@@ -1,0 +1,21 @@
+# Example settings file for C++ on Windows
+
+inc:
+    C:\px86\WSDK10\Include\10.0.10240.0\ucrt
+    C:\px86\WSDK10\Include\10.0.10240.0\um
+    C:\px86\WSDK10\Include\10.0.10240.0\shared
+    C:\px86\VSC15RC1\VC\include 
+path:
+    C:\px86\WSDK10\Lib\10.0.10240.0\um\x86
+    C:\px86\WSDK10\Lib\10.0.10240.0\ucrt\x86
+    C:\px86\VSC15RC1\VC\lib
+env:
+  - name: PATH
+    mode: prepend
+    value: C:\px86\VSC15RC1\VC\bin
+file:
+  - type: cpp:c
+    compiler: cl
+    archiver: lib
+    linker: link
+

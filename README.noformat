@@ -1,0 +1,384 @@
+Cross platform build tool for C/C++/Obj-C/C#/CUDA/opencl
+
+||||| ||||| ||||| |   | ||||| |   |
+| | | || ||   |   |  |  ||    ||  |
+| | | |||||   |   |||   ||||| | | |
+| | | || ||   |   |  |  ||    |  ||
+| | | || || ||||| |   | ||||| |   |
+
+Testers/comments/suggestions/feature requests welcome. Email me or make an issue.
+
+maiken - mkn - master
+======
+
+1.1 Preamble
+
+A minimal YAML based productivity tool.
+
+1.2 License
+
+BSD
+
+1.3 Application overview
+
+Languages supported            Compilers supported
+    - C                        - gcc/clang
+    - C++                      - MSVC (cl.exe)
+    - Obj-C                    - nvcc
+    - CUDA                     - MSVC#(csc.exe)
+    - opencl                   - Intel C Compilers (icc/icpc)
+    - C# (partially)
+
+
+2.1 A basic project mkn.yaml
+
+name: exe_project
+version: current
+main: cpp.cpp
+
+name: lib_project
+version: current
+lang: cpp
+src: ./src
+
+2.2 YAML Schema
+
+Values which allow property resolution are marked with ${aaa}
+
+name: name 
+version: version                                
+property:                                     
+  - aaa: AAA
+    bbb: ${aaa}.BBB
+inc: <directory> <directory>
+    <directory> ${aaa}
+src:  <directory> <directory>
+    <directory> ${aaa}
+path:    <directory> <directory>   # extra library paths for linking, not generally advisable unless project is in expected sub directory
+    <directory> ${aaa}
+lib: <library> <library>
+    <library> ${aaa}
+dep:
+  - name: name
+    version: version
+    scm: ${aaa}                     # git or svn remote repository - automatically detected.
+    local: ${aaa}                   # overrides local repository directory
+main: <file>
+arg: -DTHIS_PROFILE ${aaa}
+if_arg:                             # optional arguments if case is true
+    shared: ${aaa}                  # Add arguments to compilation if mode is shared
+    static: ${aaa}                  # Add arguments to compilation if mode is static
+    bin: ${aaa}                     # Add arguments to compilation if linking is binary
+    lib: ${aaa}                     # Add arguments to compilation if linking is library
+    bsd: ${aaa}
+    bsd_bin: ${aaa}
+    bsd_lib: ${aaa}
+    bsd_shared: ${aaa}
+    bsd_static: ${aaa}
+    nix: ${aaa}
+    nix_bin: ${aaa}
+    nix_lib: ${aaa}
+    nix_shared: ${aaa}
+    nix_static: ${aaa}
+    win: ${aaa}
+    win_bin: ${aaa}
+    win_lib: ${aaa}
+    win_shared: ${aaa}
+    win_static: ${aaa}
+if_inc:                         # optional includes if case is true
+    bsd: ${aaa}
+    nix: ${aaa}
+    win: ${aaa}
+if_src:                         # optional sources if case is true
+    bsd: ${aaa}
+    nix: ${aaa}
+    win: ${aaa}
+if_lib:                         # optional libraries if case is true
+    bsd: ${aaa}
+    nix: ${aaa}
+    win: ${aaa}
+env:
+  - name: name
+    mode: prepend/append/replace
+    value: value
+profiles:
+  - name: a
+    inc: | 
+        <directory>, false/no/0     # Don't include if dependency
+        <directory>, true/yes/1     # Include if dependency
+        <directory> <directory>     # Include both if dependency
+    src: | 
+        <directory>, false/no/0     # Don't find sources recursively
+        <directory>, true/yes/1     # Find sources recursively
+        <directory> <directory>     # Find sources recursively in both
+    dep:
+      - name: name
+        version: version
+        local: .                    # Dependency on another profile in same project allowed, cycles detected
+  - name: bbb
+    parent: a
+  - name: bsd
+    parent: a
+  - name: nix
+    parent: a
+  - name: win
+    parent: a
+
+  - name: test
+    self: ${OS} ${aaa}              # dependencies on current project profiles, cycles detected
+    main: test.cpp
+    install: ${aaa}                 # install binary or library to directory specified
+                                    # library naming convention is libname_profile.a/so if linux, name_profile.lib if windows 
+        
+
+2.2.1 Caveats
+
+2.2.1.1 Type deduction
+
+If no main tag is found, library linking is assumed
+If no main tag and no lang tag is found, language is deduced from first main tag found in file
+    langauge cannot be deduced if there are no main tags
+If the project is a dependency, even if a main tag is present, library linking is assumed.
+
+
+2.2.1.2 Mode 
+
+The mode tag may have three values: static/shared/none
+If the mode tag is found, it takes precedence for linking
+If no mode tag is found, the -K and -S args will be used.
+Linking cannot be guaranteed if no mode is used.
+Unless an project requires a mode, it's advised to avoid using one. So it can be overridden on the command line.
+
+If a application includes both static and shared dependencies, using the mode "none" is advised as this allows.
+The application may be run via mkn with the run command.
+
+
+2.2.1.3 Entry points
+
+All entry points must be referenced by at least one main tag, otherwise linking cannot be guaranteed.   
+eg. 
+profiles:
+  - name: a
+    main: a.cpp
+  - name: b
+    main: b.cpp
+
+
+2.2.2 Properties
+
+System properties:
+    OS - equates to system OS, can be either bsd/nix/win
+
+
+
+2.3 SCM
+
+Git supported, SVN planned.
+
+3.1 How to build maiken
+
+3.1.1 Windows
+
+Prerequisites:
+    - git
+    - Microsoft Visual Studio 2013 (Express)
+    - Windows Dev Kit 8.# (http://msdn.microsoft.com/en-us/windows/desktop/ff851942.aspx)
+    - Boost 1.56+ (Headers only - See: http://vertexwahn.de/bluego.html)
+
+Required operations:
+    - git clone http://www.github.com/Dekken/maiken.git maiken/master
+    - cd maiken/master
+    - make.bat - Enter directories for MSVS/WinKit/Boost when prompted
+
+Testing operations:
+    static
+    - ./mkn clean build -dtKa -EHsc
+    shared
+    - ./mkn clean build -dtSa -EHsc
+
+For an example settings file see ./res/example/windowsSettings.xml
+
+3.1.2 Linux
+
+Prerequisites:
+    - git
+    - gcc 4.9 (+) or equivalent
+
+Required operations:
+    - git clone http://www.github.com/Dekken/maiken.git maiken/master
+    - cd maiken/master
+    - make nix
+    WITH CLANG
+    - make nix CXX=clang++ 
+    IF CLANG SECONDARY TO GCC
+    - LD_LIBRARY_PATH=<GCC_INSTALL>/lib64 make nix CXX=clang++ CXXFLAGS="-std=c++14 -I<GCC_INSTALL>/include/c++/5.2.0 -I<GCC_INSTALL>/include/c++/5.2.0/x86_64-unknown-linux-gnu" LDFLAGS="-L<GCC_INSTALL>/lib64" 
+
+Testing operations:
+    static
+    - ./mkn clean build -dtKa "-g0 -O3 -std=c++14 -Wall -fmessage-length=0" -l -pthread
+    shared
+    - ./mkn clean build -dtSa "-g0 -O3 -std=c++14 -Wall -fmessage-length=0 -fPIC"
+
+3.1.3 BSD
+    
+Prerequisites:
+    - git
+    - gcc 4.9 (+) or equivalent
+
+Required operations:
+    - git clone http://www.github.com/Dekken/maiken.git maiken/master
+    - cd maiken/master
+    - make bsd
+
+Testing operations:
+    static
+    - ./mkn clean build -dtKa "-g0 -O3 -std=c++14 -Wall -fmessage-length=0" -l -pthread
+    shared
+    - ./mkn clean build -dtSa "-g0 -O3 -std=c++14 -Wall -fmessage-length=0 -fPIC"
+
+
+4.1 Logging - 
+
+[missing] - turns on NONE logging to std out
+KLOG=1    - turns on INFO logging to std out
+KLOG=2    - turns on ERROR logging to std out
+KLOG=3    - turns on DEBUG logging to std out
+
+4.2 Activating Logging
+
+4.2.1 Windows
+
+SET KLOG=3
+mkn clean build
+
+
+4.2.2 Linux/Mac
+
+KLOG=3 mkn clean build
+
+
+4.3 settings.yaml
+
+The settings file is the default global configuration for projects.
+
+4.3.1 schema
+
+include: <directory>                    # Optional
+path:    <directory>                    # Optional
+
+file:                                   # Must include at least one item in list
+  - type: c:cpp:cxx
+    archiver: archiver
+    compiler: compiler
+    linker:   linker    
+env:                                    # Optional
+  - name: name
+    mode: prepend/append/replace
+    value: value
+local:
+    repo: <directory>                   # Optional, missing assumed ${4.3.2}/repo
+remote:
+    repo: URL_ROOT                      # Optional, overrides switch _MKN_REMOTE_REPO_ for non complete SCM URL lookups
+
+4.3.2 Location
+    - Linux   -    ~/.maiken/settings.yaml
+    - BSD/Mac -    ~/.maiken/settings.yaml
+    - Windows -    IF CYGWIN/MSYS  ~/maiken/settings.yaml
+                   IF CMD          %HOMEDRIVE%/%HOMEPATH%/maiken/settings.yaml
+
+
+4.4 Language
+
+English is the default language.
+To activate another language run:
+mkn clean build -a MKN_LANG=fr
+
+
+5.1 Usage
+
+5.1.1 Commands
+
+Available commands
+    - build    - Compiles all supported files to the profile binary (./bin/profile) directory, and creates library/executable depending
+    - clean    - deletes all files from the profile directory recursively.
+    - compile  - Compiles all supported file to the profile binary directory
+    - link     - Creates a library/executable from found compiled files
+    - profiles - displays $(PWD)/mkn.xml profiles to std::out - then exits (--version takes precendence)
+    - init     - Create a minimal project file ${PWD}/mkn.xml, exits, error if one exists
+    - includes - Print include directories to std out
+    - sources  - Print found source files to std out [allows -d].
+    - trim     - Remove trailing spaces and tabs from includes/sources under project directory
+    - run      - Starts the application automatically linking libraries for dependencies on dynamic libraries, supports -a and -p
+
+5.1.2 Arguments
+
+Available arguments:
+    -a --args arg         - Adds $arg to the compile command if compile/build, passes arguments to application if run
+    -d n                  - Sets dependency level to n, performs applicable commands on dependencies, 1 = immediate dependencies, 2 = dep of dep etc. n missing assumed infinite.
+    -h --help             - Print help
+    -j --jargs json       - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing langauge specific args to compiler
+    -l --linker text      - Adds text to linking of binary
+    -p --profile p        - Activate profile p
+    -s --scm-status       - Display SCM status of project directory, allows -d
+    -u --scm-update       - Update project from SCM when permitted, allows -d
+    -U --scm-force-update - Force update project from SCM, allows -d
+    -t --threads n        - Consume $num threads while compiling source files where $n > 0, If $n is missing optimal resolution attempted.
+    -v --version          - Displays the current maiken version number then exits, first checked command/argument 
+    -x --settings f       - Sets settings.yaml in use to $f. Directory missing, $(4.3.1) attempted
+    -D --debug            - If default profile, changes object directory to ./bin/debug instead of ./bin/build
+    -K --static           - Sets all builds without a build tag mode attribute to static
+    -S --shared           - Sets all builds without a build tag mode attribute to shared
+
+
+5.1.3 Examples
+
+mkn clean build -dtu                 - update/clean/compile with optimal threads/link everything
+mkn clean compile link -d -t -u      - update/clean/compile with optimal threads/link everything
+mkn clean build -dtKa -DARG          - clean/compile with optimal threads passing -DARG/link everything statically
+mkn clean build -dtKa "-DARG -DARG1" - clean/compile with optimal threads passing -DARG and -DARG1/link everything statically
+mkn clean build -d 1 -t 2 -u         - update/clean/compile with two threads/link project and immediate dependencies
+mkn -ds                              - Display "${scm} status" for everything
+
+
+6. Switches
+ 
+Key             _MKN_REP_NAME_DOT_ 
+Type            bool
+Default         1
+Description     split project name by period
+                    if true
+                        name: pro.ject
+                        version: version
+                    Will expect folder
+                        ${LOCAL_REPO}/pro/ject/version
+                    otherwise
+                        ${LOCAL_REPO}/pro.ject/version
+
+Key             _MKN_REP_VERS_DOT_ 
+Type            bool
+Default         0
+Description     split project version by period. 
+                    if true
+                        name: project
+                        version: ver.si.on
+                    Will expect folder
+                        ${LOCAL_REPO}/project/ver/si/on
+                    otherwise
+                        ${LOCAL_REPO}/project/ver.si.on
+
+Key             _MKN_REMOTE_EXEC_ 
+Type            bool
+Default         1
+Description     Execute mkn.(bat/sh etc) in directory of missing dependencies when retrieved from SCM
+
+Key             _MKN_REMOTE_REPO_
+Type             string
+Default         "http://github.com/mkn/"
+Description     Space separated list of URLs to use as roots for non-complete SCM repositories.
+                    i.e.
+                    scm: http://github.com/mkn/mkn.kul.git  # ignored
+                    scm: git@github.com:mkn/mkn.kul.git     # ignored
+                    scm: mkn.kul.git                        # becomes 
+                                                                for(const std::string& s: split(_MKN_REMOTE_REPO_, " ") 
+                                                                    attempt(s + "mkn.kul.git")
+                                                                if all attempts fail, throw

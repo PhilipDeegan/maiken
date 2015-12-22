@@ -1,0 +1,20 @@
+
+
+name: mkn
+version: master
+property:
+    github: http://github.com/mkn
+scm: http://github.com/dekken/maiken.git
+
+inc: ./inc
+src: ./src
+dep: 
+  - name: mkn.kul
+    version: master
+    scm: ${github}/mkn.kul.git
+  - name: parse.yaml
+    version: no-boost
+    scm: ${github}/parse.yaml.git
+main: rel.cpp
+if_arg:
+    shared: -DYAML_CPP_DLL 
