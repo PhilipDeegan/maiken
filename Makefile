@@ -5,7 +5,7 @@ HASH_GIT=2.0.3
 
 OS =
 CXX=g++ 
-CXXFLAGS=-std=c++14 -g3 -g0 -Wall -c -fmessage-length=0 
+CXXFLAGS=-std=c++14 -g3 -Wall -c -fmessage-length=0 
 LDFLAGS=
 INCS =  -I$(CURDIR)/inc \
 		-I$(CURDIR)/ext/yaml/$(YAML_GIT)/include \
