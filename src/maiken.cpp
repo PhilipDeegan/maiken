@@ -660,7 +660,7 @@ void maiken::Application::addSourceLine(const std::string& o) throw (kul::TypeEx
         if(v.size() == 0 || v.size() > 2) KEXCEPTION("source invalid format\n" + project().dir().path());
         if(v[0].size()){
             kul::Dir d(resolveFromProperties(v[0]));
-            if(d) srcs.push_back(std::make_pair(d.real(), true));
+            if(d) srcs.push_back(std::make_pair(d.real(), r));
             else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
         }
     }
@@ -679,7 +679,7 @@ void maiken::Application::addIncludeLine(const std::string& o) throw (kul::TypeE
         if(v.size() == 0 || v.size() > 2) KEXCEPTION("include invalid format\n" + project().dir().path());
         if(v[0].size()){
             kul::Dir d(resolveFromProperties(v[0]));
-            if(d) incs.push_back(std::make_pair(d.real(), true));
+            if(d) incs.push_back(std::make_pair(d.real(), i));
             else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
         }
     }
