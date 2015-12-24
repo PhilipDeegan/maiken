@@ -210,13 +210,17 @@ void maiken::Application::buildExecutable(const std::vector<std::string>& object
         try{
             std::string linker = fs[fileType][LINKER];
             std::string linkEnd = AppVars::INSTANCE().linker();
+            kul::Dir out(inst ? inst.real() : buildDir());
             if(linkEnd.size()) KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
             const std::string& n(project().root()[NAME].Scalar());
             const kul::code::CompilerProcessCapture& cpc =
                 kul::code::Compilers::INSTANCE().get((*(*files().find(fileType)).second.find(COMPILER)).second)
                     ->buildExecutable(linker, linkEnd, objects, 
-                        libraries(), libraryPaths(), inst ? inst.join(n) : buildDir().join(n), m);
+                        libraries(), libraryPaths(), out.join(n), m);
             checkErrors(cpc);
+            kul::Dir mkn(out.join(".mkn"));
+            if(!mkn.is() && !mkn.mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
+            if(!kul::File("built", mkn).mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
             KOUT(DBG) << cpc.cmd();
             KOUT(NON) << "Creating bin: " << cpc.tmp();
         }catch(const kul::code::CompilerNotFoundException& e){
@@ -239,12 +243,16 @@ void maiken::Application::buildLibrary(const std::vector<std::string>& objects){
         if(m == kul::code::Mode::STAT) linker = fs[lang][ARCHIVER];
 
         const std::string& n(project().root()[NAME].Scalar());
+        kul::Dir out(inst ? inst.real() : buildDir());
         std::string lib(inst ? p.empty() ? n : n+"_"+p : n);
         const kul::code::CompilerProcessCapture& cpc =
             kul::code::Compilers::INSTANCE().get((*(*files().find(lang)).second.find(COMPILER)).second)
                 ->buildLibrary(linker, linkEnd, objects, 
-                    libraries(), libraryPaths(), kul::File(lib, inst ? inst.real() : buildDir()), m);
+                    libraries(), libraryPaths(), kul::File(lib, out), m);
         checkErrors(cpc);
+        kul::Dir mkn(out.join(".mkn"));
+        if(!mkn.is() && !mkn.mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
+        if(!kul::File("built", mkn).mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
         KOUT(DBG) << cpc.cmd();
         KOUT(NON) << "Creating lib: " << cpc.tmp();
 

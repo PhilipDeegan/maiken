@@ -111,16 +111,18 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
             KOUT(NON) << p.first;
         exit(0);
     }
+    
     if(args.has(MKN_DEP)){
-        if(args.get(MKN_DEP).size() > 0){
+        if(args.get(MKN_DEP).size() > 0)
             try{
                 AppVars::INSTANCE().dependencyLevel(std::stoi(args.get(MKN_DEP)));
             }catch(const std::invalid_argument& e){
-                KEXCEPTION("Don't do that.");
+                KEXCEPTION("Non numeric value used for dependency level");
             }
-        }else AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int>::max)());
-        a.buildDepVec();
-    }else a.deps.clear();
+        else AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int>::max)());
+    } 
+    a.buildDepVec();
+
     if(args.has(MKN_SRC)){
         for(const auto& p1 : a.sourceMap())
             for(const auto& p2 : p1.second)
@@ -148,13 +150,13 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
     if(args.has(ARG)) AppVars::INSTANCE().args(args.get(ARG));
     if(args.has(LINKER)) AppVars::INSTANCE().linker(args.get(LINKER));
     if(args.has(THREADS)){
-        if(args.get(THREADS).size() > 0){
+        if(args.get(THREADS).size() > 0)
             try{
                 AppVars::INSTANCE().threads(std::stoi(args.get(THREADS)));
             }catch(const std::invalid_argument& e){
-                KEXCEPTION("Don't do that.");
+                KEXCEPTION("Non numeric value used for threads");
             }
-        }else AppVars::INSTANCE().threads(kul::cpu::threads());
+        else AppVars::INSTANCE().threads(kul::cpu::threads());
     }
 
     if(args.has(BUILD))     AppVars::INSTANCE().build(true);
@@ -171,6 +173,11 @@ void maiken::Application::process() throw(kul::Exception){
     else{
         for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
             kul::env::CWD((*app).project().dir());
+            kul::Dir out((*app).inst ? (*app).inst.real() : (*app).buildDir());
+            kul::Dir mkn(out.join(".mkn"));
+            KLOG(INF) << out << " " << (*app).ig;
+            if((*app).ig && (kul::File("built", mkn).is() || !(*app).srcs.size())) continue;
+            KLOG(INF) << out << " " << (*app).ig;
             std::vector<std::pair<std::string, std::string> > oldEvs;
             for(const kul::cli::EnvVar& ev : (*app).envVars()){
                 const char* v = kul::env::GET(ev.name());
@@ -388,7 +395,10 @@ void maiken::Application::setup(){
 
 void maiken::Application::buildDepVec(){
     std::vector<Application*> dePs;
-    for(Application& app : deps)     app.buildDepVecRec(dePs);
+    for(Application& app : deps){
+        app.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel());
+        if(AppVars::INSTANCE().dependencyLevel()) app.ig = 0;
+    }
     std::vector<Application> t;
     for(const Application* a : dePs) t.push_back(*a);
     for(const Application& a : t){
@@ -401,20 +411,21 @@ void maiken::Application::buildDepVec(){
     }
 }
 
-void maiken::Application::buildDepVecRec(std::vector<Application*>& dePs){
-
+void maiken::Application::buildDepVecRec(std::vector<Application*>& dePs, int i){
     for(maiken::Application& a : deps){
-        if(AppVars::INSTANCE().dependencyLevel() > 2) a.buildDepVecRec(dePs);
-        if(AppVars::INSTANCE().dependencyLevel() > 1){
-            for(auto* a1 : dePs)
-                if(a.project().dir() == a1->project().dir() && a.p == a1->p){
-                    dePs.erase(std::remove(dePs.begin(), dePs.end(), &a), dePs.end());
-                    break;
-                }
-            dePs.push_back(&a);
-        }
+        KLOG(INF) << "i = " << i;
+        if(i > 0){
+            a.ig = 0;
+            KLOG(INF) << "ig = 0";  
+        } 
+        a.buildDepVecRec(dePs, --i);
+        for(auto* a1 : dePs)
+            if(a.project().dir() == a1->project().dir() && a.p == a1->p){
+                dePs.erase(std::remove(dePs.begin(), dePs.end(), &a), dePs.end());
+                break;
+            }
+        dePs.push_back(&a);
     }
-    maiken::AppVars::INSTANCE().dependencyLevel(maiken::AppVars::INSTANCE().dependencyLevel() - 1);
 }
 
 const kul::hash::set::String maiken::Application::inactiveMains(){

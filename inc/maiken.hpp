@@ -125,6 +125,7 @@ class AppVars{
 class ThreadingCompiler;
 class Application : public Constants{
     protected:
+        bool ig = 1;
         const Application* par = 0;
         kul::code::Mode m;
         std::string arg, main, lang;
@@ -146,7 +147,7 @@ class Application : public Constants{
         Application(const maiken::Project& proj, const std::string profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){}
         Application(const maiken::Project& proj) : m(kul::code::Mode::NONE), proj(proj){}
         void                           buildDepVec();
-        void                           buildDepVecRec(std::vector<Application*>& dePs);
+        void                           buildDepVecRec(std::vector<Application*>& dePs, int i);
         void                           buildExecutable(const std::vector<std::string>& objects);
         void                           buildLibrary(const std::vector<std::string>& objects);
         void                           checkErrors(const kul::code::CompilerProcessCapture& cpc) throw(kul::Exception);
