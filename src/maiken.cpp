@@ -175,9 +175,7 @@ void maiken::Application::process() throw(kul::Exception){
             kul::env::CWD((*app).project().dir());
             kul::Dir out((*app).inst ? (*app).inst.real() : (*app).buildDir());
             kul::Dir mkn(out.join(".mkn"));
-            KLOG(INF) << out << " " << (*app).ig;
             if((*app).ig && (kul::File("built", mkn).is() || !(*app).srcs.size())) continue;
-            KLOG(INF) << out << " " << (*app).ig;
             std::vector<std::pair<std::string, std::string> > oldEvs;
             for(const kul::cli::EnvVar& ev : (*app).envVars()){
                 const char* v = kul::env::GET(ev.name());
@@ -413,11 +411,7 @@ void maiken::Application::buildDepVec(){
 
 void maiken::Application::buildDepVecRec(std::vector<Application*>& dePs, int i){
     for(maiken::Application& a : deps){
-        KLOG(INF) << "i = " << i;
-        if(i > 0){
-            a.ig = 0;
-            KLOG(INF) << "ig = 0";  
-        } 
+        if(i > 0) a.ig = 0;
         a.buildDepVecRec(dePs, --i);
         for(auto* a1 : dePs)
             if(a.project().dir() == a1->project().dir() && a.p == a1->p){
