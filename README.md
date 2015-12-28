@@ -9,4 +9,4 @@
 
 [README](https://raw.githubusercontent.com/Dekken/maiken/master/README.noformat)
 
-Testers/comments/suggestions/feature requests welcome. Email me or make an issue.
+Testers/comments/suggestions/feature requests welcome. Email me or make an issue. Or head on over to [/r/mkn](http://reddit.com/r/mkn)
