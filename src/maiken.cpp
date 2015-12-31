@@ -182,8 +182,10 @@ void maiken::Application::process() throw(kul::Exception){
                 oldEvs.push_back(std::pair<std::string, std::string>(ev.name(), v ? v : ""));
                 kul::env::SET(ev.name(), ev.toString().c_str());
             }
-            if(AppVars::INSTANCE().clean()) if((*app).buildDir().is()) 
-                (*app).buildDir().rm() && kul::Dir((*app).buildDir().join(".mkn")).rm();
+            if(AppVars::INSTANCE().clean()) if((*app).buildDir().is()){
+                (*app).buildDir().rm();
+                kul::Dir((*app).buildDir().join(".mkn")).rm();
+            }
             if(AppVars::INSTANCE().trim())  (*app).trim();
             if(AppVars::INSTANCE().build()) (*app).build();
             else{
@@ -194,10 +196,11 @@ void maiken::Application::process() throw(kul::Exception){
                 kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
         }
         kul::env::CWD(this->project().dir());
-        for(const kul::cli::EnvVar& ev : this->envVars())
-            kul::env::SET(ev.name(), ev.toString().c_str());
-        if(AppVars::INSTANCE().clean()) if(this->buildDir().is()) 
-            this->buildDir().rm() && kul::Dir(this->buildDir().join(".mkn")).rm();
+        for(const kul::cli::EnvVar& ev : this->envVars()) kul::env::SET(ev.name(), ev.toString().c_str());
+        if(AppVars::INSTANCE().clean()) if(this->buildDir().is()){
+            this->buildDir().rm();
+            kul::Dir(this->buildDir().join(".mkn")).rm();
+        }
         if(AppVars::INSTANCE().trim())  this->trim();
         if(AppVars::INSTANCE().build()) this->build();
         else{
