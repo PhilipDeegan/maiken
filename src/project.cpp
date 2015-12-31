@@ -103,6 +103,6 @@ void maiken::NewProject::write(){
     kul::io::Writer w(file());
     w.write("\n", true);
     w.write("name: name\nversion: version", true);
-    w.write("#include: ./inc\n#source:  ./src", true);
+    w.write("#inc: ./inc\n#src:  ./src", true);
     w.write("#lang: cpp", true);
 }

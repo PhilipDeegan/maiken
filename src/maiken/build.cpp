@@ -51,7 +51,7 @@ void maiken::Application::link() throw(kul::Exception){
             if(!compiler->sourceIsBin()){
                 if(!buildDir().is()) KEXCEPT(maiken::Exception, "Cannot link without compiling.");
                 for(const kul::File f : buildDir().files(true)){
-                    if(f.name().substr(f.name().rfind(".") + 1).compare("o") == 0)
+                    if(f.name().substr(f.name().rfind(".") + 1).compare("obj") == 0)
                         objects.push_back(f.real());
                 }
             }else{
@@ -147,16 +147,11 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
                 std::exception_ptr ep;
                 for(const kul::code::CompilerProcessCapture& cpc : tc.processCaptures()){
                     if(cpc.exception()) ep = cpc.exception();
-                    if(cpc.exception()){
+                    if(!kul::LogMan::INSTANCE().inf() && cpc.exception()){
                         f(cpc.outs());
                         f(cpc.errs());
                     }else
                     if(kul::LogMan::INSTANCE().dbg()) f(cpc.cmd());
-                    else
-                    if(kul::LogMan::INSTANCE().inf()){
-                        f(cpc.outs());
-                        f(cpc.errs());
-                    }
                 }
                 if(ep) std::rethrow_exception(ep);
             }
