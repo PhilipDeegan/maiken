@@ -162,6 +162,10 @@ profiles:
     main: a.cpp
   - name: b
     main: b.cpp
+    
+2.2.1.4 Compiler deduction
+
+Compiler binares are expected to have their default names e.g. gcc/gcc.exe/cl.exe. This only applies to compilers and not archivers or linkers.
 
 
 2.2.2 Properties
