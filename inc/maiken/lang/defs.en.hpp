@@ -32,16 +32,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MAIKEN_DEFS_LANG_HPP_
 
 #define MKN_DEFS_CMD        "Program commands:"
-#define MKN_DEFS_BUILD      "\tbuild    | Compile le sources to ./bin/$profile and link"
+#define MKN_DEFS_BUILD      "\tbuild    | Compile and link"
 #define MKN_DEFS_CLEAN      "\tclean    | Delete files from ./bin/$profile"
 #define MKN_DEFS_COMP       "\tcompile  | Compile sources to ./bin/$profile"
 #define MKN_DEFS_INIT       "\tinit     | Create minimal mkn.xml in ./"
 #define MKN_DEFS_LINK       "\tlink     | Link object files to exe/lib"
 #define MKN_DEFS_PROFS      "\tprofiles | Display profiles contained within ./mkn.xml"
 #define MKN_DEFS_RUN        "\trun      | Executes project binary linking dynamic libraries automatically"
+#define MKN_DEFS_INC        "\tinc      | Print include directories to std out"
+#define MKN_DEFS_SRC        "\tsrc      | Print found source files to std out [allows -d]."
+#define MKN_DEFS_TRIM       "\ttrim     | Removes trailing whitespace from inc/src files under project directory"
 
 #define MKN_DEFS_ARG        "Program arguments:"
-#define MKN_DEFS_ARGS       "\t--args -a $arg    | Add $arg to compilation of all files"
+#define MKN_DEFS_ARGS       "\t--args -a $arg    | Add $arg to compilation on build, passes to process on run"
 #define MKN_DEFS_DEPS       "\t--dependencies -d | $num | Include dependencies where num > 0, 1 includes immediate dependencies, missing assumed infinite"
 #define MKN_DEFS_HELP       "\t--help -h         | Print help to console"
 #define MKN_DEFS_PROF       "\t--profile -p $p   | Activates profile $p"

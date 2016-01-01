@@ -96,6 +96,9 @@ void maiken::Application::showHelp(){
     ss.push_back(MKN_DEFS_LINK);
     ss.push_back(MKN_DEFS_PROFS);
     ss.push_back(MKN_DEFS_RUN);
+    ss.push_back(MKN_DEFS_INC);
+    ss.push_back(MKN_DEFS_SRC);
+    ss.push_back(MKN_DEFS_TRIM);
     ss.push_back("");
     ss.push_back(MKN_DEFS_ARG);
     ss.push_back(MKN_DEFS_ARGS);

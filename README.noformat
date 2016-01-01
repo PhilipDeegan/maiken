@@ -305,8 +305,8 @@ Available commands
     - link     - Creates a library/executable from found compiled files
     - profiles - displays $(PWD)/mkn.xml profiles to std::out - then exits (--version takes precendence)
     - init     - Create a minimal project file ${PWD}/mkn.xml, exits, error if one exists
-    - includes - Print include directories to std out
-    - sources  - Print found source files to std out [allows -d].
+    - inc      - Print include directories to std out
+    - src      - Print found source files to std out [allows -d].
     - trim     - Remove trailing spaces and tabs from includes/sources under project directory
     - run      - Starts the application automatically linking libraries for dependencies on dynamic libraries, supports -a and -p
 

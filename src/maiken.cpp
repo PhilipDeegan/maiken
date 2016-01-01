@@ -66,19 +66,19 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
         args.process(argc, argv);
     }catch(const kul::cli::ArgNotFoundException& e){
         showHelp();
-        exit(0);
+        KEXIT(0, "");
     }
     if(args.empty() || args.has(HELP)){
         showHelp();
-        exit(0);
+        KEXIT(0, "");
     }
     if(args.has(VERSION)){
         KOUT(NON) << "Version: " << VERSION_NUMBER;
-        exit(0);
+        KEXIT(0, "");
     }
     if(args.has(MKN_INIT)){
         NewProject p;
-        exit(0);
+        KEXIT(0, "");
     }
     Project project(Project::CREATE());
     std::string profile;
@@ -97,7 +97,7 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
     Application a(project, profile);
     if(args.has(PROFILES)){
         a.showProfiles();
-        exit(0);
+        KEXIT(0, "");
     }
     if(args.has(SHARED))        AppVars::INSTANCE().shar(true);
     if(args.has(STATIC))        AppVars::INSTANCE().stat(true);
@@ -109,7 +109,7 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
     if(args.has(MKN_INC)){
         for(const auto& p : a.includes())
             KOUT(NON) << p.first;
-        exit(0);
+        KEXIT(0, "");
     }
     
     if(args.has(MKN_DEP)){
@@ -127,13 +127,14 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
         for(const auto& p1 : a.sourceMap())
             for(const auto& p2 : p1.second)
                 for(const auto& p3 : p2.second)
-                KOUT(NON) << kul::File(p3).full();
+                    KOUT(NON) << kul::File(p3).full();
         for(auto app = a.deps.rbegin(); app != a.deps.rend(); ++app)
             for(const auto& p1 : (*app).sourceMap())
-                for(const auto& p2 : p1.second)
-                    for(const auto& p3 : p2.second)
-                    KOUT(NON) << kul::File(p3).full();
-        exit(0);
+                if(!(*app).ig)
+                    for(const auto& p2 : p1.second)
+                        for(const auto& p3 : p2.second)
+                            KOUT(NON) << kul::File(p3).full();
+        KEXIT(0, "");
     }
     if(args.has(SCM_STATUS)){
         a.scmStatus(args.has(MKN_DEP));
