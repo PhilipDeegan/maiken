@@ -80,11 +80,14 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
         for(const auto& s : this->includes()) KOUT(NON) << "\t" << s.first;
     }
     auto& sources = sourceMap();
-    if(sources.size() == 0){
+    if(srcs.empty() && main.empty()){
         KOUT(NON) << "NO SOURCES";
         return objects;
     }
     buildDir().mk();
+    kul::Dir mkn(buildDir().join(".mkn"));
+    if(!mkn && !mkn.mk()) KEXCEPTION("Inadequate permissions on directory " + buildDir().real());
+    std::vector<kul::File> cacheFiles;
     if(kul::LogMan::INSTANCE().inf()){
         if(!arg.empty()) KOUT(NON) << "ARGUMENTS\n\t" << arg;
         if(this->arguments().size()){
@@ -111,8 +114,11 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
         }
         if(compiler->sourceIsBin()){
             for(const std::pair<std::string, kul::hash::set::String>& kv : ft.second)
-                for(const std::string& src : kv.second)
-                    objects.push_back(kul::File(src).mini());
+                for(const std::string& src : kv.second){
+                    kul::File f(src);
+                    objects.push_back(f.mini());
+                    cacheFiles.push_back(f);
+                }
         }else{
             std::queue<std::pair<std::string, std::string> > sourceQueue;
             for(const std::pair<std::string, kul::hash::set::String>& kv : ft.second){
@@ -129,10 +135,10 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
                 }
             }
             while(sourceQueue.size() > 0){
-                std::queue<std::pair<std::string, std::string> > tQueue;
+                std::queue<std::pair<std::string, std::string> > cQueue, tQueue;
                 for(unsigned int i = 0; i < AppVars::INSTANCE().threads() && sourceQueue.size() > 0; i++){
+                    cQueue.push(sourceQueue.front());
                     tQueue.push(sourceQueue.front());
-                    objects.push_back(sourceQueue.front().second);
                     sourceQueue.pop();
                 }
                 if(tQueue.size() == 0 && sourceQueue.size() == 0) break;
@@ -154,8 +160,44 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
                     if(kul::LogMan::INSTANCE().dbg()) f(cpc.cmd());
                 }
                 if(ep) std::rethrow_exception(ep);
+
+                while(cQueue.size()){
+                    objects.push_back(cQueue.front().second);
+                    cacheFiles.push_back(kul::File(cQueue.front().first));
+                    cQueue.pop();
+                }
             }
         }
+    }
+    if(_MKN_TIMESTAMPS_){
+        kul::File srcStamps("src_stamp", mkn);
+        kul::File incStamps("inc_stamp", mkn);
+        for(const auto& src : stss) 
+            if(std::find(cacheFiles.begin(), cacheFiles.end(), src.first) == cacheFiles.end())
+                cacheFiles.push_back(src.first);
+        kul::hash::map::S2T<const kul::code::Compiler*> compilers;
+        for(const auto& f: cacheFiles){
+            std::string ft = f.name().substr(f.name().rfind(".") + 1);
+            const kul::code::Compiler* compiler;
+            if(compilers.count(ft)) compiler = (*compilers.find(ft)).second;
+            else{
+                compiler = kul::code::Compilers::INSTANCE().get((*(*files().find(ft)).second.find(COMPILER)).second);
+                compilers.insert(ft, compiler);
+            }
+            if(compiler->sourceIsBin()) 
+                if(std::find(objects.begin(), objects.end(), f.mini()) == objects.end()) objects.push_back(f.mini());
+        }
+        for(const auto& f : buildDir().files(1))
+            if(f.name().size() > 4 && f.name().substr(f.name().size() - 4) == ".obj")
+                if(std::find(objects.begin(), objects.end(), f.mini()) == objects.end()) objects.push_back(f.mini());
+
+        kul::io::Writer srcW(srcStamps);
+        kul::io::Writer incW(incStamps);
+        for(const auto& i : includeStamps)
+            incW << i.first << " " << i.second << kul::os::EOL();
+        for(const auto& src : cacheFiles)
+            if(!(*compilers.find(src.name().substr(src.name().rfind(".") + 1))).second->sourceIsBin())
+                srcW << src.mini() << " " << src.timeStamps().modified() << kul::os::EOL();
     }
     return objects;
 }
@@ -166,8 +208,9 @@ const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > maiken::
     if(main.size()){
         kul::File f(main);
         if(!f)      f = kul::File(main, project().dir());
-        if(f.is())  sm[f.name().substr(f.name().rfind(".") + 1)][f.dir().real()].insert(f.real());
-        else        KOUT(NON)  << "WARN : main does not exist: " << f;
+        if(f.is() && incSrc(f)) sm[f.name().substr(f.name().rfind(".") + 1)][f.dir().real()].insert(f.real());
+        else
+        if(!f.is()) KOUT(NON)  << "WARN : main does not exist: " << f;
     }
     for(const std::pair<std::string, bool>& sourceDir : sources()){
         for(const kul::File& file : kul::Dir(sourceDir.first).files(sourceDir.second)){
@@ -180,11 +223,32 @@ const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > maiken::
                     a = rl.compare(s) == 0;
                     if(a) break;
                 }
-                if(!a) sm[ft][sourceDir.first].insert(rl);
+                if(!a && incSrc(file)) sm[ft][sourceDir.first].insert(rl);
             }
         }
     }
     return sm;
+}
+
+bool maiken::Application::incSrc(const kul::File& file){
+    bool c = 1;
+    if(_MKN_TIMESTAMPS_){
+        const std::string& rl(file.mini());
+        c = !stss.count(rl);
+        if(!c){
+            const uint& mod = file.timeStamps().modified();
+            if(mod == (*stss.find(rl)).second){
+                for(const auto& i : includes()){
+                    kul::Dir inc(i.first);
+                    if(itss.count(inc.mini()) && includeStamps.count(inc.mini())){ 
+                        if((*includeStamps.find(inc.mini())).second != (*itss.find(inc.mini())).second) c = 1; 
+                    }else c = 1;
+                    if(c) break;
+                }
+            }else c = 1;
+        }
+    }
+    return c;
 }
 
 void maiken::Application::buildExecutable(const std::vector<std::string>& objects){

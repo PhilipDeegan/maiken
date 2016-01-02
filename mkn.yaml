@@ -15,6 +15,6 @@ dep:
   - name: parse.yaml
     version: no-boost
     scm: ${github}/parse.yaml.git
-main: rel.cpp
+main: dbg.cpp
 if_arg:
     shared: -DYAML_CPP_DLL 

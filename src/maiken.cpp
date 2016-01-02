@@ -187,6 +187,8 @@ void maiken::Application::process() throw(kul::Exception){
                 (*app).buildDir().rm();
                 kul::Dir((*app).buildDir().join(".mkn")).rm();
             }
+
+            (*app).loadTimeStamps();
             if(AppVars::INSTANCE().trim())  (*app).trim();
             if(AppVars::INSTANCE().build()) (*app).build();
             else{
@@ -202,6 +204,7 @@ void maiken::Application::process() throw(kul::Exception){
             this->buildDir().rm();
             kul::Dir(this->buildDir().join(".mkn")).rm();
         }
+        loadTimeStamps();
         if(AppVars::INSTANCE().trim())  this->trim();
         if(AppVars::INSTANCE().build()) this->build();
         else{
@@ -692,6 +695,53 @@ void maiken::Application::addIncludeLine(const std::string& o) throw (kul::TypeE
             kul::Dir d(resolveFromProperties(v[0]));
             if(d) incs.push_back(std::make_pair(d.real(), i));
             else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
+        }
+    }
+}
+
+void maiken::Application::loadTimeStamps() throw (kul::TypeException){
+    if(_MKN_TIMESTAMPS_){
+        kul::Dir mkn(buildDir().join(".mkn"));
+        kul::File src("src_stamp", mkn);
+        const std::string* l = 0;
+        if(mkn && src){
+            kul::io::Reader r(src);
+            while((l = r.readLine())){
+                if(l->size() == 0) continue;
+                std::string s(*l);
+                std::vector<std::string> bits;
+                kul::String::split(s, ' ', bits);
+                if(bits.size() != 2) KEXCEPTION("timestamp file invalid format\n"+src.full());
+                try{
+                    stss.insert(bits[0], kul::Type::GET_UINT(bits[1]));
+                }catch(const kul::TypeException& e){
+                    KEXCEPTION("timestamp file invalid format\n"+src.full());
+                }
+            }
+        }
+        kul::File inc("inc_stamp", mkn);
+        if(mkn && inc){
+            kul::io::Reader r(inc);
+            while((l = r.readLine())){
+                if(l->size() == 0) continue;
+                std::string s(*l);
+                std::vector<std::string> bits;
+                kul::String::split(s, ' ', bits);
+                if(bits.size() != 2) KEXCEPTION("timestamp file invalid format\n"+inc.full());
+                try{
+                    itss.insert(bits[0], bits[1]);
+                }catch(const kul::TypeException& e){
+                    KEXCEPTION("timestamp file invalid format\n"+src.full());
+                }
+            }
+        }
+        for(const auto& i : includes()){
+            kul::Dir inc(i.first);
+            ulonglong includeStamp = inc.timeStamps().modified();
+            for(const auto fi : inc.files(1)) includeStamp += fi.timeStamps().modified();
+            std::ostringstream os;
+            os << std::hex << includeStamp;
+            includeStamps.insert(inc.mini(), os.str());
         }
     }
 }

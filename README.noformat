@@ -295,8 +295,16 @@ remote:
 
 English is the default language.
 To activate another language run:
-mkn clean build -a MKN_LANG=fr
+    mkn clean build -a MKN_LANG=fr
 
+
+4.5 Timestamp logging
+
+Upon succesful compilation of a project, source file modification timestamps are recoreded under ./bin/<profile>/.mkn/src_stamp, which are checked on the next build to see if recompilation is required.
+Similarly, the aggregate of all non-hidden file modification timestamps are recorded under ./bin/<profile>/.mkn/inc_stamp, which are also checked on the next build to see if recompilation is required.
+This can be disabled by compiling with the argument -D_MKN_TIMESTAMPS_=0
+This is disabled for languages like C# when the source is not compiled.
+The clean command deletes the timestamp files, and recompiles everything.
 
 5.1 Usage
 
@@ -369,6 +377,11 @@ Description     split project version by period.
                         ${LOCAL_REPO}/project/ver/si/on
                     otherwise
                         ${LOCAL_REPO}/project/ver.si.on
+
+Key             _MKN_TIMESTAMPS_ 
+Type            bool
+Default         1
+Description     Logs timestamps of source/includes to skip files with no changes.
 
 Key             _MKN_REMOTE_EXEC_ 
 Type            bool

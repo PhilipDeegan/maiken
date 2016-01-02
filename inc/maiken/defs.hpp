@@ -54,8 +54,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _MKN_REMOTE_EXEC_ */
 
 #ifndef _MKN_REMOTE_REPO_
-    #define _MKN_REMOTE_REPO_ "http://github.com/mkn/";
+    #define _MKN_REMOTE_REPO_ "http://github.com/mkn/"
 #endif /* _MKN_REMOTE_REPO_ */
+
+#ifndef _MKN_TIMESTAMPS_
+    #define _MKN_TIMESTAMPS_ 1
+#endif /* _MKN_TIMESTAMPS_ */
 
 namespace maiken{
 class Constants{

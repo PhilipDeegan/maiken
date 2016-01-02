@@ -139,6 +139,9 @@ class Application : public Constants{
         std::vector<std::string> paths;
         kul::hash::map::S2S ps;
         kul::hash::map::S2T<kul::hash::set::String> args;
+        kul::hash::map::S2T<uint> stss;
+        kul::hash::map::S2S itss;
+        kul::hash::map::S2S includeStamps;
         std::vector<kul::cli::EnvVar> evs;
         std::vector<Application> deps;
         std::string scr;
@@ -173,6 +176,8 @@ class Application : public Constants{
         void                           showConfig();
         void                           cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception);
         void                           showProfiles();
+        void                           loadTimeStamps() throw (kul::TypeException);
+        bool                           incSrc(const kul::File& f);
         const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap();
 
         void addSourceLine (const std::string& o) throw (kul::TypeException);
