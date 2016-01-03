@@ -64,8 +64,10 @@ general:
 	@if [ ! -d "ext/yaml/$(YAML_GIT)/bin" ]; then \
 		mkdir ext/yaml/$(YAML_GIT)/bin; \
 	fi;
-	$(MAKE) caml
-	$(MAKE) yaml
+	@if [ ! -f "$(CWD)/ext/yaml/$(YAML_GIT)/bin/libyaml.a" ]; then \
+		$(MAKE) caml; \
+		$(MAKE) yaml; \
+	fi;
 
 	@if [ ! -d "$(CWD)/bin" ]; then \
 		mkdir -p $(CWD)/bin; \
