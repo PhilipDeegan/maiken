@@ -3,18 +3,23 @@ KUL_GIT=master
 YAML_GIT=no-boost
 HASH_GIT=2.0.3
 
+CWD:=$(CURDIR)
+ifeq ($(strip $(CURDIR)),)
+  CWD:=$(.CURDIR)
+endif
+
 OS =
 CXX=g++ 
 CXXFLAGS=-std=c++14 -g3 -Wall -c -fmessage-length=0 
 LDFLAGS=
-INCS =  -I$(CURDIR)/inc \
-		-I$(CURDIR)/ext/yaml/$(YAML_GIT)/include \
-		-I$(CURDIR)/ext/kul/$(KUL_GIT)/inc \
-		-I$(CURDIR)/ext/kul/$(KUL_GIT)/os/$(OS)/inc \
-		-I$(CURDIR)/ext/kul/$(KUL_GIT)/os/nixish/inc \
-		-I$(CURDIR)/ext/kul/$(KUL_GIT)/ext/sparsehash/$(HASH_GIT)/include
+INCS =  -I$(CWD)/inc \
+		-I$(CWD)/ext/yaml/$(YAML_GIT)/include \
+		-I$(CWD)/ext/kul/$(KUL_GIT)/inc \
+		-I$(CWD)/ext/kul/$(KUL_GIT)/os/$(OS)/inc \
+		-I$(CWD)/ext/kul/$(KUL_GIT)/os/nixish/inc \
+		-I$(CWD)/ext/kul/$(KUL_GIT)/ext/sparsehash/$(HASH_GIT)/include
 
-LIBS = $(CURDIR)/ext/yaml/$(YAML_GIT)/bin/yaml
+LIBS = $(CWD)/ext/yaml/$(YAML_GIT)/bin/libyaml.a
 LINK = -pthread -static
 LINKP= -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 
@@ -62,29 +67,29 @@ general:
 	$(MAKE) caml
 	$(MAKE) yaml
 
-	@if [ ! -d "$(CURDIR)/bin" ]; then \
-		mkdir -p $(CURDIR)/bin; \
+	@if [ ! -d "$(CWD)/bin" ]; then \
+		mkdir -p $(CWD)/bin; \
 	fi;
 	@for f in $(shell find src -type f -name '*.cpp'); do \
-		echo $(CXX) $(CXXFLAGS) $(INCS) -o "$(CURDIR)/bin/$$(basename $$f).o" -c "$(CURDIR)/$$f"; \
-		$(CXX) $(CXXFLAGS) $(INCS) -o "$(CURDIR)/bin/$$(basename $$f).o" -c "$(CURDIR)/$$f"; \
+		echo $(CXX) $(CXXFLAGS) $(INCS) -o "$(CWD)/bin/$$(basename $$f).o" -c "$(CWD)/$$f"; \
+		$(CXX) $(CXXFLAGS) $(INCS) -o "$(CWD)/bin/$$(basename $$f).o" -c "$(CWD)/$$f"; \
 	done;
-	@$(CXX) $(CXXFLAGS) $(INCS) -o "$(CURDIR)/bin/rel.cpp.o" -c "$(CURDIR)/dbg.cpp"
+	@$(CXX) $(CXXFLAGS) $(INCS) -o "$(CWD)/bin/rel.cpp.o" -c "$(CWD)/dbg.cpp"
 	$(MAKE) link
 
 link:
-	$(eval FILES := $(foreach dir,$(shell find $(CURDIR)/bin -type f -name *.o),$(dir)))
+	$(eval FILES := $(foreach dir,$(shell find $(CWD)/bin -type f -name *.o),$(dir)))
 	$(CXX) -o "$(EXE)" $(FILES) $(LIBS) $(LINK) $(LDFLAGS) 
 
 caml:
 	@for f in $(shell find ext/yaml/$(YAML_GIT)/src -type f -name '*.cpp'); do \
-		echo $(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$(CURDIR)/$$f"; \
-		$(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$(CURDIR)/$$f"; \
+		echo $(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$(CWD)/$$f"; \
+		$(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$(CWD)/$$f"; \
 	done;	
 
 yaml:
-	$(eval FILES := $(foreach dir,$(shell find $(CURDIR)/ext/yaml/$(YAML_GIT)/bin -type f -name *.o),$(dir)))
-	ar -r $(CURDIR)/ext/yaml/$(YAML_GIT)/bin/libyaml.a $(FILES)
+	$(eval FILES := $(foreach dir,$(shell find $(CWD)/ext/yaml/$(YAML_GIT)/bin -type f -name *.o),$(dir)))
+	ar -r $(CWD)/ext/yaml/$(YAML_GIT)/bin/libyaml.a $(FILES)
 
 clean:
 	@if [ -d "./ext/kul/$(KUL_GIT)" ]; then \
