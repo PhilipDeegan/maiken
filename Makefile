@@ -20,7 +20,7 @@ INCS =  -I$(CWD)/inc \
 		-I$(CWD)/ext/kul/$(KUL_GIT)/ext/sparsehash/$(HASH_GIT)/include
 
 LIBS = $(CWD)/ext/yaml/$(YAML_GIT)/bin/libyaml.a
-LINK = -pthread -static
+LINK = -pthread
 LINKP= -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 
 EXE=mkn
