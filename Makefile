@@ -14,12 +14,10 @@ INCS =  -I$(CURDIR)/inc \
 		-I$(CURDIR)/ext/kul/$(KUL_GIT)/os/nixish/inc \
 		-I$(CURDIR)/ext/kul/$(KUL_GIT)/ext/sparsehash/$(HASH_GIT)/include
 
-LIBS = -lyaml
+LIBS = $(CURDIR)/ext/yaml/$(YAML_GIT)/bin/yaml
 LINK = -pthread -static
 LINKP= -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 
-PATHS = -L$(CURDIR)/ext/kul/$(KUL_GIT)/bin \
-		-L$(CURDIR)/ext/yaml/$(YAML_GIT)/bin
 EXE=mkn
 WHICH=which
 
@@ -76,7 +74,7 @@ general:
 
 link:
 	$(eval FILES := $(foreach dir,$(shell find $(CURDIR)/bin -type f -name *.o),$(dir)))
-	$(CXX) $(PATHS) -o "$(EXE)" $(FILES) $(LIBS) $(LINK) $(LDFLAGS) 
+	$(CXX) -o "$(EXE)" $(FILES) $(LIBS) $(LINK) $(LDFLAGS) 
 
 caml:
 	@for f in $(shell find ext/yaml/$(YAML_GIT)/src -type f -name '*.cpp'); do \
