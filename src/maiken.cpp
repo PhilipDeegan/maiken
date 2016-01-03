@@ -661,14 +661,14 @@ void maiken::Application::cyclicCheck(const std::vector<std::pair<std::string, s
 }
 
 void maiken::Application::addSourceLine(const std::string& o) throw (kul::TypeException){
-    if(o.find(',') == std::string::npos)
+    if(o.find(',') == std::string::npos){
         for(const auto& s : kul::String::split(o, ' '))
             if(s.size()){
                 kul::Dir d(resolveFromProperties(s));
                 if(d) srcs.push_back(std::make_pair(d.real(), true));
                 else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
             }
-    else{
+    }else{
         const auto& v =  kul::String::split(o, ',');
         bool r = v.size() > 1 ? kul::Bool::FROM(v[1]) : true;
         if(v.size() == 0 || v.size() > 2) KEXCEPTION("source invalid format\n" + project().dir().path());
@@ -680,14 +680,14 @@ void maiken::Application::addSourceLine(const std::string& o) throw (kul::TypeEx
     }
 }
 void maiken::Application::addIncludeLine(const std::string& o) throw (kul::TypeException){
-    if(o.find(',') == std::string::npos)
+    if(o.find(',') == std::string::npos){
         for(const auto& s : kul::String::split(o, ' '))
             if(s.size()){
                 kul::Dir d(resolveFromProperties(s));
                 if(d) incs.push_back(std::make_pair(d.real(), true));
                 else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
             }
-    else{
+    }else{
         const auto& v =  kul::String::split(o, ',');
         bool i = v.size() > 1 ? kul::Bool::FROM(v[1]) : true;
         if(v.size() == 0 || v.size() > 2) KEXCEPTION("include invalid format\n" + project().dir().path());
