@@ -493,6 +493,7 @@ void maiken::Application::run(){
 #else
         kul::cli::EnvVar pa("LD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
 #endif
+        KOUT(DBG) << pa.name() << " : " << pa.toString();
         p.var(pa.name(), pa.toString());
     }
     KOUT(DBG) << p;
