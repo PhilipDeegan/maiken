@@ -232,7 +232,10 @@ Prerequisites:
 Required operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
     - cd maiken/master
-    - make bsd
+    with g++
+        - make bsd
+    with clang++
+        - make bsd CXX=clang++
 
 Testing operations:
     static
