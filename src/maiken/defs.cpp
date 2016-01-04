@@ -38,6 +38,8 @@ constexpr const char* maiken::Constants::MKN_SRC;
 
 constexpr const char* maiken::Constants::TYPE;
 
+constexpr const char* maiken::Constants::BIN;
+constexpr const char* maiken::Constants::LIB;
 constexpr const char* maiken::Constants::GIT;
 constexpr const char* maiken::Constants::SVN;
 constexpr const char* maiken::Constants::SCM;

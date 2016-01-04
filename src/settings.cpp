@@ -36,7 +36,9 @@ const kul::yaml::FileValidator maiken::Settings::validator(){
         NodeValidator("inc"),
         NodeValidator("path"),
         NodeValidator("local", {
-            NodeValidator("repo", 1)
+            NodeValidator("repo", 1),
+            NodeValidator("lib", 1),
+            NodeValidator("bin", 1)
         }, 0, NodeType::MAP),
         NodeValidator("remote", {
             NodeValidator("repo", 1)

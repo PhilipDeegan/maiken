@@ -317,11 +317,6 @@ void maiken::Application::setup(){
             }
             if(main.empty() && n[MAIN]) main = n[MAIN].Scalar();
             if(lang.empty() && n[LANG]) lang = n[LANG].Scalar();
-            if(inst.path().empty() && n[INSTALL]){
-                inst = kul::Dir(resolveFromProperties(n[INSTALL].Scalar()));
-                if(!inst && !inst.mk()) KEXCEPTION("install tag is not a valid directory\n" + project().dir().path());
-                inst = kul::Dir(inst.real());
-            }
             profile = n[PARENT] ? n[PARENT].Scalar() : "";
             c = !profile.empty();
             break;
@@ -332,14 +327,14 @@ void maiken::Application::setup(){
         if(mains.size()) lang = (*mains.begin()).substr((*mains.begin()).rfind(".")+1);
         else KEXCEPTION("no main or lang tag found and cannot deduce langauge\n" + project().dir().path());
     }
+    if(par){
+        if(!main.empty() && lang.empty()) lang = main.substr(main.rfind(".")+1);
+        main.clear();
+    }
     if(nm){
         if(AppVars::INSTANCE().shar()) m = kul::code::Mode::SHAR;
         else
         if(AppVars::INSTANCE().stat()) m = kul::code::Mode::STAT;
-    }
-    if(par){
-        if(!main.empty() && lang.empty()) lang = main.substr(main.rfind(".")+1);
-        main.clear();
     }
     profile = p.size() ? p : project().root()[NAME].Scalar();
     c = 1;
@@ -347,6 +342,24 @@ void maiken::Application::setup(){
         c = 0;
         for(const auto& n : nodes){
             if(n[NAME].Scalar() != profile) continue;
+            if(inst.path().empty()){
+                if(Settings::INSTANCE().root()[LOCAL]
+                    && Settings::INSTANCE().root()[LOCAL][BIN]
+                    && !main.empty())
+                    inst = kul::Dir(Settings::INSTANCE().root()[LOCAL][BIN].Scalar());
+                else
+                if(Settings::INSTANCE().root()[LOCAL]
+                    && Settings::INSTANCE().root()[LOCAL][LIB]
+                    && main.empty())
+                    inst = kul::Dir(Settings::INSTANCE().root()[LOCAL][LIB].Scalar());
+                else
+                if(n[INSTALL]) inst = kul::Dir(resolveFromProperties(n[INSTALL].Scalar()));
+                if(!inst.path().empty()){
+                    if(!inst && !inst.mk()) 
+                        KEXCEPTION("install tag is not a valid directory\n" + project().dir().path());
+                    inst = kul::Dir(inst.real());
+                }
+            }
             if(n[IF_ARG])
                 for(YAML::const_iterator it = n[IF_ARG].begin(); it != n[IF_ARG].end(); ++it){
                     std::string left(it->first.Scalar());
