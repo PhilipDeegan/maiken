@@ -10,7 +10,7 @@ endif
 
 OS =
 CXX=g++ 
-CXXFLAGS=-std=c++14 -g3 -Wall -c -fmessage-length=0 
+CXXFLAGS=-std=c++14 -g3 -Wall  -fmessage-length=0 
 LDFLAGS=
 INCS =  -I$(CWD)/inc \
 		-I$(CWD)/ext/yaml/$(YAML_GIT)/include \
@@ -74,7 +74,7 @@ general:
 	fi;
 	@for f in $(shell find src -type f -name '*.cpp'); do \
 		echo $(CXX) $(CXXFLAGS) $(INCS) -o "$(CWD)/bin/$$(basename $$f).o" -c "$(CWD)/$$f"; \
-		$(CXX) $(CXXFLAGS) $(INCS) -o "$(CWD)/bin/$$(basename $$f).o" -c "$(CWD)/$$f"; \
+		$(CXX) $(CXXFLAGS) $(INCS) -o "$(CWD)/bin/$$(basename $$f).o" -c "$(CWD)/$$f" || exit 1 ; \
 	done;
 	@$(CXX) $(CXXFLAGS) $(INCS) -o "$(CWD)/bin/dbg.cpp.o" -c "$(CWD)/dbg.cpp"
 	$(MAKE) link
@@ -86,7 +86,7 @@ link:
 caml:
 	@for f in $(shell find ext/yaml/$(YAML_GIT)/src -type f -name '*.cpp'); do \
 		echo $(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$(CWD)/$$f"; \
-		$(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$(CWD)/$$f"; \
+		$(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$(CWD)/$$f" || exit 1 ; \
 	done;	
 
 yaml:

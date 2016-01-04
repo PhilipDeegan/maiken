@@ -179,9 +179,9 @@ System properties:
 
 Git supported, SVN planned.
 
-3.1 How to build maiken
+3 How to build maiken
 
-3.1.1 Windows
+3.1 Windows
 
 Prerequisites:
     - git
@@ -195,54 +195,53 @@ Required operations:
     - make.bat - Enter directories for MSVS/WinKit/Boost when prompted
 
 Testing operations:
-    static
-    - ./mkn clean build -dtKa -EHsc
-    shared
-    - ./mkn clean build -dtSa -EHsc
+    static : ./mkn clean build -dtKa -EHsc
+    shared : ./mkn clean build -dtSa -EHsc
 
 For an example settings file see ./res/example/windowsSettings.xml
 
-3.1.2 Linux
+3.2 Unix
 
 Prerequisites:
     - git
     - gcc 4.9 (+) or equivalent
 
+3.2.1 Debian
+
 Required operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
     - cd maiken/master
-    - make nix
+    - make nix LINK="-pthread -static"
     WITH CLANG
     - make nix CXX=clang++ 
     IF CLANG SECONDARY TO GCC
     - LD_LIBRARY_PATH=<GCC_INSTALL>/lib64 make nix CXX=clang++ CXXFLAGS="-std=c++14 -I<GCC_INSTALL>/include/c++/5.2.0 -I<GCC_INSTALL>/include/c++/5.2.0/x86_64-unknown-linux-gnu" LDFLAGS="-L<GCC_INSTALL>/lib64" 
 
 Testing operations:
-    static
-    - ./mkn clean build -dtKa "-g0 -O3 -std=c++14 -Wall -fmessage-length=0" -l -pthread
-    shared
-    - ./mkn clean build -dtSa "-g0 -O3 -std=c++14 -Wall -fmessage-length=0 -fPIC"
+    static : ./mkn clean build -dtKa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0" -l -pthread
+    shared : ./mkn clean build -dtSa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0 -fPIC"
 
-3.1.3 BSD / MAC
-    
-Prerequisites:
-    - git
-    - gcc 4.9 (+) or equivalent
+3.2.1 MAC
 
 Required operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
     - cd maiken/master
-    BSD (Net)
-        - gmake bsd
-    Mac with clang++
-        - make bsd CXX=clang++
+    - make bsd CXX=clang++
 
 Testing operations:
-    static
-    - ./mkn clean build -dtKa "-g0 -O3 -std=c++14 -Wall -fmessage-length=0" -l -pthread
-    shared
-    - ./mkn clean build -dtSa "-g0 -O3 -std=c++14 -Wall -fmessage-length=0 -fPIC"
+    static : ./mkn clean build -dtKa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0" -l -pthread
+    shared : ./mkn clean build -dtSa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0 -fPIC"
 
+3.2.3 Net/Free BSD
+
+Required operations:
+    - git clone http://www.github.com/Dekken/maiken.git maiken/master
+    - cd maiken/master
+    - gmake bsd LINK="-pthread -lexecinfo"
+
+Testing operations:
+    static : ./mkn clean build -dtKa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0" -l "-pthread -lexecinfo"
+    shared : ./mkn clean build -dtSa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0 -fPIC" -l -lexecinfo
 
 4.1 Logging - 
 
