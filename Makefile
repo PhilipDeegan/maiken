@@ -11,7 +11,6 @@ endif
 OS =
 CXX=g++ 
 CXXFLAGS=-std=c++14 -g3 -Wall  -fmessage-length=0 
-LDFLAGS=
 INCS =  -I$(CWD)/inc \
 		-I$(CWD)/ext/yaml/$(YAML_GIT)/include \
 		-I$(CWD)/ext/kul/$(KUL_GIT)/inc \
@@ -19,8 +18,8 @@ INCS =  -I$(CWD)/inc \
 		-I$(CWD)/ext/kul/$(KUL_GIT)/os/nixish/inc \
 		-I$(CWD)/ext/kul/$(KUL_GIT)/ext/sparsehash/$(HASH_GIT)/include
 
-LIBS = $(CWD)/ext/yaml/$(YAML_GIT)/bin/libyaml.a
-LINK = -pthread
+YAML = $(CWD)/ext/yaml/$(YAML_GIT)/bin/libyaml.a
+LDFLAGS = -pthread
 LINKP= -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 
 EXE=mkn
@@ -81,7 +80,7 @@ general:
 
 link:
 	$(eval FILES := $(foreach dir,$(shell find $(CWD)/bin -type f -name *.o),$(dir)))
-	$(CXX) -o "$(EXE)" $(FILES) $(LIBS) $(LINK) $(LDFLAGS) 
+	$(CXX) -o "$(EXE)" $(FILES) $(YAML) $(LDFLAGS) 
 
 caml:
 	@for f in $(shell find ext/yaml/$(YAML_GIT)/src -type f -name '*.cpp'); do \

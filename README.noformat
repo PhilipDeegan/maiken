@@ -211,11 +211,14 @@ Prerequisites:
 Required operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
     - cd maiken/master
-    - make nix LINK="-pthread -static"
+    - shared
+        make nix
+    - static
+        make nix LDFLAGS="-pthread -static"
     WITH CLANG
-    - make nix CXX=clang++ 
+        make nix CXX=clang++ 
     IF CLANG SECONDARY TO GCC
-    - LD_LIBRARY_PATH=<GCC_INSTALL>/lib64 make nix CXX=clang++ CXXFLAGS="-std=c++14 -I<GCC_INSTALL>/include/c++/5.2.0 -I<GCC_INSTALL>/include/c++/5.2.0/x86_64-unknown-linux-gnu" LDFLAGS="-L<GCC_INSTALL>/lib64" 
+        LD_LIBRARY_PATH=<GCC_INSTALL>/lib64 make nix CXX=clang++ CXXFLAGS="-std=c++14 -I<GCC_INSTALL>/include/c++/5.2.0 -I<GCC_INSTALL>/include/c++/5.2.0/x86_64-unknown-linux-gnu" LDFLAGS="-L<GCC_INSTALL>/lib64" 
 
 Testing operations:
     static : ./mkn clean build -dtKa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0" -l -pthread
@@ -237,7 +240,7 @@ Testing operations:
 Required operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
     - cd maiken/master
-    - gmake bsd LINK="-pthread -lexecinfo"
+    - gmake bsd LDFLAGS="-pthread -lexecinfo"
 
 Testing operations:
     static : ./mkn clean build -dtKa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0" -l "-pthread -lexecinfo"
@@ -283,6 +286,8 @@ env:                                    # Optional
     value: value
 local:
     repo: <directory>                   # Optional, missing assumed ${4.3.2}/repo
+    bin:  <directory>                   # Optional, successfully linked binaries are moved to <directory>
+    lib:  <directory>                   # Optional, successfully linked libraries are moved to <directory>
 remote:
     repo: URL_ROOT                      # Optional, overrides switch _MKN_REMOTE_REPO_ for non complete SCM URL lookups
 
