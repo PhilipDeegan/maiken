@@ -36,12 +36,12 @@ const kul::yaml::FileValidator maiken::Settings::validator(){
         NodeValidator("inc"),
         NodeValidator("path"),
         NodeValidator("local", {
-            NodeValidator("repo", 1),
-            NodeValidator("lib", 1),
-            NodeValidator("bin", 1)
+            NodeValidator("repo"),
+            NodeValidator("lib"),
+            NodeValidator("bin")
         }, 0, NodeType::MAP),
         NodeValidator("remote", {
-            NodeValidator("repo", 1)
+            NodeValidator("repo")
         }, 0, NodeType::MAP),
         NodeValidator("env", {
             NodeValidator("name", 1),
@@ -50,10 +50,9 @@ const kul::yaml::FileValidator maiken::Settings::validator(){
         }, 0, NodeType::LIST),
         NodeValidator("file", {
             NodeValidator("type", 1),
-            NodeValidator("compiler"),
+            NodeValidator("compiler", 1),
             NodeValidator("linker"),
-            NodeValidator("archiver"),
-            NodeValidator("args")
+            NodeValidator("archiver")
         }, 1, NodeType::LIST)
     });
 }
