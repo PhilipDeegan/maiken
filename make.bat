@@ -3,8 +3,8 @@
 @ECHO off
 SETLOCAL enabledelayedexpansion
 
-SET KUL_VER=master
-SET YAML_VER=no-boost
+SET KUL_VER=0.6.6
+SET YAML_VER=0.5.5
 SET HASH_VER=2.0.3
 SET PWD=%CD%
 
