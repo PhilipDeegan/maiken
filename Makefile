@@ -1,5 +1,5 @@
 
-KUL_GIT=0.6.6
+KUL_GIT=master
 YAML_GIT=0.5.5
 HASH_GIT=2.0.3
 

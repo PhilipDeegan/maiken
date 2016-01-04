@@ -1,7 +1,7 @@
 
 
 name: mkn
-version: 0.7.7
+version: master
 property:
     github: http://github.com/mkn
 scm: http://github.com/dekken/maiken.git
@@ -10,7 +10,7 @@ inc: ./inc
 src: ./src
 dep: 
   - name: mkn.kul
-    version: 0.6.6
+    version: master
     scm: ${github}/mkn.kul.git
   - name: parse.yaml
     version: 0.5.5
