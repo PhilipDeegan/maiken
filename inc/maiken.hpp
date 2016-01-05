@@ -235,9 +235,9 @@ class ThreadingCompiler : public Constants{
                 std::vector<std::string> args;
                 if(app.arguments().count(fileType) > 0)
                     for(const std::string& o : (*app.arguments().find(fileType)).second)
-                        for(const auto& s : kul::String::split(o, ' '))
+                        for(const auto& s : kul::cli::asArgs(o))
                             args.push_back(s);
-                for(const auto& s : kul::String::split(app.arg, ' ')) args.push_back(s);
+                for(const auto& s : kul::cli::asArgs(app.arg)) args.push_back(s);
                 std::string cmd = compiler + " " + AppVars::INSTANCE().args();
                 if(AppVars::INSTANCE().jargs().count(fileType) > 0)
                     cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;
