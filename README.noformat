@@ -387,7 +387,7 @@ Description     split project version by period.
 
 Key             _MKN_TIMESTAMPS_ 
 Type            bool
-Default         1
+Default         0
 Description     Logs timestamps of source/includes to skip files with no changes.
 
 Key             _MKN_REMOTE_EXEC_ 

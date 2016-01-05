@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _MKN_REMOTE_REPO_ */
 
 #ifndef _MKN_TIMESTAMPS_
-    #define _MKN_TIMESTAMPS_ 1
+    #define _MKN_TIMESTAMPS_ 0
 #endif /* _MKN_TIMESTAMPS_ */
 
 namespace maiken{
