@@ -116,7 +116,7 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
             for(const std::pair<std::string, kul::hash::set::String>& kv : ft.second)
                 for(const std::string& src : kv.second){
                     kul::File f(src);
-                    objects.push_back(f.mini());
+                    objects.push_back(f.escm());
                     cacheFiles.push_back(f);
                 }
         }else{
@@ -131,7 +131,7 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
                     std::string obj(kul::Dir::JOIN(buildDir().join("obj"), src.substr(kv.first.size() + 1)));
                     if(obj.find(kul::env::CWD()) != std::string::npos)
                         obj = obj.substr(kul::env::CWD().size() + 1) + ".obj";
-                    sourceQueue.push(std::pair<std::string, std::string>(kul::File(src).mini(), obj));
+                    sourceQueue.push(std::pair<std::string, std::string>(kul::File(src).escm(), kul::File(obj).escm()));
                 }
             }
             while(sourceQueue.size() > 0){
@@ -185,11 +185,11 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
                 compilers.insert(ft, compiler);
             }
             if(compiler->sourceIsBin()) 
-                if(std::find(objects.begin(), objects.end(), f.mini()) == objects.end()) objects.push_back(f.mini());
+                if(std::find(objects.begin(), objects.end(), f.escm()) == objects.end()) objects.push_back(f.escm());
         }
         for(const auto& f : buildDir().files(1))
             if(f.name().size() > 4 && f.name().substr(f.name().size() - 4) == ".obj")
-                if(std::find(objects.begin(), objects.end(), f.mini()) == objects.end()) objects.push_back(f.mini());
+                if(std::find(objects.begin(), objects.end(), f.escm()) == objects.end()) objects.push_back(f.escm());
 
         kul::io::Writer srcW(srcStamps);
         kul::io::Writer incW(incStamps);
@@ -275,7 +275,7 @@ void maiken::Application::buildExecutable(const std::vector<std::string>& object
             const kul::code::CompilerProcessCapture& cpc =
                 kul::code::Compilers::INSTANCE().get((*(*files().find(fileType)).second.find(COMPILER)).second)
                     ->buildExecutable(linker, linkEnd, objects, 
-                        libraries(), libraryPaths(), out.join(n), m);
+                        libraries(), libraryPaths(), kul::File(out.join(n)).escm(), m);
             checkErrors(cpc);
             kul::Dir mkn(out.join(".mkn"));
             if(!mkn.is() && !mkn.mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
