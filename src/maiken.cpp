@@ -231,8 +231,9 @@ void maiken::Application::setup(){
         nodes.push_back(project().root());
         profile = project().root()[NAME].Scalar();
     }
-    else for (std::size_t i=0;i < project().root()[PROFILE].size(); i++)
-        nodes.push_back(project().root()[PROFILE][i]);
+    if(project().root()[PROFILE])
+        for (std::size_t i=0;i < project().root()[PROFILE].size(); i++)
+            nodes.push_back(project().root()[PROFILE][i]);
     bool c = 1;
     while(c){
         c = 0;
@@ -618,7 +619,6 @@ void maiken::Application::populateMaps(const YAML::Node& n){ //IS EITHER ROOT OR
 
 void maiken::Application::populateDependencies(const YAML::Node& n) throw(kul::Exception){
     std::vector<std::pair<std::string, std::string>> apps;
-
     for(const auto& dep : n[MKN_DEP]){
         const kul::Dir& projectDir = resolveDependencyDirectory(dep);
         bool f = false;

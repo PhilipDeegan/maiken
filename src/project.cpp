@@ -53,6 +53,7 @@ const kul::yaml::FileValidator maiken::Project::validator(){
         NodeValidator("version", 1),
         NodeValidator("scm"),
         NodeValidator("property",  {NodeValidator("*")}, 0, NodeType::MAP),
+        NodeValidator("parent"),
         NodeValidator("inc"),
         NodeValidator("src"),
         NodeValidator("path"),
@@ -62,6 +63,7 @@ const kul::yaml::FileValidator maiken::Project::validator(){
         NodeValidator("mode"),
         NodeValidator("arg"),
         NodeValidator("install"),
+        NodeValidator("self"),
         NodeValidator("env", {
             NodeValidator("name", 1),
             NodeValidator("mode", 1),
@@ -75,7 +77,6 @@ const kul::yaml::FileValidator maiken::Project::validator(){
         NodeValidator("profile", {
             NodeValidator("name", 1),
             NodeValidator("parent"),
-            NodeValidator("os"),
             NodeValidator("inc"),
             NodeValidator("src"),
             NodeValidator("path"),

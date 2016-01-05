@@ -6,15 +6,24 @@ property:
     github: http://github.com/mkn
 scm: http://github.com/dekken/maiken.git
 
-inc: ./inc
-src: ./src
-dep: 
-  - name: mkn.kul
-    version: master
-    scm: ${github}/mkn.kul.git
-  - name: parse.yaml
-    version: 0.5.5
-    scm: ${github}/parse.yaml.git
-main: dbg.cpp
-if_arg:
-    shared: -DYAML_CPP_DLL 
+parent: static
+mode: none
+
+profile:
+  - name: static
+    inc: ./inc
+    src: ./src
+    dep: 
+      - name: mkn.kul
+        version: master
+        scm: ${github}/mkn.kul.git
+      - name: parse.yaml
+        version: 0.5.5
+        scm: ${github}/parse.yaml.git
+    main: dbg.cpp
+    mode: static
+
+  - name: shared
+    parent: static
+    mode: shared
+    arg: -DYAML_CPP_DLL
