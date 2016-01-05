@@ -252,8 +252,8 @@ void maiken::Application::setup(){
 #ifdef _WIN32
                         if(kul::File("mkn.bat").is() && kul::os::exec("mkn.bat")) KEXCEPTION("ERROR in "+projectDir.path()+"mkn.bat");
 #else
-                        if(kul::File("mkn."+std::string(__KUL_OS__)+".sh").is() && kul::os::exec("sh mkn."+std::string(__KUL_OS__)+".sh")) 
-                            KEXCEPTION("ERROR in "+projectDir.path()+"mkn."+std::string(__KUL_OS__)+".sh");
+                        if(kul::File("mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh").is() && kul::os::exec("sh mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh")) 
+                            KEXCEPTION("ERROR in "+projectDir.path()+"mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh");
                         else
                         if(kul::File("mkn.sh").is() && kul::os::exec("sh mkn.sh")) KEXCEPTION("ERROR in "+projectDir.path()+"mkn.sh");
 #endif 
@@ -365,7 +365,7 @@ void maiken::Application::setup(){
                 for(YAML::const_iterator it = n[IF_ARG].begin(); it != n[IF_ARG].end(); ++it){
                     std::string left(it->first.Scalar());
                     if(left.find("_") != std::string::npos){
-                        if(left.substr(0, left.find("_")) == __KUL_OS__)
+                        if(left.substr(0, left.find("_")) == KTOSTRING(__KUL_OS__))
                             left = left.substr(left.find("_" + 1));
                         else continue;
                     }
@@ -381,12 +381,12 @@ void maiken::Application::setup(){
                     if(m == kul::code::Mode::STAT && left == STATIC)
                         for(const auto& s : ifArgs) arg += s + " ";
                     else
-                    if(left == __KUL_OS__) for(const auto& s : ifArgs) arg += s + " ";
+                    if(left == KTOSTRING(__KUL_OS__)) for(const auto& s : ifArgs) arg += s + " ";
                 }
             try{
                 if(n[IF_INC])
                     for(YAML::const_iterator it = n[IF_INC].begin(); it != n[IF_INC].end(); ++it)
-                        if(it->first.Scalar() == __KUL_OS__)
+                        if(it->first.Scalar() == KTOSTRING(__KUL_OS__))
                             for(const auto& s : kul::String::split(it->second.Scalar(), ' ')) 
                                 addIncludeLine(s);
             }catch(const kul::TypeException){
@@ -395,7 +395,7 @@ void maiken::Application::setup(){
             try{
                 if(n[IF_SRC])
                     for(YAML::const_iterator it = n[IF_SRC].begin(); it != n[IF_SRC].end(); ++it)
-                        if(it->first.Scalar() == __KUL_OS__)
+                        if(it->first.Scalar() == KTOSTRING(__KUL_OS__))
                             for(const auto& s : kul::String::split(it->second.Scalar(), ' ')) 
                                 addSourceLine(s);
             }catch(const kul::TypeException){
@@ -403,7 +403,7 @@ void maiken::Application::setup(){
             }
             if(n[IF_LIB])
                 for(YAML::const_iterator it = n[IF_LIB].begin(); it != n[IF_LIB].end(); ++it)
-                    if(it->first.Scalar() == __KUL_OS__)
+                    if(it->first.Scalar() == KTOSTRING(__KUL_OS__))
                         for(const auto& s : kul::String::split(it->second.Scalar(), ' '))
                             if(s.size()) libs.push_back(resolveFromProperties(s));
 

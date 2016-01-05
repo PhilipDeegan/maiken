@@ -60,7 +60,7 @@ class AppVars{
         kul::hash::map::S2S pks;
         kul::hash::map::S2S jas;
         AppVars(){
-            pks["OS"] = __KUL_OS__;
+            pks["OS"] = KTOSTRING(__KUL_OS__);
         }
     public:
         const std::string& args() const { return aa;}
