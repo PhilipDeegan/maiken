@@ -64,7 +64,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken{
 class Constants{
     public:
-        static constexpr const char* VERSION_NUMBER = "0.7.7";
+        static constexpr const char* VERSION_NUMBER = "master";
         static constexpr const char* VERSION        = "version";
 
         static constexpr const char* MAIKEN         = "maiken";
