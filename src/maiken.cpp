@@ -99,19 +99,13 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
         a.showProfiles();
         KEXIT(0, "");
     }
+    a.ig = 0;
     if(args.has(SHARED))        AppVars::INSTANCE().shar(true);
     if(args.has(STATIC))        AppVars::INSTANCE().stat(true);
     if(args.has(DEBUG))         AppVars::INSTANCE().debug(true);
     if(args.has(SCM_FUPDATE))   AppVars::INSTANCE().fupdate(true);
     if(args.has(SCM_UPDATE))    AppVars::INSTANCE().update(true);
     if(project.root()[SCM])  a.scr = project.root()[SCM].Scalar();
-    a.setup();
-    if(args.has(MKN_INC)){
-        for(const auto& p : a.includes())
-            KOUT(NON) << p.first;
-        KEXIT(0, "");
-    }
-    
     if(args.has(MKN_DEP)){
         if(args.get(MKN_DEP).size() > 0)
             try{
@@ -121,6 +115,12 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
             }
         else AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int>::max)());
     } 
+    a.setup();
+    if(args.has(MKN_INC)){
+        for(const auto& p : a.includes())
+            KOUT(NON) << p.first;
+        KEXIT(0, "");
+    }
     a.buildDepVec();
 
     if(args.has(MKN_SRC)){

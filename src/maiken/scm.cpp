@@ -44,6 +44,16 @@ void maiken::Application::scmStatus(const bool& deps) throw (kul::scm::Exception
 }
 
 void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
+    if(par && AppVars::INSTANCE().dependencyLevel() == 0) return;
+    uint i = 0;
+    auto fn = [] (uint& i) { i++; };
+    const Application* p = par;
+    while(p){
+        fn(i);
+        p = p->par;
+    }
+    if(i > AppVars::INSTANCE().dependencyLevel()) return;
+
     if(!scm) scm = SCMGetter::GET(this->project().dir(), this->scr);
     if(scm){
         if(!f) KOUT(NON) << "WARNING: ATTEMPTING SCM UPDATE, USER INTERACTION MAY BE REQUIRED!";
