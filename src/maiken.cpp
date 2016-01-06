@@ -109,7 +109,7 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
     if(args.has(MKN_DEP)){
         if(args.get(MKN_DEP).size() > 0)
             try{
-                AppVars::INSTANCE().dependencyLevel(std::stoi(args.get(MKN_DEP)));
+                AppVars::INSTANCE().dependencyLevel(std::stoul(args.get(MKN_DEP)));
             }catch(const std::invalid_argument& e){
                 KEXCEPTION("Non numeric value used for dependency level");
             }
@@ -153,7 +153,7 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
     if(args.has(THREADS)){
         if(args.get(THREADS).size() > 0)
             try{
-                AppVars::INSTANCE().threads(std::stoi(args.get(THREADS)));
+                AppVars::INSTANCE().threads(std::stoul(args.get(THREADS)));
             }catch(const std::invalid_argument& e){
                 KEXCEPTION("Non numeric value used for threads");
             }

@@ -53,7 +53,7 @@ class Exception : public kul::Exception{
 class AppVars{
     private:
         bool b = 0, c = 0, d = 0, f = 0, l = 0, p = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
-        int dl = 0;
+        unsigned int dl = 0;
         unsigned int ts = 1;
         std::string aa;
         std::string la;
@@ -108,8 +108,8 @@ class AppVars{
         const bool& stat() const { return this->st;}
         void stat(const bool& st){ this->st = st;}
 
-        const int& dependencyLevel()  const { return dl;}
-        void dependencyLevel(const int& dl)  { this->dl = dl;}
+        const unsigned int& dependencyLevel()  const { return dl;}
+        void dependencyLevel(const unsigned int& dl)  { this->dl = dl;}
 
         const unsigned int& threads() const { return ts;}
         void threads(const unsigned int& t) { this->ts = t;}
