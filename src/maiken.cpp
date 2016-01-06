@@ -323,10 +323,11 @@ void maiken::Application::setup(){
             break;
         }
     }
-    if(main.empty() && lang.empty() && !sources().empty()){
+    if(main.empty() && lang.empty()){
         const auto& mains(inactiveMains());
         if(mains.size()) lang = (*mains.begin()).substr((*mains.begin()).rfind(".")+1);
-        else KEXCEPTION("no main or lang tag found and cannot deduce langauge\n" + project().dir().path());
+        else 
+        if(sources().size()) KEXCEPTION("no main or lang tag found and cannot deduce language\n" + project().dir().path());
     }
     if(par){
         if(!main.empty() && lang.empty()) lang = main.substr(main.rfind(".")+1);
