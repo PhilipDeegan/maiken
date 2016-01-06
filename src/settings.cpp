@@ -37,6 +37,7 @@ const kul::yaml::FileValidator maiken::Settings::validator(){
         NodeValidator("path"),
         NodeValidator("local", {
             NodeValidator("repo"),
+            NodeValidator("debugger"),
             NodeValidator("lib"),
             NodeValidator("bin")
         }, 0, NodeType::MAP),

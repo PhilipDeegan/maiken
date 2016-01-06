@@ -70,10 +70,12 @@ class Constants{
         static constexpr const char* MAIKEN         = "maiken";
 
         static constexpr const char* BIN            = "bin";
+        static constexpr const char* DBG            = "dbg";
         static constexpr const char* OBJ            = "obj";
 
         static constexpr const char* BUILD          = "build";
         static constexpr const char* DEBUG          = "debug";
+        static constexpr const char* DEBUGGER       = "debugger";
         static constexpr const char* CLEAN          = "clean";
         static constexpr const char* COMPILE        = "compile";
         static constexpr const char* HELP           = "help";

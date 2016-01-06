@@ -61,6 +61,8 @@ constexpr const char* maiken::Constants::LANG;
 constexpr const char* maiken::Constants::LOCAL;
 constexpr const char* maiken::Constants::REMOTE;
 constexpr const char* maiken::Constants::REPO;
+constexpr const char* maiken::Constants::DEBUGGER;
+constexpr const char* maiken::Constants::DBG;
 constexpr const char* maiken::Constants::RUN;
 
 constexpr const char* maiken::Constants::PROJECT;

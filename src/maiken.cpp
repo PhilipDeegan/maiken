@@ -44,6 +44,7 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
     args.cmd(Cmd(COMPILE));
     args.cmd(Cmd(LINK));
     args.cmd(Cmd(RUN));
+    args.cmd(Cmd(DBG));
     args.cmd(Cmd(PROFILES));
     args.cmd(Cmd(TRIM));
     args.arg(Arg('a', ARG           , ArgType::STRING));
@@ -102,6 +103,7 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
     a.ig = 0;
     if(args.has(SHARED))        AppVars::INSTANCE().shar(true);
     if(args.has(STATIC))        AppVars::INSTANCE().stat(true);
+    if(args.has(DBG))           AppVars::INSTANCE().dbg(true);
     if(args.has(DEBUG))         AppVars::INSTANCE().debug(true);
     if(args.has(SCM_FUPDATE))   AppVars::INSTANCE().fupdate(true);
     if(args.has(SCM_UPDATE))    AppVars::INSTANCE().update(true);
@@ -170,7 +172,7 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
 }
 
 void maiken::Application::process() throw(kul::Exception){
-    if(AppVars::INSTANCE().run()) run();
+    if(AppVars::INSTANCE().run() || AppVars::INSTANCE().dbg()) run(AppVars::INSTANCE().dbg());
     else{
         for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
             kul::env::CWD((*app).project().dir());
@@ -490,15 +492,40 @@ const kul::Dir maiken::Application::resolveDependencyDirectory(const YAML::Node&
     return kul::Dir(d);
 }
 
-void maiken::Application::run(){
+void maiken::Application::run(bool dbg){
 #ifdef _WIN32
     kul::File f(project().root()[NAME].Scalar() + ".exe", inst ? inst : buildDir());
 #else
     kul::File f(project().root()[NAME].Scalar(), inst ? inst : buildDir());
 #endif
     if(!f) KEXCEPTION("binary does not exist \n" + f.full());
-    kul::Process p(f.mini());
-    for(const auto& s : kul::cli::asArgs(AppVars::INSTANCE().args())) p.arg(s);
+
+    std::unique_ptr<kul::Process> p;
+    if(dbg){
+        std::string dbg;
+        const char* debug = kul::env::GET("MKN_DBG");
+        if(debug) dbg = debug;
+        if(dbg.empty())
+            if(Settings::INSTANCE().root()[LOCAL][DEBUGGER])
+                dbg = Settings::INSTANCE().root()[LOCAL][DEBUGGER].Scalar();
+        if(dbg.empty()){
+#ifdef _WIN32
+            p = std::make_unique<kul::Process>("cdb");
+            p->arg("-o");
+#else
+            p = std::make_unique<kul::Process>("gdb");
+#endif
+        }
+        else{
+            std::vector<std::string> bits(kul::cli::asArgs(dbg));
+            p = std::make_unique<kul::Process>(bits[0]);
+            for(uint i = 1; i < bits.size(); i++) p->arg(bits[i]);
+        }
+        p->arg(f.mini());
+    }
+    else
+        p = std::make_unique<kul::Process>(f.mini());
+    for(const auto& s : kul::cli::asArgs(AppVars::INSTANCE().args())) p->arg(s);
     if(m != kul::code::Mode::STAT){
         std::string arg;
         for(const auto& s : libraryPaths()) arg += s + kul::env::SEP();
@@ -509,10 +536,10 @@ void maiken::Application::run(){
         kul::cli::EnvVar pa("LD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
 #endif
         KOUT(DBG) << pa.name() << " : " << pa.toString();
-        p.var(pa.name(), pa.toString());
+        p->var(pa.name(), pa.toString());
     }
-    KOUT(DBG) << p;
-    p.start();
+    KOUT(DBG) << (*p);
+    p->start();
     KEXIT(0, "");
 }
 

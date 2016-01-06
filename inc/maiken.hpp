@@ -52,7 +52,7 @@ class Exception : public kul::Exception{
 
 class AppVars{
     private:
-        bool b = 0, c = 0, d = 0, f = 0, l = 0, p = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
+        bool b = 0, c = 0, d = 0, f = 0, g = 0, l = 0, p = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
         unsigned int dl = 0;
         unsigned int ts = 1;
         std::string aa;
@@ -80,6 +80,9 @@ class AppVars{
 
         const bool& compile() const { return this->p;}
         void compile(const bool& p) { this->p = p;}
+
+        const bool& dbg() const { return this->g;}
+        void dbg(const bool& g)   { this->g = g;}
 
         const bool& debug() const { return this->d;}
         void debug(const bool& d)   { this->d = d;}
@@ -166,7 +169,7 @@ class Application : public Constants{
         const std::string              resolveFromProperties(const std::string& s) const;
         void                           build()     throw(kul::Exception);
         void                           link()      throw(kul::Exception);
-        void                           run();
+        void                           run(bool dbg);
         void                           trim();
         void                           trim(const kul::File& f);
         void                           scmStatus(const bool& deps = false) throw(kul::scm::Exception);

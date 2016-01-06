@@ -313,6 +313,15 @@ This can be disabled by compiling with the argument -D_MKN_TIMESTAMPS_=0
 This is disabled for languages like C# when the source is not compiled.
 The clean command deletes the timestamp files, and recompiles everything.
 
+4.6 Debugging
+
+If the environment variable "MKN_DBG" is set, it is used as the process string for debugging such that the format is: $MKN_DBG ./bin/<profile>/<binary> <args>
+Otherwise, the settings.yaml variable "local->debugger" is checked, resulting in the same style of string
+If neither are set the following rules apply
+    Windows : cdb -o ./bin/<profile>/<binary> <args>
+    Unix    : gdb ./bin/<profile>/<binary> <args>
+
+
 5.1 Usage
 
 5.1.1 Commands
@@ -327,7 +336,8 @@ Available commands
     - inc      - Print include directories to std out
     - src      - Print found source files to std out [allows -d].
     - trim     - Remove trailing spaces and tabs from includes/sources under project directory
-    - run      - Starts the application automatically linking libraries for dependencies on dynamic libraries, supports -a and -p
+    - run      - Starts the application automatically linking libraries for dependencies on dynamic libraries, supports -a and -p/-D
+    - dbg      - Same as run but uses debugger - see 4.6
 
 5.1.2 Arguments
 
