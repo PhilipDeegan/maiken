@@ -32,6 +32,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/type.hpp"
 #include "maiken.hpp"
 
+class UpdateTracker{
+    private:
+        kul::hash::set::String paths;
+    public:
+        bool has(const std::string& path){ return paths.count(path); }
+        void add(const std::string& path){ paths.insert(path); }
+        static UpdateTracker& INSTANCE(){
+            static UpdateTracker i;
+            return i;
+        }
+};
+
 void maiken::Application::scmStatus(const bool& deps) throw (kul::scm::Exception){
     if(deps) for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) (*app).scmStatus(0);
     if(!scm) scm = SCMGetter::GET(this->project().dir(), this->scr);
@@ -44,20 +56,15 @@ void maiken::Application::scmStatus(const bool& deps) throw (kul::scm::Exception
 }
 
 void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
-    if(par && AppVars::INSTANCE().dependencyLevel() == 0) return;
     uint i = 0;
-    auto fn = [] (uint& i) { i++; };
-    const Application* p = par;
-    while(p){
-        fn(i);
-        p = p->par;
-    }
+    const Application* p = this;
+    while((p = p->par)) i++;
     if(i > AppVars::INSTANCE().dependencyLevel()) return;
-
     if(!scm) scm = SCMGetter::GET(this->project().dir(), this->scr);
-    if(scm){
+    if(scm && !UpdateTracker::INSTANCE().has(this->project().dir().path())){
         if(!f) KOUT(NON) << "WARNING: ATTEMPTING SCM UPDATE, USER INTERACTION MAY BE REQUIRED!";
         scmUpdate(f, scm, SCMGetter::REPO(this->project().dir(), this->scr));
+        UpdateTracker::INSTANCE().add(this->project().dir().path());
     }
 }
 
@@ -76,5 +83,4 @@ void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const st
         KOUT(NON) << "UPDATING: " << this->project().dir().path() << " FROM " << s;
         scm->up(this->project().dir().real(), s, ver);
     }
-    else KOUT(NON) << "SKIPPED";
 }
