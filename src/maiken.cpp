@@ -73,7 +73,7 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
         KEXIT(0, "");
     }
     if(args.has(VERSION)){
-        KOUT(NON) << VERSION_NUMBER << " : " << VERSION;
+        KOUT(NON) << VERSION_NUMBER;
         KEXIT(0, "");
     }
     if(args.has(MKN_INIT)){
