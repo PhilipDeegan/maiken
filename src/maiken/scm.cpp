@@ -50,8 +50,7 @@ void maiken::Application::scmStatus(const bool& deps) throw (kul::scm::Exception
     if(scm){
         KOUT(NON) << kul::os::EOL() << "SCM STATUS CHECK ON: " << project().dir().path();
         const std::string& r(this->project().dir().real());
-        if(scm->hasChanges(r)) scm->status(r);
-        else KOUT(NON) << "NO CHANGES";
+        scm->status(r);
     }
 }
 
