@@ -107,7 +107,7 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
     if(args.has(DEBUG))         AppVars::INSTANCE().debug(true);
     if(args.has(SCM_FUPDATE))   AppVars::INSTANCE().fupdate(true);
     if(args.has(SCM_UPDATE))    AppVars::INSTANCE().update(true);
-    if(project.root()[SCM])  a.scr = project.root()[SCM].Scalar();
+    if(project.root()[SCM])     a.scr = project.root()[SCM].Scalar();
     if(args.has(MKN_DEP)){
         if(args.get(MKN_DEP).size() > 0)
             try{
@@ -221,6 +221,7 @@ void maiken::Application::setup(){
         scmUpdate(AppVars::INSTANCE().fupdate());
         proj.reload();
     }
+    if(scr.empty()) scr = project().root()[NAME].Scalar();
 
     this->preSetupValidation();
     std::string buildD = kul::Dir::JOIN(BIN, p);
@@ -245,10 +246,10 @@ void maiken::Application::setup(){
                 const std::string& cwd(kul::env::CWD());
                 kul::Dir projectDir(resolveDependencyDirectory(dep));
                 if(!projectDir.is()){
-                    if(!dep[SCM]) KEXCEPTION("Directory " + projectDir.path() + " does not exist, and no SCM found for dependency");
                     kul::env::CWD(this->project().dir());
-                    const std::string& tscr(resolveFromProperties(dep[SCM].Scalar()));
-                    KOUT(NON) << SCMGetter::GET(projectDir, tscr)->co(projectDir.path(), SCMGetter::REPO(projectDir, tscr), resolveFromProperties(dep[VERSION].Scalar()));
+                    const std::string& tscr(dep[SCM] ? resolveFromProperties(dep[SCM].Scalar()) : dep[NAME].Scalar());
+                    const std::string& v(dep[VERSION] ? resolveFromProperties(dep[VERSION].Scalar()) : "");
+                    KOUT(NON) << SCMGetter::GET(projectDir, tscr)->co(projectDir.path(), SCMGetter::REPO(projectDir, tscr), v);
                     kul::env::CWD(projectDir);
                     if(_MKN_REMOTE_EXEC_){
 #ifdef _WIN32
@@ -482,9 +483,9 @@ const kul::Dir maiken::Application::resolveDependencyDirectory(const YAML::Node&
         else
             d = kul::os::userAppDir(MAIKEN).join(REPO);
         try{
-            std::string version = resolveFromProperties(n[VERSION].Scalar());
+            std::string version(n[VERSION] ? resolveFromProperties(n[VERSION].Scalar()) : "default");
             if(_MKN_REP_VERS_DOT_) kul::String::replaceAll(version, ".", kul::Dir::SEP());
-            std::string name = resolveFromProperties(n[NAME].Scalar());
+            std::string name(resolveFromProperties(n[NAME].Scalar()));
             if(_MKN_REP_NAME_DOT_) kul::String::replaceAll(name, ".", kul::Dir::SEP());
             d = kul::Dir::JOIN(d, kul::Dir::JOIN(name, version));
         }catch(const kul::Exception& e){ KLOG(DBG) << e.debug(); }

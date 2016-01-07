@@ -50,7 +50,7 @@ const kul::yaml::FileValidator maiken::Project::validator(){
 
     return FileValidator({
         NodeValidator("name", 1),
-        NodeValidator("version", 1),
+        NodeValidator("version"),
         NodeValidator("scm"),
         NodeValidator("property",  {NodeValidator("*")}, 0, NodeType::MAP),
         NodeValidator("parent"),
@@ -103,7 +103,7 @@ const kul::yaml::FileValidator maiken::Project::validator(){
 void maiken::NewProject::write(){
     kul::io::Writer w(file());
     w.write("\n", true);
-    w.write("name: name\nversion: version", true);
+    w.write("name: new_mkn_project", true);
     w.write("#inc: ./inc\n#src:  ./src", true);
-    w.write("#lang: cpp", true);
+    w.write("main: cpp.cpp", true);
 }

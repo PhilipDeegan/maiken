@@ -62,24 +62,29 @@ void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
     if(!scm) scm = SCMGetter::GET(this->project().dir(), this->scr);
     if(scm && !UpdateTracker::INSTANCE().has(this->project().dir().path())){
         if(!f) KOUT(NON) << "WARNING: ATTEMPTING SCM UPDATE, USER INTERACTION MAY BE REQUIRED!";
-        scmUpdate(f, scm, SCMGetter::REPO(this->project().dir(), this->scr));
+        scmUpdate(f, scm, !this->scr.empty() ? SCMGetter::REPO(this->project().dir(), this->scr) : "");
         UpdateTracker::INSTANCE().add(this->project().dir().path());
     }
 }
 
-void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const std::string& s) throw (kul::scm::Exception){
-    const std::string& ver(this->project().root()[VERSION].Scalar());
+void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const std::string& s1) throw (kul::scm::Exception){
+    const std::string& ver(this->project().root()[VERSION] ? this->project().root()[VERSION].Scalar() : "");
     bool c = true;
+    std::string s(s1.empty() ? scm->origin(this->project().dir().path()) : s1);
     if(!f){
         KOUT(NON) << "CHECKING: " << this->project().dir().path() << " FROM " << s;
         const std::string& lV(scm->localVersion(this->project().dir().real(), ver));
-        const std::string& rV(scm->remoteVersion(this->project().dir().real(), s, ver));
+        const std::string& rV(s.size() ? scm->remoteVersion(this->project().dir().real(), s, ver) : "");
         c = lV != rV;
+        std::stringstream ss;
+        ss << "UPDATE FROM " + s + " VERSION: " + rV + " (Yes/No/1/0)";
         if(!c) KOUT(NON) << "CURRENT VERSION MATCHES REMOTE VERSION: SKIPPING";
-        else c = kul::Bool::FROM(kul::cli::receive("UPDATE FROM " + s + " VERSION: " + rV + " (Yes/No/1/0)"));
+        else c = kul::Bool::FROM(kul::cli::receive(ss.str()));
     }
     if(f || c){
-        KOUT(NON) << "UPDATING: " << this->project().dir().path() << " FROM " << s;
+        std::stringstream ss;
+        if(s.size()) ss << " FROM " << s;
+        KOUT(NON) << "UPDATING: " << this->project().dir().path() << ss.str();
         scm->up(this->project().dir().real(), s, ver);
     }
 }
