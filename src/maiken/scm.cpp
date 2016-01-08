@@ -46,7 +46,7 @@ class UpdateTracker{
 
 void maiken::Application::scmStatus(const bool& deps) throw (kul::scm::Exception){
     if(deps) for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) (*app).scmStatus(0);
-    if(!scm) scm = SCMGetter::GET(this->project().dir(), this->scr);
+    if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr);
     if(scm){
         KOUT(NON) << kul::os::EOL() << "SCM STATUS CHECK ON: " << project().dir().path();
         const std::string& r(this->project().dir().real());
@@ -59,7 +59,7 @@ void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
     const Application* p = this;
     while((p = p->par)) i++;
     if(i > AppVars::INSTANCE().dependencyLevel()) return;
-    if(!scm) scm = SCMGetter::GET(this->project().dir(), this->scr);
+    if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr);
     if(scm && !UpdateTracker::INSTANCE().has(this->project().dir().path())){
         if(!f) KOUT(NON) << "WARNING: ATTEMPTING SCM UPDATE, USER INTERACTION MAY BE REQUIRED!";
         scmUpdate(f, scm, !this->scr.empty() ? SCMGetter::REPO(this->project().dir(), this->scr) : "");

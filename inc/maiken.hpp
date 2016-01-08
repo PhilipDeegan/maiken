@@ -306,6 +306,9 @@ class SCMGetter{
             if(INSTANCE().valids.count(d.path())) return (*INSTANCE().valids.find(d.path())).second;
             KEXCEPT(Exception, "SCM not discovered for project: "+d.path());
         }
+        static bool HAS(const kul::Dir& d){
+            return (kul::Dir(d.join(".git")) || kul::Dir(d.join(".svn")));
+        }
         static const kul::SCM* GET(const kul::Dir& d, const std::string& r){
             if(IS_SOLID(r)) INSTANCE().valids.insert(d.path(), r);
             if(kul::Dir(d.join(".git"))) return &kul::scm::Manager::INSTANCE().get("git");
