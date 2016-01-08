@@ -53,8 +53,8 @@ class Exception : public kul::Exception{
 class AppVars{
     private:
         bool b = 0, c = 0, d = 0, f = 0, g = 0, l = 0, p = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
-        unsigned int dl = 0;
-        unsigned int ts = 1;
+        uint16_t dl = 0;
+        uint16_t ts = 1;
         std::string aa;
         std::string la;
         kul::hash::map::S2S pks;
@@ -111,11 +111,11 @@ class AppVars{
         const bool& stat() const { return this->st;}
         void stat(const bool& st){ this->st = st;}
 
-        const unsigned int& dependencyLevel()  const { return dl;}
-        void dependencyLevel(const unsigned int& dl)  { this->dl = dl;}
+        const uint16_t& dependencyLevel()  const { return dl;}
+        void dependencyLevel(const uint16_t& dl)  { this->dl = dl;}
 
-        const unsigned int& threads() const { return ts;}
-        void threads(const unsigned int& t) { this->ts = t;}
+        const uint16_t& threads() const { return ts;}
+        void threads(const uint16_t& t) { this->ts = t;}
 
         const kul::hash::map::S2S& properkeys() const { return pks;}
 
@@ -142,7 +142,7 @@ class Application : public Constants{
         std::vector<std::string> paths;
         kul::hash::map::S2S ps;
         kul::hash::map::S2T<kul::hash::set::String> args;
-        kul::hash::map::S2T<uint> stss;
+        kul::hash::map::S2T<uint16_t> stss;
         kul::hash::map::S2S itss;
         kul::hash::map::S2S includeStamps;
         std::vector<kul::cli::EnvVar> evs;
@@ -153,7 +153,7 @@ class Application : public Constants{
         Application(const maiken::Project& proj, const std::string profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){}
         Application(const maiken::Project& proj) : m(kul::code::Mode::NONE), proj(proj){}
         void                           buildDepVec();
-        void                           buildDepVecRec(std::vector<Application*>& dePs, int i);
+        void                           buildDepVecRec(std::vector<Application*>& dePs, uint16_t i);
         void                           buildExecutable(const std::vector<std::string>& objects);
         void                           buildLibrary(const std::vector<std::string>& objects);
         void                           checkErrors(const kul::code::CompilerProcessCapture& cpc) throw(kul::Exception);
@@ -188,7 +188,7 @@ class Application : public Constants{
 
         static void                                 showHelp();
     public:
-        static Application create(int argc, char *argv[]) throw(kul::Exception);
+        static Application create(int16_t argc, char *argv[]) throw(kul::Exception);
         virtual void                                       process()   throw(kul::Exception);
         const kul::Dir&                                    buildDir()      const { return bd; }
         const std::string&                                 profile()       const { return p; }

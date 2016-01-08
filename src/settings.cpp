@@ -30,9 +30,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/project.hpp"
 
-const kul::yaml::FileValidator maiken::Settings::validator(){
+const kul::yaml::Validator maiken::Settings::validator() const{
     using namespace kul::yaml;
-    return FileValidator({
+    return Validator({
         NodeValidator("inc"),
         NodeValidator("path"),
         NodeValidator("local", {

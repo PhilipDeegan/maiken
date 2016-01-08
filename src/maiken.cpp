@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken.hpp"
 
-maiken::Application maiken::Application::create(int argc, char *argv[]) throw(kul::Exception){
+maiken::Application maiken::Application::create(int16_t argc, char *argv[]) throw(kul::Exception){
     using namespace kul::cli;
 
     Args args;
@@ -115,7 +115,7 @@ maiken::Application maiken::Application::create(int argc, char *argv[]) throw(ku
             }catch(const std::invalid_argument& e){
                 KEXCEPTION("Non numeric value used for dependency level");
             }
-        else AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int>::max)());
+        else AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
     } 
     a.setup();
     if(args.has(MKN_INC)){
@@ -436,7 +436,7 @@ void maiken::Application::buildDepVec(){
     }
 }
 
-void maiken::Application::buildDepVecRec(std::vector<Application*>& dePs, int i){
+void maiken::Application::buildDepVecRec(std::vector<Application*>& dePs, uint16_t i){
     for(maiken::Application& a : deps){
         if(i > 0) a.ig = 0;
         a.buildDepVecRec(dePs, --i);
@@ -520,7 +520,7 @@ void maiken::Application::run(bool dbg){
         else{
             std::vector<std::string> bits(kul::cli::asArgs(dbg));
             p = std::make_unique<kul::Process>(bits[0]);
-            for(uint i = 1; i < bits.size(); i++) p->arg(bits[i]);
+            for(uint16_t i = 1; i < bits.size(); i++) p->arg(bits[i]);
         }
         p->arg(f.mini());
     }

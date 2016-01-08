@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/defs.hpp"
 #include "maiken/project.hpp"
 
-const kul::yaml::FileValidator maiken::Project::validator(){
+const kul::yaml::Validator maiken::Project::validator() const{
     using namespace kul::yaml;
     NodeValidator dependencies("dep", {
         NodeValidator("name", 1),
@@ -48,7 +48,7 @@ const kul::yaml::FileValidator maiken::Project::validator(){
     NodeValidator if_lib("if_lib", { NodeValidator("*") }, 0, NodeType::MAP);
     NodeValidator if_src("if_src", { NodeValidator("*") }, 0, NodeType::MAP);
 
-    return FileValidator({
+    return Validator({
         NodeValidator("name", 1),
         NodeValidator("version"),
         NodeValidator("scm"),

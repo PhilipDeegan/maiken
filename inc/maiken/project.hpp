@@ -59,7 +59,7 @@ class Project : public kul::yaml::File, public Constants{
     public: 
         Project(const Project& p) : kul::yaml::File(p), d(p.d){}
         const kul::Dir&   dir() const { return d; }
-        const kul::yaml::FileValidator validator();
+        const kul::yaml::Validator validator() const;
         static Project CREATE(const kul::Dir& d){
             kul::File f("mkn.yaml", d);
             if(!f.is()) KEXCEPT(ProjectException, "project file does not exist:\n" + f.full());
@@ -116,7 +116,7 @@ class Settings : public kul::yaml::File, public Constants{
             return 1;
 
         }
-        const kul::yaml::FileValidator validator();
+        const kul::yaml::Validator validator() const;
         const std::vector<std::string> remoteRepos() const { return rrs; }
 };
 
