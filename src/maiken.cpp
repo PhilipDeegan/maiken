@@ -709,7 +709,7 @@ void maiken::Application::addSourceLine(const std::string& o) throw (kul::TypeEx
             if(s.size()){
                 kul::Dir d(resolveFromProperties(s));
                 if(d) srcs.push_back(std::make_pair(d.real(), true));
-                else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
+                else  KEXCEPTION("source does not exist\n"+d.path()+"\n"+project().dir().path());
             }
     }else{
         const auto& v =  kul::String::split(o, ',');
@@ -718,7 +718,7 @@ void maiken::Application::addSourceLine(const std::string& o) throw (kul::TypeEx
         if(v[0].size()){
             kul::Dir d(resolveFromProperties(v[0]));
             if(d) srcs.push_back(std::make_pair(d.real(), r));
-            else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
+            else  KEXCEPTION("source does not exist\n"+d.path()+"\n"+project().dir().path());
         }
     }
 }
