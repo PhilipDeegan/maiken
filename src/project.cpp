@@ -101,9 +101,22 @@ const kul::yaml::Validator maiken::Project::validator() const{
 }
 
 void maiken::NewProject::write(){
-    kul::io::Writer w(file());
-    w.write("\n", true);
-    w.write("name: new_mkn_project", true);
-    w.write("#inc: ./inc\n#src:  ./src", true);
-    w.write("main: cpp.cpp", true);
+    {
+        kul::io::Writer w(file());
+        w.write("\n", true);
+        w.write("name: new_mkn_project", true);
+        w.write("#inc: ./inc\n#src:  ./src", true);
+        w.write("main: cpp.cpp", true);
+    }
+    {
+        kul::io::Writer w("cpp.cpp");
+        w.write("\n\n#include <iostream>", true);
+        w.write("\n", true);
+        w.write("int main(int argc, char* argv[]){", true);
+        w.write("\n", true);
+        w.write("    std::cout << \"HELLO WORLD!\" << std::endl;", true);
+        w.write("\n", true);
+        w.write("    return 0;", true);
+        w.write("}", true);
+    }
 }
