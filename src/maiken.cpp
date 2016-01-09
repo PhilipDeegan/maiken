@@ -110,11 +110,7 @@ maiken::Application maiken::Application::create(int16_t argc, char *argv[]) thro
     if(project.root()[SCM])     a.scr = project.root()[SCM].Scalar();
     if(args.has(MKN_DEP)){
         if(args.get(MKN_DEP).size() > 0)
-            try{
-                AppVars::INSTANCE().dependencyLevel(std::stoul(args.get(MKN_DEP)));
-            }catch(const std::invalid_argument& e){
-                KEXCEPTION("Non numeric value used for dependency level");
-            }
+            AppVars::INSTANCE().dependencyLevel(kul::Type::GET_UINT(args.get(MKN_DEP)));
         else AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
     } 
     a.setup();
@@ -154,11 +150,7 @@ maiken::Application maiken::Application::create(int16_t argc, char *argv[]) thro
     if(args.has(LINKER)) AppVars::INSTANCE().linker(args.get(LINKER));
     if(args.has(THREADS)){
         if(args.get(THREADS).size() > 0)
-            try{
-                AppVars::INSTANCE().threads(std::stoul(args.get(THREADS)));
-            }catch(const std::invalid_argument& e){
-                KEXCEPTION("Non numeric value used for threads");
-            }
+            AppVars::INSTANCE().dependencyLevel(kul::Type::GET_UINT(args.get(THREADS)));
         else AppVars::INSTANCE().threads(kul::cpu::threads());
     }
 
@@ -181,8 +173,8 @@ void maiken::Application::process() throw(kul::Exception){
             if((*app).ig && (kul::File("built", mkn).is() || !(*app).srcs.size())) continue;
             std::vector<std::pair<std::string, std::string> > oldEvs;
             for(const kul::cli::EnvVar& ev : (*app).envVars()){
-                const char* v = kul::env::GET(ev.name());
-                oldEvs.push_back(std::pair<std::string, std::string>(ev.name(), v ? v : ""));
+                const std::string v = kul::env::GET(ev.name());
+                if(v.size()) oldEvs.push_back(std::pair<std::string, std::string>(ev.name(), v));
                 kul::env::SET(ev.name(), ev.toString().c_str());
             }
             if(AppVars::INSTANCE().clean()) if((*app).buildDir().is()){
@@ -503,9 +495,7 @@ void maiken::Application::run(bool dbg){
 
     std::unique_ptr<kul::Process> p;
     if(dbg){
-        std::string dbg;
-        const char* debug = kul::env::GET("MKN_DBG");
-        if(debug) dbg = debug;
+        std::string dbg = kul::env::GET("MKN_DBG");
         if(dbg.empty())
             if(Settings::INSTANCE().root()[LOCAL][DEBUGGER])
                 dbg = Settings::INSTANCE().root()[LOCAL][DEBUGGER].Scalar();
