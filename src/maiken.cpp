@@ -170,7 +170,7 @@ void maiken::Application::process() throw(kul::Exception){
             kul::env::CWD((*app).project().dir());
             kul::Dir out((*app).inst ? (*app).inst.real() : (*app).buildDir());
             kul::Dir mkn(out.join(".mkn"));
-            if((*app).ig && (kul::File("built", mkn).is() || !(*app).srcs.size())) continue;
+            if(((*app).ig && kul::File("built", mkn).is()) || !(*app).srcs.size()) continue;
             std::vector<std::pair<std::string, std::string> > oldEvs;
             for(const kul::cli::EnvVar& ev : (*app).envVars()){
                 const std::string v = kul::env::GET(ev.name());
@@ -627,13 +627,8 @@ void maiken::Application::populateMaps(const YAML::Node& n){ //IS EITHER ROOT OR
         for(const auto& s : kul::String::split(n[MKN_LIB].Scalar(), ' '))
             if(s.size()) libs.push_back(resolveFromProperties(s));
 
-    for(const std::pair<std::string, bool>& p : sources())
-        if(!kul::Dir(p.first).is())
-            KEXCEPT(Exception, p.first + " is not a valid directory\n"+project().dir().path());
-    for(const auto& s : includes())             if(!kul::Dir(s.first).is())
-        KEXCEPTION(s.first + " is not a valid directory\n"+project().dir().path());
-    for(const std::string& s : libraryPaths())  if(!kul::Dir(s).is())
-        KEXCEPTION(s + " is not a valid directory\n"+project().dir().path());
+    for(const std::string& s : libraryPaths())
+        if(!kul::Dir(s).is()) KEXCEPTION(s + " is not a valid directory\n"+project().dir().path());
 }
 
 void maiken::Application::populateDependencies(const YAML::Node& n) throw(kul::Exception){
@@ -695,21 +690,22 @@ void maiken::Application::cyclicCheck(const std::vector<std::pair<std::string, s
 
 void maiken::Application::addSourceLine(const std::string& o) throw (kul::TypeException){
     if(o.find(',') == std::string::npos){
-        for(const auto& s : kul::String::split(o, ' '))
-            if(s.size()){
-                kul::Dir d(resolveFromProperties(s));
-                if(d) srcs.push_back(std::make_pair(d.real(), true));
-                else  KEXCEPTION("source does not exist\n"+d.path()+"\n"+project().dir().path());
+        for(const auto& s : kul::String::split(o, ' ')){
+            kul::Dir d(resolveFromProperties(s));
+            if(d) srcs.push_back(std::make_pair(d.real(), true));
+            else{
+                kul::File f(resolveFromProperties(s));
+                if(f) srcs.push_back(std::make_pair(f.real(), false));
+                else  KEXCEPTION("source does not exist\n"+s+"\n"+project().dir().path());
             }
+        }
     }else{
         const auto& v =  kul::String::split(o, ',');
-        bool r = v.size() > 1 ? kul::Bool::FROM(v[1]) : true;
-        if(v.size() == 0 || v.size() > 2) KEXCEPTION("source invalid format\n" + project().dir().path());
-        if(v[0].size()){
-            kul::Dir d(resolveFromProperties(v[0]));
-            if(d) srcs.push_back(std::make_pair(d.real(), r));
-            else  KEXCEPTION("source does not exist\n"+d.path()+"\n"+project().dir().path());
-        }
+        if(v   .size() == 0 || v   .size() > 2) KEXCEPTION("source invalid format\n" + project().dir().path());
+        if(v[0].size() == 0 || v[1].size() > 2) KEXCEPTION("source invalid format\n" + project().dir().path());
+        kul::Dir d(resolveFromProperties(v[0]));
+        if(d) srcs.push_back(std::make_pair(d.real(), kul::Bool::FROM(v[1])));
+        else KEXCEPTION("source does not exist\n"+v[0]+"\n"+project().dir().path());
     }
 }
 void maiken::Application::addIncludeLine(const std::string& o) throw (kul::TypeException){
@@ -722,13 +718,11 @@ void maiken::Application::addIncludeLine(const std::string& o) throw (kul::TypeE
             }
     }else{
         const auto& v =  kul::String::split(o, ',');
-        bool i = v.size() > 1 ? kul::Bool::FROM(v[1]) : true;
-        if(v.size() == 0 || v.size() > 2) KEXCEPTION("include invalid format\n" + project().dir().path());
-        if(v[0].size()){
-            kul::Dir d(resolveFromProperties(v[0]));
-            if(d) incs.push_back(std::make_pair(d.real(), i));
-            else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
-        }
+        if(v   .size() == 0 || v   .size() > 2) KEXCEPTION("include invalid format\n" + project().dir().path());
+        if(v[0].size() == 0 || v[1].size() > 2) KEXCEPTION("include invalid format\n" + project().dir().path());
+        kul::Dir d(resolveFromProperties(v[0]));
+        if(d) incs.push_back(std::make_pair(d.real(), kul::Bool::FROM(v[1])));
+        else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
     }
 }
 

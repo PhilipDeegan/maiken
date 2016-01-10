@@ -123,15 +123,22 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
             std::queue<std::pair<std::string, std::string> > sourceQueue;
             for(const std::pair<std::string, kul::hash::set::String>& kv : ft.second){
                 for(const std::string& src : kv.second){
+                    const kul::File f(src);
                     const kul::Dir d = kul::File(src).dir();
-                    if(d.path().size() == kv.first.size())
+                    if(kul::Dir(kv.first)){
+                        if(d.path().size() == kv.first.size())
+                            kul::Dir(buildDir().join("obj"), true);
+                        else
+                            kul::Dir(kul::Dir::JOIN(buildDir().join("obj"), d.path().substr(kv.first.size())), true);
+                        std::string obj(kul::Dir::JOIN(buildDir().join("obj"), src.substr(kv.first.size() + 1)));
+                        if(obj.find(kul::env::CWD()) != std::string::npos)
+                            obj = obj.substr(kul::env::CWD().size() + 1) + ".obj";
+                        sourceQueue.push(std::pair<std::string, std::string>(f.escm(), kul::File(obj).escm()));
+                    }else{
                         kul::Dir(buildDir().join("obj"), true);
-                    else
-                        kul::Dir(kul::Dir::JOIN(buildDir().join("obj"), d.path().substr(kv.first.size())), true);
-                    std::string obj(kul::Dir::JOIN(buildDir().join("obj"), src.substr(kv.first.size() + 1)));
-                    if(obj.find(kul::env::CWD()) != std::string::npos)
-                        obj = obj.substr(kul::env::CWD().size() + 1) + ".obj";
-                    sourceQueue.push(std::pair<std::string, std::string>(kul::File(src).escm(), kul::File(obj).escm()));
+                        std::string obj(kul::Dir::JOIN(buildDir().join("obj"), f.name()+".obj"));
+                        sourceQueue.push(std::pair<std::string, std::string>(f.escm(), kul::File(obj).escm()));
+                    }
                 }
             }
             while(sourceQueue.size() > 0){
@@ -213,7 +220,11 @@ const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > maiken::
         if(!f.is()) KOUT(NON)  << "WARN : main does not exist: " << f;
     }
     for(const std::pair<std::string, bool>& sourceDir : sources()){
-        for(const kul::File& file : kul::Dir(sourceDir.first).files(sourceDir.second)){
+        std::vector<kul::File> files;
+        kul::Dir d(sourceDir.first);
+        if(d) for(const auto& f : d.files(sourceDir.second)) files.push_back(f);
+        else  files.push_back(sourceDir.first);
+        for(const kul::File& file : files){
             if(file.name().find(".") == std::string::npos || file.name().substr(0, 1).compare(".") == 0) continue;
             const std::string ft = file.name().substr(file.name().rfind(".") + 1);
             if(fs.count(ft) > 0){
