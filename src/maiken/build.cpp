@@ -124,19 +124,20 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
             for(const std::pair<std::string, kul::hash::set::String>& kv : ft.second){
                 for(const std::string& src : kv.second){
                     const kul::File f(src);
-                    const kul::Dir d = kul::File(src).dir();
+                    const kul::Dir& d(f.dir());
                     if(kul::Dir(kv.first)){
-                        if(d.path().size() == kv.first.size())
-                            kul::Dir(buildDir().join("obj"), true);
-                        else
+                        kul::Dir(buildDir().join("obj")).mk();
+                        if(d.path().size() != kv.first.size())
                             kul::Dir(kul::Dir::JOIN(buildDir().join("obj"), d.path().substr(kv.first.size())), true);
                         std::string obj(kul::Dir::JOIN(buildDir().join("obj"), src.substr(kv.first.size() + 1)));
                         if(obj.find(kul::env::CWD()) != std::string::npos)
                             obj = obj.substr(kul::env::CWD().size() + 1) + ".obj";
                         sourceQueue.push(std::pair<std::string, std::string>(f.escm(), kul::File(obj).escm()));
                     }else{
-                        kul::Dir(buildDir().join("obj"), true);
-                        std::string obj(kul::Dir::JOIN(buildDir().join("obj"), f.name()+".obj"));
+                        kul::Dir(buildDir().join("obj")).mk();
+                        std::stringstream ss;
+                        ss << std::hash<std::string>()(d.real()) << "_" << f.name() << ".obj";
+                        std::string obj(kul::Dir::JOIN(buildDir().join("obj"), ss.str()));
                         sourceQueue.push(std::pair<std::string, std::string>(f.escm(), kul::File(obj).escm()));
                     }
                 }
