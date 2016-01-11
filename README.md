@@ -14,9 +14,9 @@ Testers/comments/suggestions/feature requests welcome. Email me or make an issue
 
 ## How to use
 
-mkn init      - initialise minimal C++ project
+mkn init
 
-mkn build     - Compile/Link
+mkn build
 
-mkn run       - Exectute
+mkn run
 
