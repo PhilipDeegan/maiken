@@ -43,12 +43,12 @@ class Application;
 
 class ProjectException : public kul::Exception{
     public:
-        ProjectException(const char*f, const int l, std::string s) : kul::Exception(f, l, s){}
+        ProjectException(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
 };
 
 class SettingsException : public kul::Exception{
     public:
-        SettingsException(const char*f, const int l, std::string s) : kul::Exception(f, l, s){}
+        SettingsException(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
 };
 
 class Project : public kul::yaml::File, public Constants{

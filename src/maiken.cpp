@@ -109,7 +109,7 @@ maiken::Application maiken::Application::create(int16_t argc, char *argv[]) thro
     if(args.has(SCM_UPDATE))    AppVars::INSTANCE().update(true);
     if(project.root()[SCM])     a.scr = project.root()[SCM].Scalar();
     if(args.has(MKN_DEP)){
-        if(args.get(MKN_DEP).size() > 0)
+        if(args.get(MKN_DEP).size())
             AppVars::INSTANCE().dependencyLevel(kul::Type::GET_UINT(args.get(MKN_DEP)));
         else AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
     } 
@@ -149,8 +149,8 @@ maiken::Application maiken::Application::create(int16_t argc, char *argv[]) thro
     if(args.has(ARG)) AppVars::INSTANCE().args(args.get(ARG));
     if(args.has(LINKER)) AppVars::INSTANCE().linker(args.get(LINKER));
     if(args.has(THREADS)){
-        if(args.get(THREADS).size() > 0)
-            AppVars::INSTANCE().dependencyLevel(kul::Type::GET_UINT(args.get(THREADS)));
+        if(args.get(THREADS).size())
+            AppVars::INSTANCE().threads(kul::Type::GET_UINT(args.get(THREADS)));
         else AppVars::INSTANCE().threads(kul::cpu::threads());
     }
 
@@ -497,7 +497,7 @@ void maiken::Application::run(bool dbg){
     if(dbg){
         std::string dbg = kul::env::GET("MKN_DBG");
         if(dbg.empty())
-            if(Settings::INSTANCE().root()[LOCAL][DEBUGGER])
+            if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][DEBUGGER])
                 dbg = Settings::INSTANCE().root()[LOCAL][DEBUGGER].Scalar();
         if(dbg.empty()){
 #ifdef _WIN32

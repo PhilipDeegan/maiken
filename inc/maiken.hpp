@@ -47,7 +47,7 @@ class ThreadingCompiler;
 
 class Exception : public kul::Exception{
     public:
-        Exception(const char*f, const int l, std::string s) : kul::Exception(f, l, s){}
+        Exception(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
 };
 
 class AppVars{
