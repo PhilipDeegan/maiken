@@ -262,7 +262,7 @@ class SCMGetter{
         static bool IS_SOLID(const std::string& r){
             return r.find("://") != std::string::npos || r.find("@") != std::string::npos;
         }
-        static SCMGetter& INSTANCE(){ 
+        static SCMGetter& INSTANCE(){
             static SCMGetter s;
             return s;
         }

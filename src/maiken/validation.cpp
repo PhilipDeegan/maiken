@@ -43,7 +43,7 @@ class Validator : public maiken::Constants{
             for(const std::string& s : ifIncSrcLefts) ifArgsLefts.push_back(s);
         }
         static Validator& INSTANCE(){
-            static Validator v; 
+            static Validator v;
             return v;
         }
         static void IF_VALUEDATER(const maiken::Application& a, const YAML::Node& n, const std::string& s, const std::vector<std::string>& lefts){
@@ -116,7 +116,7 @@ void maiken::Application::preSetupValidation() throw (maiken::Exception){
             for(const auto& p1 : project().root()[PROFILE])
                 if(profile[NAME].Scalar() == p1[NAME].Scalar()) continue;
                 else
-                if(p1["os"] && p1["os"].Scalar() == profile["os"].Scalar()) 
+                if(p1["os"] && p1["os"].Scalar() == profile["os"].Scalar())
                     KEXCEPTION("Multiple os tags with same value found, only one per operating system supported\n"+project().dir().path());
         Validator::PRE_BUILD(*this, profile);
         if(dpp && !dpf) dpf = project().root()[PARENT].Scalar() == p;

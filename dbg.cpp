@@ -33,17 +33,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 int main(int argc, char* argv[]) {
-	kul::Signal sig;
-	const int64_t s = kul::Now::MILLIS();
-	try{
-		maiken::Application::create(argc, argv).process();
-		KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
-		KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
-	}
-	catch(const kul::Exit& e){ if(e.code() != 0) KERR << e.stack(); return e.code(); }
-	catch(const kul::proc::ExitException& e){ KERR << e.stack(); return 1;}
-	catch(const kul::Exception& e){ KERR << e.stack(); return 2;}
-	catch(const std::exception& e){ KERR << e.what(); return 3;}
+    kul::Signal sig;
+    const int64_t s = kul::Now::MILLIS();
+    try{
+        maiken::Application::create(argc, argv).process();
+        KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
+        KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
+    }
+    catch(const kul::Exit& e){ if(e.code() != 0) KERR << e.stack(); return e.code(); }
+    catch(const kul::proc::ExitException& e){ KERR << e.stack(); return 1;}
+    catch(const kul::Exception& e){ KERR << e.stack(); return 2;}
+    catch(const std::exception& e){ KERR << e.what(); return 3;}
 
-	return 0;
+    return 0;
 }

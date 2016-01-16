@@ -59,21 +59,21 @@ void maiken::Application::showConfig(){
                 kul::Dir dir(d);
                 if(!dir) continue;
                 for(const auto& f : dir.files()){
-                    std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ? 
+                    std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ?
                         f.name().substr(0, f.name().size() - 4) : f.name();
                     if(!a && c[ARCHIVER] && b == kul::String::split(c[ARCHIVER].Scalar(), " ")[0]){
                         KOUT(INF) << "ARCHIVER: " << f.full(); a = 1; break;
                     }
                 }
                 for(const auto& f : dir.files()){
-                    std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ? 
+                    std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ?
                         f.name().substr(0, f.name().size() - 4) : f.name();
                     if(!g && c[COMPILER] && b == kul::code::Compilers::INSTANCE().key(c[COMPILER].Scalar())){
                         KOUT(INF) << "COMPILER: " << f.full(); g = 1; break;
                     }
                 }
                 for(const auto& f : dir.files()){
-                    std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ? 
+                    std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ?
                         f.name().substr(0, f.name().size() - 4) : f.name();
                     if(!l && c[LINKER] && b == kul::String::split(c[LINKER].Scalar(), " ")[0]){
                         KOUT(INF) << "LINKER  : " << f.full(); l = 1; break;

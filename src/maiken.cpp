@@ -112,7 +112,7 @@ maiken::Application maiken::Application::create(int16_t argc, char *argv[]) thro
         if(args.get(MKN_DEP).size())
             AppVars::INSTANCE().dependencyLevel(kul::Type::GET_UINT(args.get(MKN_DEP)));
         else AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
-    } 
+    }
     a.setup();
     if(args.has(MKN_INC)){
         for(const auto& p : a.includes())
@@ -247,11 +247,11 @@ void maiken::Application::setup(){
 #ifdef _WIN32
                         if(kul::File("mkn.bat").is() && kul::os::exec("mkn.bat")) KEXCEPTION("ERROR in "+projectDir.path()+"mkn.bat");
 #else
-                        if(kul::File("mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh").is() && kul::os::exec("sh mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh")) 
+                        if(kul::File("mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh").is() && kul::os::exec("sh mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh"))
                             KEXCEPTION("ERROR in "+projectDir.path()+"mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh");
                         else
                         if(kul::File("mkn.sh").is() && kul::os::exec("sh mkn.sh")) KEXCEPTION("ERROR in "+projectDir.path()+"mkn.sh");
-#endif 
+#endif
                     }
                     kul::env::CWD(this->project().dir());
                 }
@@ -321,7 +321,7 @@ void maiken::Application::setup(){
     if(main.empty() && lang.empty()){
         const auto& mains(inactiveMains());
         if(mains.size()) lang = (*mains.begin()).substr((*mains.begin()).rfind(".")+1);
-        else 
+        else
         if(sources().size()) KEXCEPTION("no main or lang tag found and cannot deduce language\n" + project().dir().path());
     }
     if(par){
@@ -352,7 +352,7 @@ void maiken::Application::setup(){
                 else
                 if(n[INSTALL]) inst = kul::Dir(resolveFromProperties(n[INSTALL].Scalar()));
                 if(!inst.path().empty()){
-                    if(!inst && !inst.mk()) 
+                    if(!inst && !inst.mk())
                         KEXCEPTION("install tag is not a valid directory\n" + project().dir().path());
                     inst = kul::Dir(inst.real());
                 }
@@ -366,12 +366,12 @@ void maiken::Application::setup(){
                         else continue;
                     }
                     std::vector<std::string> ifArgs;
-                    for(const auto& s : kul::String::split(it->second.Scalar(), ' ')) 
-                        ifArgs.push_back(resolveFromProperties(s)); 
+                    for(const auto& s : kul::String::split(it->second.Scalar(), ' '))
+                        ifArgs.push_back(resolveFromProperties(s));
                     if(lang.empty() && left == BIN) for(const auto& s : ifArgs) arg += s + " ";
                     else
                     if(main.empty() && left == LIB) for(const auto& s : ifArgs) arg += s + " ";
-                    if(m == kul::code::Mode::SHAR && left == SHARED) 
+                    if(m == kul::code::Mode::SHAR && left == SHARED)
                         for(const auto& s : ifArgs) arg += s + " ";
                     else
                     if(m == kul::code::Mode::STAT && left == STATIC)
@@ -383,7 +383,7 @@ void maiken::Application::setup(){
                 if(n[IF_INC])
                     for(YAML::const_iterator it = n[IF_INC].begin(); it != n[IF_INC].end(); ++it)
                         if(it->first.Scalar() == KTOSTRING(__KUL_OS__))
-                            for(const auto& s : kul::String::split(it->second.Scalar(), ' ')) 
+                            for(const auto& s : kul::String::split(it->second.Scalar(), ' '))
                                 addIncludeLine(s);
             }catch(const kul::TypeException){
                 KEXCEPTION("if_inc contains invalid bool value\n"+project().dir().path());
@@ -392,7 +392,7 @@ void maiken::Application::setup(){
                 if(n[IF_SRC])
                     for(YAML::const_iterator it = n[IF_SRC].begin(); it != n[IF_SRC].end(); ++it)
                         if(it->first.Scalar() == KTOSTRING(__KUL_OS__))
-                            for(const auto& s : kul::String::split(it->second.Scalar(), ' ')) 
+                            for(const auto& s : kul::String::split(it->second.Scalar(), ' '))
                                 addSourceLine(s);
             }catch(const kul::TypeException){
                 KEXCEPTION("if_src contains invalid bool value\n"+project().dir().path());
@@ -647,10 +647,10 @@ void maiken::Application::populateDependencies(const YAML::Node& n) throw(kul::E
         if(dep[PROFILE])
             for(const auto& node : c.root()[PROFILE])
                 if(node[NAME].Scalar() == dep[PROFILE].Scalar()){
-                    pp = node[NAME].Scalar(); 
+                    pp = node[NAME].Scalar();
                     break;
                 }
-        if(dep[PROFILE] && pp.empty()) 
+        if(dep[PROFILE] && pp.empty())
             KEXCEPTION("profile does not exist found\n"+dep[PROFILE].Scalar()+"\n"+project().dir().path());
 
         Application app(c, pp);

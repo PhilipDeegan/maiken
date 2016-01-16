@@ -62,7 +62,7 @@ void maiken::Settings::write(const kul::File& f){
 
     kul::io::Writer w(f);
     w.write("\n", true);
-    
+
     w.write("#local:", true);
     w.write("# Optionnaly override local repository directory", true);
     w.write("#    repo: <directory>", true);
@@ -82,7 +82,7 @@ void maiken::Settings::write(const kul::File& f){
 #ifdef _WIN32
     w.write("  - type: c:cpp", true);
     w.write("    archiver: lib", true);
-    w.write("    compiler: cl", true);  
+    w.write("    compiler: cl", true);
     w.write("    linker: link", true);
 #else
     bool c = kul::env::WHICH("clang");

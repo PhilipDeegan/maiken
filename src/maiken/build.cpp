@@ -180,7 +180,7 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
     if(_MKN_TIMESTAMPS_){
         kul::File srcStamps("src_stamp", mkn);
         kul::File incStamps("inc_stamp", mkn);
-        for(const auto& src : stss) 
+        for(const auto& src : stss)
             if(std::find(cacheFiles.begin(), cacheFiles.end(), src.first) == cacheFiles.end())
                 cacheFiles.push_back(src.first);
         kul::hash::map::S2T<const kul::code::Compiler*> compilers;
@@ -192,7 +192,7 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
                 compiler = kul::code::Compilers::INSTANCE().get((*(*files().find(ft)).second.find(COMPILER)).second);
                 compilers.insert(ft, compiler);
             }
-            if(compiler->sourceIsBin()) 
+            if(compiler->sourceIsBin())
                 if(std::find(objects.begin(), objects.end(), f.escm()) == objects.end()) objects.push_back(f.escm());
         }
         for(const auto& f : buildDir().files(1))
@@ -252,8 +252,8 @@ bool maiken::Application::incSrc(const kul::File& file){
             if(mod == (*stss.find(rl)).second){
                 for(const auto& i : includes()){
                     kul::Dir inc(i.first);
-                    if(itss.count(inc.mini()) && includeStamps.count(inc.mini())){ 
-                        if((*includeStamps.find(inc.mini())).second != (*itss.find(inc.mini())).second) c = 1; 
+                    if(itss.count(inc.mini()) && includeStamps.count(inc.mini())){
+                        if((*includeStamps.find(inc.mini())).second != (*itss.find(inc.mini())).second) c = 1;
                     }else c = 1;
                     if(c) break;
                 }
@@ -286,7 +286,7 @@ void maiken::Application::buildExecutable(const std::vector<std::string>& object
             const std::string& n(project().root()[NAME].Scalar());
             const kul::code::CompilerProcessCapture& cpc =
                 kul::code::Compilers::INSTANCE().get((*(*files().find(fileType)).second.find(COMPILER)).second)
-                    ->buildExecutable(linker, linkEnd, objects, 
+                    ->buildExecutable(linker, linkEnd, objects,
                         libraries(), libraryPaths(), kul::File(out.join(n)).escm(), m);
             checkErrors(cpc);
             kul::Dir mkn(out.join(".mkn"));
@@ -318,7 +318,7 @@ void maiken::Application::buildLibrary(const std::vector<std::string>& objects){
         std::string lib(inst ? p.empty() ? n : n+"_"+p : n);
         const kul::code::CompilerProcessCapture& cpc =
             kul::code::Compilers::INSTANCE().get((*(*files().find(lang)).second.find(COMPILER)).second)
-                ->buildLibrary(linker, linkEnd, objects, 
+                ->buildLibrary(linker, linkEnd, objects,
                     libraries(), libraryPaths(), kul::File(lib, out), m);
         checkErrors(cpc);
         kul::Dir mkn(out.join(".mkn"));

@@ -34,16 +34,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char* argv[]) {
 
-	const int64_t s = kul::Now::MILLIS();
-	try{
-		maiken::Application::create(argc, argv).process();
-		KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
-		KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
-	}
-	catch(const kul::Exit& e){ if(e.code() != 0) KERR << e.what(); return e.code(); }
-	catch(const kul::proc::ExitException& e){ KERR << e.what(); return 1;}
-	catch(const kul::Exception& e){ KERR << e.what(); return 2;}
-	catch(const std::exception& e){ KERR << e.what(); return 3;}
+    const int64_t s = kul::Now::MILLIS();
+    try{
+        maiken::Application::create(argc, argv).process();
+        KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
+        KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
+    }
+    catch(const kul::Exit& e){ if(e.code() != 0) KERR << e.what(); return e.code(); }
+    catch(const kul::proc::ExitException& e){ KERR << e.what(); return 1;}
+    catch(const kul::Exception& e){ KERR << e.what(); return 2;}
+    catch(const std::exception& e){ KERR << e.what(); return 3;}
 
-	return 0;
+    return 0;
 }
