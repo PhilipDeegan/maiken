@@ -263,12 +263,12 @@ The settings file is the default global configuration for projects.
 
 4.3.1 schema
 
-inc: <directory>                        # Optional
-path: <directory>                       # Optional
+inc: <directory> <directory>            # Optionally add all directories compiling 
+path: <directory> <directory>           # Optionally add all directories linking
 
 file:                                   # Must include at least one item in list
   - type: c:cpp:cxx
-    archiver: archiver
+    archiver: archiver                  # Not used for C#
     compiler: compiler
     linker:   linker    
 env:                                    # Optional
