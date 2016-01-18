@@ -33,11 +33,9 @@ Languages supported            Compilers supported
 2.1 A basic project mkn.yaml
 
 name: exe_project
-version: current
 main: cpp.cpp
 
 name: lib_project
-version: current
 lang: cpp
 src: ./src
 
@@ -185,16 +183,15 @@ Git supported, SVN planned.
 
 Prerequisites:
     - git
-    - Microsoft Visual Studio 2013 (Express)
-    - Windows Dev Kit 8.# (http://msdn.microsoft.com/en-us/windows/desktop/ff851942.aspx)
-    - Boost 1.56+ (Headers only - See: http://vertexwahn.de/bluego.html)
+    - Microsoft Visual Studio 2015 (Express)
+    - Windows Dev Kit 10+ (http://msdn.microsoft.com/en-us/windows/desktop/ff851942.aspx)
 
-Required operations:
+Operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
     - cd maiken/master
     - make.bat - Enter directories for MSVS/WinKit/Boost when prompted
 
-Testing operations:
+Testing:
     static : ./mkn clean build -dtKa -EHsc
     shared : ./mkn clean build -dtSa -EHsc
 
@@ -208,7 +205,7 @@ Prerequisites:
 
 3.2.1 Debian
 
-Required operations:
+Operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
     - cd maiken/master
     - shared
@@ -220,29 +217,29 @@ Required operations:
     IF CLANG SECONDARY TO GCC
         LD_LIBRARY_PATH=<GCC_INSTALL>/lib64 make nix CXX=clang++ CXXFLAGS="-std=c++14 -I<GCC_INSTALL>/include/c++/5.2.0 -I<GCC_INSTALL>/include/c++/5.2.0/x86_64-unknown-linux-gnu" LDFLAGS="-L<GCC_INSTALL>/lib64" 
 
-Testing operations:
+Testing:
     static : ./mkn clean build -dtKa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0" -l -pthread
     shared : ./mkn clean build -dtSa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0 -fPIC"
 
 3.2.1 MAC
 
-Required operations:
+Operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
     - cd maiken/master
     - make bsd CXX=clang++
 
-Testing operations:
+Testing:
     static : ./mkn clean build -dtKa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0" -l -pthread
     shared : ./mkn clean build -dtSa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0 -fPIC"
 
 3.2.3 Net/Free BSD
 
-Required operations:
+Operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
     - cd maiken/master
     - gmake bsd LDFLAGS="-pthread -lexecinfo"
 
-Testing operations:
+Operations:
     static : ./mkn clean build -dtKa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0" -l "-pthread -lexecinfo"
     shared : ./mkn clean build -dtSa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0 -fPIC" -l -lexecinfo
 
@@ -288,6 +285,7 @@ local:
     repo: <directory>                   # Optional, missing assumed ${4.3.2}/repo
     bin:  <directory>                   # Optional, successfully linked binaries are moved to <directory>
     lib:  <directory>                   # Optional, successfully linked libraries are moved to <directory>
+    debugger: <debug command>           # Optional debug command, overrides defaut, overriden by env var MKN_DBG string
 remote:
     repo: URL_ROOT                      # Optional, overrides switch _MKN_REMOTE_REPO_ for non complete SCM URL lookups
 
