@@ -48,14 +48,10 @@ version: version
 property:                                     
   - aaa: AAA
     bbb: ${aaa}.BBB
-inc: <directory> <directory>
-    <directory> ${aaa}
-src:  <directory> <directory>
-    <directory> ${aaa}
-path:    <directory> <directory>   # extra library paths for linking, not generally advisable unless project is in expected sub directory
-    <directory> ${aaa}
-lib: <library> <library>
-    <library> ${aaa}
+inc: <directory> <directory> ${aaa}
+src: <directory> <file> ${aaa}
+path: <directory> ${aaa}            # extra library paths for linking, not generally advisable unless project is in expected sub directory
+lib: <library> ${aaa}               # prefixes/file types automatically deduced e.g. "lib: math" = libmath.a/so math.lib/dll
 dep:
   - name: name
     version: version
@@ -108,7 +104,7 @@ profiles:
     src: | 
         <directory>, false/no/0     # Don't find sources recursively
         <directory>, true/yes/1     # Find sources recursively
-        <directory> <directory>     # Find sources recursively in both
+        <directory> <file>          # Find sources recursively in both
     dep:
       - name: name
         version: version
@@ -127,7 +123,7 @@ profiles:
     main: test.cpp
     install: ${aaa}                 # install binary or library to directory specified
                                     # library naming convention is libname_profile.a/so if linux, name_profile.lib if windows 
-        
+
 
 2.2.1 Caveats
 
@@ -143,12 +139,11 @@ If the project is a dependency, even if a main tag is present, library linking i
 
 The mode tag may have three values: static/shared/none
 If the mode tag is found, it takes precedence for linking
-If no mode tag is found, the -K and -S args will be used.
-Linking cannot be guaranteed if no mode is used.
-Unless an project requires a mode, it's advised to avoid using one. So it can be overridden on the command line.
+If no mode tag is found, the -K and -S args will be used if found.
+Linking cannot be guaranteed if no mode is used, but shared is generally default.
+Unless an project requires a mode, it's advised to avoid using one. So it can be overridden with -K or -S.
 
-If a application includes both static and shared dependencies, using the mode "none" is advised as this allows.
-The application may be run via mkn with the run command.
+If a application includes both static and shared dependencies, using the mode "none" is advised.
 
 
 2.2.1.3 Entry points
@@ -170,7 +165,6 @@ Compiler binares are expected to have their default names e.g. gcc/gcc.exe/cl.ex
 
 System properties:
     OS - equates to system OS, can be either bsd/nix/win
-
 
 
 2.3 SCM
@@ -269,8 +263,8 @@ The settings file is the default global configuration for projects.
 
 4.3.1 schema
 
-include: <directory>                    # Optional
-path:    <directory>                    # Optional
+inc: <directory>                        # Optional
+path: <directory>                       # Optional
 
 file:                                   # Must include at least one item in list
   - type: c:cpp:cxx
@@ -287,7 +281,7 @@ local:
     lib:  <directory>                   # Optional, successfully linked libraries are moved to <directory>
     debugger: <debug command>           # Optional debug command, overrides defaut, overriden by env var MKN_DBG string
 remote:
-    repo: URL_ROOT                      # Optional, overrides switch _MKN_REMOTE_REPO_ for non complete SCM URL lookups
+    repo: URL_ROOTA URL_ROOTB           # Optional, overrides switch _MKN_REMOTE_REPO_ for non complete SCM URL lookups
 
 4.3.2 Location
     - Linux   -    ~/.maiken/settings.yaml
@@ -307,7 +301,7 @@ To activate another language run:
 
 Upon succesful compilation of a project, source file modification timestamps are recoreded under ./bin/<profile>/.mkn/src_stamp, which are checked on the next build to see if recompilation is required.
 Similarly, the aggregate of all non-hidden file modification timestamps are recorded under ./bin/<profile>/.mkn/inc_stamp, which are also checked on the next build to see if recompilation is required.
-This can be disabled by compiling with the argument -D_MKN_TIMESTAMPS_=0
+This can be enabled by compiling with the argument -D_MKN_TIMESTAMPS_=1
 This is disabled for languages like C# when the source is not compiled.
 The clean command deletes the timestamp files, and recompiles everything.
 
@@ -404,7 +398,7 @@ Default         1
 Description     Execute mkn.(bat/sh etc) in directory of missing dependencies when retrieved from SCM
 
 Key             _MKN_REMOTE_REPO_
-Type             string
+Type            string
 Default         "http://github.com/mkn/"
 Description     Space separated list of URLs to use as roots for non-complete SCM repositories.
                     i.e.
