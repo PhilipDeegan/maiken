@@ -107,10 +107,10 @@ void maiken::Application::preSetupValidation() throw (maiken::Exception){
         if(profile[PARENT]){
             bool f = 0;
             for(const auto& p1 : project().root()[PROFILE]){
-                if(profile[PARENT].Scalar() == p1[NAME].Scalar()) f = 1;
+                if(resolveFromProperties(profile[PARENT].Scalar()) == p1[NAME].Scalar()) f = 1;
                 if(f) break;
             }
-            if(!f) KEXCEPTION("parent profile not found: "+profile[PARENT].Scalar()+"\n"+project().dir().path());
+            if(!f) KEXCEPTION("parent profile not found: "+resolveFromProperties(profile[PARENT].Scalar())+"\n"+project().dir().path());
         }
         if(profile["os"])
             for(const auto& p1 : project().root()[PROFILE])
@@ -119,12 +119,12 @@ void maiken::Application::preSetupValidation() throw (maiken::Exception){
                 if(p1["os"] && p1["os"].Scalar() == profile["os"].Scalar())
                     KEXCEPTION("Multiple os tags with same value found, only one per operating system supported\n"+project().dir().path());
         Validator::PRE_BUILD(*this, profile);
-        if(dpp && !dpf) dpf = project().root()[PARENT].Scalar() == p;
+        if(dpp && !dpf) dpf = resolveFromProperties(project().root()[PARENT].Scalar()) == p;
     }
     if(dpp && !dpf) KEXCEPTION("Parent for default profile does not exist: \n"+project().dir().path());
     for(const auto& n : project().root()[PROFILE])
         if(n[SELF] && std::find(profiles.begin(), profiles.end(), resolveFromProperties(n[SELF].Scalar())) == profiles.end())
-            KEXCEPTION("Tag self references unknown profile: "+n[SELF].Scalar()+"\n"+project().dir().path());
+            KEXCEPTION("Tag self references unknown profile: "+resolveFromProperties(n[SELF].Scalar())+"\n"+project().dir().path());
 }
 
 void maiken::Application::postSetupValidation() throw (maiken::Exception){

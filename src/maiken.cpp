@@ -215,11 +215,11 @@ void maiken::Application::setup(){
     }
     if(scr.empty()) scr = project().root()[NAME].Scalar();
 
+    this->resolveProperties();
     this->preSetupValidation();
     std::string buildD = kul::Dir::JOIN(BIN, p);
     if(p.empty()) buildD = AppVars::INSTANCE().debug() ? kul::Dir::JOIN(BIN, DEBUG) : kul::Dir::JOIN(BIN, BUILD);
     this->bd = kul::Dir(project().dir().join(buildD));
-    this->resolveProperties();
     std::string profile(p);
     std::vector<YAML::Node> nodes;
     if(profile.empty()){
@@ -259,7 +259,7 @@ void maiken::Application::setup(){
             }
             populateMaps(n);
             populateDependencies(n);
-            profile = n[PARENT] ? n[PARENT].Scalar() : "";
+            profile = n[PARENT] ? resolveFromProperties(n[PARENT].Scalar()) : "";
             c = !profile.empty();
             break;
         }
@@ -313,7 +313,7 @@ void maiken::Application::setup(){
             }
             if(main.empty() && n[MAIN]) main = n[MAIN].Scalar();
             if(lang.empty() && n[LANG]) lang = n[LANG].Scalar();
-            profile = n[PARENT] ? n[PARENT].Scalar() : "";
+            profile = n[PARENT] ? resolveFromProperties(n[PARENT].Scalar()) : "";
             c = !profile.empty();
             break;
         }
@@ -403,7 +403,7 @@ void maiken::Application::setup(){
                         for(const auto& s : kul::String::split(it->second.Scalar(), ' '))
                             if(s.size()) libs.push_back(resolveFromProperties(s));
 
-            profile = n[PARENT] ? n[PARENT].Scalar() : "";
+            profile = n[PARENT] ? resolveFromProperties(n[PARENT].Scalar()) : "";
             c = !profile.empty();
             break;
         }

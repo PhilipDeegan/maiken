@@ -53,9 +53,9 @@ src: <directory> <file> ${aaa}
 path: <directory> ${aaa}            # extra library paths for linking, not generally advisable unless project is in expected sub directory
 lib: <library> ${aaa}               # prefixes/file types automatically deduced e.g. "lib: math" = libmath.a/so math.lib/dll
 dep:
-  - name: name
-    version: version
-    scm: ${aaa}                     # git or svn remote repository - automatically detected.
+  - name: name                      # Used in URL lookup if ${scm} is missing
+    version: version                # git branch / svn ???
+    scm: ${aaa}                     # git or svn remote repository - automatically detected 
     local: ${aaa}                   # overrides local repository directory
 main: <file>
 arg: -DTHIS_PROFILE ${aaa}
@@ -84,9 +84,9 @@ if_inc:                         # optional includes if case is true
     nix: ${aaa}
     win: ${aaa}
 if_src:                         # optional sources if case is true
-    bsd: ${aaa}
-    nix: ${aaa}
-    win: ${aaa}
+    bsd: <directory/file> ${aaa}
+    nix: <directory/file> ${aaa}
+    win: <directory/file> ${aaa}
 if_lib:                         # optional libraries if case is true
     bsd: ${aaa}
     nix: ${aaa}
@@ -98,9 +98,9 @@ env:
 profiles:
   - name: a
     inc: | 
-        <directory>, false/no/0     # Don't include if dependency
-        <directory>, true/yes/1     # Include if dependency
-        <directory> <directory>     # Include both if dependency
+        <directory>, false/no/0     # Don't include if dependency / private include
+        <directory>, true/yes/1     # Include if dependency / public include
+        <directory> <directory>     # Include both if dependency / public includes
     src: | 
         <directory>, false/no/0     # Don't find sources recursively
         <directory>, true/yes/1     # Find sources recursively
@@ -110,7 +110,7 @@ profiles:
         version: version
         local: .                    # Dependency on another profile in same project allowed, cycles detected
   - name: bbb
-    parent: a
+    parent: ${aaa}
   - name: bsd
     parent: a
   - name: nix
