@@ -219,8 +219,10 @@ class ThreadingCompiler : public Constants{
         ThreadingCompiler(maiken::Application& app, std::queue<std::pair<std::string, std::string> >& sources)
             : f(0), app(app), sources(sources){
                 for(const auto& s : app.includes()){
-                    const std::string& m(kul::Dir(s.first).escm());
+                    kul::Dir d(s.first);
+                    const std::string& m(d.escm());
                     if(!m.empty()) incs.push_back(m);
+                    else           incs.push_back(".");
                 }
             }
         void operator()() throw(kul::Exception){
