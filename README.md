@@ -12,6 +12,16 @@
 Testers/comments/suggestions/feature requests welcome. Email me or make an issue. Or head on over to [/r/mkn](http://reddit.com/r/mkn)
 
 
+## Dependencies 
+
+**Automatically acquired by git in Makefile/make.bat**
+
+[mkn.kul](https://github.com/mkn/mkn.kul)
+
+[google sparsehash](https://github.com/mkn/google.sparsehash)
+
+[yamlcpp](https://github.com/mkn/parse.yaml)
+
 ## How to use
 
 mkn init
