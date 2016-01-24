@@ -30,14 +30,20 @@ Languages supported            Compilers supported
     - C# (partially)
 
 
-2.1 A basic project mkn.yaml
+2.1 Basic project mkn.yaml files
+
+2.1.1 Binary
 
 name: exe_project
 main: cpp.cpp
 
+
+2.1.2 Library
+
 name: lib_project
 lang: cpp
 src: ./src
+
 
 2.2 YAML Schema
 
@@ -183,13 +189,13 @@ Prerequisites:
 Operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
     - cd maiken/master
-    - make.bat - Enter directories for MSVS/WinKit/Boost when prompted
+    - make.bat - Enter directories for MSVS/WinKit when prompted
 
 Testing:
     static : ./mkn clean build -dtKa -EHsc
     shared : ./mkn clean build -dtSa -EHsc
 
-For an example settings file see ./res/example/windowsSettings.xml
+Example Windows settings can be found at: https://github.com/Dekken/maiken/blob/master/res/windows/settings.yaml
 
 3.2 Unix
 
@@ -215,7 +221,7 @@ Testing:
     static : ./mkn clean build -dtKa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0" -l -pthread
     shared : ./mkn clean build -dtSa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0 -fPIC"
 
-3.2.1 MAC
+3.2.1 Mac/OSX
 
 Operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
@@ -226,7 +232,7 @@ Testing:
     static : ./mkn clean build -dtKa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0" -l -pthread
     shared : ./mkn clean build -dtSa "-g0 -O2 -std=c++14 -Wall -fmessage-length=0 -fPIC"
 
-3.2.3 Net/Free BSD
+3.2.3 NetBSD
 
 Operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
@@ -263,12 +269,12 @@ The settings file is the default global configuration for projects.
 
 4.3.1 schema
 
-inc: <directory> <directory>            # Optionally add all directories compiling 
-path: <directory> <directory>           # Optionally add all directories linking
+inc: <directory> <directory>            # Optionally add include directories compiling 
+path: <directory> <directory>           # Optionally add library path directories linking
 
 file:                                   # Must include at least one item in list
-  - type: c:cpp:cxx
-    archiver: archiver                  # Not used for C#
+  - type: c:cpp:cxx                     # Sources won't be compiled if the filetype is missing
+    archiver: archiver                  # Archiver is not used for C#
     compiler: compiler
     linker:   linker    
 env:                                    # Optional
@@ -277,8 +283,8 @@ env:                                    # Optional
     value: value
 local:
     repo: <directory>                   # Optional, missing assumed ${4.3.2}/repo
-    bin:  <directory>                   # Optional, successfully linked binaries are moved to <directory>
-    lib:  <directory>                   # Optional, successfully linked libraries are moved to <directory>
+    bin:  <directory>                   # Optional, successfully linked binaries are moved to <directory>, overrides install
+    lib:  <directory>                   # Optional, successfully linked libraries are moved to <directory>, overrides install
     debugger: <debug command>           # Optional debug command, overrides defaut, overriden by env var MKN_DBG string
 remote:
     repo: URL_ROOTA URL_ROOTB           # Optional, overrides switch _MKN_REMOTE_REPO_ for non complete SCM URL lookups
