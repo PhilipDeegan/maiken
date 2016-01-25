@@ -318,6 +318,15 @@ Otherwise, the settings.yaml variable "local->debugger" is checked, resulting in
 If neither are set the following rules apply
     Windows : cdb -o ./bin/<profile>/<binary> <args>
     Unix    : gdb ./bin/<profile>/<binary> <args>
+    
+4.7 Initialising scripts
+
+After a missing dependency is retrieved for the first time, an initial setup script is run to put the repository in the desired state.
+The type of file differs per OS, the rules are thus.
+    Windows: ./mkn.bat
+    Linux  : ./mkn.nis.sh, or if missing, ./mkn.sh
+    BSD    : ./mkn.bsd.sh, or if missing, ./mkn.sh
+This can be disabled by compiling with the argument "-D_MKN_REMOTE_REPO_=0"
 
 
 5.1 Usage
