@@ -43,6 +43,12 @@ const kul::yaml::Validator maiken::Project::validator() const{
         NodeValidator("local")
     }, 0, NodeType::LIST);
 
+    NodeValidator env("env", {
+        NodeValidator("name", 1),
+        NodeValidator("mode", 1),
+        NodeValidator("value", 1)
+    }, 0, NodeType::LIST);
+
     NodeValidator if_arg("if_arg", { NodeValidator("*") }, 0, NodeType::MAP);
     NodeValidator if_inc("if_inc", { NodeValidator("*") }, 0, NodeType::MAP);
     NodeValidator if_lib("if_lib", { NodeValidator("*") }, 0, NodeType::MAP);
@@ -64,11 +70,7 @@ const kul::yaml::Validator maiken::Project::validator() const{
         NodeValidator("arg"),
         NodeValidator("install"),
         NodeValidator("self"),
-        NodeValidator("env", {
-            NodeValidator("name", 1),
-            NodeValidator("mode", 1),
-            NodeValidator("value", 1)
-        }, 0, NodeType::LIST),
+        env,
         dependencies,
         if_arg,
         if_inc,
@@ -87,11 +89,7 @@ const kul::yaml::Validator maiken::Project::validator() const{
             NodeValidator("arg"),
             NodeValidator("install"),
             NodeValidator("self"),
-            NodeValidator("env", {
-                NodeValidator("name", 1),
-                NodeValidator("mode", 1),
-                NodeValidator("value", 1)
-            }, 0, NodeType::LIST),
+            env,
             dependencies,
             if_arg,
             if_inc,

@@ -72,9 +72,12 @@ void maiken::Application::link() throw(kul::Exception){
 const std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
     showConfig();
     std::vector<std::string> objects;
-    KOUT(NON);
-    KOUT(NON) << MKN_PROJECT << ": " << this->project().dir().path();
-    if(this->profile().size() > 0) KOUT(NON) << MKN_PROFILE << ": " << this->profile();
+    {
+        std::stringstream ss;
+        ss << MKN_PROJECT << ": " << this->project().dir().path();
+        if(this->profile().size() > 0) ss << " [" << this->profile() << "]";
+        KOUT(NON) << ss.str();
+    }
     if(kul::LogMan::INSTANCE().inf() && this->includes().size()){
         KOUT(NON) << "INCLUDES";
         for(const auto& s : this->includes()) KOUT(NON) << "\t" << s.first;
@@ -265,7 +268,6 @@ bool maiken::Application::incSrc(const kul::File& file){
 
 void maiken::Application::buildExecutable(const std::vector<std::string>& objects){
     using namespace kul;
-
     const std::string& file     = main;
     const std::string& fileType = file.substr(file.rfind(".") + 1);
     if(fs.count(fileType) > 0){
@@ -282,7 +284,8 @@ void maiken::Application::buildExecutable(const std::vector<std::string>& object
             std::string linker = fs[fileType][LINKER];
             std::string linkEnd = AppVars::INSTANCE().linker();
             kul::Dir out(inst ? inst.real() : buildDir());
-            if(linkEnd.size()) KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
+            if(kul::LogMan::INSTANCE().inf() && linkEnd.size()) 
+                KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
             const std::string& n(project().root()[NAME].Scalar());
             const kul::code::CompilerProcessCapture& cpc =
                 kul::code::Compilers::INSTANCE().get((*(*files().find(fileType)).second.find(COMPILER)).second)
@@ -293,7 +296,7 @@ void maiken::Application::buildExecutable(const std::vector<std::string>& object
             if(!mkn.is() && !mkn.mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
             if(!kul::File("built", mkn).mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
             KOUT(DBG) << cpc.cmd();
-            KOUT(NON) << "Creating bin: " << cpc.tmp();
+            KOUT(NON) << "Creating bin: " << kul::File(cpc.tmp()).real();
         }catch(const kul::code::CompilerNotFoundException& e){
             KEXCEPTION("UNSUPPORTED COMPILER EXCEPTION");
         }
@@ -304,15 +307,14 @@ void maiken::Application::buildExecutable(const std::vector<std::string>& object
 void maiken::Application::buildLibrary(const std::vector<std::string>& objects){
     if(fs.count(lang) > 0){
         if(!(*files().find(lang)).second.count(COMPILER)) KEXCEPT(Exception, "No compiler found for filetype " + lang);
-
         std::string linker = fs[lang][LINKER];
         std::string linkEnd;
         if(!par){
             linkEnd = AppVars::INSTANCE().linker();
-            if(linkEnd.size()) KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
+            if(kul::LogMan::INSTANCE().inf() && linkEnd.size()) 
+                KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
         }
         if(m == kul::code::Mode::STAT) linker = fs[lang][ARCHIVER];
-
         const std::string& n(project().root()[NAME].Scalar());
         kul::Dir out(inst ? inst.real() : buildDir());
         std::string lib(inst ? p.empty() ? n : n+"_"+p : n);
@@ -325,7 +327,7 @@ void maiken::Application::buildLibrary(const std::vector<std::string>& objects){
         if(!mkn.is() && !mkn.mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
         if(!kul::File("built", mkn).mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
         KOUT(DBG) << cpc.cmd();
-        KOUT(NON) << "Creating lib: " << cpc.tmp();
+        KOUT(NON) << "Creating lib: " << kul::File(cpc.tmp()).real();
 
     }else
         KEXCEPTION("Unable to handle artifact: \"" + lang + "\" - type is not in file list");
