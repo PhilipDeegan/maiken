@@ -20,7 +20,7 @@ Testers/comments/suggestions/feature requests welcome. Email me or make an issue
 
 [google sparsehash](https://github.com/mkn/google.sparsehash)
 
-[yamlcpp](https://github.com/mkn/parse.yaml)
+[yaml.cpp](https://github.com/mkn/parse.yaml)
 
 ## How to use
 
