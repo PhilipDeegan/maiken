@@ -318,7 +318,7 @@ Otherwise, the settings.yaml variable "local->debugger" is checked, resulting in
 If neither are set the following rules apply
     Windows : cdb -o ./bin/<profile>/<binary> <args>
     Unix    : gdb ./bin/<profile>/<binary> <args>
-    
+
 4.7 Initialising scripts
 
 After a missing dependency is retrieved for the first time, an initial setup script is run to put the repository in the desired state.
@@ -328,6 +328,21 @@ The type of file differs per OS, the rules are thus.
     BSD    : ./mkn.bsd.sh, or if missing, ./mkn.sh
 This can be disabled by compiling with the argument "-D_MKN_REMOTE_REPO_=0"
 
+4.8 Default build command
+
+If the first line of mkn.yaml starts with "#! "
+The subsequent string is used as the default command if mkn is executed with zero arguments or commands (-C is allowed).
+
+
+Example mkn.yaml
+
+--------------
+#! clean build -Kl -pthread
+
+name: example
+version: version
+main: cpp.cpp
+--------------
 
 5.1 Usage
 
@@ -361,6 +376,7 @@ Available arguments:
     -t --threads n        - Consume $num threads while compiling source files where $n > 0, If $n is missing optimal resolution attempted.
     -v --version          - Displays the current maiken version number then exits, first checked command/argument 
     -x --settings f       - Sets settings.yaml in use to $f. Directory missing, $(4.3.1) attempted
+    -C --directory d      - Execute on directory $d rather than current directory 
     -D --debug            - If default profile, changes object directory to ./bin/debug instead of ./bin/build
     -K --static           - Sets all builds without a build tag mode attribute to static
     -S --shared           - Sets all builds without a build tag mode attribute to shared

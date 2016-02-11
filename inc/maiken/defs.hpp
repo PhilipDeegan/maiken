@@ -140,6 +140,7 @@ class Constants{
         static constexpr const char* TYPE           = "type";
         static constexpr const char* VALUE          = "value";
 
+        static constexpr const char* DIRECTORY      = "directory";
         static constexpr const char* SETTINGS       = "settings";
 
         static constexpr const char* IF_ARG         = "if_arg";

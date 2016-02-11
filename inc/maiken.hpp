@@ -188,7 +188,7 @@ class Application : public Constants{
 
         static void                                 showHelp();
     public:
-        static Application create(int16_t argc, char *argv[]) throw(kul::Exception);
+        static Application CREATE(int16_t argc, char *argv[]) throw(kul::Exception);
         virtual void                                       process()   throw(kul::Exception);
         const kul::Dir&                                    buildDir()      const { return bd; }
         const std::string&                                 profile()       const { return p; }

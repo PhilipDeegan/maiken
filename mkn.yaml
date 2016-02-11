@@ -15,7 +15,7 @@ profile:
         version: master
       - name: parse.yaml
         version: 0.5.5
-    main: dbg.cpp
+    main: cpp.cpp
     mode: static
 
   - name: shared

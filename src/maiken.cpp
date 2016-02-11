@@ -32,40 +32,51 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken.hpp"
 
-maiken::Application maiken::Application::create(int16_t argc, char *argv[]) throw(kul::Exception){
+maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
     using namespace kul::cli;
 
-    Args args;
-    args.cmd(Cmd(MKN_INIT));
-    args.cmd(Cmd(MKN_INC));
-    args.cmd(Cmd(MKN_SRC));
-    args.cmd(Cmd(CLEAN));
-    args.cmd(Cmd(BUILD));
-    args.cmd(Cmd(COMPILE));
-    args.cmd(Cmd(LINK));
-    args.cmd(Cmd(RUN));
-    args.cmd(Cmd(DBG));
-    args.cmd(Cmd(PROFILES));
-    args.cmd(Cmd(TRIM));
-    args.arg(Arg('a', ARG           , ArgType::STRING));
-    args.arg(Arg('j', JARG          , ArgType::STRING));
-    args.arg(Arg('l', LINKER        , ArgType::STRING));
-    args.arg(Arg('d', MKN_DEP       , ArgType::MAYBE));
-    args.arg(Arg('p', PROFILE       , ArgType::STRING));
-    args.arg(Arg('t', THREADS       , ArgType::MAYBE));
-    args.arg(Arg('h', HELP));
-    args.arg(Arg('u', SCM_UPDATE));
-    args.arg(Arg('U', SCM_FUPDATE));
-    args.arg(Arg('v', VERSION));
-    args.arg(Arg('s', SCM_STATUS));
-    args.arg(Arg('S', SHARED));
-    args.arg(Arg('K', STATIC));
-    args.arg(Arg('D', DEBUG));
-    args.arg(Arg('x', SETTINGS, ArgType::STRING));
-
+    std::vector<Arg> argV { Arg('a', ARG    , ArgType::STRING),
+                            Arg('j', JARG   , ArgType::STRING),
+                            Arg('l', LINKER , ArgType::STRING),
+                            Arg('d', MKN_DEP, ArgType::MAYBE),
+                            Arg('p', PROFILE, ArgType::STRING), 
+                            Arg('t', THREADS, ArgType::MAYBE),
+                            Arg('u', SCM_UPDATE), Arg('U', SCM_FUPDATE),
+                            Arg('v', VERSION),    Arg('s', SCM_STATUS),
+                            Arg('S', SHARED),     Arg('K', STATIC),
+                            Arg('D', DEBUG),      Arg('C', DIRECTORY, ArgType::STRING),
+                            Arg('x', SETTINGS, ArgType::STRING),   Arg('h', HELP)};
+    std::vector<Cmd> cmdV { Cmd(MKN_INIT), Cmd(MKN_INC), Cmd(MKN_SRC),
+                            Cmd(CLEAN),    Cmd(BUILD),   Cmd(COMPILE),
+                            Cmd(LINK),     Cmd(RUN),     Cmd(DBG),
+                            Cmd(PROFILES), Cmd(TRIM)};
+    Args args(cmdV, argV);
     try{
         args.process(argc, argv);
     }catch(const kul::cli::ArgNotFoundException& e){
+        showHelp();
+        KEXIT(0, "");
+    }
+    if(args.empty() || (args.size() == 1 && args.has(DIRECTORY))){
+        if(args.size() == 1 && args.has(DIRECTORY)){
+            kul::Dir d(args.get(DIRECTORY));
+            if(!d) KEXCEPTION("DIRECTORY DOES NOT EXIST: " + args.has(DIRECTORY));
+            kul::env::CWD(d);
+        }
+        kul::File yml("mkn.yaml");
+        if(yml){
+            kul::io::Reader reader(yml);
+            const std::string* s = reader.readLine();
+            if(s && s->substr(0, 3) == "#! "){
+                std::string line(s->substr(3));
+                if(!line.empty()){
+                    std::vector<std::string> lineArgs(kul::cli::asArgs(std::string(line)));
+                    char* lineV[lineArgs.size()];
+                    for(size_t i = 0; i < lineArgs.size(); i++) lineV[i] = &lineArgs[i][0];
+                    return CREATE(lineArgs.size(), lineV);
+                }
+            }
+        }
         showHelp();
         KEXIT(0, "");
     }
@@ -81,6 +92,7 @@ maiken::Application maiken::Application::create(int16_t argc, char *argv[]) thro
         NewProject p;
         KEXIT(0, "");
     }
+    if(args.has(DIRECTORY)) kul::env::CWD(args.get(DIRECTORY));
     Project project(Project::CREATE());
     std::string profile;
     if(args.has(PROFILE)){
