@@ -70,10 +70,10 @@ maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) thro
             if(s && s->substr(0, 3) == "#! "){
                 std::string line(s->substr(3));
                 if(!line.empty()){
-                    std::vector<std::string> lineArgs(kul::cli::asArgs(std::string(line)));
-                    char* lineV[lineArgs.size()];
-                    for(size_t i = 0; i < lineArgs.size(); i++) lineV[i] = &lineArgs[i][0];
-                    return CREATE(lineArgs.size(), lineV);
+                    std::vector<std::string> lineArgs(kul::cli::asArgs(line));
+                    std::vector<char*> lineV;
+                    for(size_t i = 0; i < lineArgs.size(); i++) lineV.push_back(&lineArgs[i][0]);
+                    return CREATE(lineArgs.size(), &lineV[0]);
                 }
             }
         }
