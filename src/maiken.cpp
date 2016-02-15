@@ -241,6 +241,17 @@ void maiken::Application::setup(){
     if(project().root()[PROFILE])
         for (std::size_t i=0;i < project().root()[PROFILE].size(); i++)
             nodes.push_back(project().root()[PROFILE][i]);
+
+    using namespace kul::cli;
+    for(const YAML::Node& c : Settings::INSTANCE().root()[ENV]){
+        EnvVarMode mode = EnvVarMode::APPE;
+        if      (c[MODE].Scalar().compare(APPEND)   == 0) mode = EnvVarMode::APPE;
+        else if (c[MODE].Scalar().compare(PREPEND)  == 0) mode = EnvVarMode::PREP;
+        else if (c[MODE].Scalar().compare(REPLACE)  == 0) mode = EnvVarMode::REPL;
+        else KEXCEPT(Exception, "Unhandled EnvVar mode: " + c[MODE].Scalar());
+        evs.push_back(EnvVar(c[NAME].Scalar(), c[VALUE].Scalar(), mode));
+    }
+
     bool c = 1;
     while(c){
         c = 0;
@@ -256,13 +267,16 @@ void maiken::Application::setup(){
                     KOUT(NON) << SCMGetter::GET(projectDir, tscr)->co(projectDir.path(), SCMGetter::REPO(projectDir, tscr), v);
                     kul::env::CWD(projectDir);
                     if(_MKN_REMOTE_EXEC_){
+                        kul::hash::map::S2S vars;
+                        for(const auto e : evs) vars.insert(e.name(), e.toString());
 #ifdef _WIN32
-                        if(kul::File("mkn.bat").is() && kul::os::exec("mkn.bat")) KEXCEPTION("ERROR in "+projectDir.path()+"mkn.bat");
+                        if(kul::File("mkn.bat").is() && kul::proc::Call("mkn.bat", vars).run()) KEXCEPTION("ERROR in "+projectDir.path()+"mkn.bat");
 #else
-                        if(kul::File("mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh").is() && kul::os::exec("sh mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh"))
+                        if(kul::File("mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh").is() 
+                            && kul::proc::Call("sh mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh", vars).run())
                             KEXCEPTION("ERROR in "+projectDir.path()+"mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh");
                         else
-                        if(kul::File("mkn.sh").is() && kul::os::exec("sh mkn.sh")) KEXCEPTION("ERROR in "+projectDir.path()+"mkn.sh");
+                        if(kul::File("mkn.sh").is() && kul::proc::Call("sh mkn.sh", vars).run()) KEXCEPTION("ERROR in "+projectDir.path()+"mkn.sh");
 #endif
                     }
                     kul::env::CWD(this->project().dir());
@@ -293,15 +307,6 @@ void maiken::Application::setup(){
             }
 
     this->populateMapsFromDependencies();
-    using namespace kul::cli;
-    for(const YAML::Node& c : Settings::INSTANCE().root()[ENV]){
-        EnvVarMode mode = EnvVarMode::APPE;
-        if      (c[MODE].Scalar().compare(APPEND)   == 0) mode = EnvVarMode::APPE;
-        else if (c[MODE].Scalar().compare(PREPEND)  == 0) mode = EnvVarMode::PREP;
-        else if (c[MODE].Scalar().compare(REPLACE)  == 0) mode = EnvVarMode::REPL;
-        else KEXCEPT(Exception, "Unhandled EnvVar mode: " + c[MODE].Scalar());
-        evs.push_back(EnvVar(c[NAME].Scalar(), c[VALUE].Scalar(), mode));
-    }
     std::vector<std::string> fileStrings{ARCHIVER, COMPILER, LINKER};
     for(const auto& c : Settings::INSTANCE().root()[FILE])
         for(const std::string& s : fileStrings)
