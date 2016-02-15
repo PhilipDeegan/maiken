@@ -79,7 +79,8 @@ class Constants{
         static constexpr const char* CLEAN          = "clean";
         static constexpr const char* COMPILE        = "compile";
         static constexpr const char* HELP           = "help";
-        static constexpr const char* MKN_INIT       = "init";
+        static constexpr const char* INIT           = "init";
+        static constexpr const char* INFO           = "info";
         static constexpr const char* LINK           = "link";
         static constexpr const char* RUN            = "run";
         static constexpr const char* THREADS        = "threads";

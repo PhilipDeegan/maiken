@@ -30,16 +30,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::showConfig(){
+void maiken::Application::showConfig(bool force){
     if(AppVars::INSTANCE().show()) return;
-    if(kul::LogMan::INSTANCE().inf()){
+    if(kul::LogMan::INSTANCE().inf() || force){
         std::string repo = (Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][REPO])
             ? Settings::INSTANCE().root()[LOCAL][REPO].Scalar() : kul::os::userAppDir(MAIKEN).join(REPO);
         using namespace kul::cli;
-        KOUT(INF) << "+++++++++ BUILD INFO ++++++++";
-        KOUT(INF) << "REPO    : " << repo;
-        KOUT(INF) << "THREADS : " << AppVars::INSTANCE().threads() << "\n";
-        KOUT(INF) << "BINARIES";
+        KOUT(NON) << "+++++++++ BUILD INFO ++++++++";
+        KOUT(NON) << "REPO    : " << repo;
+        KOUT(NON) << "THREADS : " << AppVars::INSTANCE().threads() << "\n";
+        KOUT(NON) << "BINARIES";
         std::string path = kul::env::GET("PATH");
         for(const YAML::Node& c : Settings::INSTANCE().root()[ENV]){
             if(c[NAME].Scalar() != "PATH") continue;
@@ -53,7 +53,7 @@ void maiken::Application::showConfig(){
         }
         for(const auto& c : Settings::INSTANCE().root()[FILE]){
             bool a = 0, g = 0, l = 0;
-            KOUT(INF) << "TYPE    : " << c[TYPE].Scalar();
+            KOUT(NON) << "TYPE    : " << c[TYPE].Scalar();
             for(const auto& d : kul::String::split(path, kul::env::SEP())){
                 if(a && g && l) break;
                 kul::Dir dir(d);
@@ -62,26 +62,26 @@ void maiken::Application::showConfig(){
                     std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ?
                         f.name().substr(0, f.name().size() - 4) : f.name();
                     if(!a && c[ARCHIVER] && b == kul::String::split(c[ARCHIVER].Scalar(), " ")[0]){
-                        KOUT(INF) << "ARCHIVER: " << f.full(); a = 1; break;
+                        KOUT(NON) << "ARCHIVER: " << f.full(); a = 1; break;
                     }
                 }
                 for(const auto& f : dir.files()){
                     std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ?
                         f.name().substr(0, f.name().size() - 4) : f.name();
                     if(!g && c[COMPILER] && b == kul::code::Compilers::INSTANCE().key(c[COMPILER].Scalar())){
-                        KOUT(INF) << "COMPILER: " << f.full(); g = 1; break;
+                        KOUT(NON) << "COMPILER: " << f.full(); g = 1; break;
                     }
                 }
                 for(const auto& f : dir.files()){
                     std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ?
                         f.name().substr(0, f.name().size() - 4) : f.name();
                     if(!l && c[LINKER] && b == kul::String::split(c[LINKER].Scalar(), " ")[0]){
-                        KOUT(INF) << "LINKER  : " << f.full(); l = 1; break;
+                        KOUT(NON) << "LINKER  : " << f.full(); l = 1; break;
                     }
                 }
             }
         }
-        KOUT(INF) << "+++++++++++++++++++++++++++++";
+        KOUT(NON) << "+++++++++++++++++++++++++++++";
     }
     AppVars::INSTANCE().show(1);
 }

@@ -46,10 +46,10 @@ maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) thro
                             Arg('S', SHARED),     Arg('K', STATIC),
                             Arg('D', DEBUG),      Arg('C', DIRECTORY, ArgType::STRING),
                             Arg('x', SETTINGS, ArgType::STRING),   Arg('h', HELP)};
-    std::vector<Cmd> cmdV { Cmd(MKN_INIT), Cmd(MKN_INC), Cmd(MKN_SRC),
+    std::vector<Cmd> cmdV { Cmd(INIT),     Cmd(MKN_INC), Cmd(MKN_SRC),
                             Cmd(CLEAN),    Cmd(BUILD),   Cmd(COMPILE),
                             Cmd(LINK),     Cmd(RUN),     Cmd(DBG),
-                            Cmd(PROFILES), Cmd(TRIM)};
+                            Cmd(PROFILES), Cmd(TRIM),    Cmd(INFO)};
     Args args(cmdV, argV);
     try{
         args.process(argc, argv);
@@ -88,7 +88,7 @@ maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) thro
         KOUT(NON) << VERSION_NUMBER;
         KEXIT(0, "");
     }
-    if(args.has(MKN_INIT)){
+    if(args.has(INIT)){
         NewProject p;
         KEXIT(0, "");
     }
@@ -130,6 +130,9 @@ maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) thro
         for(const auto& p : a.includes())
             KOUT(NON) << p.first;
         KEXIT(0, "");
+    }
+    if(args.has(INFO)){
+        a.showConfig(1);
     }
     a.buildDepVec();
 

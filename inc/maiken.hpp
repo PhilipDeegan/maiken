@@ -176,7 +176,7 @@ class Application : public Constants{
         void                           scmUpdate(const bool& f) throw(kul::scm::Exception);
         void                           scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo) throw(kul::scm::Exception);
         void                           setup();
-        void                           showConfig();
+        void                           showConfig(bool force = 0);
         void                           cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception);
         void                           showProfiles();
         void                           loadTimeStamps() throw (kul::TypeException);
