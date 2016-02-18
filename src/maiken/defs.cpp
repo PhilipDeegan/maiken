@@ -75,6 +75,7 @@ constexpr const char* maiken::Constants::PROFILE;
 constexpr const char* maiken::Constants::PROFILES;
 constexpr const char* maiken::Constants::PROPERTY;
 constexpr const char* maiken::Constants::MKN_DEP;
+constexpr const char* maiken::Constants::MKN_DEPS;
 
 
 constexpr const char* maiken::Constants::IF_ARG;

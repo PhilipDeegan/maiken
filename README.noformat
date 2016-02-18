@@ -334,6 +334,16 @@ If the first line of mkn.yaml starts with "#! "
 The subsequent string is used as the default command if mkn is executed with zero arguments or commands (-C is allowed).
 
 
+4.8 Dependency build rules
+
+Using the argument -d / --dep
+    The following rules apply
+If soley numeric, must be greater than 0, used to limit which dependencies are built, if 1, project immediate dependencies are built, if two, includes dependencies of dependencies.
+If non-numeric, CSV apply, with the value equating to the yaml root node "name", only those found, plus the current project are built.
+Also, if non numeric, special characters include
+    "+", ignores current project. If only value builds all but current project.
+
+
 Example mkn.yaml
 
 --------------
@@ -365,7 +375,7 @@ Available commands
 
 Available arguments:
     -a --args arg         - Adds $arg to the compile command if compile/build, passes arguments to application if run
-    -d n                  - Sets dependency level to n, performs applicable commands on dependencies, 1 = immediate dependencies, 2 = dep of dep etc. n missing assumed infinite.
+    -d n                  - See 4.8
     -h --help             - Print help
     -j --jargs json       - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing langauge specific args to compiler
     -l --linker text      - Adds text to linking of binary

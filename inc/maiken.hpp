@@ -57,8 +57,7 @@ class AppVars{
         uint16_t ts = 1;
         std::string aa;
         std::string la;
-        kul::hash::map::S2S pks;
-        kul::hash::map::S2S jas;
+        kul::hash::map::S2S jas, pks;
         AppVars(){
             pks["OS"] = KTOSTRING(__KUL_OS__);
         }
@@ -152,8 +151,8 @@ class Application : public Constants{
 
         Application(const maiken::Project& proj, const std::string profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){}
         Application(const maiken::Project& proj) : m(kul::code::Mode::NONE), proj(proj){}
-        void                           buildDepVec();
-        void                           buildDepVecRec(std::vector<Application*>& dePs, uint16_t i);
+        void                           buildDepVec(const std::string* depVal);
+        void                           buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc);
         void                           buildExecutable(const std::vector<std::string>& objects);
         void                           buildLibrary(const std::vector<std::string>& objects);
         void                           checkErrors(const kul::code::CompilerProcessCapture& cpc) throw(kul::Exception);
