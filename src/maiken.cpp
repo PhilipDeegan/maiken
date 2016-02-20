@@ -520,7 +520,7 @@ const kul::hash::set::String maiken::Application::inactiveMains(){
 
 const kul::Dir maiken::Application::resolveDependencyDirectory(const YAML::Node& n){
     std::string d;
-    if(n[LOCAL]) d = resolveFromProperties(n[LOCAL].Scalar()));
+    if(n[LOCAL]) d = resolveFromProperties(n[LOCAL].Scalar());
     else{
         if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][REPO])
             d = Settings::INSTANCE().root()[LOCAL][REPO].Scalar();

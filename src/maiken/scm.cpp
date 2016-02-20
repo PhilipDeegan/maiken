@@ -48,7 +48,7 @@ void maiken::Application::scmStatus(const bool& deps) throw (kul::scm::Exception
     if(deps) for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) (*app).scmStatus(0);
     if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr);
     if(scm){
-        KOUT(NON) << kul::os::EOL() << "SCM STATUS CHECK ON: " << project().dir().path();
+        KOUT(NON) << "SCM STATUS CHECK ON: " << project().dir().path();
         const std::string& r(this->project().dir().real());
         scm->status(r);
     }
