@@ -59,7 +59,8 @@ class AppVars{
         std::string la;
         kul::hash::map::S2S jas, pks;
         AppVars(){
-            pks["OS"] = KTOSTRING(__KUL_OS__);
+            pks["OS"]   = KTOSTRING(__KUL_OS__);
+            pks["HOME"] = kul::user::home().path();
         }
     public:
         const std::string& args() const { return aa;}

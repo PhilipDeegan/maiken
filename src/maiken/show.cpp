@@ -34,7 +34,7 @@ void maiken::Application::showConfig(bool force){
     if(AppVars::INSTANCE().show()) return;
     if(kul::LogMan::INSTANCE().inf() || force){
         std::string repo = (Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][REPO])
-            ? Settings::INSTANCE().root()[LOCAL][REPO].Scalar() : kul::os::userAppDir(MAIKEN).join(REPO);
+            ? Settings::INSTANCE().root()[LOCAL][REPO].Scalar() : kul::user::home(MAIKEN).join(REPO);
         using namespace kul::cli;
         KOUT(NON) << "+++++++++ BUILD INFO ++++++++";
         KOUT(NON) << "REPO    : " << repo;

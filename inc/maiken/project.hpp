@@ -94,7 +94,7 @@ class Settings : public kul::yaml::File, public Constants{
         }
         static Settings& INSTANCE(){
             if(!instance.get()){
-                const kul::File f("settings.yaml", kul::os::userAppDir("maiken"));
+                const kul::File f("settings.yaml", kul::user::home("maiken"));
                 if(!f.dir().is()) f.dir().mk();
                 if(!f.is()){ write(f);}
                 instance = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
@@ -106,11 +106,11 @@ class Settings : public kul::yaml::File, public Constants{
             else
             if(kul::File(s+".yaml").is())   instance = std::make_unique<Settings>(s+".yaml");
             else
-            if(kul::File(s, kul::os::userAppDir("maiken")).is())
-                instance = std::make_unique<Settings>(kul::os::userAppDir("maiken").join(s));
+            if(kul::File(s, kul::user::home("maiken")).is())
+                instance = std::make_unique<Settings>(kul::user::home("maiken").join(s));
             else
-            if(kul::File(s+".yaml", kul::os::userAppDir("maiken")).is())
-                instance = std::make_unique<Settings>(kul::os::userAppDir("maiken").join(s+".yaml"));
+            if(kul::File(s+".yaml", kul::user::home("maiken")).is())
+                instance = std::make_unique<Settings>(kul::user::home("maiken").join(s+".yaml"));
             else
                 return 0;
             return 1;

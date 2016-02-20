@@ -520,13 +520,12 @@ const kul::hash::set::String maiken::Application::inactiveMains(){
 
 const kul::Dir maiken::Application::resolveDependencyDirectory(const YAML::Node& n){
     std::string d;
-    if(n[LOCAL])
-        d = kul::Dir::REAL(resolveFromProperties(n[LOCAL].Scalar()));
+    if(n[LOCAL]) d = resolveFromProperties(n[LOCAL].Scalar()));
     else{
         if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][REPO])
             d = Settings::INSTANCE().root()[LOCAL][REPO].Scalar();
         else
-            d = kul::os::userAppDir(MAIKEN).join(REPO);
+            d = kul::user::home(MAIKEN).join(REPO);
         try{
             std::string version(n[VERSION] ? resolveFromProperties(n[VERSION].Scalar()) : "default");
             if(_MKN_REP_VERS_DOT_) kul::String::replaceAll(version, ".", kul::Dir::SEP());

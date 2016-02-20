@@ -170,7 +170,9 @@ Compiler binares are expected to have their default names e.g. gcc/gcc.exe/cl.ex
 2.2.2 Properties
 
 System properties:
-    OS - equates to system OS, can be either bsd/nix/win
+    OS   - system OS, can be either bsd/nix/win
+    HOME - bsd/nix/win(with msys/cygwin/etc) = ~/
+           win cmd prompt = %HOMEDRIVE%/%HOMEPATH%
 
 
 2.3 SCM
