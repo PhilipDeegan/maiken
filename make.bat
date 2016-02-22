@@ -26,6 +26,9 @@ IF NOT EXIST ext\kul\%KUL_VER% (
 IF NOT EXIST ext\yaml\%YAML_VER% (
 	git clone http://github.com/mkn/parse.yaml.git --branch %YAML_VER% ext/yaml/%YAML_VER%
 )
+IF NOT EXIST ext\sparsehash\%HASH_VER% (
+	git clone http://github.com/mkn/google.sparsehash.git --branch %HASH_VER% ext/sparsehash/%HASH_VER%
+)
 
 SET /P WIN_KIT="Enter Windows Kit 10 root dir (one above 'include'): "
 SET /P VIS_STU="Enter Visual Studio 14/15 root dir (one above 'VC'): "
@@ -39,8 +42,8 @@ SET VSCAR=%VIS_STU%\VC\bin\lib
 
 SET INCLUDES=%INCLUDES% /I%PWD%\ext\kul\%KUL_VER%\inc
 SET INCLUDES=%INCLUDES% /I%PWD%\ext\kul\%KUL_VER%\os\win\inc
-SET INCLUDES=%INCLUDES% /I%PWD%\ext\kul\%KUL_VER%\ext\sparsehash\%HASH_VER%\src
-SET INCLUDES=%INCLUDES% /I%PWD%\ext\kul\%KUL_VER%\ext\sparsehash\%HASH_VER%\src\windows
+SET INCLUDES=%INCLUDES% /I%PWD%\ext\sparsehash\%HASH_VER%\src
+SET INCLUDES=%INCLUDES% /I%PWD%\ext\sparsehash\%HASH_VER%\src\windows
 SET INCLUDES=%INCLUDES% /I%PWD%\ext\yaml\%YAML_VER%\include
 SET INCLUDES=%INCLUDES% /I%WIN_KIT%\Include\10.0.10240.0\um
 SET INCLUDES=%INCLUDES% /I%WIN_KIT%\Include\10.0.10240.0\ucrt
@@ -52,8 +55,6 @@ SET LIBPATHS=%LIBPATHS% /LIBPATH:%PWD%\ext\yaml\%YAML_VER%\bin
 SET LIBPATHS=%LIBPATHS% /LIBPATH:%WIN_KIT%\Lib\10.0.10240.0\um\x86
 SET LIBPATHS=%LIBPATHS% /LIBPATH:%WIN_KIT%\Lib\10.0.10240.0\ucrt\x86
 SET LIBPATHS=%LIBPATHS% /LIBPATH:%VIS_STU%\VC\lib
-
-CALL %PWD%\ext\kul\%KUL_VER%\make.bat
 
 SET OBJECTS=
 

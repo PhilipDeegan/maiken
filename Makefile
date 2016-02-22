@@ -16,7 +16,7 @@ INCS =  -I$(CWD)/inc \
 		-I$(CWD)/ext/kul/$(KUL_GIT)/inc \
 		-I$(CWD)/ext/kul/$(KUL_GIT)/os/$(OS)/inc \
 		-I$(CWD)/ext/kul/$(KUL_GIT)/os/nixish/inc \
-		-I$(CWD)/ext/kul/$(KUL_GIT)/ext/sparsehash/$(HASH_GIT)/include
+		-I$(CWD)/ext/sparsehash/$(HASH_GIT)/include
 
 YAML = $(CWD)/ext/yaml/$(YAML_GIT)/bin/libyaml.a
 LDFLAGS = -pthread
@@ -55,7 +55,13 @@ general:
 	@if [ ! -d "./ext/kul/$(KUL_GIT)" ]; then \
 		git clone http://github.com/mkn/mkn.kul.git --branch $(KUL_GIT) ext/kul/$(KUL_GIT); \
 	fi; 
-	$(MAKE) -C ./ext/kul/$(KUL_GIT)
+	@if [ ! -d "./ext/sparsehash/$(HASH_GIT)" ]; then \
+		git clone http://github.com/mkn/google.sparsehash.git --branch $(HASH_GIT) ext/sparsehash/$(HASH_GIT); \
+		cd ./ext/sparsehash/$(HASH_GIT); bash ./configure --prefix=$(CWD)/ext/sparsehash/$(HASH_GIT); \
+		$(MAKE) -C $(CWD)/ext/sparsehash/$(HASH_GIT); \
+		$(MAKE) -C $(CWD)/ext/sparsehash/$(HASH_GIT) install; \
+		cd ../../..; \
+	fi;
 
 	@if [ ! -d "ext/yaml/$(YAML_GIT)" ]; then \
 		git clone https://github.com/mkn/parse.yaml.git --branch $(YAML_GIT) ext/yaml/$(YAML_GIT); \
@@ -93,13 +99,8 @@ yaml:
 	ar -r $(CWD)/ext/yaml/$(YAML_GIT)/bin/libyaml.a $(FILES)
 
 clean:
-	@if [ -d "./ext/kul/$(KUL_GIT)" ]; then \
-		$(MAKE) -C ./ext/kul/$(KUL_GIT) clean; \
-	fi;
 	rm -rf ext/yaml/$(YAML_GIT)/bin	
 	rm -rf bin
 
-clean-all: clean
-	@if [ -d "./ext/kul/$(KUL_GIT)" ]; then \
-		$(MAKE) -C ./ext/kul/$(KUL_GIT) clean-all; \
-	fi;
+clean-all:
+	rm -rf bin ext
