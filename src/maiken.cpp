@@ -121,6 +121,7 @@ maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) thro
     if(args.has(SCM_UPDATE))    AppVars::INSTANCE().update(true);
     if(project.root()[SCM])     a.scr = project.root()[SCM].Scalar();
 
+    if(args.has(MKN_DEP)) AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
     a.setup();
     if(args.has(INFO)){
         a.showConfig(1);
@@ -439,7 +440,7 @@ void maiken::Application::buildDepVec(const std::string* depVal){
     kul::hash::set::String all, ignore, include;
     ignore.insert("+");
     if(depVal){
-        if(depVal->size())
+        if(depVal->size()){
             try{
                 AppVars::INSTANCE().dependencyLevel(kul::Type::GET_UINT(*depVal));
             }catch(const kul::TypeException& e){
@@ -448,9 +449,10 @@ void maiken::Application::buildDepVec(const std::string* depVal){
                     include.insert(s);
                 }
             }
-        else 
+        }else 
             AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
     }
+
     if(include.size() == 1 && include.count("+")){
         AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
         this->ig = 1;
