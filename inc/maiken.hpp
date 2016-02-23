@@ -135,7 +135,7 @@ class Application : public Constants{
         const std::string p;
         kul::Dir bd, inst;
         maiken::Project proj;
-        kul::hash::map::S2S2T<std::string> fs;
+        kul::hash::map::S2T<kul::hash::map::S2S> fs;
         std::vector<std::string> libs;
         std::vector<std::pair<std::string, bool> > srcs;
         std::vector<std::pair<std::string, bool> > incs;
@@ -195,7 +195,7 @@ class Application : public Constants{
         const maiken::Project&                             project()       const { return proj;}
         const std::vector<Application>&                    dependencies()  const { return deps; }
         const std::vector<kul::cli::EnvVar>&               envVars()       const { return evs; }
-        const kul::hash::map::S2S2T<std::string>&          files()         const { return fs; }
+        const kul::hash::map::S2T<kul::hash::map::S2S>&    files()         const { return fs; }
         const std::vector<std::string>&                    libraries()     const { return libs;}
         const std::vector<std::pair<std::string, bool> >&  sources()       const { return srcs;}
         const std::vector<std::pair<std::string, bool> >&  includes()      const { return incs;}
