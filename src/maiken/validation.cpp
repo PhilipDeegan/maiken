@@ -112,12 +112,13 @@ void maiken::Application::preSetupValidation() throw (maiken::Exception){
             }
             if(!f) KEXCEPTION("parent profile not found: "+resolveFromProperties(profile[PARENT].Scalar())+"\n"+project().dir().path());
         }
-        if(profile["os"])
+        if(profile["os"]){
             for(const auto& p1 : project().root()[PROFILE])
                 if(profile[NAME].Scalar() == p1[NAME].Scalar()) continue;
                 else
                 if(p1["os"] && p1["os"].Scalar() == profile["os"].Scalar())
                     KEXCEPTION("Multiple os tags with same value found, only one per operating system supported\n"+project().dir().path());
+        }
         Validator::PRE_BUILD(*this, profile);
         if(dpp && !dpf) dpf = resolveFromProperties(project().root()[PARENT].Scalar()) == p;
     }
