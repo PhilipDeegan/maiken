@@ -60,7 +60,7 @@ maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) thro
     if(args.empty() || (args.size() == 1 && args.has(DIRECTORY))){
         if(args.size() == 1 && args.has(DIRECTORY)){
             kul::Dir d(args.get(DIRECTORY));
-            if(!d) KEXCEPTION("DIRECTORY DOES NOT EXIST: " + args.has(DIRECTORY));
+            if(!d) KEXCEPTION("DIRECTORY DOES NOT EXIST: " + args.get(DIRECTORY));
             kul::env::CWD(d);
         }
         kul::File yml("mkn.yaml");
