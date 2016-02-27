@@ -43,8 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken{
 
-class ThreadingCompiler;
-
 class Exception : public kul::Exception{
     public:
         Exception(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
@@ -152,41 +150,41 @@ class Application : public Constants{
 
         Application(const maiken::Project& proj, const std::string profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){}
         Application(const maiken::Project& proj) : m(kul::code::Mode::NONE), proj(proj){}
-        void                           buildDepVec(const std::string* depVal);
-        void                           buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc);
-        void                           buildExecutable(const std::vector<std::string>& objects);
-        void                           buildLibrary(const std::vector<std::string>& objects);
-        void                           checkErrors(const kul::code::CompilerProcessCapture& cpc) throw(kul::Exception);
-        const std::vector<std::string> compile() throw(kul::Exception);
-        const kul::hash::set::String   inactiveMains();
-        void                           populateMaps(const YAML::Node& n);
-        void                           populateMapsFromDependencies();
-        void                           populateDependencies(const YAML::Node& n) throw(kul::Exception);
-        void                           preSetupValidation() throw(Exception);
-        void                           postSetupValidation() throw(Exception);
-        const kul::Dir                 resolveDependencyDirectory(const YAML::Node& d);
-        void                           resolveProperties();
-        const std::string              resolveFromProperties(const std::string& s) const;
-        void                           build()     throw(kul::Exception);
-        void                           link()      throw(kul::Exception);
-        void                           run(bool dbg);
-        void                           trim();
-        void                           trim(const kul::File& f);
-        void                           scmStatus(const bool& deps = false) throw(kul::scm::Exception);
-        void                           scmUpdate(const bool& f) throw(kul::scm::Exception);
-        void                           scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo) throw(kul::scm::Exception);
-        void                           setup();
-        void                           showConfig(bool force = 0);
-        void                           cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception);
-        void                           showProfiles();
-        void                           loadTimeStamps() throw (kul::TypeException);
-        bool                           incSrc(const kul::File& f);
-        const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap();
+        void buildDepVec(const std::string* depVal);
+        void buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc);
+        void buildExecutable(const std::vector<std::string>& objects);
+        void buildLibrary(const std::vector<std::string>& objects);
+        void checkErrors(const kul::code::CompilerProcessCapture& cpc) throw(kul::Exception);
+        void populateMaps(const YAML::Node& n);
+        void populateMapsFromDependencies();
+        void populateDependencies(const YAML::Node& n) throw(kul::Exception);
+        void preSetupValidation() throw(Exception);
+        void postSetupValidation() throw(Exception);
+        void resolveProperties();
+        void build() throw(kul::Exception);
+        void link()  throw(kul::Exception);
+        void run(bool dbg);
+        void trim();
+        void trim(const kul::File& f);
+        void scmStatus(const bool& deps = false) throw(kul::scm::Exception);
+        void scmUpdate(const bool& f) throw(kul::scm::Exception);
+        void scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo) throw(kul::scm::Exception);
+        void setup();
+        void showConfig(bool force = 0);
+        void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception);
+        void showProfiles();
+        void loadTimeStamps() throw (kul::TypeException);
+        bool incSrc(const kul::File& f);
+        std::string resolveFromProperties(const std::string& s) const;
+        kul::Dir    resolveDependencyDirectory(const YAML::Node& d);
+        kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap();
+        std::vector<std::string> compile() throw(kul::Exception);
+        kul::hash::set::String   inactiveMains();
 
         void addSourceLine (const std::string& o) throw (kul::TypeException);
         void addIncludeLine(const std::string& o) throw (kul::TypeException);
 
-        static void                                 showHelp();
+        static void showHelp();
     public:
         static Application CREATE(int16_t argc, char *argv[]) throw(kul::Exception);
         virtual void                                       process()   throw(kul::Exception);

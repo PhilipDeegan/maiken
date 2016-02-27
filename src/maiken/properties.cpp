@@ -41,7 +41,7 @@ void maiken::Application::resolveProperties(){
     }
 }
 
-const std::string maiken::Application::resolveFromProperties(const std::string& s) const{
+std::string maiken::Application::resolveFromProperties(const std::string& s) const{
     std::string r = s;
     int lb  = s.find("${");
     int clb = s.find("\\${");

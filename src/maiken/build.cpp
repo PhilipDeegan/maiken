@@ -69,7 +69,7 @@ void maiken::Application::link() throw(kul::Exception){
     }else KEXCEPTION("No objects found, try \"compile\" first.");
 }
 
-const std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
+std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
     showConfig();
     std::vector<std::string> objects;
     {
@@ -82,7 +82,7 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
         KOUT(NON) << "INCLUDES";
         for(const auto& s : this->includes()) KOUT(NON) << "\t" << s.first;
     }
-    auto& sources = sourceMap();
+    auto sources = sourceMap();
     if(srcs.empty() && main.empty()){
         KOUT(NON) << "NO SOURCES";
         return objects;
@@ -213,7 +213,7 @@ const std::vector<std::string> maiken::Application::compile() throw(kul::Excepti
     return objects;
 }
 
-const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > maiken::Application::sourceMap(){
+kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > maiken::Application::sourceMap(){
     const kul::hash::set::String iMs = inactiveMains();
     kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> sm;
     if(main.size()){

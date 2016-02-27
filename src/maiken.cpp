@@ -496,7 +496,7 @@ void maiken::Application::buildDepVecRec(std::vector<Application*>& dePs, int16_
     }
 }
 
-const kul::hash::set::String maiken::Application::inactiveMains(){
+kul::hash::set::String maiken::Application::inactiveMains(){
     kul::hash::set::String iMs;
     std::string p;
     try{
@@ -520,7 +520,7 @@ const kul::hash::set::String maiken::Application::inactiveMains(){
     return iMs;
 }
 
-const kul::Dir maiken::Application::resolveDependencyDirectory(const YAML::Node& n){
+kul::Dir maiken::Application::resolveDependencyDirectory(const YAML::Node& n){
     std::string d;
     if(n[LOCAL]) d = resolveFromProperties(n[LOCAL].Scalar());
     else{
