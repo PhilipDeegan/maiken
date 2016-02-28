@@ -74,10 +74,10 @@ void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const st
     if(!f){
         KOUT(NON) << "CHECKING: " << this->project().dir().path() << " FROM " << s;
         const std::string& lV(scm->localVersion(this->project().dir().real(), ver));
-        const std::string& rV(s.size() ? scm->remoteVersion(this->project().dir().real(), s, ver) : "");
+        const std::string& rV(s.size() ? scm->remoteVersion(s, ver) : "");
         c = lV != rV;
         std::stringstream ss;
-        ss << "UPDATE FROM " + s + " VERSION: " + rV + " (Yes/No/1/0)";
+        ss << "UPDATE FROM " << s << " VERSION: " << rV << " (Yes/No/1/0)";
         if(!c) KOUT(NON) << "CURRENT VERSION MATCHES REMOTE VERSION: SKIPPING";
         else c = kul::Bool::FROM(kul::cli::receive(ss.str()));
     }
