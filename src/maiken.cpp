@@ -191,7 +191,7 @@ void maiken::Application::process() throw(kul::Exception){
             kul::env::CWD((*app).project().dir());
             kul::Dir out((*app).inst ? (*app).inst.real() : (*app).buildDir());
             kul::Dir mkn(out.join(".mkn"));
-            if(((*app).ig && kul::File("built", mkn).is()) || !(*app).srcs.size()) continue;
+            if((*app).ig || (*app).srcs.empty()) continue;
             std::vector<std::pair<std::string, std::string> > oldEvs;
             for(const kul::cli::EnvVar& ev : (*app).envVars()){
                 const std::string v = kul::env::GET(ev.name());

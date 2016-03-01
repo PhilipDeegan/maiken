@@ -292,9 +292,6 @@ void maiken::Application::buildExecutable(const std::vector<std::string>& object
                     ->buildExecutable(linker, linkEnd, objects,
                         libraries(), libraryPaths(), kul::File(out.join(n)).escm(), m);
             checkErrors(cpc);
-            kul::Dir mkn(out.join(".mkn"));
-            if(!mkn.is() && !mkn.mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
-            if(!kul::File("built", mkn).mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
             KOUT(DBG) << cpc.cmd();
             KOUT(NON) << "Creating bin: " << kul::File(cpc.tmp()).real();
         }catch(const kul::code::CompilerNotFoundException& e){
@@ -323,9 +320,6 @@ void maiken::Application::buildLibrary(const std::vector<std::string>& objects){
                 ->buildLibrary(linker, linkEnd, objects,
                     libraries(), libraryPaths(), kul::File(lib, out), m);
         checkErrors(cpc);
-        kul::Dir mkn(out.join(".mkn"));
-        if(!mkn.is() && !mkn.mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
-        if(!kul::File("built", mkn).mk()) KEXCEPTION("Inadequate access for directory: " +out.path());
         KOUT(DBG) << cpc.cmd();
         KOUT(NON) << "Creating lib: " << kul::File(cpc.tmp()).real();
 
