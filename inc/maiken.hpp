@@ -59,7 +59,7 @@ class AppVars{
         AppVars(){
             pks["OS"]   = KTOSTRING(__KUL_OS__);
             pks["HOME"] = kul::user::home().path();
-            if(Settings::INSTANCE().root()[LOCAL][REPO])
+            if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][REPO])
                 pks["MKN_REPO"] = Settings::INSTANCE().root()[LOCAL][REPO].Scalar();
             else
                 pks["MKN_REPO"] = kul::user::home(MAIKEN).path();
