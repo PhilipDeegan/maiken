@@ -64,7 +64,7 @@ std::string maiken::Application::resolveFromProperties(const std::string& s) con
         }else k = (*ps.find(k)).second;
         r = resolveFromProperties(r.substr(0, lb) + k + r.substr(rb + 1));
     }
-    kul::String::trim(r);
+    kul::String::TRIM(r);
     return r;
 }
 

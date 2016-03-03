@@ -28,8 +28,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "kul/log.hpp"
-#include "kul/type.hpp"
 #include "maiken.hpp"
 
 class UpdateTracker{
@@ -79,7 +77,7 @@ void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const st
         std::stringstream ss;
         ss << "UPDATE FROM " << s << " VERSION: " << rV << " (Yes/No/1/0)";
         if(!c) KOUT(NON) << "CURRENT VERSION MATCHES REMOTE VERSION: SKIPPING";
-        else c = kul::Bool::FROM(kul::cli::receive(ss.str()));
+        else c = kul::String::BOOL(kul::cli::receive(ss.str()));
     }
     if(f || c){
         std::stringstream ss;

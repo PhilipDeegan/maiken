@@ -54,14 +54,14 @@ void maiken::Application::showConfig(bool force){
         for(const auto& c : Settings::INSTANCE().root()[FILE]){
             bool a = 0, g = 0, l = 0;
             KOUT(NON) << "TYPE    : " << c[TYPE].Scalar();
-            for(const auto& d : kul::String::split(path, kul::env::SEP())){
+            for(const auto& d : kul::String::SPLIT(path, kul::env::SEP())){
                 if(a && g && l) break;
                 kul::Dir dir(d);
                 if(!dir) continue;
                 for(const auto& f : dir.files()){
                     std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ?
                         f.name().substr(0, f.name().size() - 4) : f.name();
-                    if(!a && c[ARCHIVER] && b == kul::String::split(c[ARCHIVER].Scalar(), " ")[0]){
+                    if(!a && c[ARCHIVER] && b == kul::String::SPLIT(c[ARCHIVER].Scalar(), " ")[0]){
                         KOUT(NON) << "ARCHIVER: " << f.full(); a = 1; break;
                     }
                 }
@@ -75,7 +75,7 @@ void maiken::Application::showConfig(bool force){
                 for(const auto& f : dir.files()){
                     std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ?
                         f.name().substr(0, f.name().size() - 4) : f.name();
-                    if(!l && c[LINKER] && b == kul::String::split(c[LINKER].Scalar(), " ")[0]){
+                    if(!l && c[LINKER] && b == kul::String::SPLIT(c[LINKER].Scalar(), " ")[0]){
                         KOUT(NON) << "LINKER  : " << f.full(); l = 1; break;
                     }
                 }
@@ -127,9 +127,9 @@ void maiken::Application::showProfiles(){
     }
     for(const auto& n : this->project().root()[PROFILE]){
         std::string s(n[NAME].Scalar());
-        kul::String::pad(s, b);
+        kul::String::PAD(s, b);
         std::string os(n["os"] ? "("+n["os"].Scalar()+")" : "");
-        if(!os.empty()) kul::String::pad(os, o);
+        if(!os.empty()) kul::String::PAD(os, o);
         std::stringstream s1;
         s1 << "\t" << s << os;
         if(n[PARENT]) s1 << "\t" << MKN_PARENT << ": " << resolveFromProperties(n[PARENT].Scalar());

@@ -173,6 +173,9 @@ System properties:
     OS   - system OS, can be either bsd/nix/win
     HOME - bsd/nix/win(with msys/cygwin/etc) = ~/
            win cmd prompt = %HOMEDRIVE%/%HOMEPATH%
+    MKN_REPO - if settings.xml has [local][repo], it is that, otherwise
+           bsd/nix/win(with msys/cygwin/etc) = ~/.maiken/repo
+           win cmd prompt = %HOMEDRIVE%/%HOMEPATH%/maiken/repo
 
 
 2.3 SCM

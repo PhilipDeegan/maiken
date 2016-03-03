@@ -84,11 +84,11 @@ class Settings : public kul::yaml::File, public Constants{
                 if(!d.is() && !d.mk()) KEXCEPT(SettingsException, "settings.yaml local/repo is not a valid directory");
             }
             if(root()[REMOTE] && root()[REMOTE][REPO])
-                for(const auto& s : kul::String::split(root()[REMOTE][REPO].Scalar(), ' '))
+                for(const auto& s : kul::String::SPLIT(root()[REMOTE][REPO].Scalar(), ' '))
                     rrs.push_back(s);
             else{
                 const std::string& rr = _MKN_REMOTE_REPO_;
-                for(const auto& s : kul::String::split(rr, ' '))
+                for(const auto& s : kul::String::SPLIT(rr, ' '))
                     rrs.push_back(s);
             }
         }

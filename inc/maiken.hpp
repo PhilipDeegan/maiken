@@ -59,6 +59,11 @@ class AppVars{
         AppVars(){
             pks["OS"]   = KTOSTRING(__KUL_OS__);
             pks["HOME"] = kul::user::home().path();
+            if(Settings::INSTANCE().root()[LOCAL][REPO])
+                pks["MKN_REPO"] = Settings::INSTANCE().root()[LOCAL][REPO].Scalar();
+            else
+                pks["MKN_REPO"] = kul::user::home(MAIKEN).path();
+
         }
     public:
         const std::string& args() const { return aa;}
@@ -173,7 +178,7 @@ class Application : public Constants{
         void showConfig(bool force = 0);
         void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception);
         void showProfiles();
-        void loadTimeStamps() throw (kul::TypeException);
+        void loadTimeStamps() throw (kul::StringException);
         bool incSrc(const kul::File& f);
         std::string resolveFromProperties(const std::string& s) const;
         kul::Dir    resolveDependencyDirectory(const YAML::Node& d);
@@ -181,8 +186,8 @@ class Application : public Constants{
         std::vector<std::string> compile() throw(kul::Exception);
         kul::hash::set::String   inactiveMains();
 
-        void addSourceLine (const std::string& o) throw (kul::TypeException);
-        void addIncludeLine(const std::string& o) throw (kul::TypeException);
+        void addSourceLine (const std::string& o) throw (kul::StringException);
+        void addIncludeLine(const std::string& o) throw (kul::StringException);
 
         static void showHelp();
     public:

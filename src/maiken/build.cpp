@@ -154,8 +154,7 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
                 }
                 if(tQueue.size() == 0 && sourceQueue.size() == 0) break;
                 ThreadingCompiler tc(*this, tQueue);
-                kul::Ref<ThreadingCompiler> ref(tc);
-                kul::PredicatedThreadQueue<std::queue<std::pair<std::string, std::string> > > tp(ref, tQueue);
+                kul::PredicatedThreadQueue<std::queue<std::pair<std::string, std::string> > > tp(std::ref(tc), tQueue);
                 tp.setMax(AppVars::INSTANCE().threads());
                 tp.run();
                 tp.join();

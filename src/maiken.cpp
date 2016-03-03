@@ -163,7 +163,7 @@ maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) thro
         try{
             YAML::Node node = YAML::Load(args.get(JARG));
             for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
-                for(const auto& s : kul::String::split(it->first.Scalar(), ':'))
+                for(const auto& s : kul::String::SPLIT(it->first.Scalar(), ':'))
                     AppVars::INSTANCE().jargs(s, it->second.Scalar());
         }catch(const std::exception& e){ KEXCEPTION("JSON args failed to parse"); }
     }
@@ -171,7 +171,7 @@ maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) thro
     if(args.has(LINKER)) AppVars::INSTANCE().linker(args.get(LINKER));
     if(args.has(THREADS)){
         if(args.get(THREADS).size())
-            AppVars::INSTANCE().threads(kul::Type::GET_UINT(args.get(THREADS)));
+            AppVars::INSTANCE().threads(kul::String::UINT16(args.get(THREADS)));
         else AppVars::INSTANCE().threads(kul::cpu::threads());
     }
 
@@ -301,14 +301,14 @@ void maiken::Application::setup(){
     }
 
     if(Settings::INSTANCE().root()[MKN_INC])
-        for(const auto& s : kul::String::split(Settings::INSTANCE().root()[MKN_INC].Scalar(), ' '))
+        for(const auto& s : kul::String::SPLIT(Settings::INSTANCE().root()[MKN_INC].Scalar(), ' '))
             if(s.size()){
                 kul::Dir d(resolveFromProperties(s));
                 if(d) incs.push_back(std::make_pair(d.real(), false));
                 else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+Settings::INSTANCE().file());
             }
     if(Settings::INSTANCE().root()[PATH])
-        for(const auto& s : kul::String::split(Settings::INSTANCE().root()[PATH].Scalar(), ' '))
+        for(const auto& s : kul::String::SPLIT(Settings::INSTANCE().root()[PATH].Scalar(), ' '))
             if(s.size()){
                 kul::Dir d(resolveFromProperties(s));
                 if(d) paths.push_back(d.path());
@@ -319,7 +319,7 @@ void maiken::Application::setup(){
     std::vector<std::string> fileStrings{ARCHIVER, COMPILER, LINKER};
     for(const auto& c : Settings::INSTANCE().root()[FILE])
         for(const std::string& s : fileStrings)
-            for(const auto& t : kul::String::split(c[TYPE].Scalar(), ':'))
+            for(const auto& t : kul::String::SPLIT(c[TYPE].Scalar(), ':'))
                 if(fs[t].count(s) == 0 && c[s])
                     fs[t].insert(s, c[s].Scalar());
 
@@ -392,7 +392,7 @@ void maiken::Application::setup(){
                         else continue;
                     }
                     std::vector<std::string> ifArgs;
-                    for(const auto& s : kul::String::split(it->second.Scalar(), ' '))
+                    for(const auto& s : kul::String::SPLIT(it->second.Scalar(), ' '))
                         ifArgs.push_back(resolveFromProperties(s));
                     if(lang.empty() && left == BIN) for(const auto& s : ifArgs) arg += s + " ";
                     else
@@ -409,24 +409,24 @@ void maiken::Application::setup(){
                 if(n[IF_INC])
                     for(YAML::const_iterator it = n[IF_INC].begin(); it != n[IF_INC].end(); ++it)
                         if(it->first.Scalar() == KTOSTRING(__KUL_OS__))
-                            for(const auto& s : kul::String::split(it->second.Scalar(), ' '))
+                            for(const auto& s : kul::String::SPLIT(it->second.Scalar(), ' '))
                                 addIncludeLine(s);
-            }catch(const kul::TypeException){
+            }catch(const kul::StringException){
                 KEXCEPTION("if_inc contains invalid bool value\n"+project().dir().path());
             }
             try{
                 if(n[IF_SRC])
                     for(YAML::const_iterator it = n[IF_SRC].begin(); it != n[IF_SRC].end(); ++it)
                         if(it->first.Scalar() == KTOSTRING(__KUL_OS__))
-                            for(const auto& s : kul::String::split(it->second.Scalar(), ' '))
+                            for(const auto& s : kul::String::SPLIT(it->second.Scalar(), ' '))
                                 addSourceLine(s);
-            }catch(const kul::TypeException){
+            }catch(const kul::StringException){
                 KEXCEPTION("if_src contains invalid bool value\n"+project().dir().path());
             }
             if(n[IF_LIB])
                 for(YAML::const_iterator it = n[IF_LIB].begin(); it != n[IF_LIB].end(); ++it)
                     if(it->first.Scalar() == KTOSTRING(__KUL_OS__))
-                        for(const auto& s : kul::String::split(it->second.Scalar(), ' '))
+                        for(const auto& s : kul::String::SPLIT(it->second.Scalar(), ' '))
                             if(s.size()) libs.push_back(resolveFromProperties(s));
 
             profile = n[PARENT] ? resolveFromProperties(n[PARENT].Scalar()) : "";
@@ -442,10 +442,10 @@ void maiken::Application::buildDepVec(const std::string* depVal){
     if(depVal){
         if(depVal->size()){
             try{
-                AppVars::INSTANCE().dependencyLevel(kul::Type::GET_UINT(*depVal));
-            }catch(const kul::TypeException& e){
-                for(auto s : kul::String::split(*depVal, ',')){
-                    kul::String::trim(s);
+                AppVars::INSTANCE().dependencyLevel(kul::String::UINT16(*depVal));
+            }catch(const kul::StringException& e){
+                for(auto s : kul::String::SPLIT(*depVal, ',')){
+                    kul::String::TRIM(s);
                     include.insert(s);
                 }
             }
@@ -530,9 +530,9 @@ kul::Dir maiken::Application::resolveDependencyDirectory(const YAML::Node& n){
             d = kul::user::home(MAIKEN).join(REPO);
         try{
             std::string version(n[VERSION] ? resolveFromProperties(n[VERSION].Scalar()) : "default");
-            if(_MKN_REP_VERS_DOT_) kul::String::replaceAll(version, ".", kul::Dir::SEP());
+            if(_MKN_REP_VERS_DOT_) kul::String::REPLACE_ALL(version, ".", kul::Dir::SEP());
             std::string name(resolveFromProperties(n[NAME].Scalar()));
-            if(_MKN_REP_NAME_DOT_) kul::String::replaceAll(name, ".", kul::Dir::SEP());
+            if(_MKN_REP_NAME_DOT_) kul::String::REPLACE_ALL(name, ".", kul::Dir::SEP());
             d = kul::Dir::JOIN(d, kul::Dir::JOIN(name, version));
         }catch(const kul::Exception& e){ KLOG(DBG) << e.debug(); }
     }
@@ -658,19 +658,19 @@ void maiken::Application::populateMaps(const YAML::Node& n){ //IS EITHER ROOT OR
         evs.push_back(EnvVar(c[NAME].Scalar(), c[VALUE].Scalar(), mode));
     }
 
-    if(n[ARG]) for(const auto& o : kul::String::lines(n[ARG].Scalar())) arg += resolveFromProperties(o) + " ";
+    if(n[ARG]) for(const auto& o : kul::String::LINES(n[ARG].Scalar())) arg += resolveFromProperties(o) + " ";
     try{
-        if(n[MKN_INC]) for(const auto& o : kul::String::lines(n[MKN_INC].Scalar())) addIncludeLine(o);
-    }catch(const kul::TypeException){
+        if(n[MKN_INC]) for(const auto& o : kul::String::LINES(n[MKN_INC].Scalar())) addIncludeLine(o);
+    }catch(const kul::StringException){
         KEXCEPT(Exception, "include contains invalid bool value\n"+project().dir().path());
     }
     try{
-        if(n[MKN_SRC]) for(const auto& o : kul::String::lines(n[MKN_SRC].Scalar())) addSourceLine(o);
-    }catch(const kul::TypeException){
+        if(n[MKN_SRC]) for(const auto& o : kul::String::LINES(n[MKN_SRC].Scalar())) addSourceLine(o);
+    }catch(const kul::StringException){
         KEXCEPT(Exception, "source contains invalid bool value\n"+project().dir().path());
     }
     if(n[PATH])
-        for(const auto& s : kul::String::split(n[PATH].Scalar(), ' '))
+        for(const auto& s : kul::String::SPLIT(n[PATH].Scalar(), ' '))
             if(s.size()){
                 kul::Dir d(resolveFromProperties(s));
                 if(d) paths.push_back(d.path());
@@ -678,7 +678,7 @@ void maiken::Application::populateMaps(const YAML::Node& n){ //IS EITHER ROOT OR
             }
 
     if(n[MKN_LIB])
-        for(const auto& s : kul::String::split(n[MKN_LIB].Scalar(), ' '))
+        for(const auto& s : kul::String::SPLIT(n[MKN_LIB].Scalar(), ' '))
             if(s.size()) libs.push_back(resolveFromProperties(s));
 
     for(const std::string& s : libraryPaths())
@@ -714,7 +714,7 @@ void maiken::Application::populateDependencies(const YAML::Node& n) throw(kul::E
         apps.push_back(std::make_pair(app.project().dir().path(), app.p));
     }
     if(n[SELF])
-        for(const auto& s : kul::String::split(resolveFromProperties(n[SELF].Scalar()), ' ')){
+        for(const auto& s : kul::String::SPLIT(resolveFromProperties(n[SELF].Scalar()), ' ')){
             Application app(project(), s);
             app.par = this;
             app.scr = scr;
@@ -742,9 +742,9 @@ void maiken::Application::cyclicCheck(const std::vector<std::pair<std::string, s
             KEXCEPTION("Cyclical dependency found\n"+project().dir().path());
 }
 
-void maiken::Application::addSourceLine(const std::string& o) throw (kul::TypeException){
+void maiken::Application::addSourceLine(const std::string& o) throw (kul::StringException){
     if(o.find(',') == std::string::npos){
-        for(const auto& s : kul::String::split(o, ' ')){
+        for(const auto& s : kul::String::SPLIT(o, ' ')){
             kul::Dir d(resolveFromProperties(s));
             if(d) srcs.push_back(std::make_pair(d.real(), true));
             else{
@@ -754,31 +754,31 @@ void maiken::Application::addSourceLine(const std::string& o) throw (kul::TypeEx
             }
         }
     }else{
-        const auto& v =  kul::String::split(o, ',');
+        const auto& v =  kul::String::SPLIT(o, ',');
         if(v   .size() == 0 || v   .size() > 2) KEXCEPTION("source invalid format\n" + project().dir().path());
         kul::Dir d(resolveFromProperties(v[0]));
-        if(d) srcs.push_back(std::make_pair(d.real(), kul::Bool::FROM(v[1])));
+        if(d) srcs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
         else KEXCEPTION("source does not exist\n"+v[0]+"\n"+project().dir().path());
     }
 }
-void maiken::Application::addIncludeLine(const std::string& o) throw (kul::TypeException){
+void maiken::Application::addIncludeLine(const std::string& o) throw (kul::StringException){
     if(o.find(',') == std::string::npos){
-        for(const auto& s : kul::String::split(o, ' '))
+        for(const auto& s : kul::String::SPLIT(o, ' '))
             if(s.size()){
                 kul::Dir d(resolveFromProperties(s));
                 if(d) incs.push_back(std::make_pair(d.real(), true));
                 else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
             }
     }else{
-        const auto& v =  kul::String::split(o, ',');
+        const auto& v =  kul::String::SPLIT(o, ',');
         if(v   .size() == 0 || v   .size() > 2) KEXCEPTION("include invalid format\n" + project().dir().path());
         kul::Dir d(resolveFromProperties(v[0]));
-        if(d) incs.push_back(std::make_pair(d.real(), kul::Bool::FROM(v[1])));
+        if(d) incs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
         else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
     }
 }
 
-void maiken::Application::loadTimeStamps() throw (kul::TypeException){
+void maiken::Application::loadTimeStamps() throw (kul::StringException){
     if(_MKN_TIMESTAMPS_){
         kul::Dir mkn(buildDir().join(".mkn"));
         kul::File src("src_stamp", mkn);
@@ -789,11 +789,11 @@ void maiken::Application::loadTimeStamps() throw (kul::TypeException){
                 if(l->size() == 0) continue;
                 std::string s(*l);
                 std::vector<std::string> bits;
-                kul::String::split(s, ' ', bits);
+                kul::String::SPLIT(s, ' ', bits);
                 if(bits.size() != 2) KEXCEPTION("timestamp file invalid format\n"+src.full());
                 try{
-                    stss.insert(bits[0], kul::Type::GET_UINT(bits[1]));
-                }catch(const kul::TypeException& e){
+                    stss.insert(bits[0], kul::String::UINT16(bits[1]));
+                }catch(const kul::StringException& e){
                     KEXCEPTION("timestamp file invalid format\n"+src.full());
                 }
             }
@@ -805,11 +805,11 @@ void maiken::Application::loadTimeStamps() throw (kul::TypeException){
                 if(l->size() == 0) continue;
                 std::string s(*l);
                 std::vector<std::string> bits;
-                kul::String::split(s, ' ', bits);
+                kul::String::SPLIT(s, ' ', bits);
                 if(bits.size() != 2) KEXCEPTION("timestamp file invalid format\n"+inc.full());
                 try{
                     itss.insert(bits[0], bits[1]);
-                }catch(const kul::TypeException& e){
+                }catch(const kul::StringException& e){
                     KEXCEPTION("timestamp file invalid format\n"+src.full());
                 }
             }
