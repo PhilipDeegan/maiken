@@ -92,8 +92,8 @@ void maiken::Settings::write(const kul::File& f){
     w << "    linker: "   << (c?"clang":"gcc") << kul::os::EOL();
     w.write("  - type: cpp", true);
     w.write("    archiver: ar -cr", true);
-    w << "    compiler: " << (c?"clang":"") << "g++" << kul::os::EOL();
-    w << "    linker: "   << (c?"clang":"") << "g++" << kul::os::EOL();
+    w << "    compiler: " << (c?"clan":"") << "g++" << kul::os::EOL();
+    w << "    linker: "   << (c?"clan":"") << "g++" << kul::os::EOL();
 #endif
 
     w.write("# Other examples", true);
