@@ -48,7 +48,7 @@ class Exception : public kul::Exception{
         Exception(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
 };
 
-class AppVars{
+class AppVars : public Constants{
     private:
         bool b = 0, c = 0, d = 0, f = 0, g = 0, l = 0, p = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
         uint16_t dl = 0;
