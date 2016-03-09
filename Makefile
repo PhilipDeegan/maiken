@@ -10,7 +10,7 @@ endif
 
 OS =
 CXX=g++ 
-CXXFLAGS=-std=c++14 -g3 -Wall  -fmessage-length=0 
+CXXFLAGS=-std=c++14 -Os -Wall -fmessage-length=0 
 INCS =  -I$(CWD)/inc \
 		-I$(CWD)/ext/yaml/$(YAML_GIT)/include \
 		-I$(CWD)/ext/kul/$(KUL_GIT)/inc \
