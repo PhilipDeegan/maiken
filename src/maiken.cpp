@@ -198,7 +198,7 @@ void maiken::Application::process() throw(kul::Exception){
                 if(v.size()) oldEvs.push_back(std::pair<std::string, std::string>(ev.name(), v));
                 kul::env::SET(ev.name(), ev.toString().c_str());
             }
-            if(AppVars::INSTANCE().clean()) if((*app).buildDir().is()){
+            if(AppVars::INSTANCE().clean() && (*app).buildDir().is()){
                 (*app).buildDir().rm();
                 kul::Dir((*app).buildDir().join(".mkn")).rm();
             }
@@ -216,7 +216,7 @@ void maiken::Application::process() throw(kul::Exception){
         kul::env::CWD(this->project().dir());
         if(!this->ig){
             for(const kul::cli::EnvVar& ev : this->envVars()) kul::env::SET(ev.name(), ev.toString().c_str());
-            if(AppVars::INSTANCE().clean()) if(this->buildDir().is()){
+            if(AppVars::INSTANCE().clean() && this->buildDir().is()){
                 this->buildDir().rm();
                 kul::Dir(this->buildDir().join(".mkn")).rm();
             }

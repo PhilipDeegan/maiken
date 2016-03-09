@@ -88,8 +88,6 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
         return objects;
     }
     buildDir().mk();
-    kul::Dir mkn(buildDir().join(".mkn"));
-    if(!mkn && !mkn.mk()) KEXCEPTION("Inadequate permissions on directory " + buildDir().real());
     std::vector<kul::File> cacheFiles;
     if(kul::LogMan::INSTANCE().inf()){
         if(!arg.empty()) KOUT(NON) << "ARGUMENTS\n\t" << arg;
@@ -180,6 +178,7 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
         }
     }
     if(_MKN_TIMESTAMPS_){
+        kul::Dir mkn(buildDir().join(".mkn"), 1);
         kul::File srcStamps("src_stamp", mkn);
         kul::File incStamps("inc_stamp", mkn);
         for(const auto& src : stss)
