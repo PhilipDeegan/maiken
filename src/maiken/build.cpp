@@ -157,15 +157,14 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
                 tp.run();
                 tp.join();
 
-                auto f = [] (const std::string& s) { if(s.size()) KOUT(NON) << s; };
+                auto o = [] (const std::string& s) { if(s.size()) KOUT(NON) << s; };
+                auto e = [] (const std::string& s) { if(s.size()) KERR << s; };
                 std::exception_ptr ep;
                 for(const kul::code::CompilerProcessCapture& cpc : tc.processCaptures()){
                     if(cpc.exception()) ep = cpc.exception();
-                    if(!kul::LogMan::INSTANCE().inf() && cpc.exception()){
-                        f(cpc.outs());
-                        f(cpc.errs());
-                    }else
-                    if(kul::LogMan::INSTANCE().dbg()) f(cpc.cmd());
+                    if(kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
+                    if(kul::LogMan::INSTANCE().err() || cpc.exception()) e(cpc.errs());
+                    KOUT(DBG) << cpc.cmd();
                 }
                 if(ep) std::rethrow_exception(ep);
 
@@ -320,17 +319,17 @@ void maiken::Application::buildLibrary(const std::vector<std::string>& objects){
         checkErrors(cpc);
         KOUT(DBG) << cpc.cmd();
         KOUT(NON) << "Creating lib: " << kul::File(cpc.tmp()).real();
-
     }else
         KEXCEPTION("Unable to handle artifact: \"" + lang + "\" - type is not in file list");
 }
 
 void maiken::Application::checkErrors(const kul::code::CompilerProcessCapture& cpc) throw(kul::Exception){
-    if(kul::LogMan::INSTANCE().inf()){
-        auto f = [] (const std::string& s) { if(s.size()) KOUT(NON) << s; };
-        f(cpc.outs());
-        f(cpc.errs());
-    }
+    auto o = [] (const std::string& s) { if(s.size()) KOUT(NON) << s; };
+    auto e = [] (const std::string& s) { if(s.size()) KERR << s; };
+    if(kul::LogMan::INSTANCE().inf() || cpc.exception())
+        o(cpc.outs());
+    if(kul::LogMan::INSTANCE().err() || cpc.exception())
+        e(cpc.errs());
     if(cpc.exception()) std::rethrow_exception(cpc.exception());
 }
 
