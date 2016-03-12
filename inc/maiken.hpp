@@ -62,7 +62,7 @@ class AppVars : public Constants{
             if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][REPO])
                 pks["MKN_REPO"] = Settings::INSTANCE().root()[LOCAL][REPO].Scalar();
             else
-                pks["MKN_REPO"] = kul::user::home(MAIKEN).path();
+                pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(MAIKEN, REPO)).path();
 
         }
     public:
