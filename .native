@@ -5,8 +5,8 @@ x86_64-debian-gcc-32 -std=c++14 -Wall
 x86_64-debian-gcc-64 -std=c++14 -Wall
 x86_64-netbsd-gcc-32 -std=c++14 -Wall
 x86_64-netbsd-gcc-64 -std=c++14 -Wall
-x86_64-freebsd-gcc-32 -std=c++14 -Wall
-x86_64-freebsd-gcc-64 -std=c++14 -Wall
+x86_64-freebsd-gcc-32 -D_GLIBCXX_USE_C99 -std=c++14 -Wall
+x86_64-freebsd-gcc-64 -D_GLIBCXX_USE_C99 -std=c++14 -Wall
 armv7_a-debian-gcc-32 -std=c++14 -Wall
 x86_64-windows-cl-32 -EHsc
 #x86_64-windows-cl-64 -EHsc
