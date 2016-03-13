@@ -223,8 +223,8 @@ Operations:
         LD_LIBRARY_PATH=<GCC_INSTALL>/lib64 make nix CXX=clang++ CXXFLAGS="-O2 -std=c++14 -Wall -I<GCC_INSTALL>/include/c++/5.2.0 -I<GCC_INSTALL>/include/c++/5.2.0/x86_64-unknown-linux-gnu" LDFLAGS="-L<GCC_INSTALL>/lib64" 
 
 Testing:
-    static : ./mkn clean build -dtKa "-Os -std=c++14 -Wall -fmessage-length=0" -l -pthread
-    shared : ./mkn clean build -dtSa "-Os -std=c++14 -Wall -fmessage-length=0 -fPIC"
+    static : ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l -pthread
+    shared : ./mkn clean build -dtSa "-Os -std=c++14 -Wall -fPIC"
 
 3.2.1 Mac/OSX
 
@@ -234,8 +234,8 @@ Operations:
     - make bsd CXX=clang++
 
 Testing:
-    static : ./mkn clean build -dtKa "-Os -std=c++14 -Wall -fmessage-length=0" -l -pthread
-    shared : ./mkn clean build -dtSa "-Os -std=c++14 -Wall -fmessage-length=0 -fPIC"
+    static : ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l -pthread
+    shared : ./mkn clean build -dtSa "-Os -std=c++14 -Wall -fPIC"
 
 3.2.3 NetBSD
 
@@ -245,19 +245,19 @@ Operations:
     - gmake bsd LDFLAGS="-pthread -lexecinfo"
 
 Operations:
-    static : ./mkn clean build -dtKa "-Os -std=c++14 -Wall -fmessage-length=0" -l "-pthread -lexecinfo"
-    shared : ./mkn clean build -dtSa "-Os -std=c++14 -Wall -fmessage-length=0 -fPIC" -l -lexecinfo
+    static : ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l "-pthread -lexecinfo"
+    shared : ./mkn clean build -dtSa "-Os -std=c++14 -Wall -fPIC" -l -lexecinfo
 
 3.2.3 FreeBSD
 
 Operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
     - cd maiken/master
-    - gmake bsd CXXFLAGS="-std=c++14 -Os -Wall -fmessage-length=0 -D_GLIBCXX_USE_C99"
+    - gmake bsd CXXFLAGS="-std=c++14 -Os -Wall -D_GLIBCXX_USE_C99"
 
 Operations:
-    static : ./mkn clean build -dtKa "-Os -std=c++14 -Wall -fmessage-length=0 -D_GLIBCXX_USE_C99" -l -pthread
-    shared : ./mkn clean build -dtSa "-Os -std=c++14 -Wall -fmessage-length=0 -fPIC -D_GLIBCXX_USE_C99" 
+    static : ./mkn clean build -dtKa "-Os -std=c++14 -Wall -D_GLIBCXX_USE_C99" -l -pthread
+    shared : ./mkn clean build -dtSa "-Os -std=c++14 -Wall -fPIC -D_GLIBCXX_USE_C99" 
 
 
 4.1 Logging - 
