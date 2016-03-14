@@ -1,7 +1,7 @@
 
 KUL_GIT=master
-YAML_GIT=0.5.5
-HASH_GIT=2.0.3
+YAML_GIT=stable
+HASH_GIT=stable
 
 CWD:=$(CURDIR)
 ifeq ($(strip $(CURDIR)),)
