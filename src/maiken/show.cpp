@@ -54,7 +54,9 @@ void maiken::Application::showConfig(bool force){
         for(const auto& c : Settings::INSTANCE().root()[FILE]){
             bool a = 0, g = 0, l = 0;
             KOUT(NON) << "TYPE    : " << c[TYPE].Scalar();
-            for(const auto& d : kul::String::SPLIT(path, kul::env::SEP())){
+            std::vector<std::string> ps;
+            kul::String::SPLIT(path, kul::env::SEP(), ps);
+            for(const auto& d : ps){
                 if(a && g && l) break;
                 kul::Dir dir(d);
                 if(!dir) continue;

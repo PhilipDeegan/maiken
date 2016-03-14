@@ -388,7 +388,7 @@ void maiken::Application::setup(){
                     std::string left(it->first.Scalar());
                     if(left.find("_") != std::string::npos){
                         if(left.substr(0, left.find("_")) == KTOSTRING(__KUL_OS__))
-                            left = left.substr(left.find("_" + 1));
+                            left = left.substr(left.find("_") + 1);
                         else continue;
                     }
                     std::vector<std::string> ifArgs;
@@ -569,7 +569,7 @@ void maiken::Application::run(bool dbg){
         p->arg(f.mini());
     }
     else
-        p = std::make_unique<kul::Process>(f.mini());
+        p = std::make_unique<kul::Process>(f.escm());
     for(const auto& s : kul::cli::asArgs(AppVars::INSTANCE().args())) p->arg(s);
     if(m != kul::code::Mode::STAT){
         std::string arg;
