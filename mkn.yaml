@@ -21,4 +21,5 @@ profile:
   - name: shared
     parent: static
     mode: shared
-    arg: -DYAML_CPP_DLL
+    if_arg:
+        win_shared: -DYAML_CPP_DLL
