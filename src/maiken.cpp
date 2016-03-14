@@ -85,7 +85,7 @@ maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) thro
         KEXIT(0, "");
     }
     if(args.has(VERSION)){
-        KOUT(NON) << VERSION_NUMBER;
+        KOUT(NON) << VERSION_NUMBER << " (" << KTOSTRING(__KUL_OS__) << ")";
         KEXIT(0, "");
     }
     if(args.has(INIT)){
