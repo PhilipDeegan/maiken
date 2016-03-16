@@ -80,7 +80,7 @@ void maiken::Settings::write(const kul::File& f){
 
     w.write("file:", true);
 #ifdef _WIN32
-    w.write("  - type: c:cpp", true);
+    w.write("  - type: cpp:cxx:cc:c", true);
     w.write("    archiver: lib", true);
     w.write("    compiler: cl", true);
     w.write("    linker: link", true);
@@ -90,7 +90,7 @@ void maiken::Settings::write(const kul::File& f){
     w.write("    archiver: ar -cr", true);
     w << "    compiler: " << (c?"clang":"gcc") << kul::os::EOL();
     w << "    linker: "   << (c?"clang":"gcc") << kul::os::EOL();
-    w.write("  - type: cpp", true);
+    w.write("  - type: cpp:cxx:cc", true);
     w.write("    archiver: ar -cr", true);
     w << "    compiler: " << (c?"clan":"") << "g++" << kul::os::EOL();
     w << "    linker: "   << (c?"clan":"") << "g++" << kul::os::EOL();
