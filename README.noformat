@@ -136,7 +136,7 @@ profiles:
 2.2.1.1 Type deduction
 
 If no main tag is found, library linking is assumed
-If no main tag and no lang tag is found, language is deduced from first main tag found in file
+If no lang tag is found, language is deduced from first main tag found in file
     langauge cannot be deduced if there are no main tags
 If the project is a dependency, even if a main tag is present, library linking is assumed.
 
@@ -147,7 +147,7 @@ The mode tag may have three values: static/shared/none
 If the mode tag is found, it takes precedence for linking
 If no mode tag is found, the -K and -S args will be used if found.
 Linking cannot be guaranteed if no mode is used, but shared is generally default.
-Unless an project requires a mode, it's advised to avoid using one. So it can be overridden with -K or -S.
+Unless a project requires a mode, it's advised to avoid using one. So it can be overridden with -K or -S.
 
 If a application includes both static and shared dependencies, using the mode "none" is advised.
 
@@ -200,7 +200,7 @@ Testing:
     static : ./mkn clean build -dtKa -EHsc
     shared : ./mkn clean build -dtSa -EHsc
 
-Example Windows settings can be found at: https://github.com/Dekken/maiken/blob/master/res/windows/settings.yaml
+Example Windows settings can be found at: https://github.com/Dekken/maiken/wiki
 
 3.2 Unix
 
@@ -286,8 +286,8 @@ The settings file is the default global configuration for projects.
 
 4.3.1 schema
 
-inc: <directory> <directory>            # Optionally add include directories compiling 
-path: <directory> <directory>           # Optionally add library path directories linking
+inc: <directory> <directory>            # Optional, add include directories compiling 
+path: <directory> <directory>           # Optional, add library path directories linking
 
 file:                                   # Must include at least one item in list
   - type: c:cpp:cxx                     # Sources won't be compiled if the filetype is missing
@@ -304,7 +304,7 @@ local:
     lib:  <directory>                   # Optional, successfully linked libraries are moved to <directory>, overrides install
     debugger: <debug command>           # Optional debug command, overrides defaut, overriden by env var MKN_DBG string
 remote:
-    repo: URL_ROOTA URL_ROOTB           # Optional, overrides switch _MKN_REMOTE_REPO_ for non complete SCM URL lookups
+    repo: URL_ROOTA URL_ROOTB           # Optional, overrides switch _MKN_REMOTE_REPO_ for incomplete SCM URL lookups
 
 4.3.2 Location
     - Linux   -    ~/.maiken/settings.yaml
@@ -341,9 +341,9 @@ If neither are set the following rules apply
 After a missing dependency is retrieved for the first time, an initial setup script is run to put the repository in the desired state.
 The type of file differs per OS, the rules are thus.
     Windows: ./mkn.bat
-    Linux  : ./mkn.nis.sh, or if missing, ./mkn.sh
+    Linux  : ./mkn.nix.sh, or if missing, ./mkn.sh
     BSD    : ./mkn.bsd.sh, or if missing, ./mkn.sh
-This can be disabled by compiling with the argument "-D_MKN_REMOTE_REPO_=0"
+This can be disabled by compiling with the argument "-D_MKN_REMOTE_EXEC_=0"
 
 4.8 Default build command
 
@@ -394,19 +394,19 @@ Available arguments:
     -a --args arg         - Adds $arg to the compile command if compile/build, passes arguments to application if run
     -d n                  - See 4.8
     -h --help             - Print help
-    -j --jargs json       - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing langauge specific args to compiler
+    -j --jargs json       - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing file-type specific args to compiler
     -l --linker text      - Adds text to linking of binary
     -p --profile p        - Activate profile p
-    -s --scm-status       - Display SCM status of project directory, allows -d
+    -s --scm-status       - Display SCM status of project, allows -d
     -u --scm-update       - Update project from SCM when permitted, allows -d
     -U --scm-force-update - Force update project from SCM, allows -d
     -t --threads n        - Consume $num threads while compiling source files where $n > 0, If $n is missing optimal resolution attempted.
-    -v --version          - Displays the current maiken version number then exits, first checked command/argument 
+    -v --version          - Displays the current maiken version number
     -x --settings f       - Sets settings.yaml in use to $f. Directory missing, $(4.3.1) attempted
     -C --directory d      - Execute on directory $d rather than current directory 
     -D --debug            - If default profile, changes object directory to ./bin/debug instead of ./bin/build
-    -K --static           - Sets all builds without a build tag mode attribute to static
-    -S --shared           - Sets all builds without a build tag mode attribute to shared
+    -K --static           - Links projects without mode as static
+    -S --shared           - Links projects without mode as shared
 
 
 5.1.3 Examples
