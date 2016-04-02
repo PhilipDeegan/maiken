@@ -51,10 +51,8 @@ class Exception : public kul::Exception{
 class AppVars : public Constants{
     private:
         bool b = 0, c = 0, d = 0, f = 0, g = 0, l = 0, p = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
-        uint16_t dl = 0;
-        uint16_t ts = 1;
-        std::string aa;
-        std::string la;
+        uint16_t dl = 0, ts = 1;
+        std::string aa, la;
         kul::hash::map::S2S jas, pks;
         AppVars(){
             pks["OS"]   = KTOSTRING(__KUL_OS__);
@@ -66,8 +64,8 @@ class AppVars : public Constants{
 
         }
     public:
-        const std::string& args() const { return aa;}
-        void args(const std::string& aa)    { this->aa = aa;}
+        const std::string& args() const  { return aa;}
+        void args(const std::string& aa) { this->aa = aa;}
 
         const kul::hash::map::S2S& jargs() const { return jas;}
         void jargs(const std::string& a, const std::string& b) { this->jas.insert(a, b);}
@@ -88,10 +86,10 @@ class AppVars : public Constants{
         void dbg(const bool& g)   { this->g = g;}
 
         const bool& debug() const { return this->d;}
-        void debug(const bool& d)   { this->d = d;}
+        void debug(const bool& d) { this->d = d;}
 
         const bool& fupdate() const { return this->f;}
-        void fupdate(const bool& f)   { this->f = f;}
+        void fupdate(const bool& f) { this->f = f;}
 
         const bool& link() const { return this->l;}
         void link(const bool& l) { this->l = l;}
@@ -109,13 +107,13 @@ class AppVars : public Constants{
         void trim(const bool& t) { this->t = t;}
 
         const bool& update() const { return this->u;}
-        void update(const bool& u)   { this->u = u;}
+        void update(const bool& u) { this->u = u;}
 
-        const bool& stat() const { return this->st;}
-        void stat(const bool& st){ this->st = st;}
+        const bool& stat() const  { return this->st;}
+        void stat(const bool& st) { this->st = st;}
 
         const uint16_t& dependencyLevel()  const { return dl;}
-        void dependencyLevel(const uint16_t& dl)  { this->dl = dl;}
+        void dependencyLevel(const uint16_t& dl) { this->dl = dl;}
 
         const uint16_t& threads() const { return ts;}
         void threads(const uint16_t& t) { this->ts = t;}
@@ -134,23 +132,18 @@ class Application : public Constants{
         bool ig = 1;
         const Application* par = 0;
         kul::code::Mode m;
-        std::string arg, main, lang;
+        std::string arg, main, lang, scr;
         const std::string p;
         kul::Dir bd, inst;
         maiken::Project proj;
         kul::hash::map::S2T<kul::hash::map::S2S> fs;
-        std::vector<std::string> libs;
-        std::vector<std::pair<std::string, bool> > srcs;
-        std::vector<std::pair<std::string, bool> > incs;
-        std::vector<std::string> paths;
-        kul::hash::map::S2S ps;
+        std::vector<std::pair<std::string, bool> > incs, srcs;
+        std::vector<std::string> libs, paths;
+        kul::hash::map::S2S includeStamps, itss, ps;
         kul::hash::map::S2T<kul::hash::set::String> args;
         kul::hash::map::S2T<uint16_t> stss;
-        kul::hash::map::S2S itss;
-        kul::hash::map::S2S includeStamps;
         std::vector<kul::cli::EnvVar> evs;
         std::vector<Application> deps;
-        std::string scr;
         const kul::SCM* scm = 0;
 
         Application(const maiken::Project& proj, const std::string profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){}
