@@ -279,13 +279,13 @@ void maiken::Application::setup(){
                     kul::env::CWD(projectDir);
                     if(_MKN_REMOTE_EXEC_){
 #ifdef _WIN32
-                        if(kul::File("mkn.bat").is() && kul::proc::Call("mkn.bat").run()) KEXCEPTION("ERROR in "+projectDir.path()+"mkn.bat");
+                        if(kul::File("mkn.bat").is() && kul::proc::Call("mkn.bat").run()) KEXCEPTION("ERROR in "+projectDir.path()+"/mkn.bat");
 #else
                         if(kul::File("mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh").is() 
                             && kul::proc::Call("sh mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh").run())
                             KEXCEPTION("ERROR in "+projectDir.path()+"mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh");
                         else
-                        if(kul::File("mkn.sh").is() && kul::proc::Call("sh mkn.sh").run()) KEXCEPTION("ERROR in "+projectDir.path()+"mkn.sh");
+                        if(kul::File("mkn.sh").is() && kul::proc::Call("sh mkn.sh").run()) KEXCEPTION("ERROR in "+projectDir.path()+"/mkn.sh");
 #endif
                     }
                     kul::env::CWD(this->project().dir());
