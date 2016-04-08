@@ -16,7 +16,7 @@ INCS =  -I$(CWD)/inc \
 		-I$(CWD)/ext/kul/$(KUL_GIT)/inc \
 		-I$(CWD)/ext/kul/$(KUL_GIT)/os/$(OS)/inc \
 		-I$(CWD)/ext/kul/$(KUL_GIT)/os/nixish/inc \
-		-I$(CWD)/ext/sparsehash/$(HASH_GIT)/include
+		-I$(CWD)/ext/sparsehash/$(HASH_GIT)
 
 YAML = $(CWD)/ext/yaml/$(YAML_GIT)/bin/libyaml.a
 LDFLAGS = -pthread
