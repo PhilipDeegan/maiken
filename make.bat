@@ -42,8 +42,7 @@ SET VSCAR=%VIS_STU%\VC\bin\lib
 
 SET INCLUDES=%INCLUDES% /I%PWD%\ext\kul\%KUL_VER%\inc
 SET INCLUDES=%INCLUDES% /I%PWD%\ext\kul\%KUL_VER%\os\win\inc
-SET INCLUDES=%INCLUDES% /I%PWD%\ext\sparsehash\%HASH_VER%\src
-SET INCLUDES=%INCLUDES% /I%PWD%\ext\sparsehash\%HASH_VER%\src\windows
+SET INCLUDES=%INCLUDES% /I%PWD%\ext\sparsehash\%HASH_VER%
 SET INCLUDES=%INCLUDES% /I%PWD%\ext\yaml\%YAML_VER%\include
 SET INCLUDES=%INCLUDES% /I%WIN_KIT%\Include\10.0.10240.0\um
 SET INCLUDES=%INCLUDES% /I%WIN_KIT%\Include\10.0.10240.0\ucrt
