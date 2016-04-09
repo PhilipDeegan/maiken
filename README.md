@@ -43,3 +43,7 @@ MSVC Windows
 
 ![MSVC Windows](https://raw.githubusercontent.com/Dekken/maiken/wiki/mkn_win.png)
 
+Init example
+
+![MSVC Windows](https://raw.githubusercontent.com/Dekken/maiken/wiki/mkn_init.png)
+
