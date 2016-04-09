@@ -35,5 +35,9 @@ mkn run
 
 ## Screenshots
 
-![Windows](https://raw.githubusercontent.com/Dekken/maiken/wiki/mkn_win.png)
+GCC Debian
+![GCC Debian](https://raw.githubusercontent.com/Dekken/maiken/wiki/mkn_nix.png)
+
+MSVC Windows
+![MSVC Windows](https://raw.githubusercontent.com/Dekken/maiken/wiki/mkn_win.png)
 
