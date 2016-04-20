@@ -13,6 +13,7 @@
 
 Testers/comments/suggestions/feature requests welcome. Email me or make an issue. Or head on over to [/r/mkn](http://reddit.com/r/mkn)
 
+**Note: Older compilers may be used by maiken**
 
 ## Dependencies 
 
