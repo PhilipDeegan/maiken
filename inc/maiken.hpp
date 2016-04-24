@@ -145,9 +145,6 @@ class Application : public Constants{
         std::vector<kul::cli::EnvVar> evs;
         std::vector<Application> deps;
         const kul::SCM* scm = 0;
-
-        Application(const maiken::Project& proj, const std::string profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){}
-        Application(const maiken::Project& proj) : m(kul::code::Mode::NONE), proj(proj){}
         void buildDepVec(const std::string* depVal);
         void buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc);
         void buildExecutable(const std::vector<std::string>& objects);
@@ -184,7 +181,9 @@ class Application : public Constants{
 
         static void showHelp();
     public:
-        static Application CREATE(int16_t argc, char *argv[]) throw(kul::Exception);
+        Application(const maiken::Project& proj, const std::string profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){}
+        Application(const maiken::Project& proj) : m(kul::code::Mode::NONE), proj(proj){}
+
         virtual void                                       process()   throw(kul::Exception);
         const kul::Dir&                                    buildDir()      const { return bd; }
         const std::string&                                 profile()       const { return p; }
@@ -200,6 +199,8 @@ class Application : public Constants{
         const kul::hash::map::S2T<kul::hash::set::String>& arguments()     const { return args; }
 
         friend class ThreadingCompiler;
+
+        static std::shared_ptr<Application> CREATE(int16_t argc, char *argv[]) throw(kul::Exception);
 };
 
 class ThreadingCompiler : public Constants{

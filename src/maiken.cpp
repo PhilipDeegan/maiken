@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken.hpp"
 
-maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
+std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
     using namespace kul::cli;
 
     std::vector<Arg> argV { Arg('a', ARG    , ArgType::STRING),
@@ -107,7 +107,8 @@ maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) thro
     if(args.has(SETTINGS) && !Settings::SET(args.get(SETTINGS)))
         KEXCEPT(Exception, "Unable to set specific settings xml");
     else Settings::INSTANCE();
-    Application a(project, profile);
+    auto app = std::make_shared<Application>(project, profile);
+    auto& a = *app.get();
     if(args.has(PROFILES)){
         a.showProfiles();
         KEXIT(0, "");
@@ -181,7 +182,7 @@ maiken::Application maiken::Application::CREATE(int16_t argc, char *argv[]) thro
     if(args.has(LINK))      AppVars::INSTANCE().link(true);
     if(args.has(RUN))       AppVars::INSTANCE().run(true);
     if(args.has(TRIM))      AppVars::INSTANCE().trim(true);
-    return a;
+    return app;
 }
 
 void maiken::Application::process() throw(kul::Exception){
@@ -463,15 +464,15 @@ void maiken::Application::buildDepVec(const std::string* depVal){
         app.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), include);
         if(AppVars::INSTANCE().dependencyLevel()) app.ig = 0;
     }
-    std::vector<Application> t;
-    for(const Application* a : dePs) t.push_back(*a);
-    for(const Application& a : t){
+    std::vector<Application*> t;
+    for(Application* a : dePs) t.push_back(a);
+    for(const Application* a : t){
         bool f = 0;
         for(const auto& a1: deps)
-            if(a.project().dir() == a1.project().dir() && a.p == a1.p){
+            if(a->project().dir() == a1.project().dir() && a->p == a1.p){
                 f = 1; break;
             }
-        if(!f) deps.push_back(a);
+        if(!f) deps.push_back(*a);
     }
     for(const auto& d : deps) all.insert(d.project().root()[NAME].Scalar());
     for(const auto& d : include)

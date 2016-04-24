@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
     kul::Signal sig;
     const int64_t s = kul::Now::MILLIS();
     try{
-        maiken::Application::CREATE(argc, argv).process();
+        maiken::Application::CREATE(argc, argv)->process();
         KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
         KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
     }
