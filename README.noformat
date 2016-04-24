@@ -206,7 +206,7 @@ Example Windows settings can be found at: https://github.com/Dekken/maiken/wiki
 
 Prerequisites:
     - git
-    - gcc 4.9 (+) or equivalent
+    - gcc 5.0 (+) or equivalent
 
 3.2.1 Debian
 
