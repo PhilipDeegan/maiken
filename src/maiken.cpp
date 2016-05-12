@@ -464,15 +464,15 @@ void maiken::Application::buildDepVec(const std::string* depVal){
         app.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), include);
         if(AppVars::INSTANCE().dependencyLevel()) app.ig = 0;
     }
-    std::vector<Application*> t;
-    for(Application* a : dePs) t.push_back(a);
-    for(const Application* a : t){
+    std::vector<Application> t;
+    for(const Application* a : dePs) t.push_back(*a);
+    for(const Application& a : t){
         bool f = 0;
         for(const auto& a1: deps)
-            if(a->project().dir() == a1.project().dir() && a->p == a1.p){
+            if(a.project().dir() == a1.project().dir() && a.p == a1.p){
                 f = 1; break;
             }
-        if(!f) deps.push_back(*a);
+        if(!f) deps.push_back(a);
     }
     for(const auto& d : deps) all.insert(d.project().root()[NAME].Scalar());
     for(const auto& d : include)
