@@ -214,7 +214,7 @@ kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > maiken::Applic
     const kul::hash::set::String iMs = inactiveMains();
     kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> sm;
     if(main.size()){
-        kul::File f(main);
+        kul::File f(kul::Dir(main).locl());
         if(!f)      f = kul::File(main, project().dir());
         if(f.is() && incSrc(f)) sm[f.name().substr(f.name().rfind(".") + 1)][f.dir().real()].insert(f.real());
         else
