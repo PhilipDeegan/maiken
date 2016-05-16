@@ -744,10 +744,8 @@ void maiken::Application::cyclicCheck(const std::vector<std::pair<std::string, s
 }
 
 void maiken::Application::addSourceLine(const std::string& o) throw (kul::StringException){
-    std::vector<std::string> v(kul::cli::asArgs(o));
-    const auto& it(std::find(v.begin(), v.end(), ","));
-    if(it == v.end()){
-        for(const auto& s : v){
+    if(o.find(',') == std::string::npos){
+        for(const auto& s : kul::cli::asArgs(o)){
             kul::Dir d(resolveFromProperties(s));
             if(d) srcs.push_back(std::make_pair(d.real(), true));
             else{
@@ -757,26 +755,28 @@ void maiken::Application::addSourceLine(const std::string& o) throw (kul::String
             }
         }
     }else{
+        std::vector<std::string> v;
+        kul::String::SPLIT(o, ",", v);
         if(v.size() == 0 || v.size() > 2) KEXCEPTION("source invalid format\n" + project().dir().path());
         kul::Dir d(resolveFromProperties(v[0]));
-        if(d) srcs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[2])));
+        if(d) srcs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
         else KEXCEPTION("source does not exist\n"+v[0]+"\n"+project().dir().path());
     }
 }
 void maiken::Application::addIncludeLine(const std::string& o) throw (kul::StringException){
-    std::vector<std::string> v(kul::cli::asArgs(o));
-    const auto& it(std::find(v.begin(), v.end(), ","));
-    if(it == v.end()){
-        for(const auto& s : v)
+    if(o.find(',') == std::string::npos){
+        for(const auto& s : kul::cli::asArgs(o))
             if(s.size()){
                 kul::Dir d(resolveFromProperties(s));
                 if(d) incs.push_back(std::make_pair(d.real(), true));
                 else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
             }
     }else{
-        if(v.size() == 0 || v.size() > 3) KEXCEPTION("include invalid format\n" + project().dir().path());
+        std::vector<std::string> v;
+        kul::String::SPLIT(o, ",", v);
+        if(v.size() == 0 || v.size() > 2) KEXCEPTION("include invalid format\n" + project().dir().path());
         kul::Dir d(resolveFromProperties(v[0]));
-        if(d) incs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[2])));
+        if(d) incs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
         else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
     }
 }
