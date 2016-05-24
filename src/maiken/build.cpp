@@ -315,7 +315,7 @@ void maiken::Application::buildLibrary(const std::vector<std::string>& objects){
         const kul::code::CompilerProcessCapture& cpc =
             kul::code::Compilers::INSTANCE().get((*(*files().find(lang)).second.find(COMPILER)).second)
                 ->buildLibrary(linker, linkEnd, objects,
-                    libraries(), libraryPaths(), kul::File(lib, out), m);
+                    libraries(), libraryPaths(), kul::File(lib, out).escm(), m);
         checkErrors(cpc);
         KOUT(DBG) << cpc.cmd();
         KOUT(NON) << "Creating lib: " << kul::File(cpc.tmp()).real();

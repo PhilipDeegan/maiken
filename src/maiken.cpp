@@ -312,7 +312,7 @@ void maiken::Application::setup(){
         for(const auto& s : kul::String::SPLIT(Settings::INSTANCE().root()[PATH].Scalar(), ' '))
             if(s.size()){
                 kul::Dir d(resolveFromProperties(s));
-                if(d) paths.push_back(d.path());
+                if(d) paths.push_back(d.esc());
                 else  KEXCEPTION("library path does not exist\n"+d.path()+"\n"+Settings::INSTANCE().file());
             }
 
@@ -674,7 +674,7 @@ void maiken::Application::populateMaps(const YAML::Node& n){ //IS EITHER ROOT OR
         for(const auto& s : kul::String::SPLIT(n[PATH].Scalar(), ' '))
             if(s.size()){
                 kul::Dir d(resolveFromProperties(s));
-                if(d) paths.push_back(d.path());
+                if(d) paths.push_back(d.esc());
                 else KEXCEPTION("library path does not exist\n"+d.path()+"\n"+project().dir().path());
             }
 
@@ -730,7 +730,7 @@ void maiken::Application::populateDependencies(const YAML::Node& n) throw(kul::E
         if(app.project().root()[SCM]) app.scr = app.resolveFromProperties(app.project().root()[SCM].Scalar());
         if(!app.sources().empty()){
             app.buildDir().mk();
-            app.paths.push_back(app.inst ? app.inst.real() : app.buildDir().real());
+            app.paths.push_back(app.inst ? app.inst.esc() : app.buildDir().esc());
         }
         kul::env::CWD(this->project().dir());
     }
