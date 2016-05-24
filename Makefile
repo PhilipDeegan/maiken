@@ -11,14 +11,14 @@ endif
 OS =
 CXX=g++ 
 CXXFLAGS=-std=c++14 -Os -Wall -fmessage-length=0 
-INCS =  -I$(CWD)/inc \
-		-I$(CWD)/ext/yaml/$(YAML_GIT)/include \
-		-I$(CWD)/ext/kul/$(KUL_GIT)/inc \
-		-I$(CWD)/ext/kul/$(KUL_GIT)/os/$(OS)/inc \
-		-I$(CWD)/ext/kul/$(KUL_GIT)/os/nixish/inc \
-		-I$(CWD)/ext/sparsehash/$(HASH_GIT)
+INCS =  -Iinc \
+		-Iext/yaml/$(YAML_GIT)/include \
+		-Iext/kul/$(KUL_GIT)/inc \
+		-Iext/kul/$(KUL_GIT)/os/$(OS)/inc \
+		-Iext/kul/$(KUL_GIT)/os/nixish/inc \
+		-Iext/sparsehash/$(HASH_GIT)
 
-YAML = $(CWD)/ext/yaml/$(YAML_GIT)/bin/libyaml.a
+YAML = ext/yaml/$(YAML_GIT)/bin/libyaml.a
 LDFLAGS = -pthread
 LINKP= -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 
@@ -57,10 +57,6 @@ general:
 	fi; 
 	@if [ ! -d "./ext/sparsehash/$(HASH_GIT)" ]; then \
 		git clone http://github.com/mkn/google.sparsehash.git --branch $(HASH_GIT) ext/sparsehash/$(HASH_GIT); \
-		cd ./ext/sparsehash/$(HASH_GIT); bash ./configure --prefix=$(CWD)/ext/sparsehash/$(HASH_GIT); \
-		$(MAKE) -C $(CWD)/ext/sparsehash/$(HASH_GIT); \
-		$(MAKE) -C $(CWD)/ext/sparsehash/$(HASH_GIT) install; \
-		cd ../../..; \
 	fi;
 
 	@if [ ! -d "ext/yaml/$(YAML_GIT)" ]; then \
@@ -69,34 +65,34 @@ general:
 	@if [ ! -d "ext/yaml/$(YAML_GIT)/bin" ]; then \
 		mkdir ext/yaml/$(YAML_GIT)/bin; \
 	fi;
-	@if [ ! -f "$(CWD)/ext/yaml/$(YAML_GIT)/bin/libyaml.a" ]; then \
+	@if [ ! -f "ext/yaml/$(YAML_GIT)/bin/libyaml.a" ]; then \
 		$(MAKE) caml; \
 		$(MAKE) yaml; \
 	fi;
 
-	@if [ ! -d "$(CWD)/bin" ]; then \
-		mkdir -p $(CWD)/bin; \
+	@if [ ! -d "bin" ]; then \
+		mkdir -p bin; \
 	fi;
 	@for f in $(shell find src -type f -name '*.cpp'); do \
-		echo $(CXX) $(CXXFLAGS) $(INCS) -o "$(CWD)/bin/$$(basename $$f).o" -c "$(CWD)/$$f"; \
-		$(CXX) $(CXXFLAGS) $(INCS) -o "$(CWD)/bin/$$(basename $$f).o" -c "$(CWD)/$$f" || exit 1 ; \
+		echo $(CXX) $(CXXFLAGS) $(INCS) -o "bin/$$(basename $$f).o" -c "$$f"; \
+		$(CXX) $(CXXFLAGS) $(INCS) -o "bin/$$(basename $$f).o" -c "$$f" || exit 1 ; \
 	done;
-	@$(CXX) $(CXXFLAGS) $(INCS) -o "$(CWD)/bin/cpp.cpp.o" -c "$(CWD)/cpp.cpp"
+	@$(CXX) $(CXXFLAGS) $(INCS) -o "bin/cpp.cpp.o" -c "cpp.cpp"
 	$(MAKE) link
 
 link:
-	$(eval FILES := $(foreach dir,$(shell find $(CWD)/bin -type f -name *.o),$(dir)))
+	$(eval FILES := $(foreach dir,$(shell find bin -type f -name *.o),$(dir)))
 	$(CXX) -o "$(EXE)" $(FILES) $(YAML) $(LDFLAGS) 
 
 caml:
 	@for f in $(shell find ext/yaml/$(YAML_GIT)/src -type f -name '*.cpp'); do \
-		echo $(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$(CWD)/$$f"; \
-		$(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$(CWD)/$$f" || exit 1 ; \
+		echo $(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$$f"; \
+		$(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$$f" || exit 1 ; \
 	done;	
 
 yaml:
-	$(eval FILES := $(foreach dir,$(shell find $(CWD)/ext/yaml/$(YAML_GIT)/bin -type f -name *.o),$(dir)))
-	ar -r $(CWD)/ext/yaml/$(YAML_GIT)/bin/libyaml.a $(FILES)
+	$(eval FILES := $(foreach dir,$(shell find ext/yaml/$(YAML_GIT)/bin -type f -name *.o),$(dir)))
+	ar -r ext/yaml/$(YAML_GIT)/bin/libyaml.a $(FILES)
 
 clean:
 	rm -rf ext/yaml/$(YAML_GIT)/bin	
