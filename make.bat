@@ -21,13 +21,13 @@ SET LIBPATHS=
 ECHO "Making Maiken for Windows"
 
 IF NOT EXIST ext\kul\%KUL_VER% (
-	git clone http://github.com/mkn/mkn.kul.git --branch %KUL_VER% ext/kul/%KUL_VER%
+	git clone https://github.com/mkn/mkn.kul.git --branch %KUL_VER% ext/kul/%KUL_VER%
 )
 IF NOT EXIST ext\yaml\%YAML_VER% (
-	git clone http://github.com/mkn/parse.yaml.git --branch %YAML_VER% ext/yaml/%YAML_VER%
+	git clone https://github.com/mkn/parse.yaml.git --branch %YAML_VER% ext/yaml/%YAML_VER%
 )
 IF NOT EXIST ext\sparsehash\%HASH_VER% (
-	git clone http://github.com/mkn/google.sparsehash.git --branch %HASH_VER% ext/sparsehash/%HASH_VER%
+	git clone https://github.com/mkn/google.sparsehash.git --branch %HASH_VER% ext/sparsehash/%HASH_VER%
 )
 
 SET /P WIN_KIT="Enter Windows Kit 10 root dir (one above 'include'): "
