@@ -46,7 +46,6 @@ constexpr const char* maiken::Constants::SCM;
 constexpr const char* maiken::Constants::NAME;
 
 constexpr const char* maiken::Constants::VERSION;
-constexpr const char* maiken::Constants::VERSION_NUMBER;
 constexpr const char* maiken::Constants::PARENT;
 constexpr const char* maiken::Constants::PATH;
 constexpr const char* maiken::Constants::BUILD;

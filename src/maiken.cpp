@@ -85,7 +85,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
         KEXIT(0, "");
     }
     if(args.has(VERSION)){
-        KOUT(NON) << VERSION_NUMBER << " (" << KTOSTRING(__KUL_OS__) << ")";
+        KOUT(NON) << KTOSTRING(_MKN_VERSION_) << " (" << KTOSTRING(__KUL_OS__) << ")";
         KEXIT(0, "");
     }
     if(args.has(INIT)){

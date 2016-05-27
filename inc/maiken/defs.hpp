@@ -61,10 +61,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define _MKN_TIMESTAMPS_ 0
 #endif /* _MKN_TIMESTAMPS_ */
 
+#ifndef _MKN_VERSION_
+    #define _MKN_VERSION_ master
+#endif /* _MKN_VERSION_ */
+
 namespace maiken{
 class Constants{
     public:
-        static constexpr const char* VERSION_NUMBER = "master";
         static constexpr const char* VERSION        = "version";
 
         static constexpr const char* MAIKEN         = "maiken";

@@ -60,6 +60,9 @@ std::string maiken::Application::resolveFromProperties(const std::string& s) con
         if(ps.count(k) == 0){
             if(AppVars::INSTANCE().properkeys().count(k))
                 k = (*AppVars::INSTANCE().properkeys().find(k)).second;
+            else
+            if(project().root()[VERSION] && project().root()[VERSION].Type() == 2)
+                k = project().root()[VERSION].Scalar();
             else KEXCEPT(Exception, "Property : '" + k + "' has not been defined");
         }else k = (*ps.find(k)).second;
         r = resolveFromProperties(r.substr(0, lb) + k + r.substr(rb + 1));

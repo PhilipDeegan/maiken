@@ -1,6 +1,7 @@
 
 
 name: mkn
+version: master
 scm: https://github.com/dekken/maiken
 
 parent: static
@@ -16,6 +17,7 @@ profile:
       - name: parse.yaml
         version: stable
     main: cpp.cpp
+    arg: -D_MKN_VERSION_=${version}
     mode: static
 
   - name: shared
