@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
         KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
     }
     catch(const kul::Exit& e){ if(e.code() != 0) KERR << e.stack(); return e.code(); }
-    catch(const kul::proc::ExitException& e){ KERR << e.stack(); return 1;}
+    catch(const kul::proc::ExitException& e){ KERR << e.what(); return 1;}
     catch(const kul::Exception& e){ KERR << e.stack(); return 2;}
     catch(const std::exception& e){ KERR << e.what(); return 3;}
 
