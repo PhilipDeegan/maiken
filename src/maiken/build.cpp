@@ -132,7 +132,8 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
                             kul::Dir(kul::Dir::JOIN(buildDir().join("obj"), d.path().substr(kv.first.size())), true);
                         std::string obj(kul::Dir::JOIN(buildDir().join("obj"), src.substr(kv.first.size() + 1)));
                         if(obj.find(kul::env::CWD()) != std::string::npos)
-                            obj = obj.substr(kul::env::CWD().size() + 1) + ".obj";
+                            obj = obj.substr(kul::env::CWD().size() + 1);
+                        obj = obj + ".obj";
                         sourceQueue.push(std::pair<std::string, std::string>(f.escm(), kul::File(obj).escm()));
                     }else{
                         kul::Dir(buildDir().join("obj")).mk();

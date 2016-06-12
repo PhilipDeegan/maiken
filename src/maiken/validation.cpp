@@ -124,8 +124,10 @@ void maiken::Application::preSetupValidation() throw (maiken::Exception){
     }
     if(dpp && !dpf) KEXCEPTION("Parent for default profile does not exist: \n"+project().dir().path());
     for(const auto& n : project().root()[PROFILE])
-        if(n[SELF] && std::find(profiles.begin(), profiles.end(), resolveFromProperties(n[SELF].Scalar())) == profiles.end())
-            KEXCEPTION("Tag self references unknown profile: "+resolveFromProperties(n[SELF].Scalar())+"\n"+project().dir().path());
+        if(n[SELF])
+            for(const auto& s : kul::String::SPLIT(resolveFromProperties(n[SELF].Scalar()), ' '))
+                if(std::find(profiles.begin(), profiles.end(), s) == profiles.end())
+                    KEXCEPTION("Tag self references unknown profile: "+ s + "\n"+project().dir().path());
 }
 
 void maiken::Application::postSetupValidation() throw (maiken::Exception){

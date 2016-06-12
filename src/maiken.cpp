@@ -93,7 +93,11 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
         NewProject p;
         KEXIT(0, "");
     }
-    if(args.has(DIRECTORY)) kul::env::CWD(args.get(DIRECTORY));
+    if(args.has(DIRECTORY)) {
+        kul::Dir d(args.get(DIRECTORY));
+        if(!d) KEXCEPTION("DIRECTORY DOES NOT EXIST: " + args.get(DIRECTORY));
+        kul::env::CWD(args.get(DIRECTORY));
+    }
     Project project(Project::CREATE());
     std::string profile;
     if(args.has(PROFILE)){
