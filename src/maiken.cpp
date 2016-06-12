@@ -66,9 +66,10 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
         kul::File yml("mkn.yaml");
         if(yml){
             kul::io::Reader reader(yml);
-            const std::string* s = reader.readLine();
-            if(s && s->substr(0, 3) == "#! "){
-                std::string line(s->substr(3));
+            const char* c = reader.readLine();
+            const std::string s(c ? c : ""); 
+            if(s.substr(0, 3) == "#! "){
+                std::string line(s.substr(3));
                 if(!line.empty()){
                     std::vector<std::string> lineArgs(kul::cli::asArgs(line));
                     std::vector<char*> lineV;
@@ -609,9 +610,9 @@ void maiken::Application::trim(const kul::File& f){
     {
         kul::io::Writer w(tmp);
         kul::io::Reader r(f);
-        const std::string* l = r.readLine();
+        const char* l = r.readLine();
         if(l){
-            std::string s = *l;
+            std::string s(l);
             while(s.size() && (s[s.size() - 1] == ' ' || s[s.size() - 1] == '\t')) s.pop_back();
             w << s.c_str();
             while((l = r.readLine())){
@@ -785,12 +786,12 @@ void maiken::Application::loadTimeStamps() throw (kul::StringException){
     if(_MKN_TIMESTAMPS_){
         kul::Dir mkn(buildDir().join(".mkn"));
         kul::File src("src_stamp", mkn);
-        const std::string* l = 0;
         if(mkn && src){
             kul::io::Reader r(src);
-            while((l = r.readLine())){
-                if(l->size() == 0) continue;
-                std::string s(*l);
+            const char* c = 0;
+            while((c = r.readLine())){
+                std::string s(c);
+                if(s.size() == 0) continue;
                 std::vector<std::string> bits;
                 kul::String::SPLIT(s, ' ', bits);
                 if(bits.size() != 2) KEXCEPTION("timestamp file invalid format\n"+src.full());
@@ -804,9 +805,10 @@ void maiken::Application::loadTimeStamps() throw (kul::StringException){
         kul::File inc("inc_stamp", mkn);
         if(mkn && inc){
             kul::io::Reader r(inc);
-            while((l = r.readLine())){
-                if(l->size() == 0) continue;
-                std::string s(*l);
+            const char* c = 0;
+            while((c = r.readLine())){
+                std::string s(c);
+                if(s.size() == 0) continue;
                 std::vector<std::string> bits;
                 kul::String::SPLIT(s, ' ', bits);
                 if(bits.size() != 2) KEXCEPTION("timestamp file invalid format\n"+inc.full());
