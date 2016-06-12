@@ -75,7 +75,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
                     std::vector<char*> lineV;
                     lineV.push_back(argv[0]);
                     for(size_t i = 0; i < lineArgs.size(); i++) lineV.push_back(&lineArgs[i][0]);
-                    return CREATE(lineArgs.size(), &lineV[0]);
+                    return CREATE(lineV.size(), &lineV[0]);
                 }
             }
         }
