@@ -55,7 +55,7 @@ class Project : public kul::yaml::File, public Constants{
     private:
         const kul::Dir d;
     protected:      
-        Project(const kul::Dir d) : kul::yaml::File(d.join("mkn.yaml")), d(d){}
+        Project(const kul::Dir d) : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml")), d(d.real()){}
     public: 
         Project(const Project& p) : kul::yaml::File(p), d(p.d){}
         const kul::Dir&   dir() const { return d; }
