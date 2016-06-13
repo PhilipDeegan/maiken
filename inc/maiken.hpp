@@ -170,7 +170,6 @@ class Application : public Constants{
         void showProfiles();
         void loadTimeStamps() throw (kul::StringException);
         bool incSrc(const kul::File& f);
-        std::string resolveFromProperties(const std::string& s) const;
         kul::Dir    resolveDependencyDirectory(const YAML::Node& d);
         kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap();
         std::vector<std::string> compile() throw(kul::Exception);
@@ -197,6 +196,7 @@ class Application : public Constants{
         const std::vector<std::string>&                    libraryPaths()  const { return paths;}
         const kul::hash::map::S2S&                         properties()    const { return ps;}
         const kul::hash::map::S2T<kul::hash::set::String>& arguments()     const { return args; }
+        std::string                                        resolveFromProperties(const std::string& s) const;
 
         friend class ThreadingCompiler;
 

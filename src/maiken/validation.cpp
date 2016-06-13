@@ -83,6 +83,17 @@ class Validator : public maiken::Constants{
             if(n[LANG] && !a.files().count(n[LANG].Scalar()))
                 KEXCEPT(maiken::Exception, "lang tag invalid type, valid types are\n"+ss.str()+"\n"+a.project().dir().path());
         }
+        static boolean PARENT_CYCLE(const maiken::Application& a, const std::string& pr, const std::string& pa){
+            for(const auto& p1 : a.project().root()[PROFILE]){
+                if(p1[NAME].Scalar() != pr) continue;
+                if(p1[PARENT]){
+                    std::string resolved(a.resolveFromProperties(p1[PARENT].Scalar()));
+                    if(resolved == pa) return true;
+                    else return PARENT_CYCLE(a, resolved, pa);
+                }
+            }
+            return false;
+        }
 };
 
 void maiken::Application::preSetupValidation() throw (maiken::Exception){
@@ -106,9 +117,15 @@ void maiken::Application::preSetupValidation() throw (maiken::Exception){
         profiles.push_back(p);
         if(profile[PARENT]){
             bool f = 0;
+            std::string resolved(resolveFromProperties(profile[PARENT].Scalar()));
+            if(resolved == profile[NAME].Scalar()) KEXCEPTION("Profile may not be its own parent");
             for(const auto& p1 : project().root()[PROFILE]){
-                if(resolveFromProperties(profile[PARENT].Scalar()) == p1[NAME].Scalar()) f = 1;
-                if(f) break;
+                if(profile[NAME].Scalar() == p1[NAME].Scalar()) continue;
+                if(resolved == p1[NAME].Scalar()) f = 1;
+                if(f) {
+                    if(Validator::PARENT_CYCLE(*this, p1[NAME].Scalar(), profile[NAME].Scalar())) KEXCEPTION("Profile inheritence cycle detected");
+                    break;
+                }
             }
             if(!f) KEXCEPTION("parent profile not found: "+resolveFromProperties(profile[PARENT].Scalar())+"\n"+project().dir().path());
         }
