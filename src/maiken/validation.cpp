@@ -83,7 +83,7 @@ class Validator : public maiken::Constants{
             if(n[LANG] && !a.files().count(n[LANG].Scalar()))
                 KEXCEPT(maiken::Exception, "lang tag invalid type, valid types are\n"+ss.str()+"\n"+a.project().dir().path());
         }
-        static boolean PARENT_CYCLE(const maiken::Application& a, const std::string& pr, const std::string& pa){
+        static bool PARENT_CYCLE(const maiken::Application& a, const std::string& pr, const std::string& pa){
             for(const auto& p1 : a.project().root()[PROFILE]){
                 if(p1[NAME].Scalar() != pr) continue;
                 if(p1[PARENT]){
