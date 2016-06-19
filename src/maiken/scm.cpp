@@ -43,10 +43,17 @@ class UpdateTracker{
 };
 
 void maiken::Application::scmStatus(const bool& deps) throw (kul::scm::Exception){
-    if(deps) for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) (*app).scmStatus(0);
+    std::vector<Application*> v;
+    if(deps) 
+        for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
+            const std::string& s((*app).project().dir().real());
+            auto it = std::find_if(v.begin(), v.end(), [&s](const Application* app) {return (*app).project().dir().real() == s;});
+            if (it == v.end()) v.push_back(&(*app));
+        }
+    for(auto* app : v) (*app).scmStatus(0);
     if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr);
     if(scm){
-        KOUT(NON) << "SCM STATUS CHECK ON: " << project().dir().path();
+        KOUT(NON) << "SCM STATUS CHECK ON: " << project().dir().real();
         const std::string& r(this->project().dir().real());
         scm->status(r);
     }
@@ -58,19 +65,19 @@ void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
     while((p = p->par)) i++;
     if(i > AppVars::INSTANCE().dependencyLevel()) return;
     if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr);
-    if(scm && !UpdateTracker::INSTANCE().has(this->project().dir().path())){
+    if(scm && !UpdateTracker::INSTANCE().has(this->project().dir().real())){
         if(!f) KOUT(NON) << "WARNING: ATTEMPTING SCM UPDATE, USER INTERACTION MAY BE REQUIRED!";
         scmUpdate(f, scm, !this->scr.empty() ? SCMGetter::REPO(this->project().dir(), this->scr) : "");
-        UpdateTracker::INSTANCE().add(this->project().dir().path());
+        UpdateTracker::INSTANCE().add(this->project().dir().real());
     }
 }
 
 void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const std::string& s1) throw (kul::scm::Exception){
     const std::string& ver(this->project().root()[VERSION] ? this->project().root()[VERSION].Scalar() : "");
     bool c = true;
-    std::string s(s1.empty() ? scm->origin(this->project().dir().path()) : s1);
+    std::string s(s1.empty() ? scm->origin(this->project().dir().real()) : s1);
     if(!f){
-        KOUT(NON) << "CHECKING: " << this->project().dir().path() << " FROM " << s;
+        KOUT(NON) << "CHECKING: " << this->project().dir().real() << " FROM " << s;
         const std::string& lV(scm->localVersion(this->project().dir().real(), ver));
         const std::string& rV(s.size() ? scm->remoteVersion(s, ver) : "");
         c = lV != rV;
@@ -82,7 +89,7 @@ void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const st
     if(f || c){
         std::stringstream ss;
         if(s.size()) ss << " FROM " << s;
-        KOUT(NON) << "UPDATING: " << this->project().dir().path() << ss.str();
+        KOUT(NON) << "UPDATING: " << this->project().dir().real() << ss.str();
         scm->up(this->project().dir().real(), s, ver);
     }
 }
