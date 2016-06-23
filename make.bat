@@ -4,8 +4,8 @@
 SETLOCAL enabledelayedexpansion
 
 SET KUL_VER=master
-SET YAML_VER=stable
-SET HASH_VER=stable
+SET YAML_VER=master
+SET HASH_VER=master
 SET PWD=%CD%
 
 SET WIN_KIT=
