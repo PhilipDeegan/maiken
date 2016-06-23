@@ -15,7 +15,7 @@ profile:
       - name: mkn.kul
         version: master
       - name: parse.yaml
-        version: stable
+        version: master
     main: cpp.cpp
     arg: -D_MKN_VERSION_=${version}
     mode: static
