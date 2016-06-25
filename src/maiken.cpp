@@ -130,24 +130,38 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
 
     if(args.has(MKN_DEP)) AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
     a.setup();
-    if(args.has(INFO)){
-        a.showConfig(1);
+    a.buildDepVec(args.has(MKN_DEP) ? &args.get(MKN_DEP) : 0);
+
+    if(args.has(ARG)) AppVars::INSTANCE().args(args.get(ARG));
+    if(args.has(LINKER)) AppVars::INSTANCE().linker(args.get(LINKER));
+    if(args.has(THREADS)){
+        if(args.get(THREADS).size())
+            AppVars::INSTANCE().threads(kul::String::UINT16(args.get(THREADS)));
+        else AppVars::INSTANCE().threads(kul::cpu::threads());
+    }
+    if(args.has(JARG)){
+        try{
+            YAML::Node node = YAML::Load(args.get(JARG));
+            for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
+                for(const auto& s : kul::String::SPLIT(it->first.Scalar(), ':'))
+                    AppVars::INSTANCE().jargs(s, it->second.Scalar());
+        }catch(const std::exception& e){ KEXCEPTION("JSON args failed to parse"); }
+    }
+
+    if(args.has(MKN_DEPS)){
+        std::vector<Application*> v;
+        for(auto app = a.deps.rbegin(); app != a.deps.rend(); ++app){
+            const std::string& s((*app).project().dir().real());
+            auto it = std::find_if(v.begin(), v.end(), [&s](const Application* app) { return (*app).project().dir().real() == s;});
+            if (it == v.end()) v.push_back(&(*app));
+        }
+        for(auto* app : v) KOUT(NON) <<  (*app).project().dir();
+        KEXIT(0, "");
     }
     if(args.has(MKN_INC)){
         for(const auto& p : a.includes())
             KOUT(NON) << p.first;
-    }
-
-    a.buildDepVec(args.has(MKN_DEP) ? &args.get(MKN_DEP) : 0);
-
-    if(args.has(MKN_DEPS)){
-        for(auto app = a.deps.rbegin(); app != a.deps.rend(); ++app){
-            std::stringstream ss;
-            ss << (*app).project().root()[NAME].Scalar();
-            if(kul::LogMan::INSTANCE().inf())
-            ss << " " << (*app).project().dir();
-            KOUT(NON) <<  ss.str();
-        }
+        KEXIT(0, "");
     }
     if(args.has(MKN_SRC)){
         for(const auto& p1 : a.sourceMap())
@@ -160,27 +174,13 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
                     for(const auto& p2 : p1.second)
                         for(const auto& p3 : p2.second)
                             KOUT(NON) << kul::File(p3).full();
+        KEXIT(0, "");
     }
-    if(args.has(MKN_INC) || args.has(MKN_SRC) || args.has(MKN_DEPS)) KEXIT(0, "");
     if(args.has(SCM_STATUS)){
         a.scmStatus(args.has(MKN_DEP));
         KEXIT(0, "");
     }
-    if(args.has(JARG)){
-        try{
-            YAML::Node node = YAML::Load(args.get(JARG));
-            for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
-                for(const auto& s : kul::String::SPLIT(it->first.Scalar(), ':'))
-                    AppVars::INSTANCE().jargs(s, it->second.Scalar());
-        }catch(const std::exception& e){ KEXCEPTION("JSON args failed to parse"); }
-    }
-    if(args.has(ARG)) AppVars::INSTANCE().args(args.get(ARG));
-    if(args.has(LINKER)) AppVars::INSTANCE().linker(args.get(LINKER));
-    if(args.has(THREADS)){
-        if(args.get(THREADS).size())
-            AppVars::INSTANCE().threads(kul::String::UINT16(args.get(THREADS)));
-        else AppVars::INSTANCE().threads(kul::cpu::threads());
-    }
+    if(args.has(INFO)) a.showConfig(1);
 
     if(args.has(BUILD))     AppVars::INSTANCE().build(true);
     if(args.has(CLEAN))     AppVars::INSTANCE().clean(true);
@@ -192,50 +192,48 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
 }
 
 void maiken::Application::process() throw(kul::Exception){
-    if(AppVars::INSTANCE().run() || AppVars::INSTANCE().dbg()) run(AppVars::INSTANCE().dbg());
-    else{
-        for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
-            kul::env::CWD((*app).project().dir());
-            kul::Dir out((*app).inst ? (*app).inst.real() : (*app).buildDir());
-            kul::Dir mkn(out.join(".mkn"));
-            if((*app).ig || (*app).srcs.empty()) continue;
-            std::vector<std::pair<std::string, std::string> > oldEvs;
-            for(const kul::cli::EnvVar& ev : (*app).envVars()){
-                const std::string v = kul::env::GET(ev.name());
-                if(v.size()) oldEvs.push_back(std::pair<std::string, std::string>(ev.name(), v));
-                kul::env::SET(ev.name(), ev.toString().c_str());
-            }
-            if(AppVars::INSTANCE().clean() && (*app).buildDir().is()){
-                (*app).buildDir().rm();
-                kul::Dir((*app).buildDir().join(".mkn")).rm();
-            }
-
-            (*app).loadTimeStamps();
-            if(AppVars::INSTANCE().trim())  (*app).trim();
-            if(AppVars::INSTANCE().build()) (*app).build();
-            else{
-                if(AppVars::INSTANCE().compile())(*app).compile();
-                if(AppVars::INSTANCE().link())   (*app).link();
-            }
-            for(const std::pair<std::string, std::string>& oldEv : oldEvs)
-                kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
+    for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
+        kul::env::CWD((*app).project().dir());
+        kul::Dir out((*app).inst ? (*app).inst.real() : (*app).buildDir());
+        kul::Dir mkn(out.join(".mkn"));
+        if((*app).ig || (*app).srcs.empty()) continue;
+        std::vector<std::pair<std::string, std::string> > oldEvs;
+        for(const kul::cli::EnvVar& ev : (*app).envVars()){
+            const std::string v = kul::env::GET(ev.name());
+            if(v.size()) oldEvs.push_back(std::pair<std::string, std::string>(ev.name(), v));
+            kul::env::SET(ev.name(), ev.toString().c_str());
         }
-        kul::env::CWD(this->project().dir());
-        if(!this->ig){
-            for(const kul::cli::EnvVar& ev : this->envVars()) kul::env::SET(ev.name(), ev.toString().c_str());
-            if(AppVars::INSTANCE().clean() && this->buildDir().is()){
-                this->buildDir().rm();
-                kul::Dir(this->buildDir().join(".mkn")).rm();
-            }
-            loadTimeStamps();
-            if(AppVars::INSTANCE().trim())  this->trim();
-            if(AppVars::INSTANCE().build()) this->build();
-            else{
-                if(AppVars::INSTANCE().compile())   this->compile();
-                if(AppVars::INSTANCE().link())      this->link();
-            }
+        if(AppVars::INSTANCE().clean() && (*app).buildDir().is()){
+            (*app).buildDir().rm();
+            kul::Dir((*app).buildDir().join(".mkn")).rm();
+        }
+
+        (*app).loadTimeStamps();
+        if(AppVars::INSTANCE().trim())  (*app).trim();
+        if(AppVars::INSTANCE().build()) (*app).build();
+        else{
+            if(AppVars::INSTANCE().compile())(*app).compile();
+            if(AppVars::INSTANCE().link())   (*app).link();
+        }
+        for(const std::pair<std::string, std::string>& oldEv : oldEvs)
+            kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
+    }
+    kul::env::CWD(this->project().dir());
+    if(!this->ig){
+        for(const kul::cli::EnvVar& ev : this->envVars()) kul::env::SET(ev.name(), ev.toString().c_str());
+        if(AppVars::INSTANCE().clean() && this->buildDir().is()){
+            this->buildDir().rm();
+            kul::Dir(this->buildDir().join(".mkn")).rm();
+        }
+        loadTimeStamps();
+        if(AppVars::INSTANCE().trim())  this->trim();
+        if(AppVars::INSTANCE().build()) this->build();
+        else{
+            if(AppVars::INSTANCE().compile())   this->compile();
+            if(AppVars::INSTANCE().link())      this->link();
         }
     }
+    if(AppVars::INSTANCE().run() || AppVars::INSTANCE().dbg()) run(AppVars::INSTANCE().dbg());
 }
 
 void maiken::Application::setup(){

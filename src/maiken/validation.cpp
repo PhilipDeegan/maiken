@@ -94,6 +94,12 @@ class Validator : public maiken::Constants{
             }
             return false;
         }
+        static bool SELF_CHECK(const maiken::Application& a, const YAML::Node& n, const std::vector<std::string>& profiles){
+            if(n[SELF])
+                for(const auto& s : kul::String::SPLIT(a.resolveFromProperties(n[SELF].Scalar()), ' '))
+                    if(std::find(profiles.begin(), profiles.end(), s) == profiles.end())
+                        KEXCEPT(maiken::Exception, "Self tag references unknown profile:\n"+a.project().dir().path());
+        }
 };
 
 void maiken::Application::preSetupValidation() throw (maiken::Exception){
@@ -129,22 +135,12 @@ void maiken::Application::preSetupValidation() throw (maiken::Exception){
             }
             if(!f) KEXCEPTION("parent profile not found: "+resolveFromProperties(profile[PARENT].Scalar())+"\n"+project().dir().path());
         }
-        if(profile["os"]){
-            for(const auto& p1 : project().root()[PROFILE])
-                if(profile[NAME].Scalar() == p1[NAME].Scalar()) continue;
-                else
-                if(p1["os"] && p1["os"].Scalar() == profile["os"].Scalar())
-                    KEXCEPTION("Multiple os tags with same value found, only one per operating system supported\n"+project().dir().path());
-        }
         Validator::PRE_BUILD(*this, profile);
         if(dpp && !dpf) dpf = resolveFromProperties(project().root()[PARENT].Scalar()) == p;
     }
     if(dpp && !dpf) KEXCEPTION("Parent for default profile does not exist: \n"+project().dir().path());
-    for(const auto& n : project().root()[PROFILE])
-        if(n[SELF])
-            for(const auto& s : kul::String::SPLIT(resolveFromProperties(n[SELF].Scalar()), ' '))
-                if(std::find(profiles.begin(), profiles.end(), s) == profiles.end())
-                    KEXCEPTION("Tag self references unknown profile: "+ s + "\n"+project().dir().path());
+    Validator::SELF_CHECK(*this, project().root(), profiles);
+    for(const auto& n : project().root()[PROFILE]) Validator::SELF_CHECK(*this, n, profiles);
 }
 
 void maiken::Application::postSetupValidation() throw (maiken::Exception){

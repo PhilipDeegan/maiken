@@ -37,7 +37,7 @@ const kul::yaml::Validator maiken::Project::validator() const{
     using namespace kul::yaml;
     NodeValidator dependencies("dep", {
         NodeValidator("name", 1),
-        NodeValidator("version", 1),
+        NodeValidator("version"),
         NodeValidator("profile"),
         NodeValidator("scm"),
         NodeValidator("local")
