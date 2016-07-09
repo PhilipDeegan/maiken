@@ -715,6 +715,7 @@ void maiken::Application::populateDependencies(const YAML::Node& n) throw(kul::E
         Application app(c, pp);
         app.par = this;
         if(dep[SCM]) app.scr = resolveFromProperties(dep[SCM].Scalar());
+        if(dep[VERSION]) app.scv = resolveFromProperties(dep[VERSION].Scalar());
         this->deps.push_back(app);
         apps.push_back(std::make_pair(app.project().dir().path(), app.p));
     }

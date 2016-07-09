@@ -128,23 +128,25 @@ class AppVars : public Constants{
 
 class ThreadingCompiler;
 class Application : public Constants{
+    friend class ThreadingCompiler;
     protected:
         bool ig = 1;
         const Application* par = 0;
         kul::code::Mode m;
-        std::string arg, main, lang, scr;
+        std::string arg, main, lang, scr, scv;
         const std::string p;
         kul::Dir bd, inst;
         maiken::Project proj;
         kul::hash::map::S2T<kul::hash::map::S2S> fs;
-        std::vector<std::pair<std::string, bool> > incs, srcs;
-        std::vector<std::string> libs, paths;
         kul::hash::map::S2S includeStamps, itss, ps;
         kul::hash::map::S2T<kul::hash::set::String> args;
         kul::hash::map::S2T<uint16_t> stss;
-        std::vector<kul::cli::EnvVar> evs;
         std::vector<Application> deps;
+        std::vector<kul::cli::EnvVar> evs;
+        std::vector<std::string> libs, paths;
+        std::vector<std::pair<std::string, bool> > incs, srcs;
         const kul::SCM* scm = 0;
+        
         void buildDepVec(const std::string* depVal);
         void buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc);
         void buildExecutable(const std::vector<std::string>& objects);
@@ -197,8 +199,6 @@ class Application : public Constants{
         const kul::hash::map::S2S&                         properties()    const { return ps;}
         const kul::hash::map::S2T<kul::hash::set::String>& arguments()     const { return args; }
         std::string                                        resolveFromProperties(const std::string& s) const;
-
-        friend class ThreadingCompiler;
 
         static std::shared_ptr<Application> CREATE(int16_t argc, char *argv[]) throw(kul::Exception);
 };

@@ -73,7 +73,7 @@ void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
 }
 
 void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const std::string& s1) throw (kul::scm::Exception){
-    const std::string& ver(this->project().root()[VERSION] ? this->project().root()[VERSION].Scalar() : "");
+    const std::string& ver(!this->scv.empty() ? this->scv : this->project().root()[VERSION] ? this->project().root()[VERSION].Scalar() : "");
     bool c = true;
     std::string s(s1.empty() ? scm->origin(this->project().dir().real()) : s1);
     if(!f){
