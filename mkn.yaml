@@ -14,6 +14,7 @@ profile:
     dep: 
       - name: mkn.kul
         version: master
+        #profile: c++0x
       - name: parse.yaml
         version: master
     main: cpp.cpp
