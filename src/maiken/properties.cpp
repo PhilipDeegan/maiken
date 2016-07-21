@@ -57,10 +57,10 @@ std::string maiken::Application::resolveFromProperties(const std::string& s) con
     }
     if(lb != -1 && clb == -1 && rb != -1 && crb == -1){
         std::string k(r.substr(lb + 2, rb - 2 - lb));
+        if(AppVars::INSTANCE().properkeys().count(k))
+            k = (*AppVars::INSTANCE().properkeys().find(k)).second;
+        else
         if(ps.count(k) == 0){
-            if(AppVars::INSTANCE().properkeys().count(k))
-                k = (*AppVars::INSTANCE().properkeys().find(k)).second;
-            else
             if(project().root()[VERSION] && project().root()[VERSION].Type() == 2)
                 k = project().root()[VERSION].Scalar();
             else KEXCEPT(Exception, "Property : '" + k + "' has not been defined");

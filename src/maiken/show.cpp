@@ -33,8 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 void maiken::Application::showConfig(bool force){
     if(AppVars::INSTANCE().show()) return;
     if(kul::LogMan::INSTANCE().inf() || force){
-        std::string repo = (Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][REPO])
-            ? Settings::INSTANCE().root()[LOCAL][REPO].Scalar() : kul::user::home(MAIKEN).join(REPO);
+        std::string repo = (*AppVars::INSTANCE().properkeys().find("MKN_REPO")).second;
         using namespace kul::cli;
         KOUT(NON) << "+++++++++ BUILD INFO ++++++++";
         KOUT(NON) << "REPO    : " << repo;
@@ -50,6 +49,10 @@ void maiken::Application::showConfig(bool force){
             else KEXCEPT(Exception, "Unhandled EnvVar mode: " + c[MODE].Scalar());
             path = EnvVar(c[NAME].Scalar(), c[VALUE].Scalar(), mode).toString();
             break;
+        }
+        {
+            auto it(std::find_if(evs.begin(), evs.end(), [](const kul::cli::EnvVar& ev) { return strcmp(ev.name(), "PATH") == 0;}));
+            if(it != evs.end()) path = (*it).toString();
         }
         for(const auto& c : Settings::INSTANCE().root()[FILE]){
             bool a = 0, g = 0, l = 0;

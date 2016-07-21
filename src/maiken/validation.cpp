@@ -73,6 +73,11 @@ class Validator : public maiken::Constants{
             if(n[IF_INC]) IF_VALUEDATER(a, n[IF_INC], IF_ARG, INSTANCE().ifIncSrcLefts);
             if(n[IF_SRC]) IF_VALUEDATER(a, n[IF_SRC], IF_ARG, INSTANCE().ifIncSrcLefts);
             if(n[IF_LIB]) IF_VALUEDATER(a, n[IF_SRC], IF_ARG, INSTANCE().ifIncSrcLefts);
+            if(n[MKN_DEP])
+                for(const auto& d : n[MKN_DEP])
+                    if(!d[LOCAL] && !d[NAME])
+                        KEXCEPT(maiken::Exception, "dependency name must exist if local tag does not\n"+a.project().dir().path());
+
         }
         static void POST_BUILD(const maiken::Application& a, const YAML::Node& n) throw (maiken::Exception){
             std::stringstream ss;

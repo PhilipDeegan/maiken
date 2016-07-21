@@ -53,7 +53,7 @@ class AppVars : public Constants{
         bool b = 0, c = 0, d = 0, f = 0, g = 0, l = 0, p = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
         uint16_t dl = 0, ts = 1;
         std::string aa, la;
-        kul::hash::map::S2S jas, pks;
+        kul::hash::map::S2S evs, jas, pks;
         AppVars(){
             pks["OS"]   = KTOSTRING(__KUL_OS__);
             pks["HOME"] = kul::user::home().path();
@@ -68,7 +68,7 @@ class AppVars : public Constants{
         void args(const std::string& aa) { this->aa = aa;}
 
         const kul::hash::map::S2S& jargs() const { return jas;}
-        void jargs(const std::string& a, const std::string& b) { this->jas.insert(a, b);}
+        void jargs(const std::string& a, const std::string& b) { jas[a] = b; }
 
         const std::string& linker() const  { return la;}
         void linker(const std::string& la) { this->la = la;}
@@ -119,6 +119,10 @@ class AppVars : public Constants{
         void threads(const uint16_t& t) { this->ts = t;}
 
         const kul::hash::map::S2S& properkeys() const { return pks;}
+        void properkeys(const std::string& k, const std::string& v)  { pks[k] = v;}
+
+        const kul::hash::map::S2S& envVars() const { return evs;}
+        void envVars(const std::string& k, const std::string& v)  { evs[k] = v;}
 
         static AppVars& INSTANCE(){
             static AppVars instance;
@@ -270,7 +274,9 @@ class SCMGetter{
             if(IS_SOLID(r)) repos.push_back(r);
             else
                 for(const std::string& s : Settings::INSTANCE().remoteRepos()) repos.push_back(s + r);
+#ifndef _MKN_DISABLE_SCM_
             for(const auto& repo : repos){
+#ifndef _MKN_DISABLE_GIT_
                 try{
                     kul::Process g("git");
                     kul::ProcessCapture gp(g);
@@ -283,16 +289,22 @@ class SCMGetter{
                         return &kul::scm::Manager::INSTANCE().get("git");
                     }
                 }catch(const kul::proc::ExitException& e){}
+#endif//_MKN_DISABLE_GIT_
+#ifndef _MKN_DISABLE_SVN_
                 try{
-                    kul::Process s("svn");
-                    kul::ProcessCapture sp(s);
-                    s.arg("ls").arg(repo).start();
-                    if(!sp.errs().size()) {
-                        INSTANCE().valids.insert(d.path(), repo);
-                        return &kul::scm::Manager::INSTANCE().get("svn");
-                    }
+                   kul::Process s("svn");
+                   kul::ProcessCapture sp(s);
+                   s.arg("ls").arg(repo).start();
+                   if(!sp.errs().size()) {
+                       INSTANCE().valids.insert(d.path(), repo);
+                       return &kul::scm::Manager::INSTANCE().get("svn");
+                   }
                 }catch(const kul::proc::ExitException& e){}
+#endif//_MKN_DISABLE_SVN_
             }
+#else
+            KEXCEPT(Exception, "SCM disabled, cannot resolve dependency, check local paths and configurations");
+#endif//_MKN_DISABLE_SCM_
             std::stringstream ss;
             for(const auto& s : repos) ss << s << "\n";
             KEXCEPT(Exception, "SCM not found or not supported type(git/svn) for repo(s)\n"+ss.str()+"project:"+d.path());
