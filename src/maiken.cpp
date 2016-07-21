@@ -35,12 +35,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
     using namespace kul::cli;
 
-    std::vector<Arg> argV { Arg('a', ARG    , ArgType::STRING),
-                            Arg('j', JARG   , ArgType::STRING),
-                            Arg('l', LINKER , ArgType::STRING),
-                            Arg('d', MKN_DEP, ArgType::MAYBE),
-                            Arg('p', PROFILE, ArgType::STRING), 
-                            Arg('t', THREADS, ArgType::MAYBE),
+    std::vector<Arg> argV { Arg('a', ARG    ,  ArgType::STRING),
+                            Arg('j', JARG   ,  ArgType::STRING),
+                            Arg('l', LINKER ,  ArgType::STRING),
+                            Arg('d', MKN_DEP,  ArgType::MAYBE),
+                            Arg('E', ENV    ,  ArgType::STRING),
+                            Arg('p', PROFILE,  ArgType::STRING), 
+                            Arg('P', PROPERTY, ArgType::STRING), 
+                            Arg('t', THREADS,  ArgType::MAYBE),
                             Arg('u', SCM_UPDATE), Arg('U', SCM_FUPDATE),
                             Arg('v', VERSION),    Arg('s', SCM_STATUS),
                             Arg('S', SHARED),     Arg('K', STATIC),
@@ -129,6 +131,33 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
     if(project.root()[SCM])     a.scr = project.root()[SCM].Scalar();
 
     if(args.has(MKN_DEP)) AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
+
+    auto splitArgs = [](const std::string& s, const std::string& t, const std::function<void(const std::string&, const std::string&)>& f){
+        for(const auto& p : kul::String::ESC_SPLIT(s, ',')){
+            std::vector<std::string> ps;
+            kul::String::ESC_SPLIT(p, '=', ps);
+            if(ps.size() > 2) KEXCEPTION(t + " override invalid, escape extra \"=\"");
+            f(ps[0], ps[1]);
+        }
+    };
+
+    if(args.has(PROPERTY)) 
+        splitArgs(args.get(PROPERTY), 
+            "property",
+            std::bind(
+                (void(AppVars::*)(const std::string&, const std::string&)) &AppVars::properkeys, 
+                std::ref(AppVars::INSTANCE()), 
+                std::placeholders::_1, 
+                std::placeholders::_2));
+    if(args.has(ENV))      
+        splitArgs(args.get(ENV),      
+            "environment", 
+            std::bind(
+                (void(AppVars::*)(const std::string&, const std::string&)) &AppVars::envVars, 
+                std::ref(AppVars::INSTANCE()), 
+                std::placeholders::_1, 
+                std::placeholders::_2));
+
     a.setup();
     a.buildDepVec(args.has(MKN_DEP) ? &args.get(MKN_DEP) : 0);
 
@@ -200,7 +229,7 @@ void maiken::Application::process() throw(kul::Exception){
         std::vector<std::pair<std::string, std::string> > oldEvs;
         for(const kul::cli::EnvVar& ev : (*app).envVars()){
             const std::string v = kul::env::GET(ev.name());
-            if(v.size()) oldEvs.push_back(std::pair<std::string, std::string>(ev.name(), v));
+            oldEvs.push_back(std::pair<std::string, std::string>(ev.name(), v));
             kul::env::SET(ev.name(), ev.toString().c_str());
         }
         if(AppVars::INSTANCE().clean() && (*app).buildDir().is()){
@@ -284,13 +313,16 @@ void maiken::Application::setup(){
                     kul::env::CWD(projectDir);
                     if(_MKN_REMOTE_EXEC_){
 #ifdef _WIN32
-                        if(kul::File("mkn.bat").is() && kul::proc::Call("mkn.bat").run()) KEXCEPTION("ERROR in "+projectDir.path()+"/mkn.bat");
+                        if(kul::File("mkn.bat").is() 
+                                && kul::proc::Call("mkn.bat", AppVars::INSTANCE().envVars()).run()) 
+                            KEXCEPTION("ERROR in "+projectDir.path()+"/mkn.bat");
 #else
                         if(kul::File("mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh").is() 
-                            && kul::proc::Call("sh mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh").run())
+                            && kul::proc::Call("sh mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh", AppVars::INSTANCE().envVars()).run())
                             KEXCEPTION("ERROR in "+projectDir.path()+"mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh");
                         else
-                        if(kul::File("mkn.sh").is() && kul::proc::Call("sh mkn.sh").run()) KEXCEPTION("ERROR in "+projectDir.path()+"/mkn.sh");
+                        if(kul::File("mkn.sh").is() && kul::proc::Call("sh mkn.sh", AppVars::INSTANCE().envVars()).run()) 
+                            KEXCEPTION("ERROR in "+projectDir.path()+"/mkn.sh");
 #endif
                     }
                     kul::env::CWD(this->project().dir());
@@ -529,10 +561,7 @@ kul::Dir maiken::Application::resolveDependencyDirectory(const YAML::Node& n){
     std::string d;
     if(n[LOCAL]) d = resolveFromProperties(n[LOCAL].Scalar());
     else{
-        if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][REPO])
-            d = Settings::INSTANCE().root()[LOCAL][REPO].Scalar();
-        else
-            d = kul::user::home(MAIKEN).join(REPO);
+        d = (*AppVars::INSTANCE().properkeys().find("MKN_REPO")).second;
         try{
             std::string version(n[VERSION] ? resolveFromProperties(n[VERSION].Scalar()) : "default");
             if(_MKN_REP_VERS_DOT_) kul::String::REPLACE_ALL(version, ".", kul::Dir::SEP());
@@ -588,7 +617,9 @@ void maiken::Application::run(bool dbg){
         KOUT(DBG) << pa.name() << " : " << pa.toString();
         p->var(pa.name(), pa.toString());
     }
-    KOUT(DBG) << (*p);
+    for(const auto& ev : AppVars::INSTANCE().envVars())
+        p->var(ev.first, kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
+    KOUT(DBG) << (*p);    
     p->start();
     KEXIT(0, "");
 }
@@ -660,7 +691,14 @@ void maiken::Application::populateMaps(const YAML::Node& n){ //IS EITHER ROOT OR
         else if (c[MODE].Scalar().compare(PREPEND)  == 0) mode = EnvVarMode::PREP;
         else if (c[MODE].Scalar().compare(REPLACE)  == 0) mode = EnvVarMode::REPL;
         else KEXCEPTION("Unhandled EnvVar mode: " + c[MODE].Scalar());
+        evs.erase(std::remove_if(evs.begin(), evs.end(),
+            [&c](const EnvVar& ev) {return ev.name() == c[NAME].Scalar();}), evs.end());
         evs.push_back(EnvVar(c[NAME].Scalar(), c[VALUE].Scalar(), mode));
+    }
+    for(const auto& p : AppVars::INSTANCE().envVars()){
+        evs.erase(std::remove_if(evs.begin(), evs.end(),
+            [&p](const EnvVar& ev) {return ev.name() == p.first;}), evs.end());
+        evs.push_back(EnvVar(p.first, p.second, EnvVarMode::PREP));
     }
 
     if(n[ARG]) for(const auto& o : kul::String::LINES(n[ARG].Scalar())) arg += resolveFromProperties(o) + " ";

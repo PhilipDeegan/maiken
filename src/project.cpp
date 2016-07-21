@@ -36,7 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 const kul::yaml::Validator maiken::Project::validator() const{
     using namespace kul::yaml;
     NodeValidator dependencies("dep", {
-        NodeValidator("name", 1),
+        NodeValidator("name"),
         NodeValidator("version"),
         NodeValidator("profile"),
         NodeValidator("scm"),
