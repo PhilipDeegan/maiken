@@ -123,6 +123,7 @@ class Constants{
         static constexpr const char* NONE           = "none";
         static constexpr const char* SHARED         = "shared";
         static constexpr const char* STATIC         = "static";
+        static constexpr const char* DRY_RUN        = "dry-run";
 
         static constexpr const char* ARCHIVER       = "archiver";
         static constexpr const char* ASSEMBLER      = "assembler";
@@ -136,6 +137,7 @@ class Constants{
         static constexpr const char* MKN_SRC        = "src";
         static constexpr const char* MKN_INC        = "inc";
         static constexpr const char* MKN_LIB        = "lib";
+        static constexpr const char* MKN_LIBS       = "libs";
         static constexpr const char* MKN_DEP        = "dep";
         static constexpr const char* MKN_DEPS       = "deps";
         static constexpr const char* PATH           = "path";

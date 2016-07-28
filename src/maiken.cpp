@@ -45,11 +45,12 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
                             Arg('t', THREADS,  ArgType::MAYBE),
                             Arg('u', SCM_UPDATE), Arg('U', SCM_FUPDATE),
                             Arg('v', VERSION),    Arg('s', SCM_STATUS),
-                            Arg('S', SHARED),     Arg('K', STATIC),
+                            Arg('K', STATIC),      
+                            Arg('R', DRY_RUN),    Arg('S', SHARED),
                             Arg('D', DEBUG),      Arg('C', DIRECTORY, ArgType::STRING),
                             Arg('x', SETTINGS, ArgType::STRING),   Arg('h', HELP)};
     std::vector<Cmd> cmdV { Cmd(INIT),     Cmd(MKN_INC), Cmd(MKN_SRC), Cmd(MKN_DEPS),
-                            Cmd(CLEAN),    Cmd(BUILD),   Cmd(COMPILE),
+                            Cmd(CLEAN),    Cmd(BUILD),   Cmd(COMPILE), Cmd(MKN_LIBS),
                             Cmd(LINK),     Cmd(RUN),     Cmd(DBG),
                             Cmd(PROFILES), Cmd(TRIM),    Cmd(INFO)};
     Args args(cmdV, argV);
@@ -122,6 +123,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
         KEXIT(0, "");
     }
     a.ig = 0;
+    if(args.has(DRY_RUN))       AppVars::INSTANCE().dryRun(true);
     if(args.has(SHARED))        AppVars::INSTANCE().shar(true);
     if(args.has(STATIC))        AppVars::INSTANCE().stat(true);
     if(args.has(DBG))           AppVars::INSTANCE().dbg(true);
@@ -177,6 +179,17 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
         }catch(const std::exception& e){ KEXCEPTION("JSON args failed to parse"); }
     }
 
+    if(args.has(MKN_LIBS)){
+        kul::LogMan::INSTANCE().setMode(kul::log::mode::OFF);
+        AppVars::INSTANCE().dryRun(true);
+        std::vector<std::string> v;
+        for(auto app = a.deps.rbegin(); app != a.deps.rend(); ++app)
+            if(!(*app).srcs.empty()) 
+                v.push_back((*app).buildLibrary(std::vector<std::string>()).file());
+        kul::LogMan::INSTANCE().setMode(kul::log::mode::NON);
+        for(const auto& s : v) KOUT(NON) << s;
+        KEXIT(0, "");
+    }
     if(args.has(MKN_DEPS)){
         std::vector<Application*> v;
         for(auto app = a.deps.rbegin(); app != a.deps.rend(); ++app){
@@ -701,7 +714,8 @@ void maiken::Application::populateMaps(const YAML::Node& n){ //IS EITHER ROOT OR
         evs.push_back(EnvVar(p.first, p.second, EnvVarMode::PREP));
     }
 
-    if(n[ARG]) for(const auto& o : kul::String::LINES(n[ARG].Scalar())) arg += resolveFromProperties(o) + " ";
+    if(n[ARG])  for(const auto& o : kul::String::LINES(n[ARG].Scalar()))  arg += resolveFromProperties(o) + " ";
+    if(n[LINK]) for(const auto& o : kul::String::LINES(n[LINK].Scalar())) lnk += resolveFromProperties(o) + " ";
     try{
         if(n[MKN_INC]) for(const auto& o : kul::String::LINES(n[MKN_INC].Scalar())) addIncludeLine(o);
     }catch(const kul::StringException){
