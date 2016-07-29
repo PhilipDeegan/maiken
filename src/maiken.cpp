@@ -275,6 +275,7 @@ void maiken::Application::process() throw(kul::Exception){
             if(AppVars::INSTANCE().link())      this->link();
         }
     }
+    if(AppVars::INSTANCE().dryRun()) KEXIT(0, "");
     if(AppVars::INSTANCE().run() || AppVars::INSTANCE().dbg()) run(AppVars::INSTANCE().dbg());
 }
 
