@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 void maiken::Application::showConfig(bool force){
-    if(AppVars::INSTANCE().show()) return;
+    if(AppVars::INSTANCE().show() || AppVars::INSTANCE().dryRun()) return;
     if(kul::LogMan::INSTANCE().inf() || force){
         std::string repo = (*AppVars::INSTANCE().properkeys().find("MKN_REPO")).second;
         using namespace kul::cli;

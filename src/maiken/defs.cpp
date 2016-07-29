@@ -57,6 +57,7 @@ constexpr const char* maiken::Constants::SELF;
 constexpr const char* maiken::Constants::VALUE;
 constexpr const char* maiken::Constants::MAIN;
 constexpr const char* maiken::Constants::LANG;
+constexpr const char* maiken::Constants::LINK;
 constexpr const char* maiken::Constants::LOCAL;
 constexpr const char* maiken::Constants::REMOTE;
 constexpr const char* maiken::Constants::REPO;

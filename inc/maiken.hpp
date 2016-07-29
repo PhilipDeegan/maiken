@@ -50,7 +50,7 @@ class Exception : public kul::Exception{
 
 class AppVars : public Constants{
     private:
-        bool b = 0, c = 0, d = 0, f = 0, g = 0, l = 0, p = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
+        bool b = 0, c = 0, d = 0, dr = 0, f = 0, g = 0, l = 0, p = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
         uint16_t dl = 0, ts = 1;
         std::string aa, la;
         kul::hash::map::S2S evs, jas, pks;
@@ -87,6 +87,9 @@ class AppVars : public Constants{
 
         const bool& debug() const { return this->d;}
         void debug(const bool& d) { this->d = d;}
+
+        const bool& dryRun() const { return this->dr;}
+        void dryRun(const bool& dr) { this->dr = dr;}
 
         const bool& fupdate() const { return this->f;}
         void fupdate(const bool& f) { this->f = f;}
@@ -137,7 +140,7 @@ class Application : public Constants{
         bool ig = 1;
         const Application* par = 0;
         kul::code::Mode m;
-        std::string arg, main, lang, scr, scv;
+        std::string arg, main, lang, lnk, scr, scv;
         const std::string p;
         kul::Dir bd, inst;
         maiken::Project proj;
@@ -153,8 +156,8 @@ class Application : public Constants{
         
         void buildDepVec(const std::string* depVal);
         void buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc);
-        void buildExecutable(const std::vector<std::string>& objects);
-        void buildLibrary(const std::vector<std::string>& objects);
+        kul::code::CompilerProcessCapture buildExecutable(const std::vector<std::string>& objects);
+        kul::code::CompilerProcessCapture buildLibrary(const std::vector<std::string>& objects);
         void checkErrors(const kul::code::CompilerProcessCapture& cpc) throw(kul::Exception);
         void populateMaps(const YAML::Node& n);
         void populateMapsFromDependencies();
@@ -221,7 +224,7 @@ class ThreadingCompiler : public Constants{
             : f(0), app(app), sources(sources){
                 for(const auto& s : app.includes()){
                     kul::Dir d(s.first);
-                    const std::string& m(d.escm());
+                    const std::string& m(AppVars::INSTANCE().dryRun() ? d.esc() : d.escm());
                     if(!m.empty()) incs.push_back(m);
                     else           incs.push_back(".");
                 }
@@ -250,7 +253,9 @@ class ThreadingCompiler : public Constants{
                 // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
                 if(kul::LogMan::INSTANCE().inf() && !kul::LogMan::INSTANCE().dbg())
                     KOUT(NON) << compiler << " : " << src;
-                const kul::code::CompilerProcessCapture& cpc = kul::code::Compilers::INSTANCE().get(compiler)->compileSource(cmd, args, incs, src, obj, app.m);
+                const kul::code::CompilerProcessCapture& cpc 
+                    = kul::code::Compilers::INSTANCE().get(compiler)
+                        ->compileSource(cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
                 kul::ScopeLock lock(push);
                 cpcs.push_back(cpc);
                 if(cpc.exception()) f = 1;
