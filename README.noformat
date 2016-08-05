@@ -392,13 +392,13 @@ Available commands
 
 Available arguments:
     -a --args arg         - Adds $arg to the compile command if compile/build, passes arguments to application if run
-    -a --env arg          - CSV key:value environment variables override format -P "k1:v1,k2:v2" , can be used with run/dbg, backslash escaps , and :
+    -a --env arg          - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
     -d n                  - See 4.8
     -h --help             - Print help
     -j --jargs json       - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing file-type specific args to compiler
     -l --linker text      - Adds text to linking of binary
     -p --profile p        - Activate profile p
-    -P --property p       - CSV key:value properties override format -P "k1:v1,k2:v2" , backslash escaps , and :
+    -P --property p       - CSV key=value properties override format -P "k1=v1,k2=v2" , backslash escaps , and =
     -s --scm-status       - Display SCM status of project, allows -d
     -u --scm-update       - Update project from SCM when permitted, allows -d
     -U --scm-force-update - Force update project from SCM, allows -d
