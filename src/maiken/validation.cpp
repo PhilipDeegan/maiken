@@ -99,7 +99,7 @@ class Validator : public maiken::Constants{
             }
             return false;
         }
-        static bool SELF_CHECK(const maiken::Application& a, const YAML::Node& n, const std::vector<std::string>& profiles){
+        static void SELF_CHECK(const maiken::Application& a, const YAML::Node& n, const std::vector<std::string>& profiles){
             if(n[SELF])
                 for(const auto& s : kul::String::SPLIT(a.resolveFromProperties(n[SELF].Scalar()), ' '))
                     if(std::find(profiles.begin(), profiles.end(), s) == profiles.end())
