@@ -177,10 +177,25 @@ System properties:
            bsd/nix/win(with msys/cygwin/etc) = ~/.maiken/repo
            win cmd prompt = %HOMEDRIVE%/%HOMEPATH%/maiken/repo
 
+2.2.3 Profile Dependencies
+
+Adding a profile as a dependency can do a number of things:
+    Import addition public includes
+    Add libraries while linking.
+        This can happen when a dependency profile has sources so is linked into a library, or
+        This can happen when a dependency has the "lib" tag
+    Import addition library search directories with the "path" tag
+
+2.2.4  Profile Inheritence
+
+Using the "parent" tag, one profile may derive a number of values from the selected profile.
+Generally all values are inherited, however even if this is the case, some values such as 
+the "main" tag or others with only a single value are overridden in the case they exist in the active profile.
 
 2.3 SCM
 
 Git supported, SVN planned.
+
 
 3 How to build maiken
 
@@ -313,7 +328,7 @@ remote:
                    IF CMD          %HOMEDRIVE%/%HOMEPATH%/maiken/settings.yaml
 
 
-4.4 Language
+4.4 Language (HELP WANTED!)
 
 English is the default language.
 To activate another language run:
@@ -355,8 +370,11 @@ The subsequent string is used as the default command if mkn is executed with zer
 
 Using the argument -d / --dep
     The following rules apply
-If soley numeric, must be greater than 0, used to limit which dependencies are built, if 1, project immediate dependencies are built, if two, includes dependencies of dependencies.
+If soley numeric, must be greater than 0, used to limit which dependencies are built, 
+    if 1, project immediate dependencies are built, if two, includes dependencies of dependencies.
 If non-numeric, CSV apply, with the value equating to the yaml root node "name", only those found, plus the current project are built.
+Project profiles may be specified with square brackets, e.g. "-d project[profile]"
+If no profile is chosen, all profiles from that project which would normally be active with an argumentless "-d" will be active.
 Also, if non numeric, special characters include
     "+", ignores current project. If only value builds all but current project.
 

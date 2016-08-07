@@ -121,6 +121,8 @@ void maiken::Application::preSetupValidation() throw (maiken::Exception){
     std::vector<std::string> profiles;
     for(const auto& profile : project().root()[PROFILE]){
         const std::string& p(profile[NAME].Scalar());
+        if(p.find("[") != std::string::npos || p.find("]") != std::string::npos)
+            KEXCEPTION("Profile may not contain character \"[\" or \"]\"");
         if(p == project().root()[NAME].Scalar())
             KEXCEPTION("Profile may not have same name as project");
         if(std::find(profiles.begin(), profiles.end(), p) != profiles.end())

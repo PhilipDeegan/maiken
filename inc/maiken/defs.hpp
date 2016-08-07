@@ -137,7 +137,6 @@ class Constants{
         static constexpr const char* MKN_SRC        = "src";
         static constexpr const char* MKN_INC        = "inc";
         static constexpr const char* MKN_LIB        = "lib";
-        static constexpr const char* MKN_LIBS       = "libs";
         static constexpr const char* MKN_DEP        = "dep";
         static constexpr const char* MKN_DEPS       = "deps";
         static constexpr const char* PATH           = "path";

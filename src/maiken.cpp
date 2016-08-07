@@ -50,7 +50,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
                             Arg('D', DEBUG),      Arg('C', DIRECTORY, ArgType::STRING),
                             Arg('x', SETTINGS, ArgType::STRING),   Arg('h', HELP)};
     std::vector<Cmd> cmdV { Cmd(INIT),     Cmd(MKN_INC), Cmd(MKN_SRC), Cmd(MKN_DEPS),
-                            Cmd(CLEAN),    Cmd(BUILD),   Cmd(COMPILE), Cmd(MKN_LIBS),
+                            Cmd(CLEAN),    Cmd(BUILD),   Cmd(COMPILE),
                             Cmd(LINK),     Cmd(RUN),     Cmd(DBG),
                             Cmd(PROFILES), Cmd(TRIM),    Cmd(INFO)};
     Args args(cmdV, argV);
@@ -71,7 +71,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
             kul::io::Reader reader(yml);
             const char* c = reader.readLine();
             const std::string s(c ? c : ""); 
-            if(s.substr(0, 3) == "#! "){
+            if(s.size() > 3 && s.substr(0, 3) == "#! "){
                 std::string line(s.substr(3));
                 if(!line.empty()){
                     std::vector<std::string> lineArgs(kul::cli::asArgs(line));
@@ -126,6 +126,8 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
     if(args.has(DRY_RUN))       AppVars::INSTANCE().dryRun(true);
     if(args.has(SHARED))        AppVars::INSTANCE().shar(true);
     if(args.has(STATIC))        AppVars::INSTANCE().stat(true);
+    if(AppVars::INSTANCE().shar() && AppVars::INSTANCE().stat())
+        KEXCEPT(Exception, "Cannot specify shared and static simultaneously");
     if(args.has(DBG))           AppVars::INSTANCE().dbg(true);
     if(args.has(DEBUG))         AppVars::INSTANCE().debug(true);
     if(args.has(SCM_FUPDATE))   AppVars::INSTANCE().fupdate(true);
@@ -179,17 +181,6 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
         }catch(const std::exception& e){ KEXCEPTION("JSON args failed to parse"); }
     }
 
-    if(args.has(MKN_LIBS)){
-        kul::LogMan::INSTANCE().setMode(kul::log::mode::OFF);
-        AppVars::INSTANCE().dryRun(true);
-        std::vector<std::string> v;
-        for(auto app = a.deps.rbegin(); app != a.deps.rend(); ++app)
-            if(!(*app).srcs.empty()) 
-                v.push_back((*app).buildLibrary(std::vector<std::string>()).file());
-        kul::LogMan::INSTANCE().setMode(kul::log::mode::NON);
-        for(const auto& s : v) KOUT(NON) << s;
-        KEXIT(0, "");
-    }
     if(args.has(MKN_DEPS)){
         std::vector<Application*> v;
         for(auto app = a.deps.rbegin(); app != a.deps.rend(); ++app){
@@ -495,8 +486,10 @@ void maiken::Application::buildDepVec(const std::string* depVal){
             try{
                 AppVars::INSTANCE().dependencyLevel(kul::String::UINT16(*depVal));
             }catch(const kul::StringException& e){
+                AppVars::INSTANCE().dependencyLevel(0);
                 for(auto s : kul::String::SPLIT(*depVal, ',')){
                     kul::String::TRIM(s);
+                    kul::String::REPLACE_ALL(s, " ", "");
                     include.insert(s);
                 }
             }
@@ -510,9 +503,15 @@ void maiken::Application::buildDepVec(const std::string* depVal){
     }
 
     std::vector<Application*> dePs;
-    for(Application& app : deps){
-        app.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), include);
-        if(AppVars::INSTANCE().dependencyLevel()) app.ig = 0;
+    for(Application& a : deps){
+        a.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), include);
+        const std::string& name(a.project().root()[NAME].Scalar());
+        std::stringstream ss;
+        ss << name << "[" << (a.p.empty() ? name : a.p) << "]";
+        if(AppVars::INSTANCE().dependencyLevel()
+            || include.count(name) || include.count(ss.str())) a.ig = 0;
+        all.insert(name);
+        all.insert(ss.str());
     }
     std::vector<Application> t;
     for(const Application* a : dePs) t.push_back(*a);
@@ -524,7 +523,6 @@ void maiken::Application::buildDepVec(const std::string* depVal){
             }
         if(!f) deps.push_back(a);
     }
-    for(const auto& d : deps) all.insert(d.project().root()[NAME].Scalar());
     for(const auto& d : include)
         if(!all.count(d) && !ignore.count(d)) KEXCEPTION("Dependency project specified does not exist: "+ d);
     if(include.size() && include.count("+")) this->ig = 1;
@@ -533,7 +531,10 @@ void maiken::Application::buildDepVec(const std::string* depVal){
 void maiken::Application::buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc){
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
         maiken::Application& a = (*app);
-        if(i > 0 || inc.count(a.project().root()[NAME].Scalar())) a.ig = 0;
+        const std::string& name(a.project().root()[NAME].Scalar());
+        std::stringstream ss;
+        ss << name << "[" << (a.p.empty() ? name : a.p) << "]";
+        if(i > 0 || inc.count(name) || inc.count(ss.str())) a.ig = 0;
         for(auto app1 = dePs.rbegin(); app1 != dePs.rend(); ++app1){
             maiken::Application* a1 = (*app1);
             if(a.project().dir() == a1->project().dir() && a.p == a1->p){
