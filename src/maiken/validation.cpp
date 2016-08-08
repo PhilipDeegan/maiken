@@ -99,7 +99,7 @@ class Validator : public maiken::Constants{
             }
             return false;
         }
-        static bool SELF_CHECK(const maiken::Application& a, const YAML::Node& n, const std::vector<std::string>& profiles){
+        static void SELF_CHECK(const maiken::Application& a, const YAML::Node& n, const std::vector<std::string>& profiles){
             if(n[SELF])
                 for(const auto& s : kul::String::SPLIT(a.resolveFromProperties(n[SELF].Scalar()), ' '))
                     if(std::find(profiles.begin(), profiles.end(), s) == profiles.end())
@@ -121,6 +121,8 @@ void maiken::Application::preSetupValidation() throw (maiken::Exception){
     std::vector<std::string> profiles;
     for(const auto& profile : project().root()[PROFILE]){
         const std::string& p(profile[NAME].Scalar());
+        if(p.find("[") != std::string::npos || p.find("]") != std::string::npos)
+            KEXCEPTION("Profile may not contain character \"[\" or \"]\"");
         if(p == project().root()[NAME].Scalar())
             KEXCEPTION("Profile may not have same name as project");
         if(std::find(profiles.begin(), profiles.end(), p) != profiles.end())
