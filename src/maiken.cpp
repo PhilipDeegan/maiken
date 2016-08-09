@@ -162,6 +162,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
                 std::placeholders::_1, 
                 std::placeholders::_2));
 
+    a.setSuper(0);
     a.setup();
     a.buildDepVec(args.has(MKN_DEP) ? &args.get(MKN_DEP) : 0);
 
@@ -755,23 +756,36 @@ void maiken::Application::populateDependencies(const YAML::Node& n) throw(kul::E
             }
         if(f) continue;
         const maiken::Project c(maiken::Project::CREATE(projectDir));
-        std::string pp;
 
-        if(dep[PROFILE])
-            for(const auto& node : c.root()[PROFILE])
-                if(node[NAME].Scalar() == dep[PROFILE].Scalar()){
-                    pp = node[NAME].Scalar();
-                    break;
-                }
-        if(dep[PROFILE] && pp.empty())
-            KEXCEPTION("profile does not exist found\n"+dep[PROFILE].Scalar()+"\n"+project().dir().path());
-
-        Application app(c, pp);
-        app.par = this;
-        if(dep[SCM]) app.scr = resolveFromProperties(dep[SCM].Scalar());
-        if(dep[VERSION]) app.scv = resolveFromProperties(dep[VERSION].Scalar());
-        this->deps.push_back(app);
-        apps.push_back(std::make_pair(app.project().dir().path(), app.p));
+        if(dep[PROFILE]){
+            for(auto s : kul::String::SPLIT(resolveFromProperties(dep[PROFILE].Scalar()), ' ')){
+                if(s.empty()) continue;
+                f = 0;
+                if(s == "@") s = "";
+                else
+                    for(const auto& node : c.root()[PROFILE])
+                        if(node[NAME].Scalar() == s){
+                            f = 1;
+                            break;
+                        }
+                    
+                if(!f || !s.empty()) 
+                    KEXCEPTION("profile does not exist found\n"+s+"\n"+project().dir().path());
+                Application app(c, s);
+                app.par = this;
+                if(dep[SCM]) app.scr = resolveFromProperties(dep[SCM].Scalar());
+                if(dep[VERSION]) app.scv = resolveFromProperties(dep[VERSION].Scalar());
+                this->deps.push_back(app);
+                apps.push_back(std::make_pair(app.project().dir().path(), app.p));
+            }
+        }else{
+            Application app(c, "");
+            app.par = this;
+            if(dep[SCM]) app.scr = resolveFromProperties(dep[SCM].Scalar());
+            if(dep[VERSION]) app.scv = resolveFromProperties(dep[VERSION].Scalar());
+            this->deps.push_back(app);
+            apps.push_back(std::make_pair(app.project().dir().path(), app.p));
+        }
     }
     if(n[SELF])
         for(const auto& s : kul::String::SPLIT(resolveFromProperties(n[SELF].Scalar()), ' ')){
@@ -782,9 +796,12 @@ void maiken::Application::populateDependencies(const YAML::Node& n) throw(kul::E
             apps.push_back(std::make_pair(app.project().dir().path(), app.p));
         }
     cyclicCheck(apps);
+    KLOG(INF);
     for(auto& app : deps){
+        KLOG(INF);
         if(app.buildDir().path().size()) continue;
         kul::env::CWD(app.project().dir());
+        app.setSuper(this);
         app.setup();
         if(app.project().root()[SCM]) app.scr = app.resolveFromProperties(app.project().root()[SCM].Scalar());
         if(!app.sources().empty()){
@@ -885,5 +902,27 @@ void maiken::Application::loadTimeStamps() throw (kul::StringException){
             os << std::hex << includeStamp;
             includeStamps.insert(inc.mini(), os.str());
         }
+    }
+}
+
+void maiken::Application::setSuper(const Application* app){
+    if(sup.get()) return;
+    if(project().root()[SUPER]){
+        const std::string& cwd(kul::env::CWD());
+        kul::env::CWD(project().dir().real());
+        kul::Dir d(project().root()[SUPER].Scalar());
+        if(!d) KEXCEPTION("Super does not exist in project: " + project().dir().real());
+        if(d.real() == project().dir().real())
+            KEXCEPTION("Super cannot reference itself: " + project().dir().real());
+        if(app && app->project().dir().real() == d.real())
+            sup = std::make_shared<Application>(*app);
+        else{
+            sup = std::make_shared<Application>(maiken::Project::CREATE(d), "");
+            kul::env::CWD(d.real());
+            sup->setSuper(app ? app : this);
+            sup->setup();
+        }
+        for(const auto& p : sup->properties()) if(!ps.count(p.first)) ps.insert(p.first, p.second);
+        kul::env::CWD(cwd);
     }
 }

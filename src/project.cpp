@@ -59,6 +59,7 @@ const kul::yaml::Validator maiken::Project::validator() const{
         NodeValidator("version"),
         NodeValidator("scm"),
         NodeValidator("property",  {NodeValidator("*")}, 0, NodeType::MAP),
+        NodeValidator("super"),
         NodeValidator("parent"),
         NodeValidator("inc"),
         NodeValidator("src"),
