@@ -139,6 +139,7 @@ class Application : public Constants{
     protected:
         bool ig = 1;
         const Application* par = 0;
+        std::shared_ptr<Application> sup;
         kul::code::Mode m;
         std::string arg, main, lang, lnk, scr, scv;
         const std::string p;
@@ -174,6 +175,7 @@ class Application : public Constants{
         void scmUpdate(const bool& f) throw(kul::scm::Exception);
         void scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo) throw(kul::scm::Exception);
         void setup();
+        void setSuper(const Application* app);
         void showConfig(bool force = 0);
         void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception);
         void showProfiles();
