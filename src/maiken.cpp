@@ -769,8 +769,8 @@ void maiken::Application::populateDependencies(const YAML::Node& n) throw(kul::E
                             break;
                         }
                     
-                if(!f || !s.empty()) 
-                    KEXCEPTION("profile does not exist found\n"+s+"\n"+project().dir().path());
+                if(!f && !s.empty()) 
+                    KEXCEPTION("profile does not found\n"+s+"\n"+project().dir().path());
                 Application app(c, s);
                 app.par = this;
                 if(dep[SCM]) app.scr = resolveFromProperties(dep[SCM].Scalar());
@@ -796,9 +796,7 @@ void maiken::Application::populateDependencies(const YAML::Node& n) throw(kul::E
             apps.push_back(std::make_pair(app.project().dir().path(), app.p));
         }
     cyclicCheck(apps);
-    KLOG(INF);
     for(auto& app : deps){
-        KLOG(INF);
         if(app.buildDir().path().size()) continue;
         kul::env::CWD(app.project().dir());
         app.setSuper(this);
