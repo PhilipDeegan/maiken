@@ -18,7 +18,7 @@ profile:
       - name: parse.yaml
         version: master
     main: cpp.cpp
-    arg: -D_MKN_VERSION_=${version}
+    arg: -D_MKN_VERSION_=${version}_${DATETIME}
     mode: static
 
   - name: shared

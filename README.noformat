@@ -409,21 +409,21 @@ Available commands
 5.1.2 Arguments
 
 Available arguments:
-    -a --args arg         - Adds $arg to the compile command if compile/build, passes arguments to application if run
-    -a --env arg          - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
-    -d n                  - See 4.8
+    -a --args $a          - Adds $arg to the compile command if compile/build, passes arguments to application if run
+    -e --env $e           - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
+    -d --dependencies     - See 4.8
     -h --help             - Print help
-    -j --jargs json       - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing file-type specific args to compiler
-    -l --linker text      - Adds text to linking of binary
-    -p --profile p        - Activate profile p
-    -P --property p       - CSV key=value properties override format -P "k1=v1,k2=v2" , backslash escaps , and =
+    -j --jargs $j         - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing file-type specific args to compiler
+    -l --linker $t        - Adds $t to linking of root project build
+    -p --profile $p       - Activate profile p
+    -P --property $p      - CSV key=value properties override format -P "k1=v1,k2=v2" , backslash escaps , and =
     -s --scm-status       - Display SCM status of project, allows -d
     -u --scm-update       - Update project from SCM when permitted, allows -d
     -U --scm-force-update - Force update project from SCM, allows -d
-    -t --threads n        - Consume $num threads while compiling source files where $n > 0, If $n is missing optimal resolution attempted.
+    -t --threads $n       - Consume $num threads while compiling source files where $n > 0, If $n is missing optimal resolution attempted.
     -v --version          - Displays the current maiken version number
-    -x --settings f       - Sets settings.yaml in use to $f. Directory missing, $(4.3.1) attempted
-    -C --directory d      - Execute on directory $d rather than current directory 
+    -x --settings $f      - Sets settings.yaml in use to $f. Directory missing, $(4.3.1) attempted
+    -C --directory $d     - Execute on directory $d rather than current directory 
     -K --static           - Links projects without mode as static
     -S --shared           - Links projects without mode as shared
 
@@ -494,7 +494,7 @@ Description     disables all SCM
 Key             _MKN_DISABLE_SVN_
 Type            flag
 Default         0
-Description     disables SVN
+Description     disables SVN if it was supported
 
 Key             _MKN_DISABLE_GIT_
 Type            flag

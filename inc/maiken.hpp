@@ -57,6 +57,8 @@ class AppVars : public Constants{
         AppVars(){
             pks["OS"]   = KTOSTRING(__KUL_OS__);
             pks["HOME"] = kul::user::home().path();
+            pks["DATETIME"] = kul::DateTime::NOW();
+            pks["TIMESTAMP"] = std::time(NULL);
             if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][REPO])
                 pks["MKN_REPO"] = Settings::INSTANCE().root()[LOCAL][REPO].Scalar();
             else
@@ -297,17 +299,18 @@ class SCMGetter{
                     }
                 }catch(const kul::proc::ExitException& e){}
 #endif//_MKN_DISABLE_GIT_
-#ifndef _MKN_DISABLE_SVN_
-                try{
-                   kul::Process s("svn");
-                   kul::ProcessCapture sp(s);
-                   s.arg("ls").arg(repo).start();
-                   if(!sp.errs().size()) {
-                       INSTANCE().valids.insert(d.path(), repo);
-                       return &kul::scm::Manager::INSTANCE().get("svn");
-                   }
-                }catch(const kul::proc::ExitException& e){}
-#endif//_MKN_DISABLE_SVN_
+// SVN NOT YET SUPPORTED
+// #ifndef _MKN_DISABLE_SVN_
+//                 try{
+//                    kul::Process s("svn");
+//                    kul::ProcessCapture sp(s);
+//                    s.arg("ls").arg(repo).start();
+//                    if(!sp.errs().size()) {
+//                        INSTANCE().valids.insert(d.path(), repo);
+//                        return &kul::scm::Manager::INSTANCE().get("svn");
+//                    }
+//                 }catch(const kul::proc::ExitException& e){}
+// #endif//_MKN_DISABLE_SVN_
             }
 #else
             KEXCEPT(Exception, "SCM disabled, cannot resolve dependency, check local paths and configurations");

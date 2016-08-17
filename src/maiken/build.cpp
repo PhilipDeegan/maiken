@@ -286,6 +286,7 @@ kul::code::CompilerProcessCapture maiken::Application::buildExecutable(const std
         try{
             std::string linker = fs[fileType][LINKER];
             std::string linkEnd = AppVars::INSTANCE().linker();
+            if(!lnk.empty()) linkEnd += " " + lnk;
             kul::Dir out(inst ? inst.real() : buildDir());
             if(!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && linkEnd.size()) 
                 KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
