@@ -50,18 +50,20 @@ src: ./src
 Values which allow property resolution are marked with ${aaa}
 
 name: name 
-version: version                                
+version: version
+scm: string                         # Appended to remote URLs for lookup if non concrete URL, used if concrete
+parent: $directory                  # Inherit properties of project at directory, super (..) or sub directory advisable
 property:                                     
   - aaa: AAA
     bbb: ${aaa}.BBB
 inc: <directory> <directory> ${aaa}
 src: <directory> <file> ${aaa}
-path: <directory> ${aaa}            # extra library paths for linking, not generally advisable unless project is in expected sub directory
+path: <directory> ${aaa}            # extra library paths for linking, generally inadvisable unless project is in sub directory
 lib: <library> ${aaa}               # prefixes/file types automatically deduced e.g. "lib: math" = libmath.a/so math.lib/dll
 dep:
   - name: name                      # Used in URL lookup if ${scm} is missing
-    version: version                # git branch / svn ???
-    scm: ${aaa}                     # git or svn remote repository - automatically detected 
+    version: version                # git branch and directory name of dependency under $name if no local tag
+    scm: ${aaa}                     # Appended to remote URLs for lookup if non concrete URL, used if concrete
     local: ${aaa}                   # overrides local repository directory
 main: <file>
 arg: -DTHIS_PROFILE ${aaa}
@@ -173,6 +175,8 @@ System properties:
     OS   - system OS, can be either bsd/nix/win
     HOME - bsd/nix/win(with msys/cygwin/etc) = ~/
            win cmd prompt = %HOMEDRIVE%/%HOMEPATH%
+    DATETIME - DateTime when app launched format %Y-%m-%d-%H:%M:%S
+    TIMESTAMP - Unix timestamp when app launched in seconds
     MKN_REPO - if settings.xml has [local][repo], it is that, otherwise
            bsd/nix/win(with msys/cygwin/etc) = ~/.maiken/repo
            win cmd prompt = %HOMEDRIVE%/%HOMEPATH%/maiken/repo
