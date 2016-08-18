@@ -97,6 +97,7 @@ void maiken::Application::showHelp(){
     ss.push_back(MKN_DEFS_BUILD);
     ss.push_back(MKN_DEFS_CLEAN);
     ss.push_back(MKN_DEFS_COMP);
+    ss.push_back(MKN_DEFS_DBG);
     ss.push_back(MKN_DEFS_INIT);
     ss.push_back(MKN_DEFS_LINK);
     ss.push_back(MKN_DEFS_PROFS);
@@ -107,11 +108,20 @@ void maiken::Application::showHelp(){
     ss.push_back("");
     ss.push_back(MKN_DEFS_ARG);
     ss.push_back(MKN_DEFS_ARGS);
+    ss.push_back(MKN_DEFS_DIRC);
     ss.push_back(MKN_DEFS_DEPS);
+    ss.push_back(MKN_DEFS_EVSA);
+    ss.push_back(MKN_DEFS_HELP);
+    ss.push_back(MKN_DEFS_JARG);
+    ss.push_back(MKN_DEFS_STATIC);
+    ss.push_back(MKN_DEFS_LINKER);
     ss.push_back(MKN_DEFS_PROF);
+    ss.push_back(MKN_DEFS_PROP);
     ss.push_back(MKN_DEFS_STAT);
+    ss.push_back(MKN_DEFS_SHARED);
     ss.push_back(MKN_DEFS_THREDS);
     ss.push_back(MKN_DEFS_UPDATE);
+    ss.push_back(MKN_DEFS_FUPDATE);
     ss.push_back(MKN_DEFS_VERSON);
     ss.push_back(MKN_DEFS_SETTNGS);
     ss.push_back("");
@@ -119,6 +129,7 @@ void maiken::Application::showHelp(){
     ss.push_back(MKN_DEFS_EXMPL1);
     ss.push_back(MKN_DEFS_EXMPL2);
     ss.push_back(MKN_DEFS_EXMPL3);
+    ss.push_back(MKN_DEFS_EXMPL4);
     ss.push_back("");
     for(const auto& s : ss) KOUT(NON) << s;
 }
