@@ -50,7 +50,7 @@ class Exception : public kul::Exception{
 
 class AppVars : public Constants{
     private:
-        bool b = 0, c = 0, d = 0, dr = 0, f = 0, g = 0, l = 0, p = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
+        bool b = 0, c = 0, d = 0, dr = 0, f = 0, g = 0, l = 0, p = 0, pk = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
         uint16_t dl = 0, ts = 1;
         std::string aa, la;
         kul::hash::map::S2S evs, jas, pks;
@@ -101,6 +101,9 @@ class AppVars : public Constants{
 
         const bool& run() const { return this->r;}
         void run(const bool& r) { this->r = r;}
+
+        const bool& pack() const { return this->pk;}
+        void pack(const bool& pk) { this->pk = pk;}
 
         const bool& show() const { return this->s;}
         void show(const bool& s){ this->s = s;}
@@ -169,6 +172,7 @@ class Application : public Constants{
         void postSetupValidation() throw(Exception);
         void resolveProperties();
         void build() throw(kul::Exception);
+        void pack() throw(kul::Exception);
         void link()  throw(kul::Exception);
         void run(bool dbg);
         void trim();

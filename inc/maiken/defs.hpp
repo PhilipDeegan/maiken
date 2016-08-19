@@ -85,6 +85,7 @@ class Constants{
         static constexpr const char* INIT           = "init";
         static constexpr const char* INFO           = "info";
         static constexpr const char* LINK           = "link";
+        static constexpr const char* PACK           = "pack";
         static constexpr const char* RUN            = "run";
         static constexpr const char* THREADS        = "threads";
         static constexpr const char* TRIM           = "trim";
