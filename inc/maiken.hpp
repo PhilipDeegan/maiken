@@ -34,8 +34,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/os.hpp"
 #include "kul/cli.hpp"
 #include "kul/log.hpp"
-#include "kul/scm.hpp"
 #include "kul/proc.hpp"
+#include "kul/scm/man.hpp"
 #include "kul/threads.hpp"
 #include "kul/code/compilers.hpp"
 
