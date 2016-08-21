@@ -453,9 +453,10 @@ void maiken::Application::setup(){
                 if(n[IF_INC])
                     for(YAML::const_iterator it = n[IF_INC].begin(); it != n[IF_INC].end(); ++it)
                         if(it->first.Scalar() == KTOSTRING(__KUL_OS__))
-                            for(const auto& s : kul::String::SPLIT(it->second.Scalar(), ' '))
+                            for(const auto& s : kul::String::LINES(it->second.Scalar()))
                                 addIncludeLine(s);
-            }catch(const kul::StringException){
+            }catch(const kul::StringException& e){
+                KLOG(ERR) << e.what();
                 KEXCEPTION("if_inc contains invalid bool value\n"+project().dir().path());
             }
             try{
