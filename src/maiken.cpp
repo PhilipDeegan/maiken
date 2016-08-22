@@ -51,7 +51,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
                             Arg('x', SETTINGS, ArgType::STRING),   Arg('h', HELP)};
     std::vector<Cmd> cmdV { Cmd(INIT),     Cmd(MKN_INC), Cmd(MKN_SRC), Cmd(MKN_DEPS),
                             Cmd(CLEAN),    Cmd(BUILD),   Cmd(COMPILE),
-                            Cmd(LINK),     Cmd(RUN),     Cmd(DBG),
+                            Cmd(LINK),     Cmd(RUN),     Cmd(DBG), Cmd(PACK),
                             Cmd(PROFILES), Cmd(TRIM),    Cmd(INFO)};
     Args args(cmdV, argV);
     try{
@@ -222,14 +222,14 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
     if(args.has(LINK))      AppVars::INSTANCE().link(true);
     if(args.has(RUN))       AppVars::INSTANCE().run(true);
     if(args.has(TRIM))      AppVars::INSTANCE().trim(true);
+    if(args.has(PACK))      AppVars::INSTANCE().pack(true);
     return app;
 }
 
 void maiken::Application::process() throw(kul::Exception){
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
         kul::env::CWD((*app).project().dir());
-        kul::Dir out((*app).inst ? (*app).inst.real() : (*app).buildDir());
-        kul::Dir mkn(out.join(".mkn"));
+        kul::Dir mkn((*app).buildDir().join(".mkn"));
         if((*app).ig || (*app).srcs.empty()) continue;
         std::vector<std::pair<std::string, std::string> > oldEvs;
         for(const kul::cli::EnvVar& ev : (*app).envVars()){
@@ -239,7 +239,7 @@ void maiken::Application::process() throw(kul::Exception){
         }
         if(AppVars::INSTANCE().clean() && (*app).buildDir().is()){
             (*app).buildDir().rm();
-            kul::Dir((*app).buildDir().join(".mkn")).rm();
+            mkn.rm();
         }
 
         (*app).loadTimeStamps();
@@ -267,7 +267,8 @@ void maiken::Application::process() throw(kul::Exception){
             if(AppVars::INSTANCE().link())      this->link();
         }
     }
-    if(AppVars::INSTANCE().dryRun()) KEXIT(0, "");
+
+    if(AppVars::INSTANCE().pack()) pack();
     if(AppVars::INSTANCE().run() || AppVars::INSTANCE().dbg()) run(AppVars::INSTANCE().dbg());
 }
 
@@ -452,9 +453,10 @@ void maiken::Application::setup(){
                 if(n[IF_INC])
                     for(YAML::const_iterator it = n[IF_INC].begin(); it != n[IF_INC].end(); ++it)
                         if(it->first.Scalar() == KTOSTRING(__KUL_OS__))
-                            for(const auto& s : kul::String::SPLIT(it->second.Scalar(), ' '))
+                            for(const auto& s : kul::String::LINES(it->second.Scalar()))
                                 addIncludeLine(s);
-            }catch(const kul::StringException){
+            }catch(const kul::StringException& e){
+                KLOG(ERR) << e.what();
                 KEXCEPTION("if_inc contains invalid bool value\n"+project().dir().path());
             }
             try{
@@ -635,8 +637,8 @@ void maiken::Application::run(bool dbg){
     }
     for(const auto& ev : AppVars::INSTANCE().envVars())
         p->var(ev.first, kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
-    KOUT(DBG) << (*p);    
-    p->start();
+    KOUT(DBG) << (*p);
+    if(!AppVars::INSTANCE().dryRun()) p->start();
     KEXIT(0, "");
 }
 
@@ -770,7 +772,7 @@ void maiken::Application::populateDependencies(const YAML::Node& n) throw(kul::E
                         }
                     
                 if(!f && !s.empty()) 
-                    KEXCEPTION("profile does not found\n"+s+"\n"+project().dir().path());
+                    KEXCEPTION("profile does not exist\n"+s+"\n"+project().dir().path());
                 Application app(c, s);
                 app.par = this;
                 if(dep[SCM]) app.scr = resolveFromProperties(dep[SCM].Scalar());

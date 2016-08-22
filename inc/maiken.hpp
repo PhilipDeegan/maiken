@@ -34,8 +34,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/os.hpp"
 #include "kul/cli.hpp"
 #include "kul/log.hpp"
-#include "kul/scm.hpp"
 #include "kul/proc.hpp"
+#include "kul/scm/man.hpp"
 #include "kul/threads.hpp"
 #include "kul/code/compilers.hpp"
 
@@ -50,7 +50,7 @@ class Exception : public kul::Exception{
 
 class AppVars : public Constants{
     private:
-        bool b = 0, c = 0, d = 0, dr = 0, f = 0, g = 0, l = 0, p = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
+        bool b = 0, c = 0, d = 0, dr = 0, f = 0, g = 0, l = 0, p = 0, pk = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
         uint16_t dl = 0, ts = 1;
         std::string aa, la;
         kul::hash::map::S2S evs, jas, pks;
@@ -101,6 +101,9 @@ class AppVars : public Constants{
 
         const bool& run() const { return this->r;}
         void run(const bool& r) { this->r = r;}
+
+        const bool& pack() const { return this->pk;}
+        void pack(const bool& pk) { this->pk = pk;}
 
         const bool& show() const { return this->s;}
         void show(const bool& s){ this->s = s;}
@@ -169,6 +172,7 @@ class Application : public Constants{
         void postSetupValidation() throw(Exception);
         void resolveProperties();
         void build() throw(kul::Exception);
+        void pack() throw(kul::Exception);
         void link()  throw(kul::Exception);
         void run(bool dbg);
         void trim();
@@ -233,38 +237,7 @@ class ThreadingCompiler : public Constants{
                     else           incs.push_back(".");
                 }
             }
-        void operator()() throw(kul::Exception){
-            std::pair<std::string, std::string> p;
-            {
-                kul::ScopeLock lock(compile);
-                p = sources.front();
-                sources.pop();
-            }
-            const std::string src(p.first);
-            const std::string obj(p.second);
-            if(!f){
-                const std::string& fileType = src.substr(src.rfind(".") + 1);
-                const std::string& compiler = (*(*app.files().find(fileType)).second.find(COMPILER)).second;
-                std::vector<std::string> args;
-                if(app.arguments().count(fileType) > 0)
-                    for(const std::string& o : (*app.arguments().find(fileType)).second)
-                        for(const auto& s : kul::cli::asArgs(o))
-                            args.push_back(s);
-                for(const auto& s : kul::cli::asArgs(app.arg)) args.push_back(s);
-                std::string cmd = compiler + " " + AppVars::INSTANCE().args();
-                if(AppVars::INSTANCE().jargs().count(fileType) > 0)
-                    cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;
-                // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
-                if(kul::LogMan::INSTANCE().inf() && !kul::LogMan::INSTANCE().dbg())
-                    KOUT(NON) << compiler << " : " << src;
-                const kul::code::CompilerProcessCapture& cpc 
-                    = kul::code::Compilers::INSTANCE().get(compiler)
-                        ->compileSource(cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
-                kul::ScopeLock lock(push);
-                cpcs.push_back(cpc);
-                if(cpc.exception()) f = 1;
-            }
-        }
+        void operator()() throw(kul::Exception);
         const std::vector<kul::code::CompilerProcessCapture>& processCaptures(){return cpcs;}
 };
 
@@ -278,47 +251,7 @@ class SCMGetter{
             static SCMGetter s;
             return s;
         }
-        static const kul::SCM* GET_SCM(const kul::Dir& d, const std::string& r){
-            std::vector<std::string> repos;
-            if(IS_SOLID(r)) repos.push_back(r);
-            else
-                for(const std::string& s : Settings::INSTANCE().remoteRepos()) repos.push_back(s + r);
-#ifndef _MKN_DISABLE_SCM_
-            for(const auto& repo : repos){
-#ifndef _MKN_DISABLE_GIT_
-                try{
-                    kul::Process g("git");
-                    kul::ProcessCapture gp(g);
-                    std::string r1(repo);
-                    if(repo.find("http") != std::string::npos && repo.find("@") == std::string::npos)
-                        r1 = repo.substr(0, repo.find("//") + 2) + "u:p@" + repo.substr(repo.find("//") + 2);
-                    g.arg("ls-remote").arg(r1).start();
-                    if(!gp.errs().size()) {
-                        INSTANCE().valids.insert(d.path(), repo);
-                        return &kul::scm::Manager::INSTANCE().get("git");
-                    }
-                }catch(const kul::proc::ExitException& e){}
-#endif//_MKN_DISABLE_GIT_
-// SVN NOT YET SUPPORTED
-// #ifndef _MKN_DISABLE_SVN_
-//                 try{
-//                    kul::Process s("svn");
-//                    kul::ProcessCapture sp(s);
-//                    s.arg("ls").arg(repo).start();
-//                    if(!sp.errs().size()) {
-//                        INSTANCE().valids.insert(d.path(), repo);
-//                        return &kul::scm::Manager::INSTANCE().get("svn");
-//                    }
-//                 }catch(const kul::proc::ExitException& e){}
-// #endif//_MKN_DISABLE_SVN_
-            }
-#else
-            KEXCEPT(Exception, "SCM disabled, cannot resolve dependency, check local paths and configurations");
-#endif//_MKN_DISABLE_SCM_
-            std::stringstream ss;
-            for(const auto& s : repos) ss << s << "\n";
-            KEXCEPT(Exception, "SCM not found or not supported type(git/svn) for repo(s)\n"+ss.str()+"project:"+d.path());
-        }
+        static const kul::SCM* GET_SCM(const kul::Dir& d, const std::string& r);
     public:
         static const std::string REPO(const kul::Dir& d, const std::string& r){
             if(INSTANCE().valids.count(d.path())) return (*INSTANCE().valids.find(d.path())).second;

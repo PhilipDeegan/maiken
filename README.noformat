@@ -406,7 +406,7 @@ Available commands
     - init     - Create a minimal project file ${PWD}/mkn.xml, exits, error if one exists
     - inc      - Print include directories to std out
     - src      - Print found source files to std out [allows -d].
-    - trim     - Remove trailing spaces and tabs from includes/sources under project directory
+    - pack     - Copy binary files & library files into bin/$profile/pack
     - run      - Starts the application automatically linking libraries for dependencies on dynamic libraries, supports -a and -p/-D
     - dbg      - Same as run but uses debugger - see 4.6
 
@@ -414,20 +414,21 @@ Available commands
 
 Available arguments:
     -a --args $a          - Adds $arg to the compile command if compile/build, passes arguments to application if run
-    -e --env $e           - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
+    -C --directory $d     - Execute on directory $d rather than current directory 
     -d --dependencies     - See 4.8
+    -e --env $e           - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
     -h --help             - Print help
     -j --jargs $j         - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing file-type specific args to compiler
     -l --linker $t        - Adds $t to linking of root project build
     -p --profile $p       - Activate profile p
     -P --property $p      - CSV key=value properties override format -P "k1=v1,k2=v2" , backslash escaps , and =
+    -R --dry-run $f       - Do not compile/link, but print out compiler process strings, do not run etc
     -s --scm-status       - Display SCM status of project, allows -d
     -u --scm-update       - Update project from SCM when permitted, allows -d
     -U --scm-force-update - Force update project from SCM, allows -d
     -t --threads $n       - Consume $num threads while compiling source files where $n > 0, If $n is missing optimal resolution attempted.
     -v --version          - Displays the current maiken version number
     -x --settings $f      - Sets settings.yaml in use to $f. Directory missing, $(4.3.1) attempted
-    -C --directory $d     - Execute on directory $d rather than current directory 
     -K --static           - Links projects without mode as static
     -S --shared           - Links projects without mode as shared
 

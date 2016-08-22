@@ -312,6 +312,8 @@ kul::code::CompilerProcessCapture maiken::Application::buildExecutable(const std
 
 kul::code::CompilerProcessCapture maiken::Application::buildLibrary(const std::vector<std::string>& objects){
     if(fs.count(lang) > 0){
+        if(m == kul::code::Mode::NONE)
+            KEXCEPTION("Library requires mode for linking, " + this->project().dir().real());
         if(!(*files().find(lang)).second.count(COMPILER)) KEXCEPT(Exception, "No compiler found for filetype " + lang);
         std::string linker = fs[lang][LINKER];
         std::string linkEnd(lnk);

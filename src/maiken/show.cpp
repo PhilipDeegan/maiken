@@ -100,6 +100,7 @@ void maiken::Application::showHelp(){
     ss.push_back(MKN_DEFS_DBG);
     ss.push_back(MKN_DEFS_INIT);
     ss.push_back(MKN_DEFS_LINK);
+    ss.push_back(MKN_DEFS_PACK);
     ss.push_back(MKN_DEFS_PROFS);
     ss.push_back(MKN_DEFS_RUN);
     ss.push_back(MKN_DEFS_INC);

@@ -68,29 +68,35 @@ void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
     if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr);
     if(scm && !UpdateTracker::INSTANCE().has(this->project().dir().real())){
         if(!f) KOUT(NON) << "WARNING: ATTEMPTING SCM UPDATE, USER INTERACTION MAY BE REQUIRED!";
-        scmUpdate(f, scm, !this->scr.empty() ? SCMGetter::REPO(this->project().dir(), this->scr) : "");
+
+        const std::string& tscr(
+            !this->scr.empty() ? this->scr
+                : this->project().root()[SCM] ? resolveFromProperties(this->project().root()[SCM].Scalar()) 
+                : this->project().root()[NAME].Scalar());
+
+        scmUpdate(f, scm, SCMGetter::REPO(this->project().dir(), tscr) );
         UpdateTracker::INSTANCE().add(this->project().dir().real());
     }
 }
 
-void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const std::string& s1) throw (kul::scm::Exception){
-    const std::string& ver(!this->scv.empty() ? this->scv : this->project().root()[VERSION] ? this->project().root()[VERSION].Scalar() : "");
+void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const std::string& url) throw (kul::scm::Exception){
+    const std::string& ver(!this->scv.empty() ? this->scv 
+        : this->project().root()[VERSION] ? this->project().root()[VERSION].Scalar() : "");
     bool c = true;
-    std::string s(s1.empty() ? scm->origin(this->project().dir().real()) : s1);
     if(!f){
-        KOUT(NON) << "CHECKING: " << this->project().dir().real() << " FROM " << s;
+        KOUT(NON) << "CHECKING: " << this->project().dir().real() << " FROM " << url;
         const std::string& lV(scm->localVersion(this->project().dir().real(), ver));
-        const std::string& rV(s.size() ? scm->remoteVersion(s, ver) : "");
+        const std::string& rV(url.size() ? scm->remoteVersion(url, ver) : "");
         c = lV != rV;
         std::stringstream ss;
-        ss << "UPDATE FROM " << s << " VERSION: " << rV << " (Yes/No/1/0)";
+        ss << "UPDATE FROM " << url << " VERSION: " << rV << " (Yes/No/1/0)";
         if(!c) KOUT(NON) << "CURRENT VERSION MATCHES REMOTE VERSION: SKIPPING";
         else c = kul::String::BOOL(kul::cli::receive(ss.str()));
     }
     if(f || c){
         std::stringstream ss;
-        if(s.size()) ss << " FROM " << s;
+        if(url.size()) ss << " FROM " << url;
         KOUT(NON) << "UPDATING: " << this->project().dir().real() << ss.str();
-        scm->up(this->project().dir().real(), s, ver);
+        scm->up(this->project().dir().real(), url, ver);
     }
 }
