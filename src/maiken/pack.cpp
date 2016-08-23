@@ -37,47 +37,48 @@ void maiken::Application::pack() throw(kul::Exception){
     kul::Dir bin(pk.join("bin"), main.size());
     kul::Dir lib(pk.join("lib"));
     
-	const auto& binar(buildDir().files(0));
-	if(binar.size() == 0) KEXCEPTION("No files found, try building");
+    const auto& binar(buildDir().files(0));
+    if((!main.empty() || srcs.empty()) && binar.size() == 0)
+        KEXCEPTION("No files found, try building");
 
     for(const auto& f : binar) f.cp(main.size() ? bin : lib);
 
-	kul::hash::set::String libS;
+    kul::hash::set::String libS;
 
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
-	    if(!(*app).srcs.empty()){ 
-	    	const auto& libar((*app).buildDir().files(0));
-			if(libar.size() == 0) KEXCEPTION("No files found, try building, " + (*app).project().dir().real());
-	    	for(const auto& f : libar) {
-				if(f.name().find(".") == std::string::npos) continue;
-	    		f.cp(lib);
-	    		libS.insert(f.name().substr(0, f.name().rfind(".")));
-	    	}
-	    }
-	for(const auto& l : libs){
-		bool f1 = 0;
-		for(const auto& p : paths){
-			kul::Dir path(p);
-			if(!path) KEXCEPTION("Path does not exist: " + pk.path());
-			for(const auto& f : path.files(0)){
-				if(f.name().find(".") == std::string::npos) continue;
-				if(libS.count(f.name().substr(0, f.name().rfind(".")))) {
-					f1 = 1;
-					break;
-				}
+        if(!(*app).srcs.empty()){ 
+            const auto& libar((*app).buildDir().files(0));
+            if(libar.size() == 0) KEXCEPTION("No files found, try building, " + (*app).project().dir().real());
+            for(const auto& f : libar) {
+                if(f.name().find(".") == std::string::npos) continue;
+                f.cp(lib);
+                libS.insert(f.name().substr(0, f.name().rfind(".")));
+            }
+        }
+    for(const auto& l : libs){
+        bool f1 = 0;
+        for(const auto& p : paths){
+            kul::Dir path(p);
+            if(!path) KEXCEPTION("Path does not exist: " + pk.path());
+            for(const auto& f : path.files(0)){
+                if(f.name().find(".") == std::string::npos) continue;
+                if(libS.count(f.name().substr(0, f.name().rfind(".")))) {
+                    f1 = 1;
+                    break;
+                }
 #ifdef  _WIN32
-				if(f.name().substr(0, f.name().rfind(".")) == l){
+                if(f.name().substr(0, f.name().rfind(".")) == l){
 #else
-				if(f.name().size() > 3 && f.name().substr(0, 3) == "lib" 
-					&& f.name().substr(3, f.name().rfind(".") - 3) == l){
+                if(f.name().size() > 3 && f.name().substr(0, 3) == "lib" 
+                    && f.name().substr(3, f.name().rfind(".") - 3) == l){
 #endif//_WIN32
-					f.cp(lib);
-					f1 = 1;
-					break;
-				}
-			}
-			if(f1) break;
-		}
-		if(!f1) KOUT(NON) << "Could not find library, assumed system based for: " << l;
-	}
+                    f.cp(lib);
+                    f1 = 1;
+                    break;
+                }
+            }
+            if(f1) break;
+        }
+        if(!f1) KOUT(NON) << "Could not find library, assumed system based for: " << l;
+    }
 }
