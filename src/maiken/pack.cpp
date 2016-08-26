@@ -38,7 +38,7 @@ void maiken::Application::pack() throw(kul::Exception){
     kul::Dir lib(pk.join("lib"));
     
     const auto& binar(buildDir().files(0));
-    if((!main.empty() || srcs.empty()) && binar.size() == 0)
+    if((!main.empty() || !srcs.empty()) && binar.size() == 0)
         KEXCEPTION("No files found, try building");
 
     for(const auto& f : binar) f.cp(main.size() ? bin : lib);

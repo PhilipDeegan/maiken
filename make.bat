@@ -70,6 +70,8 @@ RD /S/Q bin
 MKDIR %PWD%\bin
 FOR /f %%f in ('dir /A:-D /b %PWD%\src') do %VSCC% %CXXFLAGS% /I%PWD%\inc %INCLUDES% /c /Fo"%PWD%\bin\%%f.o" "%PWD%\src\%%f"
 FOR /f %%f in ('dir /A:-D /b %PWD%\src\maiken') do %VSCC% %CXXFLAGS% /I%PWD%\inc %INCLUDES% /c /Fo"%PWD%\bin\%%f.o" "%PWD%\src\maiken\%%f" 
+FOR /f %%f in ('dir /A:-D /b %PWD%\src\maiken\scm') do %VSCC% %CXXFLAGS% /I%PWD%\inc %INCLUDES% /c /Fo"%PWD%\bin\%%f.o" "%PWD%\src\maiken\scm\%%f" 
+FOR /f %%f in ('dir /A:-D /b %PWD%\src\maiken\threading') do %VSCC% %CXXFLAGS% /I%PWD%\inc %INCLUDES% /c /Fo"%PWD%\bin\%%f.o" "%PWD%\src\maiken\threading\%%f" 
 %VSCC% %CXXFLAGS% /I%PWD%\inc %INCLUDES% /c /Fo"%PWD%\bin\cpp.o" "%PWD%\cpp.cpp" 
 
 FOR /f %%f in ('dir /b %PWD%\bin') do SET OBJECTS=!OBJECTS! %PWD%\bin\%%f
