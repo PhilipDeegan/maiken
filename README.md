@@ -3,9 +3,9 @@
 **Cross platform build tool for C/C++/Obj-C/C#/CUDA/opencl** 
 
 ## Building maiken prerequisites
-  Linux/BSD: GCC 5.0 (or CLANG equivalent) / git
+  Linux/BSD: GCC 5.0 (or CLANG equivalent) / git 2.0
   
-  Windows:   Visual C++ 2015 / Windows SDK 10+ / git
+  Windows:   Visual C++ 2015 / Windows SDK 10+ / git 2.0
 
 [README](https://raw.githubusercontent.com/Dekken/maiken/master/README.noformat)
 
