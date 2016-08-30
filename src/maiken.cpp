@@ -313,6 +313,7 @@ void maiken::Application::setup(){
                 const std::string& cwd(kul::env::CWD());
                 kul::Dir projectDir(resolveDependencyDirectory(dep));
                 if(!projectDir.is()){
+                    KOUT(NON) << MKN_PROJECT_NOT_FOUND << projectDir;
                     kul::env::CWD(this->project().dir());
                     const std::string& tscr(dep[SCM] ? resolveFromProperties(dep[SCM].Scalar()) : dep[NAME].Scalar());
                     const std::string& v(dep[VERSION] ? resolveFromProperties(dep[VERSION].Scalar()) : "");
@@ -632,12 +633,12 @@ void maiken::Application::run(bool dbg){
 #else
         kul::cli::EnvVar pa("LD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
 #endif
-        KOUT(DBG) << pa.name() << " : " << pa.toString();
+        KOUT(INF) << pa.name() << " : " << pa.toString();
         p->var(pa.name(), pa.toString());
     }
     for(const auto& ev : AppVars::INSTANCE().envVars())
         p->var(ev.first, kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
-    KOUT(DBG) << (*p);
+    KOUT(INF) << (*p);
     if(!AppVars::INSTANCE().dryRun()) p->start();
     KEXIT(0, "");
 }

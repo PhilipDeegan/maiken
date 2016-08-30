@@ -169,8 +169,8 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
                     if(!AppVars::INSTANCE().dryRun()){
                         if(cpc.exception()) ep = cpc.exception();
                         if(kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
-                        if(kul::LogMan::INSTANCE().err() || cpc.exception()) e(cpc.errs());
-                        KOUT(DBG) << cpc.cmd();
+                        if(kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
+                        KOUT(INF) << cpc.cmd();
                     }else KOUT(NON) << cpc.cmd();
                 }
                 if(ep) std::rethrow_exception(ep);

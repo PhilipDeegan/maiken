@@ -71,8 +71,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_EXMPL3     "   mkn clean build -d 1 -t 2 -u | Update/Clean/Build project and immediate dependencies with two threads"
 #define MKN_DEFS_EXMPL4     "   mkn -ds                      | Display '${scm} status' for everything"
 
-#define MKN_PARENT          "Parent"
-#define MKN_PROFILE         "Profile"
-#define MKN_PROJECT         "Project"
+#define MKN_PARENT              "Parent"
+#define MKN_PROFILE             "Profile"
+#define MKN_PROJECT             "Project"
+#define MKN_PROJECT_NOT_FOUND   "Project not found, attempting automatic resolution: "
 
 #endif /* _MAIKEN_DEFS_LANG_HPP_ */

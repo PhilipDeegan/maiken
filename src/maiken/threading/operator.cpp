@@ -52,8 +52,6 @@ void maiken::ThreadingCompiler::operator()() throw(kul::Exception){
         if(AppVars::INSTANCE().jargs().count(fileType) > 0)
             cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;
         // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
-        if(kul::LogMan::INSTANCE().inf() && !kul::LogMan::INSTANCE().dbg())
-            KOUT(NON) << compiler << " : " << src;
         const kul::code::CompilerProcessCapture& cpc 
             = kul::code::Compilers::INSTANCE().get(compiler)
                 ->compileSource(cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
