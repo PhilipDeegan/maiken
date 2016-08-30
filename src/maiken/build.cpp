@@ -105,6 +105,7 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
         }
     }
     for(const std::pair<std::string, kul::hash::map::S2T<kul::hash::set::String> >& ft : sources){
+        kul::Dir objD(buildDir().join("obj")); objD.mk();
         const kul::code::Compiler* compiler;
         try{
             if(!(*files().find(ft.first)).second.count(COMPILER))
@@ -115,36 +116,23 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
         }
         if(compiler->sourceIsBin()){
             for(const std::pair<std::string, kul::hash::set::String>& kv : ft.second)
-                for(const std::string& src : kv.second){
-                    kul::File f(src);
-                    objects.push_back(f.escm());
-                    cacheFiles.push_back(f);
+                for(const std::string& s : kv.second){
+                    kul::File source(s);
+                    objects.push_back(source.escm());
+                    cacheFiles.push_back(source);
                 }
         }else{
             std::queue<std::pair<std::string, std::string> > sourceQueue;
             for(const std::pair<std::string, kul::hash::set::String>& kv : ft.second){
-                for(const std::string& src : kv.second){
-                    const kul::File f(src);
-                    const kul::Dir& d(f.dir());
-                    if(kul::Dir(kv.first)){
-                        kul::Dir(buildDir().join("obj")).mk();
-                        if(d.path().size() != kv.first.size())
-                            kul::Dir(kul::Dir::JOIN(buildDir().join("obj"), d.path().substr(kv.first.size())), true);
-                        std::string obj(kul::Dir::JOIN(buildDir().join("obj"), src.substr(kv.first.size() + 1)));
-                        if(obj.find(kul::env::CWD()) != std::string::npos) obj = obj.substr(kul::env::CWD().size() + 1);
-                        obj = obj + ".obj";
-                        std::string file(AppVars::INSTANCE().dryRun() ? f.esc() : f.escm());
-                        obj = AppVars::INSTANCE().dryRun() ? kul::File(obj).esc() : kul::File(obj).escm();
-                        sourceQueue.push(std::pair<std::string, std::string>(file, obj));
-                    }else{
-                        kul::Dir(buildDir().join("obj")).mk();
-                        std::stringstream ss;
-                        ss << std::hash<std::string>()(d.real()) << "_" << f.name() << ".obj";
-                        std::string obj(kul::Dir::JOIN(buildDir().join("obj"), ss.str()));
-                        std::string file(AppVars::INSTANCE().dryRun() ? f.esc() : f.escm());
-                        obj = AppVars::INSTANCE().dryRun() ? kul::File(obj).esc() : kul::File(obj).escm();
-                        sourceQueue.push(std::pair<std::string, std::string>(file, obj));
-                    }
+                for(const std::string& s : kv.second){
+                    const kul::File source(s);
+                    auto hash();
+                    std::stringstream ss;
+                    ss << std::hex << std::hash<std::string>()(source.real()) << ".obj";
+                    kul::File object(ss.str(), objD);
+                    sourceQueue.push(std::pair<std::string, std::string>(
+                        AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(), 
+                        AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
                 }
             }
             while(sourceQueue.size() > 0){
