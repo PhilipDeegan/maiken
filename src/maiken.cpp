@@ -670,7 +670,7 @@ void maiken::Application::trim(const kul::File& f){
             w << s.c_str();
             while((l = r.readLine())){
                 w << kul::os::EOL();
-                s = *l;
+                s = l;
                 while(s.size() && (s[s.size() - 1] == ' ' || s[s.size() - 1] == '\t')) s.pop_back();
                 w << s.c_str();
             }
