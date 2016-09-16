@@ -181,7 +181,7 @@ class Application : public Constants{
         void scmUpdate(const bool& f) throw(kul::scm::Exception);
         void scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo) throw(kul::scm::Exception);
         void setup();
-        void setSuper(const Application* app);
+        void setSuper(Application* app);
         void showConfig(bool force = 0);
         void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception);
         void showProfiles();
@@ -197,8 +197,9 @@ class Application : public Constants{
 
         static void showHelp();
     public:
-        Application(const maiken::Project& proj, const std::string profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){}
-        Application(const maiken::Project& proj) : m(kul::code::Mode::NONE), proj(proj){}
+        Application(const maiken::Project& proj, const std::string profile);// : m(kul::code::Mode::NONE), p(profile), proj(proj){}
+        Application(const maiken::Project& proj); // : m(kul::code::Mode::NONE), proj(proj);//{}
+        ~Application();
 
         virtual void                                       process()   throw(kul::Exception);
         const kul::Dir&                                    buildDir()      const { return bd; }

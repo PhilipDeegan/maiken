@@ -29,6 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
+#include "kul/string.hpp"
 
 void maiken::Application::pack() throw(kul::Exception){
     kul::Dir pk(buildDir().join("pack"));
@@ -70,11 +71,28 @@ void maiken::Application::pack() throw(kul::Exception){
                 if(f.name().substr(0, f.name().rfind(".")) == l){
 #else
                 if(f.name().size() > 3 && f.name().substr(0, 3) == "lib" 
-                    && f.name().substr(3, f.name().rfind(".") - 3) == l){
+                    && f.name().substr(3, f.name().rfind(".") - 3).find(l) != std::string::npos){
+
+                    auto bits(kul::String::SPLIT(f.name(), '.'));
+
+#ifdef  __APPLE__
+                    if(bits[bits.size() - 1] != "dyn"
+#else
+                    bool so = 0;
+                    for(size_t i = 1; i < bits.size(); i++){
+                        KLOG(INF) << bits[i];
+                        if(bits[i] == "so"){
+                            so = 1;
+                            break;
+                        }
+                    }
+                    if(!so
+#endif//__APPLE__
+                        && bits[bits.size() - 1] != "a") continue;
+
 #endif//_WIN32
                     f.cp(lib);
                     f1 = 1;
-                    break;
                 }
             }
             if(f1) break;
