@@ -32,6 +32,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken.hpp"
 
+class AppRecorder{
+    friend class maiken::Application;
+    private:
+        std::vector<maiken::Application*> apps;
+    public:
+        static AppRecorder& INSTANCE(){
+            static AppRecorder a;
+            return a;
+        } 
+};
+
+struct noop_deleter { void operator ()(void *) {} };
+
+maiken::Application::Application(const maiken::Project& proj, const std::string profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){
+    AppRecorder::INSTANCE().apps.push_back(this);
+}
+maiken::Application::Application(const maiken::Project& proj) : m(kul::code::Mode::NONE), proj(proj){
+    AppRecorder::INSTANCE().apps.push_back(this);
+}
+maiken::Application::~Application(){
+    auto& apps(AppRecorder::INSTANCE().apps);
+    apps.erase(std::remove(apps.begin(), apps.end(), this), apps.end());
+}
+
 std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
     using namespace kul::cli;
 
@@ -56,7 +80,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
     Args args(cmdV, argV);
     try{
         args.process(argc, argv);
-    }catch(const kul::cli::ArgNotFoundException& e){
+    }catch(const kul::cli::Exception& e){
         showHelp();
         KEXIT(0, "");
     }
@@ -906,17 +930,28 @@ void maiken::Application::loadTimeStamps() throw (kul::StringException){
     }
 }
 
-void maiken::Application::setSuper(const Application* app){
+void maiken::Application::setSuper(Application* app){
     if(sup.get()) return;
     if(project().root()[SUPER]){
         const std::string& cwd(kul::env::CWD());
         kul::env::CWD(project().dir().real());
         kul::Dir d(project().root()[SUPER].Scalar());
         if(!d) KEXCEPTION("Super does not exist in project: " + project().dir().real());
-        if(d.real() == project().dir().real())
+        std::string super(d.real());
+        if(super == project().dir().real())
             KEXCEPTION("Super cannot reference itself: " + project().dir().real());
+        Application* f = 0;
+        for(auto* p : AppRecorder::INSTANCE().apps){
+            if(p && p->project().dir().path() == super){
+                f = p;
+                break;
+            }
+        }
+        if(f)
+            sup = std::shared_ptr<Application>(f, noop_deleter());
+        else
         if(app && app->project().dir().real() == d.real())
-            sup = std::make_shared<Application>(*app);
+            sup = std::shared_ptr<Application>(app, noop_deleter());
         else{
             sup = std::make_shared<Application>(maiken::Project::CREATE(d), "");
             kul::env::CWD(d.real());
