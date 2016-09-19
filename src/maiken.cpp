@@ -370,14 +370,14 @@ void maiken::Application::setup(){
     }
 
     if(Settings::INSTANCE().root()[MKN_INC])
-        for(const auto& s : kul::String::SPLIT(Settings::INSTANCE().root()[MKN_INC].Scalar(), ' '))
+        for(const auto& s : kul::cli::asArgs(Settings::INSTANCE().root()[MKN_INC].Scalar()))
             if(s.size()){
                 kul::Dir d(resolveFromProperties(s));
                 if(d) incs.push_back(std::make_pair(d.real(), false));
                 else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+Settings::INSTANCE().file());
             }
     if(Settings::INSTANCE().root()[PATH])
-        for(const auto& s : kul::String::SPLIT(Settings::INSTANCE().root()[PATH].Scalar(), ' '))
+        for(const auto& s : kul::cli::asArgs(Settings::INSTANCE().root()[PATH].Scalar()))
             if(s.size()){
                 kul::Dir d(resolveFromProperties(s));
                 if(d) paths.push_back(d.escr());

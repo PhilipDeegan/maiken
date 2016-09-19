@@ -53,14 +53,14 @@ general:
 	$(MAKE) prechecks
 
 	@if [ ! -d "./ext/kul/$(KUL_GIT)" ]; then \
-		git clone https://github.com/mkn/mkn.kul.git --branch $(KUL_GIT) ext/kul/$(KUL_GIT); \
+		git clone --depth 1 https://github.com/mkn/mkn.kul.git --branch $(KUL_GIT) ext/kul/$(KUL_GIT); \
 	fi; 
 	@if [ ! -d "./ext/sparsehash/$(HASH_GIT)" ]; then \
-		git clone https://github.com/mkn/google.sparsehash.git --branch $(HASH_GIT) ext/sparsehash/$(HASH_GIT); \
+		git clone --depth 1 https://github.com/mkn/google.sparsehash.git --branch $(HASH_GIT) ext/sparsehash/$(HASH_GIT); \
 	fi;
 
 	@if [ ! -d "ext/yaml/$(YAML_GIT)" ]; then \
-		git clone https://github.com/mkn/parse.yaml.git --branch $(YAML_GIT) ext/yaml/$(YAML_GIT); \
+		git clone --depth 1 https://github.com/mkn/parse.yaml.git --branch $(YAML_GIT) ext/yaml/$(YAML_GIT); \
 	fi;
 	@if [ ! -d "ext/yaml/$(YAML_GIT)/bin" ]; then \
 		mkdir ext/yaml/$(YAML_GIT)/bin; \
