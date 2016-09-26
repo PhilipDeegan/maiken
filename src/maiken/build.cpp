@@ -126,7 +126,6 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
             for(const std::pair<std::string, kul::hash::set::String>& kv : ft.second){
                 for(const std::string& s : kv.second){
                     const kul::File source(s);
-                    auto hash();
                     std::stringstream ss;
                     ss << std::hex << std::hash<std::string>()(source.real()) << ".obj";
                     kul::File object(ss.str(), objD);
