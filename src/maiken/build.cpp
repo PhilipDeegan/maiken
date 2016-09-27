@@ -273,6 +273,7 @@ kul::code::CompilerProcessCapture maiken::Application::buildExecutable(const std
         try{
             std::string linker = fs[fileType][LINKER];
             std::string linkEnd = AppVars::INSTANCE().linker();
+            if(!AppVars::INSTANCE().allinker().empty()) linkEnd += " " + AppVars::INSTANCE().allinker();
             if(!lnk.empty()) linkEnd += " " + lnk;
             kul::Dir out(inst ? inst.real() : buildDir());
             if(!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && linkEnd.size()) 
@@ -303,8 +304,10 @@ kul::code::CompilerProcessCapture maiken::Application::buildLibrary(const std::v
             KEXCEPTION("Library requires mode for linking, " + this->project().dir().real());
         if(!(*files().find(lang)).second.count(COMPILER)) KEXCEPT(Exception, "No compiler found for filetype " + lang);
         std::string linker = fs[lang][LINKER];
-        std::string linkEnd(lnk);
+        std::string linkEnd;
         if(!par) linkEnd = AppVars::INSTANCE().linker();
+        if(!AppVars::INSTANCE().allinker().empty()) linkEnd += " " + AppVars::INSTANCE().allinker();
+        if(!lnk.empty()) linkEnd += " " + lnk;
         if(!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && linkEnd.size()) 
             KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
         if(m == kul::code::Mode::STAT) linker = fs[lang][ARCHIVER];

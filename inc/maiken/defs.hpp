@@ -130,6 +130,8 @@ class Constants{
         static constexpr const char* ASSEMBLER      = "assembler";
         static constexpr const char* COMPILER       = "compiler";
         static constexpr const char* LINKER         = "linker";
+        static constexpr const char* ALINKER        = "all-linker";
+        
 
         static constexpr const char* PROPERTY       = "property";
         static constexpr const char* FILE           = "file";

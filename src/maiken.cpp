@@ -62,6 +62,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
     std::vector<Arg> argV { Arg('a', ARG    ,  ArgType::STRING),
                             Arg('j', JARG   ,  ArgType::STRING),
                             Arg('l', LINKER ,  ArgType::STRING),
+                            Arg('L', ALINKER,  ArgType::STRING),
                             Arg('d', MKN_DEP,  ArgType::MAYBE),
                             Arg('E', ENV    ,  ArgType::STRING),
                             Arg('p', PROFILE,  ArgType::STRING), 
@@ -190,8 +191,9 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
     a.setup();
     a.buildDepVec(args.has(MKN_DEP) ? &args.get(MKN_DEP) : 0);
 
-    if(args.has(ARG)) AppVars::INSTANCE().args(args.get(ARG));
-    if(args.has(LINKER)) AppVars::INSTANCE().linker(args.get(LINKER));
+    if(args.has(ARG))     AppVars::INSTANCE().args    (args.get(ARG));
+    if(args.has(LINKER))  AppVars::INSTANCE().linker  (args.get(LINKER));
+    if(args.has(ALINKER)) AppVars::INSTANCE().allinker(args.get(ALINKER));
     if(args.has(THREADS)){
         if(args.get(THREADS).size())
             AppVars::INSTANCE().threads(kul::String::UINT16(args.get(THREADS)));
