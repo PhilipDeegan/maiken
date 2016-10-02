@@ -59,7 +59,7 @@ general:
 		git clone --depth 1 https://github.com/mkn/google.sparsehash.git --branch $(HASH_GIT) ext/sparsehash/$(HASH_GIT); \
 		cd ext/sparsehash/$(HASH_GIT); \
 		sh mkn.sh; \
-		cd ../../..
+		cd ../../..; \
 	fi;
 
 	@if [ ! -d "ext/yaml/$(YAML_GIT)" ]; then \
