@@ -28,6 +28,9 @@ IF NOT EXIST ext\yaml\%YAML_VER% (
 )
 IF NOT EXIST ext\sparsehash\%HASH_VER% (
 	git clone --depth 1 https://github.com/mkn/google.sparsehash.git --branch %HASH_VER% ext/sparsehash/%HASH_VER%
+	cd ext/sparsehash/%HASH_VER%
+	mkn.bat
+	cd ../../..
 )
 
 SET /P WIN_KIT="Enter Windows Kit 10 root dir (one above 'include'): "
