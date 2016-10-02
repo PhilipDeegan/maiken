@@ -16,7 +16,7 @@ INCS =  -Iinc \
 		-Iext/kul/$(KUL_GIT)/inc \
 		-Iext/kul/$(KUL_GIT)/os/$(OS)/inc \
 		-Iext/kul/$(KUL_GIT)/os/nixish/inc \
-		-Iext/sparsehash/$(HASH_GIT)
+		-Iext/sparsehash/$(HASH_GIT)/google
 
 YAML = ext/yaml/$(YAML_GIT)/bin/libyaml.a
 LDFLAGS = -pthread
