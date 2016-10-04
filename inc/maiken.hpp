@@ -52,7 +52,7 @@ class AppVars : public Constants{
     private:
         bool b = 0, c = 0, d = 0, dr = 0, f = 0, g = 0, l = 0, p = 0, pk = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
         uint16_t dl = 0, ts = 1;
-        std::string aa, la;
+        std::string aa, al, la;
         kul::hash::map::S2S evs, jas, pks;
         AppVars(){
             pks["OS"]   = KTOSTRING(__KUL_OS__);
@@ -79,6 +79,9 @@ class AppVars : public Constants{
 
         const std::string& linker() const  { return la;}
         void linker(const std::string& la) { this->la = la;}
+
+        const std::string& allinker() const  { return al;}
+        void allinker(const std::string& al) { this->al = al;}
 
         const bool& build() const { return this->b;}
         void build(const bool& b) { this->b = b;}

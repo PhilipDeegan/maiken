@@ -28,6 +28,9 @@ IF NOT EXIST ext\yaml\%YAML_VER% (
 )
 IF NOT EXIST ext\sparsehash\%HASH_VER% (
 	git clone --depth 1 https://github.com/mkn/google.sparsehash.git --branch %HASH_VER% ext/sparsehash/%HASH_VER%
+	cd ext/sparsehash/%HASH_VER%
+	CALL mkn.bat
+	cd ../../..
 )
 
 SET /P WIN_KIT="Enter Windows Kit 10 root dir (one above 'include'): "
@@ -42,7 +45,7 @@ SET VSCAR=%VIS_STU%\VC\bin\lib
 
 SET INCLUDES=%INCLUDES% /I%PWD%\ext\kul\%KUL_VER%\inc
 SET INCLUDES=%INCLUDES% /I%PWD%\ext\kul\%KUL_VER%\os\win\inc
-SET INCLUDES=%INCLUDES% /I%PWD%\ext\sparsehash\%HASH_VER%
+SET INCLUDES=%INCLUDES% /I%PWD%\ext\sparsehash\%HASH_VER%\google
 SET INCLUDES=%INCLUDES% /I%PWD%\ext\yaml\%YAML_VER%\include
 SET INCLUDES=%INCLUDES% /I%WIN_KIT%\Include\10.0.10240.0\um
 SET INCLUDES=%INCLUDES% /I%WIN_KIT%\Include\10.0.10240.0\ucrt
