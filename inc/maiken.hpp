@@ -64,6 +64,11 @@ class AppVars : public Constants{
             else
                 pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(MAIKEN, REPO)).path();
 
+            if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][BIN])
+                pks["MKN_BIN"] = Settings::INSTANCE().root()[LOCAL][BIN].Scalar();
+            if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][LIB])
+                pks["MKN_LIB"] = Settings::INSTANCE().root()[LOCAL][LIB].Scalar();
+
         }
     public:
         const std::string& args() const  { return aa;}

@@ -432,18 +432,19 @@ void maiken::Application::setup(){
     c = 1;
     while(c){
         c = 0;
+        const auto& propK = AppVars::INSTANCE().properkeys();
         for(const auto& n : nodes){
             if(n[NAME].Scalar() != profile) continue;
             if(inst.path().empty()){
                 if(Settings::INSTANCE().root()[LOCAL]
-                    && Settings::INSTANCE().root()[LOCAL][BIN]
+                    && propK.count("MKN_BIN")
                     && !main.empty())
-                    inst = kul::Dir(Settings::INSTANCE().root()[LOCAL][BIN].Scalar());
+                    inst = kul::Dir((*propK.find("MKN_BIN")).second);
                 else
                 if(Settings::INSTANCE().root()[LOCAL]
-                    && Settings::INSTANCE().root()[LOCAL][LIB]
+                    && propK.count("MKN_LIB")
                     && main.empty())
-                    inst = kul::Dir(Settings::INSTANCE().root()[LOCAL][LIB].Scalar());
+                    inst = kul::Dir((*propK.find("MKN_LIB")).second);
                 else
                 if(n[INSTALL]) inst = kul::Dir(resolveFromProperties(n[INSTALL].Scalar()));
                 if(!inst.path().empty()){

@@ -62,31 +62,24 @@ void maiken::Application::pack() throw(kul::Exception){
             kul::Dir path(p);
             if(!path) KEXCEPTION("Path does not exist: " + pk.path());
             for(const auto& f : path.files(0)){
-                if(f.name().find(".") == std::string::npos) continue;
-                if(libS.count(f.name().substr(0, f.name().rfind(".")))) {
+                const auto& fn(f.name());
+                if(fn.find(".") == std::string::npos) continue;
+                if(libS.count(f.name().substr(0, fn.rfind(".")))) {
                     f1 = 1;
                     break;
                 }
 #ifdef  _WIN32
                 if(f.name().substr(0, f.name().rfind(".")) == l){
 #else
-                if(f.name().size() > 3 && f.name().substr(0, 3) == "lib" 
-                    && f.name().substr(3, f.name().rfind(".") - 3).find(l) != std::string::npos){
+                if(fn.size() > (3 + l.size()) && f.name().substr(0, 3) == "lib" 
+                    && kul::String::NO_CASE_CMP(fn.substr(3, l.size()), l)){
 
-                    auto bits(kul::String::SPLIT(f.name(), '.'));
+                    auto bits(kul::String::SPLIT(fn.substr(3 + l.size()), '.'));
 
 #ifdef  __APPLE__
                     if(bits[bits.size() - 1] != "dyn"
 #else
-                    bool so = 0;
-                    for(size_t i = 1; i < bits.size(); i++){
-                        KLOG(INF) << bits[i];
-                        if(bits[i] == "so"){
-                            so = 1;
-                            break;
-                        }
-                    }
-                    if(!so
+                    if(bits[0] != "so"
 #endif//__APPLE__
                         && bits[bits.size() - 1] != "a") continue;
 
