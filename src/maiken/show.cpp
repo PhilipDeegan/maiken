@@ -116,6 +116,7 @@ void maiken::Application::showHelp(){
     ss.push_back(MKN_DEFS_JARG);
     ss.push_back(MKN_DEFS_STATIC);
     ss.push_back(MKN_DEFS_LINKER);
+    ss.push_back(MKN_DEFS_ALINKR);
     ss.push_back(MKN_DEFS_PROF);
     ss.push_back(MKN_DEFS_PROP);
     ss.push_back(MKN_DEFS_STAT);

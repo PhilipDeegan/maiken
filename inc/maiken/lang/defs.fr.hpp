@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_HELP       "   -h/--help             | Print help to console"
 #define MKN_DEFS_JARG       "   -j/--jargs            | File type specifc args as json like '{\"c\": \"-DC_ARG1\", \"cpp\": \"-DCXX_ARG1\"}'"
 #define MKN_DEFS_LINKER     "   -l/--linker $t        | Adds $t to linking of root project profile"
-#define MKN_DEFS_LINKER     "   -L/--all-linker $t    | Adds $t to linking of all projects with link operations"
+#define MKN_DEFS_ALINKR     "   -L/--all-linker $t    | Adds $t to linking of all projects with link operations"
 #define MKN_DEFS_PROF       "   -p/--profile $p       | Activates profile $p"
 #define MKN_DEFS_PROP       "   -P/--property $p      | CSV key=value project properties override, format \"k1=v1,k2=v2\""
 #define MKN_DEFS_DRYR       "   -R/--dry-run          | Do not compile but print out process commands, do not run etc"
