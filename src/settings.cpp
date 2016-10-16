@@ -28,10 +28,20 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "kul/code/compilers.hpp"
 #include "maiken/project.hpp"
 
 const kul::yaml::Validator maiken::Settings::validator() const{
     using namespace kul::yaml;
+
+    std::vector<NodeValidator> masks;
+    for(const auto& s : kul::code::Compilers::INSTANCE().keys())
+        masks.push_back(NodeValidator(s));
+
+    NodeValidator compiler("compiler", {
+        NodeValidator("mask", masks, 0, NodeType::MAP)
+    }, 0, NodeType::MAP);
+
     return Validator({
         NodeValidator("inc"),
         NodeValidator("path"),
@@ -54,7 +64,8 @@ const kul::yaml::Validator maiken::Settings::validator() const{
             NodeValidator("compiler", 1),
             NodeValidator("linker"),
             NodeValidator("archiver")
-        }, 1, NodeType::LIST)
+        }, 1, NodeType::LIST),
+        compiler
     });
 }
 
