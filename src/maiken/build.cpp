@@ -287,7 +287,7 @@ kul::code::CompilerProcessCapture maiken::Application::buildExecutable(const std
             if(AppVars::INSTANCE().dryRun()) KOUT(NON) << cpc.cmd();
             else{
                 checkErrors(cpc);
-                KOUT(DBG) << cpc.cmd();
+                KOUT(INF) << cpc.cmd();
                 KOUT(NON) << "Creating bin: " << kul::File(cpc.file()).real();
             }
             return cpc;
@@ -322,7 +322,7 @@ kul::code::CompilerProcessCapture maiken::Application::buildLibrary(const std::v
         if(AppVars::INSTANCE().dryRun()) KOUT(NON) << cpc.cmd();
         else{
             checkErrors(cpc);
-            KOUT(DBG) << cpc.cmd();
+            KOUT(INF) << cpc.cmd();
             KOUT(NON) << "Creating lib: " << kul::File(cpc.file()).real();
         }
         return cpc;
