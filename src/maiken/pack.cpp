@@ -79,7 +79,7 @@ void maiken::Application::pack() throw(kul::Exception){
 #ifdef  __APPLE__
                     if(bits[bits.size() - 1] != "dyn"
 #else
-                    if(bits[0] != "so"
+                    if(!(bits[0] == "so" || bits[bits.size() - 1] == "so")
 #endif//__APPLE__
                         && bits[bits.size() - 1] != "a") continue;
 
