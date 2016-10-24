@@ -69,6 +69,9 @@ class AppVars : public Constants{
             if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][LIB])
                 pks["MKN_LIB"] = Settings::INSTANCE().root()[LOCAL][LIB].Scalar();
 
+            evs["MKN_OBJ"] = "o";
+            std::string obj = kul::env::GET("MKN_OBJ");
+            if(!obj.empty()) evs["MKN_OBJ"] = obj;
         }
     public:
         const std::string& args() const  { return aa;}

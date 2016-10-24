@@ -104,6 +104,8 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
                 KOUT(NON) << "\t" << kv.first << " : " << kv.second;
         }
     }
+    if(!AppVars::INSTANCE().envVars().count("MKN_OBJ")) KEXCEPTION("INTERNAL BADNESS ERROR!");
+    const std::string oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
     for(const std::pair<std::string, kul::hash::map::S2T<kul::hash::set::String> >& ft : sources){
         kul::Dir objD(buildDir().join("obj")); objD.mk();
         const kul::code::Compiler* compiler;
@@ -122,12 +124,13 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
                     cacheFiles.push_back(source);
                 }
         }else{
+
             std::queue<std::pair<std::string, std::string> > sourceQueue;
             for(const std::pair<std::string, kul::hash::set::String>& kv : ft.second){
                 for(const std::string& s : kv.second){
                     const kul::File source(s);
                     std::stringstream ss;
-                    ss << std::hex << std::hash<std::string>()(source.real()) << ".obj";
+                    ss << std::hex << std::hash<std::string>()(source.real()) << oType;
                     kul::File object(ss.str(), objD);
                     sourceQueue.push(std::pair<std::string, std::string>(
                         AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(), 
@@ -189,7 +192,7 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
                 if(std::find(objects.begin(), objects.end(), f.escm()) == objects.end()) objects.push_back(f.escm());
         }
         for(const auto& f : buildDir().files(1))
-            if(f.name().size() > 4 && f.name().substr(f.name().size() - 4) == ".obj")
+            if(f.name().size() > 4 && f.name().substr(f.name().size() - 4) == oType)
                 if(std::find(objects.begin(), objects.end(), f.escm()) == objects.end()) objects.push_back(f.escm());
 
         kul::io::Writer srcW(srcStamps);

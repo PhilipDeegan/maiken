@@ -443,8 +443,25 @@ mkn clean build -dtKa "-DARG -DARG1" - clean/compile with optimal threads passin
 mkn clean build -d 1 -t 2 -u         - update/clean/compile with two threads/link project and immediate dependencies
 mkn -ds                              - Display "${scm} status" for everything
 
+6. Environment Variables
 
-6. Switches
+Key             KLOG
+Type            Number
+Default         0
+Description     See section 4
+
+Key             MKN_DBG
+Type            String
+Default         ""
+Description     Sets the preceding command line string when using "dbg"
+                See seciont 4.6
+
+Key             MKN_OBJ
+Type            String
+Default         "o"
+Description     Sets the file type to compile object files to
+
+7. Switches
  
 Key             _MKN_REP_NAME_DOT_ 
 Type            bool
