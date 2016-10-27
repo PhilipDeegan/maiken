@@ -76,48 +76,20 @@ class Settings : public kul::yaml::File, public Constants{
     private:
         std::vector<std::string> rrs;
         static std::unique_ptr<Settings> instance;
+        std::unique_ptr<Settings> supe;
         static void write(const kul::File& f);
     public:
-        Settings(const std::string& s) : kul::yaml::File(s){
-            if(root()[LOCAL] && root()[LOCAL][REPO]){
-                kul::Dir d(root()[LOCAL][REPO].as<std::string>());
-                if(!d.is() && !d.mk()) KEXCEPT(SettingsException, "settings.yaml local/repo is not a valid directory");
-            }
-            if(root()[REMOTE] && root()[REMOTE][REPO])
-                for(const auto& s : kul::String::SPLIT(root()[REMOTE][REPO].Scalar(), ' '))
-                    rrs.push_back(s);
-            else{
-                const std::string& rr = _MKN_REMOTE_REPO_;
-                for(const auto& s : kul::String::SPLIT(rr, ' '))
-                    rrs.push_back(s);
-            }
-        }
-        static Settings& INSTANCE(){
-            if(!instance.get()){
-                const kul::File f("settings.yaml", kul::user::home("maiken"));
-                if(!f.dir().is()) f.dir().mk();
-                if(!f.is()){ write(f);}
-                instance = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
-            }
-            return *instance.get();
-        }
-        static bool SET(const std::string& s){
-            if(kul::File(s).is())           instance = std::make_unique<Settings>(s);
-            else
-            if(kul::File(s+".yaml").is())   instance = std::make_unique<Settings>(s+".yaml");
-            else
-            if(kul::File(s, kul::user::home("maiken")).is())
-                instance = std::make_unique<Settings>(kul::user::home("maiken").join(s));
-            else
-            if(kul::File(s+".yaml", kul::user::home("maiken")).is())
-                instance = std::make_unique<Settings>(kul::user::home("maiken").join(s+".yaml"));
-            else
-                return 0;
-            return 1;
+        Settings(const std::string& s);
 
+        const Settings* super() const{
+            return supe ? supe.get() : 0;
         }
+
         const kul::yaml::Validator validator() const;
         const std::vector<std::string> remoteRepos() const { return rrs; }
+
+        static Settings& INSTANCE();
+        static bool SET(const std::string& s);
 };
 
 class NewProject{

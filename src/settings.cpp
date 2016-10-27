@@ -31,12 +31,62 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/code/compilers.hpp"
 #include "maiken/project.hpp"
 
+std::unique_ptr<maiken::Settings> maiken::Settings::instance;
+
+maiken::Settings::Settings(const std::string& s) : kul::yaml::File(s){
+    if(root()[LOCAL] && root()[LOCAL][REPO]){
+        kul::Dir d(root()[LOCAL][REPO].Scalar());
+        if(!d.is() && !d.mk()) KEXCEPT(SettingsException, "settings.yaml local/repo is not a valid directory");
+    }
+    if(root()[REMOTE] && root()[REMOTE][REPO])
+        for(const auto& s : kul::String::SPLIT(root()[REMOTE][REPO].Scalar(), ' '))
+            rrs.push_back(s);
+    else{
+        const std::string& rr = _MKN_REMOTE_REPO_;
+        for(const auto& s : kul::String::SPLIT(rr, ' '))
+            rrs.push_back(s);
+    }
+    if(root()[SUPER]){
+        kul::File f(root()[SUPER].Scalar());
+        if(!f) KEXCEPT(SettingsException, "Super in settings does not exist\n"+file());
+    }
+    if(root()[COMPILER] && root()[COMPILER][MASK])
+        for(const auto& k : kul::code::Compilers::INSTANCE().keys())
+            for(const auto& m : root()[COMPILER][MASK][k])
+                kul::code::Compilers::INSTANCE().addMask(m.Scalar(), k);
+}
+
+maiken::Settings& maiken::Settings::INSTANCE(){
+    if(!instance.get()){
+        const kul::File f("settings.yaml", kul::user::home("maiken"));
+        if(!f.dir().is()) f.dir().mk();
+        if(!f.is()){ write(f);}
+        instance = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
+    }
+    return *instance.get();
+}
+
+bool maiken::Settings::SET(const std::string& s){
+    if(kul::File(s).is())           instance = std::make_unique<Settings>(s);
+    else
+    if(kul::File(s+".yaml").is())   instance = std::make_unique<Settings>(s+".yaml");
+    else
+    if(kul::File(s, kul::user::home("maiken")).is())
+        instance = std::make_unique<Settings>(kul::user::home("maiken").join(s));
+    else
+    if(kul::File(s+".yaml", kul::user::home("maiken")).is())
+        instance = std::make_unique<Settings>(kul::user::home("maiken").join(s+".yaml"));
+    else
+        return 0;
+    return 1;
+}
+
 const kul::yaml::Validator maiken::Settings::validator() const{
     using namespace kul::yaml;
 
     std::vector<NodeValidator> masks;
     for(const auto& s : kul::code::Compilers::INSTANCE().keys())
-        masks.push_back(NodeValidator(s));
+        masks.push_back(NodeValidator(s, {}, 0, NodeType::LIST));
 
     NodeValidator compiler("compiler", {
         NodeValidator("mask", masks, 0, NodeType::MAP)
@@ -123,5 +173,3 @@ void maiken::Settings::write(const kul::File& f){
     w.write("#    linker: csc", true);
 
 }
-
-std::unique_ptr<maiken::Settings> maiken::Settings::instance;
