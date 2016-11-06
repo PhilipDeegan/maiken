@@ -35,10 +35,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/log.hpp"
 #include "kul/sys.hpp"
 
-namespace maiken{ 
-class Plugin;
-}
-
 /*
 extern "C" 
 KUL_PUBLISH 
@@ -61,7 +57,6 @@ class ModuleException : public kul::Exception{
 enum MODULE_PHASE {
     COMPILE = 0, LINK, PACK
 };
-
 
 class Module {
     public:
