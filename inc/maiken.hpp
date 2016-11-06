@@ -60,8 +60,10 @@ class AppVars : public Constants{
         AppVars(){
             pks["OS"]   = KTOSTRING(__KUL_OS__);
             pks["HOME"] = kul::user::home().path();
+            pks["MKN_HOME"] = kul::user::home(MAIKEN).path();
             pks["DATETIME"] = kul::DateTime::NOW();
             pks["TIMESTAMP"] = std::time(NULL);
+
             if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][REPO])
                 pks["MKN_REPO"] = Settings::INSTANCE().root()[LOCAL][REPO].Scalar();
             else
