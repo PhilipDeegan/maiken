@@ -29,7 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "kul/code/compilers.hpp"
-#include "maiken/project.hpp"
+#include "maiken/settings.hpp"
 
 std::unique_ptr<maiken::Settings> maiken::Settings::instance;
 
@@ -46,10 +46,10 @@ maiken::Settings::Settings(const std::string& s) : kul::yaml::File(s){
         for(const auto& s : kul::String::SPLIT(rr, ' '))
             rrs.push_back(s);
     }
-    if(root()[SUPER]){
-        kul::File f(root()[SUPER].Scalar());
-        if(!f) KEXCEPT(SettingsException, "Super in settings does not exist\n"+file());
-    }
+    // if(root()[SUPER]){
+    //     kul::File f(root()[SUPER].Scalar());
+    //     if(!f) KEXCEPT(SettingsException, "Super in settings does not exist\n"+file());
+    // }
     if(root()[COMPILER] && root()[COMPILER][MASK])
         for(const auto& k : kul::code::Compilers::INSTANCE().keys())
             for(const auto& m : root()[COMPILER][MASK][k])
@@ -93,16 +93,19 @@ const kul::yaml::Validator maiken::Settings::validator() const{
     }, 0, NodeType::MAP);
 
     return Validator({
+        NodeValidator("super"),
         NodeValidator("inc"),
         NodeValidator("path"),
         NodeValidator("local", {
             NodeValidator("repo"),
+            NodeValidator("plugin"),
             NodeValidator("debugger"),
             NodeValidator("lib"),
             NodeValidator("bin")
         }, 0, NodeType::MAP),
         NodeValidator("remote", {
-            NodeValidator("repo")
+            NodeValidator("repo"),
+            NodeValidator("plugin")
         }, 0, NodeType::MAP),
         NodeValidator("env", {
             NodeValidator("name", 1),

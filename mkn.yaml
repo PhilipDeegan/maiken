@@ -4,25 +4,36 @@ name: mkn
 version: master
 scm: https://github.com/dekken/maiken
 
-parent: static
+parent: base
 mode: none
 
 profile:
-  - name: static
+  - name: header
     inc: ./inc
-    src: ./src
     dep: 
       - name: mkn.kul
         version: master
         #profile: c++0x
       - name: parse.yaml
         version: master
+
+  - name: base
+    parent: header
+    src: ./src
     main: cpp.cpp
     arg: -D_MKN_VERSION_=${version}_${DATETIME}
+    if_arg:
+        win_shared: -DYAML_CPP_DLL
+
+  - name: static
+    parent: base
     mode: static
 
   - name: shared
-    parent: static
+    parent: base
     mode: shared
+
+  - name: lib
+    parent: base
     if_arg:
-        win_shared: -DYAML_CPP_DLL
+        win_shared: -DKUL_SHARED -DKUL_EXPORT

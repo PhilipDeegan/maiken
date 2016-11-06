@@ -28,8 +28,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_PROJECT_HPP_
-#define _MAIKEN_PROJECT_HPP_
+#ifndef _MAIKEN_SETTINGS_HPP_
+#define _MAIKEN_SETTINGS_HPP_
 
 #include "kul/os.hpp"
 #include "kul/log.hpp"
@@ -39,47 +39,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken{
 
-class Application;
-
-class ProjectException : public kul::Exception{
+class SettingsException : public kul::Exception{
     public:
-        ProjectException(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
+        SettingsException(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
 };
 
-class KUL_PUBLISH Project : public kul::yaml::File, public Constants{
+class Settings : public kul::yaml::File, public Constants{
     private:
-        const kul::Dir d;
-    protected:      
-        Project(const kul::Dir d) : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml")), d(d.real()){}
-    public: 
-        Project(const Project& p) : kul::yaml::File(p), d(p.d){}
-        const kul::Dir&   dir() const { return d; }
+        std::vector<std::string> rrs;
+        static std::unique_ptr<Settings> instance;
+        std::unique_ptr<Settings> supe;
+        static void write(const kul::File& f);
+    public:
+        Settings(const std::string& s);
+
+        const Settings* super() const{
+            return supe ? supe.get() : 0;
+        }
+
         const kul::yaml::Validator validator() const;
-        static Project CREATE(const kul::Dir& d){
-            kul::File f("mkn.yaml", d);
-            if(!f.is()) KEXCEPT(ProjectException, "project file does not exist:\n" + f.full());
-            return kul::yaml::File::CREATE<Project>(d.path());
-        }
-        static Project CREATE(){
-            return Project::CREATE(kul::Dir(kul::env::CWD()));
-        }
-        friend class maiken::Application;
-        friend class kul::yaml::File;
-};
+        const std::vector<std::string> remoteRepos() const { return rrs; }
 
-class NewProject{
-    private:
-        kul::File f;
-        void write();
-        const kul::File& file() const { return f; }
-    public:
-        NewProject() throw(ProjectException) : f("mkn.yaml", kul::env::CWD()){
-            if(!f.is())
-                write();
-            else
-                KEXCEPT(ProjectException, "mkn.yaml already exists");
-        }
+        static Settings& INSTANCE();
+        static bool SET(const std::string& s);
 };
 
 }
-#endif /* _MAIKEN_PROJECT_HPP_ */
+#endif /* _MAIKEN_SETTINGS_HPP_ */

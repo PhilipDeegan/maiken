@@ -44,6 +44,7 @@ constexpr const char* maiken::Constants::GIT;
 constexpr const char* maiken::Constants::SVN;
 constexpr const char* maiken::Constants::SCM;
 constexpr const char* maiken::Constants::NAME;
+constexpr const char* maiken::Constants::MASK;
 
 constexpr const char* maiken::Constants::VERSION;
 constexpr const char* maiken::Constants::PARENT;

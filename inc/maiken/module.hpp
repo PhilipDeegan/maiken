@@ -28,58 +28,77 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_PROJECT_HPP_
-#define _MAIKEN_PROJECT_HPP_
+#ifndef _MAIKEN_PLUGIN_HPP_
+#define _MAIKEN_PLUGIN_HPP_
 
 #include "kul/os.hpp"
 #include "kul/log.hpp"
+#include "kul/sys.hpp"
 #include "kul/yaml.hpp"
 
-#include "maiken/defs.hpp"
+namespace maiken{ 
+class Plugin;
+}
 
-namespace maiken{
+/*
+extern "C" 
+KUL_PUBLISH 
+void maiken_module_construct(maiken::Plugin* p);
 
-class Application;
+extern "C" 
+KUL_PUBLISH  
+void maiken_module_destruct(maiken::Plugin* p);
+*/
 
-class ProjectException : public kul::Exception{
+namespace maiken{ 
+
+class Application; 
+
+class ModuleException : public kul::Exception{
     public:
-        ProjectException(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
+        ModuleException(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
 };
 
-class KUL_PUBLISH Project : public kul::yaml::File, public Constants{
-    private:
-        const kul::Dir d;
-    protected:      
-        Project(const kul::Dir d) : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml")), d(d.real()){}
-    public: 
-        Project(const Project& p) : kul::yaml::File(p), d(p.d){}
-        const kul::Dir&   dir() const { return d; }
-        const kul::yaml::Validator validator() const;
-        static Project CREATE(const kul::Dir& d){
-            kul::File f("mkn.yaml", d);
-            if(!f.is()) KEXCEPT(ProjectException, "project file does not exist:\n" + f.full());
-            return kul::yaml::File::CREATE<Project>(d.path());
-        }
-        static Project CREATE(){
-            return Project::CREATE(kul::Dir(kul::env::CWD()));
-        }
-        friend class maiken::Application;
-        friend class kul::yaml::File;
+enum MODULE_PHASE {
+    COMPILE = 0, LINK, PACK
 };
 
-class NewProject{
-    private:
-        kul::File f;
-        void write();
-        const kul::File& file() const { return f; }
+
+class KUL_PUBLISH Module {
+
     public:
-        NewProject() throw(ProjectException) : f("mkn.yaml", kul::env::CWD()){
-            if(!f.is())
-                write();
-            else
-                KEXCEPT(ProjectException, "mkn.yaml already exists");
-        }
+        virtual ~Module(){}
+        virtual void execute(Application& app) = 0;
+        // virtual void compile(const Application& app, const kuL::File& f) throw(ModuleException){}
+        // virtual void link   (const Application& app, const kuL::File& f) throw(ModuleException){}
+        // virtual void pack   (const Application& app, const kuL::File& f) throw(ModuleException){}
+
 };
+
+class KUL_PUBLISH ModuleLoader : public kul::sys::SharedClass<maiken::Module> {
+    private:
+        bool loaded = 0;
+        Module* p;
+    public:
+        ModuleLoader(const kul::File& f) throw(kul::sys::Exception) 
+            : kul::sys::SharedClass<maiken::Module>(f, "maiken_module_construct", "maiken_module_destruct") {
+            construct(p);
+            loaded = 1;
+        }
+        ~ModuleLoader(){
+            if(loaded) KERR << "WARNING: ModuleLoader not unloaded, possible memory leak";
+        }
+        void unload(){
+            destruct(p);
+            loaded = 0;
+        }
+        void execute(Application& app){
+            if(!p) KEXCEPTSTR(ModuleException) << "PLUGIN NOT LOADED";
+            p->execute(app);
+        }
+
+};
+
 
 }
 #endif /* _MAIKEN_PROJECT_HPP_ */

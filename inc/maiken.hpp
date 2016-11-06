@@ -39,7 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/threads.hpp"
 #include "kul/code/compilers.hpp"
 
+#include <maiken/module.hpp>
 #include "maiken/project.hpp"
+#include "maiken/settings.hpp"
+
 
 namespace maiken{
 
@@ -150,7 +153,7 @@ class AppVars : public Constants{
 };
 
 class ThreadingCompiler;
-class Application : public Constants{
+class KUL_PUBLISH Application : public Constants{
     friend class ThreadingCompiler;
     protected:
         bool ig = 1;
