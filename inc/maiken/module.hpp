@@ -34,7 +34,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/os.hpp"
 #include "kul/log.hpp"
 #include "kul/sys.hpp"
-#include "kul/yaml.hpp"
 
 namespace maiken{ 
 class Plugin;
@@ -64,8 +63,7 @@ enum MODULE_PHASE {
 };
 
 
-class KUL_PUBLISH Module {
-
+class Module {
     public:
         virtual ~Module(){}
         virtual void execute(Application& app) = 0;
@@ -75,7 +73,7 @@ class KUL_PUBLISH Module {
 
 };
 
-class KUL_PUBLISH ModuleLoader : public kul::sys::SharedClass<maiken::Module> {
+class ModuleLoader : public kul::sys::SharedClass<maiken::Module> {
     private:
         bool loaded = 0;
         Module* p;
