@@ -46,6 +46,16 @@ maiken::Settings::Settings(const std::string& s) : kul::yaml::File(s){
         for(const auto& s : kul::String::SPLIT(rr, ' '))
             rrs.push_back(s);
     }
+
+    if(root()[REMOTE] && root()[REMOTE][MOD_REPO])
+        for(const auto& s : kul::String::SPLIT(root()[REMOTE][MOD_REPO].Scalar(), ' '))
+            rms.push_back(s);
+    else{
+        const std::string& rr = _MKN_REMOTE_MOD_;
+        for(const auto& s : kul::String::SPLIT(rr, ' '))
+            rms.push_back(s);
+    }
+
     // if(root()[SUPER]){
     //     kul::File f(root()[SUPER].Scalar());
     //     if(!f) KEXCEPT(SettingsException, "Super in settings does not exist\n"+file());

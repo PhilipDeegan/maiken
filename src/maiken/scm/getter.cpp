@@ -30,11 +30,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-const kul::SCM* maiken::SCMGetter::GET_SCM(const kul::Dir& d, const std::string& r){
+const kul::SCM* maiken::SCMGetter::GET_SCM(const kul::Dir& d, const std::string& r, bool module){
     std::vector<std::string> repos;
     if(IS_SOLID(r)) repos.push_back(r);
     else
-        for(const std::string& s : Settings::INSTANCE().remoteRepos()) repos.push_back(s + r);
+        if(module)
+            for(const std::string& s : Settings::INSTANCE().remoteModules()) repos.push_back(s + r);
+        else
+            for(const std::string& s : Settings::INSTANCE().remoteRepos()) repos.push_back(s + r);
 #ifndef _MKN_DISABLE_SCM_
     for(const auto& repo : repos){
 #ifndef _MKN_DISABLE_GIT_

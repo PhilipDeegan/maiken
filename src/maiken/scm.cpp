@@ -52,7 +52,7 @@ void maiken::Application::scmStatus(const bool& deps) throw (kul::scm::Exception
         }
 
     for(auto* app : v) (*app).scmStatus(0);
-    if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr);
+    if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr, 0);
     if(scm){
         KOUT(NON) << "SCM STATUS CHECK ON: " << project().dir().real();
         const std::string& r(this->project().dir().real());
@@ -65,7 +65,7 @@ void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
     const Application* p = this;
     while((p = p->par)) i++;
     if(i > AppVars::INSTANCE().dependencyLevel()) return;
-    if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr);
+    if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr, 0);
     if(scm && !UpdateTracker::INSTANCE().has(this->project().dir().real())){
         if(!f) KOUT(NON) << "WARNING: ATTEMPTING SCM UPDATE, USER INTERACTION MAY BE REQUIRED!";
 
@@ -74,7 +74,7 @@ void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
                 : this->project().root()[SCM] ? resolveFromProperties(this->project().root()[SCM].Scalar()) 
                 : this->project().root()[NAME].Scalar());
 
-        scmUpdate(f, scm, SCMGetter::REPO(this->project().dir(), tscr) );
+        scmUpdate(f, scm, SCMGetter::REPO(this->project().dir(), tscr, 0));
         UpdateTracker::INSTANCE().add(this->project().dir().real());
     }
 }

@@ -46,7 +46,7 @@ class SettingsException : public kul::Exception{
 
 class Settings : public kul::yaml::File, public Constants{
     private:
-        std::vector<std::string> rrs;
+        std::vector<std::string> rrs, rms;
         static std::unique_ptr<Settings> instance;
         std::unique_ptr<Settings> supe;
         static void write(const kul::File& f);
@@ -58,7 +58,8 @@ class Settings : public kul::yaml::File, public Constants{
         }
 
         const kul::yaml::Validator validator() const;
-        const std::vector<std::string> remoteRepos() const { return rrs; }
+        const std::vector<std::string>& remoteModules() const { return rms; }
+        const std::vector<std::string>& remoteRepos()   const { return rrs; }
 
         static Settings& INSTANCE();
         static bool SET(const std::string& s);

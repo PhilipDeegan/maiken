@@ -201,7 +201,7 @@ class KUL_PUBLISH Application : public Constants{
         void loadModules();
         void populateMapsFromModules();
 
-        void loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod);
+        void loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module);
         kul::Dir resolveDepOrModDirectory(const YAML::Node& d, const std::string dp);
         void popDepOrMod(const YAML::Node& n, std::vector<Application>& vec, const std::string& s, std::string dp) throw(kul::Exception);
 
@@ -271,23 +271,23 @@ class SCMGetter{
             static SCMGetter s;
             return s;
         }
-        static const kul::SCM* GET_SCM(const kul::Dir& d, const std::string& r);
+        static const kul::SCM* GET_SCM(const kul::Dir& d, const std::string& r, bool module);
     public:
-        static const std::string REPO(const kul::Dir& d, const std::string& r){
+        static const std::string REPO(const kul::Dir& d, const std::string& r, bool module){
             if(INSTANCE().valids.count(d.path())) return (*INSTANCE().valids.find(d.path())).second;
             if(IS_SOLID(r)) INSTANCE().valids.insert(d.path(), r);
-            else            GET_SCM(d, r);
+            else            GET_SCM(d, r, module);
             if(INSTANCE().valids.count(d.path())) return (*INSTANCE().valids.find(d.path())).second;
             KEXCEPT(Exception, "SCM not discovered for project: "+d.path());
         }
         static bool HAS(const kul::Dir& d){
             return (kul::Dir(d.join(".git")) || kul::Dir(d.join(".svn")));
         }
-        static const kul::SCM* GET(const kul::Dir& d, const std::string& r){
+        static const kul::SCM* GET(const kul::Dir& d, const std::string& r, bool module){
             if(IS_SOLID(r)) INSTANCE().valids.insert(d.path(), r);
             if(kul::Dir(d.join(".git"))) return &kul::scm::Manager::INSTANCE().get("git");
             if(kul::Dir(d.join(".svn"))) return &kul::scm::Manager::INSTANCE().get("svn");
-            return r.size() ? GET_SCM(d, r) : 0;
+            return r.size() ? GET_SCM(d, r, module) : 0;
         }
 };
 

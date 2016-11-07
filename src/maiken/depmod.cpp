@@ -30,12 +30,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod){
+void maiken::Application::loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module){
     KOUT(NON) << MKN_PROJECT_NOT_FOUND << depOrMod;
     kul::env::CWD(this->project().dir());
     const std::string& tscr(node[SCM] ? resolveFromProperties(node[SCM].Scalar()) : node[NAME].Scalar());
     const std::string& v(node[VERSION] ? resolveFromProperties(node[VERSION].Scalar()) : "");
-    KOUT(NON) << SCMGetter::GET(depOrMod, tscr)->co(depOrMod.path(), SCMGetter::REPO(depOrMod, tscr), v);
+    KOUT(NON) << SCMGetter::GET(depOrMod, tscr, module)->co(depOrMod.path(), SCMGetter::REPO(depOrMod, tscr, module), v);
     kul::env::CWD(depOrMod);
     if(_MKN_REMOTE_EXEC_){
 #ifdef _WIN32

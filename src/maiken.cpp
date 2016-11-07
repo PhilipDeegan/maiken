@@ -425,7 +425,7 @@ void maiken::Application::setup(){
                 const std::string& cwd(kul::env::CWD());
                 kul::Dir projectDir(resolveDepOrModDirectory(mod, "MKN_MOD_REPO"));
                 if(!projectDir.is()){
-                    loadDepOrMod(mod, projectDir);
+                    loadDepOrMod(mod, projectDir, 1);
                 }
                 kul::env::CWD(cwd);
             }
@@ -447,7 +447,7 @@ void maiken::Application::setup(){
                 const std::string& cwd(kul::env::CWD());
                 kul::Dir projectDir(resolveDepOrModDirectory(dep, "MKN_REPO"));
                 if(!projectDir.is()){
-                    loadDepOrMod(dep, projectDir);
+                    loadDepOrMod(dep, projectDir, 0);
                 }
                 kul::env::CWD(cwd);
             }
