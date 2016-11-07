@@ -59,7 +59,7 @@ class ModuleMinimiser{
         kul::hash::map::S2T<maiken::Application> modules(maiken::Application& app){
             kul::hash::map::S2T<maiken::Application> apps;
             add(app.moduleDependencies(), apps);
-            for(auto& dep = app.dependencies().rbegin(); dep != app.dependencies().rend(); ++dep)
+            for(auto dep = app.dependencies().rbegin(); dep != app.dependencies().rend(); ++dep)
                 add(dep->moduleDependencies(), apps);
             return apps;
         }

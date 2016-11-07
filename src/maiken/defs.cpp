@@ -63,6 +63,7 @@ constexpr const char* maiken::Constants::LINK;
 constexpr const char* maiken::Constants::LOCAL;
 constexpr const char* maiken::Constants::REMOTE;
 constexpr const char* maiken::Constants::REPO;
+constexpr const char* maiken::Constants::MOD_REPO;
 constexpr const char* maiken::Constants::DEBUGGER;
 constexpr const char* maiken::Constants::DBG;
 constexpr const char* maiken::Constants::RUN;
@@ -76,6 +77,8 @@ constexpr const char* maiken::Constants::MKN_LIB;
 constexpr const char* maiken::Constants::PROFILE;
 constexpr const char* maiken::Constants::PROFILES;
 constexpr const char* maiken::Constants::PROPERTY;
+constexpr const char* maiken::Constants::MKN_MOD;
+constexpr const char* maiken::Constants::MKN_MODS;
 constexpr const char* maiken::Constants::MKN_DEP;
 constexpr const char* maiken::Constants::MKN_DEPS;
 
