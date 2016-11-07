@@ -98,14 +98,14 @@ const kul::yaml::Validator maiken::Settings::validator() const{
         NodeValidator("path"),
         NodeValidator("local", {
             NodeValidator("repo"),
-            NodeValidator("plugin"),
+            NodeValidator("mod-repo"),
             NodeValidator("debugger"),
             NodeValidator("lib"),
             NodeValidator("bin")
         }, 0, NodeType::MAP),
         NodeValidator("remote", {
             NodeValidator("repo"),
-            NodeValidator("plugin")
+            NodeValidator("mod-repo")
         }, 0, NodeType::MAP),
         NodeValidator("env", {
             NodeValidator("name", 1),

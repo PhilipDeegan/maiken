@@ -57,6 +57,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define _MKN_REMOTE_REPO_ "https://github.com/mkn/"
 #endif /* _MKN_REMOTE_REPO_ */
 
+#ifndef _MKN_REMOTE_MOD_
+    #define _MKN_REMOTE_MOD_ "https://github.com/mkn-mod/"
+#endif /* _MKN_REMOTE_MOD_ */
+
 #ifndef _MKN_TIMESTAMPS_
     #define _MKN_TIMESTAMPS_ 0
 #endif /* _MKN_TIMESTAMPS_ */
@@ -77,6 +81,8 @@ class Constants{
         static constexpr const char* OBJ            = "obj";
 
         static constexpr const char* BUILD          = "build";
+        static constexpr const char* BUILD_MOD      = "build-mod";
+        static constexpr const char* BUILD_ALL      = "build-all";
         static constexpr const char* DEBUG          = "debug";
         static constexpr const char* DEBUGGER       = "debugger";
         static constexpr const char* CLEAN          = "clean";
@@ -100,6 +106,7 @@ class Constants{
         static constexpr const char* REPLACE        = "replace";
 
         static constexpr const char* REPO           = "repo";
+        static constexpr const char* MOD_REPO       = "mod-repo";
         static constexpr const char* GIT            = "git";
         static constexpr const char* SVN            = "svn";
 
@@ -143,8 +150,11 @@ class Constants{
         static constexpr const char* MKN_LIB        = "lib";
         static constexpr const char* MKN_DEP        = "dep";
         static constexpr const char* MKN_DEPS       = "deps";
+        static constexpr const char* MKN_MOD        = "mod";
+        static constexpr const char* MKN_MODS       = "mods";
         static constexpr const char* PATH           = "path";
         static constexpr const char* DEPENDENCY     = "dependency";
+        static constexpr const char* MODULE         = "module";
         static constexpr const char* NAME           = "name";
         static constexpr const char* PARENT         = "parent";
         static constexpr const char* TYPE           = "type";

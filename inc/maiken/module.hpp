@@ -28,12 +28,14 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_PLUGIN_HPP_
-#define _MAIKEN_PLUGIN_HPP_
+#ifndef _MAIKEN_MODULE_HPP_
+#define _MAIKEN_MODULE_HPP_
 
 #include "kul/os.hpp"
 #include "kul/log.hpp"
 #include "kul/sys.hpp"
+
+#include "maiken/defs.hpp"
 
 /*
 extern "C" 
@@ -47,8 +49,6 @@ void maiken_module_destruct(maiken::Plugin* p);
 
 namespace maiken{ 
 
-class Application; 
-
 class ModuleException : public kul::Exception{
     public:
         ModuleException(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
@@ -58,14 +58,22 @@ enum MODULE_PHASE {
     COMPILE = 0, LINK, PACK
 };
 
-class Module {
+class ModuleLoader;
+class Module{
+    friend class ModuleLoader;
+    private:
+        const Application * app;
+        void application(const Application * _app){
+            app = _app;
+        }
     public:
-        virtual ~Module(){}
-        virtual void execute(Application& app) = 0;
-        // virtual void compile(const Application& app, const kuL::File& f) throw(ModuleException){}
-        // virtual void link   (const Application& app, const kuL::File& f) throw(ModuleException){}
-        // virtual void pack   (const Application& app, const kuL::File& f) throw(ModuleException){}
+    	virtual ~Module(){}
+    	Module() throw(ModuleException) {}
 
+        virtual void compile(Application& app) throw(ModuleException) {} 
+        virtual void link   (Application& app) throw(ModuleException) {}
+        virtual void pack   (Application& app) throw(ModuleException) {}
+        virtual void destroy(Application& app) throw(ModuleException) {}
 };
 
 class ModuleLoader : public kul::sys::SharedClass<maiken::Module> {
@@ -73,25 +81,44 @@ class ModuleLoader : public kul::sys::SharedClass<maiken::Module> {
         bool loaded = 0;
         Module* p;
     public:
-        ModuleLoader(const kul::File& f) throw(kul::sys::Exception) 
+        ModuleLoader(const Application& ap, const kul::File& f) throw(kul::sys::Exception) 
             : kul::sys::SharedClass<maiken::Module>(f, "maiken_module_construct", "maiken_module_destruct") {
             construct(p);
+            p->application(&ap);
             loaded = 1;
+        }
+        static std::shared_ptr<ModuleLoader> LOAD(const Application& ap) throw(kul::sys::Exception) {
+            std::string file;
+            for(const auto& f : ap.buildDir().files(0)){
+                const auto& name(f.name());
+                if(name.find(".") != std::string::npos 
+                    && name.find(ap.project().root()["name"].Scalar()) != std::string::npos
+#ifdef _WIN32
+                    && name.substr(name.rfind(".") + 1) == "dll"){
+#else
+                    && name.substr(name.rfind(".") + 1) == "so"){
+#endif
+                    file = ap.buildDir().join(name);
+                    break;
+                }
+            }
+            kul::File lib(file);
+            if(!lib) KEXCEPT(kul::sys::Exception, "No loadable library found.");
+            return std::make_shared<ModuleLoader>(ap, lib);
         }
         ~ModuleLoader(){
             if(loaded) KERR << "WARNING: ModuleLoader not unloaded, possible memory leak";
         }
         void unload(){
-            destruct(p);
+            if(loaded) destruct(p);
             loaded = 0;
         }
-        void execute(Application& app){
-            if(!p) KEXCEPTSTR(ModuleException) << "PLUGIN NOT LOADED";
-            p->execute(app);
+        Module* module(){
+            return p;
         }
 
 };
 
 
 }
-#endif /* _MAIKEN_PROJECT_HPP_ */
+#endif /* _MAIKEN_MODULE_HPP_ */

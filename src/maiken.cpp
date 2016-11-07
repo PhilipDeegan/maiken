@@ -43,6 +43,28 @@ class AppRecorder{
         } 
 };
 
+class ModuleMinimiser{
+    friend class maiken::Application;
+    private:
+        void add(const std::vector<maiken::Application>& mods, kul::hash::map::S2T<maiken::Application>& apps){
+            for(const auto& m : mods)
+                if(!apps.count(m.buildDir().real()))
+                    apps.insert(m.buildDir().real(), m);
+        }
+    public:
+        static ModuleMinimiser& INSTANCE(){
+            static ModuleMinimiser a;
+            return a;
+        } 
+        kul::hash::map::S2T<maiken::Application> modules(maiken::Application& app){
+            kul::hash::map::S2T<maiken::Application> apps;
+            add(app.moduleDependencies(), apps);
+            for(auto& dep = app.dependencies().rbegin(); dep != app.dependencies().rend(); ++dep)
+                add(dep->moduleDependencies(), apps);
+            return apps;
+        }
+};
+
 struct noop_deleter { void operator ()(void *) {} };
 
 maiken::Application::Application(const maiken::Project& proj, const std::string profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){
@@ -54,30 +76,28 @@ maiken::Application::Application(const maiken::Project& proj) : m(kul::code::Mod
 maiken::Application::~Application(){
     auto& apps(AppRecorder::INSTANCE().apps);
     apps.erase(std::remove(apps.begin(), apps.end(), this), apps.end());
+    for(auto& mod : mods) mod->unload();
 }
 
 std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
     using namespace kul::cli;
 
-    std::vector<Arg> argV { Arg('a', ARG    ,  ArgType::STRING),
-                            Arg('j', JARG   ,  ArgType::STRING),
-                            Arg('l', LINKER ,  ArgType::STRING),
-                            Arg('L', ALINKER,  ArgType::STRING),
-                            Arg('d', MKN_DEP,  ArgType::MAYBE),
-                            Arg('E', ENV    ,  ArgType::STRING),
-                            Arg('p', PROFILE,  ArgType::STRING), 
-                            Arg('P', PROPERTY, ArgType::STRING), 
-                            Arg('t', THREADS,  ArgType::MAYBE),
-                            Arg('u', SCM_UPDATE), Arg('U', SCM_FUPDATE),
-                            Arg('v', VERSION),    Arg('s', SCM_STATUS),
-                            Arg('K', STATIC),      
-                            Arg('R', DRY_RUN),    Arg('S', SHARED),
-                            Arg('D', DEBUG),      Arg('C', DIRECTORY, ArgType::STRING),
-                            Arg('x', SETTINGS, ArgType::STRING),   Arg('h', HELP)};
-    std::vector<Cmd> cmdV { Cmd(INIT),     Cmd(MKN_INC), Cmd(MKN_SRC), Cmd(MKN_DEPS),
-                            Cmd(CLEAN),    Cmd(BUILD),   Cmd(COMPILE),
-                            Cmd(LINK),     Cmd(RUN),     Cmd(DBG), Cmd(PACK),
-                            Cmd(PROFILES), Cmd(TRIM),    Cmd(INFO)};
+    std::vector<Arg> argV { Arg('a', ARG    ,  ArgType::STRING), Arg('j', JARG   ,  ArgType::STRING),
+                            Arg('l', LINKER ,  ArgType::STRING), Arg('L', ALINKER,  ArgType::STRING),
+                            Arg('d', MKN_DEP,  ArgType::MAYBE),  Arg('m', MKN_MOD,  ArgType::MAYBE),
+                            Arg('E', ENV    ,  ArgType::STRING), Arg('p', PROFILE,  ArgType::STRING), 
+                            Arg('P', PROPERTY, ArgType::STRING), Arg('t', THREADS,  ArgType::MAYBE),
+                            Arg('u', SCM_UPDATE), Arg('U', SCM_FUPDATE), Arg('v', VERSION),    
+                            Arg('s', SCM_STATUS), Arg('K', STATIC),      Arg('S', SHARED),
+                            Arg('R', DRY_RUN),    Arg('h', HELP),        Arg('D', DEBUG),      
+                            Arg('C', DIRECTORY, ArgType::STRING),
+                            Arg('x', SETTINGS,  ArgType::STRING)};
+    std::vector<Cmd> cmdV { Cmd(INIT),     Cmd(MKN_INC),   Cmd(MKN_SRC), 
+                            Cmd(MKN_MODS), Cmd(CLEAN),     Cmd(MKN_DEPS), 
+                            Cmd(BUILD),    Cmd(BUILD_ALL), Cmd(BUILD_MOD),
+                            Cmd(COMPILE),  Cmd(LINK),      Cmd(RUN),     
+                            Cmd(DBG),      Cmd(PACK),      Cmd(PROFILES), 
+                            Cmd(TRIM),     Cmd(INFO)};
     Args args(cmdV, argV);
     try{
         args.process(argc, argv);
@@ -153,10 +173,9 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
     if(args.has(STATIC))        AppVars::INSTANCE().stat(true);
     if(AppVars::INSTANCE().shar() && AppVars::INSTANCE().stat())
         KEXCEPT(Exception, "Cannot specify shared and static simultaneously");
-    if(args.has(DBG))           AppVars::INSTANCE().dbg(true);
-    if(args.has(DEBUG))         AppVars::INSTANCE().debug(true);
     if(args.has(SCM_FUPDATE))   AppVars::INSTANCE().fupdate(true);
     if(args.has(SCM_UPDATE))    AppVars::INSTANCE().update(true);
+    
     if(project.root()[SCM])     a.scr = project.root()[SCM].Scalar();
 
     if(args.has(MKN_DEP)) AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
@@ -191,6 +210,23 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
     a.setup();
     a.buildDepVec(args.has(MKN_DEP) ? &args.get(MKN_DEP) : 0);
 
+    if(args.has(MKN_MOD)){
+        std::vector<std::string> vp { COMPILE, LINK, PACK };
+        if(args.get(MKN_MOD).size()){
+            for(const auto& s : kul::String::SPLIT(args.get(MKN_MOD), ",")){
+                if(std::find(vp.begin(), vp.end(), s) == vp.end())
+                    KEXCEPSTREAM << "Invalid Module phase specified: " << s
+                        << kul::os::EOL() << "Valid phases are: compile, link, pack";
+                else if(AppVars::INSTANCE().modulePhases().count(s))
+                    KEXCEPSTREAM << "Duplicate Module phase specified: " << s;
+                else
+                    AppVars::INSTANCE().modulePhase(s);
+            }
+        }else for(const auto& s : vp) AppVars::INSTANCE().modulePhase(s);
+    }
+
+    if(!args.has(MKN_MOD) && !(args.has(BUILD_MOD) || args.has(BUILD_ALL))) a.modDeps.clear();
+
     if(args.has(ARG))     AppVars::INSTANCE().args    (args.get(ARG));
     if(args.has(LINKER))  AppVars::INSTANCE().linker  (args.get(LINKER));
     if(args.has(ALINKER)) AppVars::INSTANCE().allinker(args.get(ALINKER));
@@ -208,16 +244,20 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
         }catch(const std::exception& e){ KEXCEPTION("JSON args failed to parse"); }
     }
 
-    if(args.has(MKN_DEPS)){
-        std::vector<Application*> v;
-        for(auto app = a.deps.rbegin(); app != a.deps.rend(); ++app){
+    auto printDeps = [&] (const std::vector<Application>& vec) { 
+        std::vector<const Application*> v;
+        for(auto app = vec.rbegin(); app != vec.rend(); ++app){
             const std::string& s((*app).project().dir().real());
             auto it = std::find_if(v.begin(), v.end(), [&s](const Application* app) { return (*app).project().dir().real() == s;});
             if (it == v.end()) v.push_back(&(*app));
         }
         for(auto* app : v) KOUT(NON) <<  (*app).project().dir();
         KEXIT(0, "");
-    }
+    };
+
+    if(args.has(MKN_DEPS)) printDeps(a.deps);
+    if(args.has(MKN_MODS)) printDeps(a.modDeps);
+
     if(args.has(MKN_INC)){
         for(const auto& p : a.includes())
             KOUT(NON) << p.first;
@@ -242,60 +282,106 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
     }
     if(args.has(INFO)) a.showConfig(1);
 
-    if(args.has(BUILD))     AppVars::INSTANCE().build(true);
-    if(args.has(CLEAN))     AppVars::INSTANCE().clean(true);
-    if(args.has(COMPILE))   AppVars::INSTANCE().compile(true);
-    if(args.has(LINK))      AppVars::INSTANCE().link(true);
-    if(args.has(RUN))       AppVars::INSTANCE().run(true);
-    if(args.has(TRIM))      AppVars::INSTANCE().trim(true);
-    if(args.has(PACK))      AppVars::INSTANCE().pack(true);
+    if(args.has(BUILD))     AppVars::INSTANCE().command(BUILD);
+    if(args.has(BUILD_MOD)) AppVars::INSTANCE().command(BUILD_MOD);
+    if(args.has(BUILD_ALL)) AppVars::INSTANCE().command(BUILD_ALL);
+    if(args.has(CLEAN))     AppVars::INSTANCE().command(CLEAN);
+    if(args.has(COMPILE))   AppVars::INSTANCE().command(COMPILE);
+    if(args.has(LINK))      AppVars::INSTANCE().command(LINK);
+    if(args.has(RUN))       AppVars::INSTANCE().command(RUN);
+    if(args.has(DBG))       AppVars::INSTANCE().command(DBG);
+    if(args.has(TRIM))      AppVars::INSTANCE().command(TRIM);
+    if(args.has(PACK))      AppVars::INSTANCE().command(PACK);
+
     return app;
 }
 
+
+class CSM{ // CommandStateMachine
+    friend class maiken::Application;
+    private:
+        kul::hash::set::String cmds;
+        CSM(){
+            reset();
+        }
+        static CSM& INSTANCE(){
+            static CSM a;
+            return a;
+        } 
+        void reset(){
+            cmds.clear();
+            for(const auto& s : maiken::AppVars::INSTANCE().commands()) 
+                cmds.insert(s);
+        }
+        void add(const std::string& s){
+            cmds.insert(s);
+        }
+        const kul::hash::set::String& commands(){
+            return cmds;
+        }
+};
+
 void maiken::Application::process() throw(kul::Exception){
-    for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
-        kul::env::CWD((*app).project().dir());
-        kul::Dir mkn((*app).buildDir().join(".mkn"));
-        if((*app).ig || (*app).srcs.empty()) continue;
+    const kul::hash::set::String& cmds (CSM::INSTANCE().commands());
+    const kul::hash::set::String& phase(AppVars::INSTANCE().modulePhases());
+
+    auto loadModules = [&] (Application& app) { 
+        if(phase.size())
+            for(auto mod = app.modDeps.rbegin(); mod != app.modDeps.rend(); ++mod)
+                app.mods.push_back(ModuleLoader::LOAD(*mod));
+    };
+
+    auto proc = [&] (Application& app, bool work = 1) { 
+        kul::env::CWD(app.project().dir());
+        kul::Dir mkn(app.buildDir().join(".mkn"));
         std::vector<std::pair<std::string, std::string> > oldEvs;
-        for(const kul::cli::EnvVar& ev : (*app).envVars()){
+        for(const kul::cli::EnvVar& ev : app.envVars()){
             const std::string v = kul::env::GET(ev.name());
             oldEvs.push_back(std::pair<std::string, std::string>(ev.name(), v));
             kul::env::SET(ev.name(), ev.toString().c_str());
         }
-        if(AppVars::INSTANCE().clean() && (*app).buildDir().is()){
-            (*app).buildDir().rm();
+        if(cmds.count(CLEAN) && app.buildDir().is()){
+            app.buildDir().rm();
             mkn.rm();
         }
-
-        (*app).loadTimeStamps();
-        if(AppVars::INSTANCE().trim())  (*app).trim();
-        if(AppVars::INSTANCE().build()) (*app).build();
-        else{
-            if(AppVars::INSTANCE().compile())(*app).compile();
-            if(AppVars::INSTANCE().link())   (*app).link();
+        app.loadTimeStamps();
+        if(cmds.count(TRIM)) app.trim();
+        
+        std::vector<std::string> objects;
+        if(cmds.count(BUILD_ALL) || cmds.count(BUILD) || cmds.count(COMPILE)){
+            if(phase.count(COMPILE)) for(auto& modLoader : app.mods) modLoader->module()->compile(app);
+            if(work) app.compile(objects);
+        }
+        if(cmds.count(BUILD_ALL) || cmds.count(BUILD) || cmds.count(LINK)){
+            if(phase.count(LINK)) for(auto& modLoader : app.mods) modLoader->module()->link(app);
+            if(work) objects.empty() ? app.link() : app.link(objects);
         }
         for(const std::pair<std::string, std::string>& oldEv : oldEvs)
             kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
-    }
-    kul::env::CWD(this->project().dir());
-    if(!this->ig){
-        for(const kul::cli::EnvVar& ev : this->envVars()) kul::env::SET(ev.name(), ev.toString().c_str());
-        if(AppVars::INSTANCE().clean() && this->buildDir().is()){
-            this->buildDir().rm();
-            kul::Dir(this->buildDir().join(".mkn")).rm();
-        }
-        loadTimeStamps();
-        if(AppVars::INSTANCE().trim())  this->trim();
-        if(AppVars::INSTANCE().build()) this->build();
-        else{
-            if(AppVars::INSTANCE().compile())   this->compile();
-            if(AppVars::INSTANCE().link())      this->link();
-        }
+    };
+
+    if(cmds.count(BUILD_ALL) || cmds.count(BUILD_MOD)){
+        CSM::INSTANCE().add(BUILD);
+        for(auto& m : ModuleMinimiser::INSTANCE().modules(*this))
+            m.second.process();
     }
 
-    if(AppVars::INSTANCE().pack()) pack();
-    if(AppVars::INSTANCE().run() || AppVars::INSTANCE().dbg()) run(AppVars::INSTANCE().dbg());
+    for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
+        if(!(*app).ig) loadModules(*app);
+    if(!this->ig) loadModules(*this);
+
+    for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
+        if((*app).ig) continue;
+        proc(*app, !(*app).srcs.empty());
+    }
+    if(!this->ig) proc(*this);
+
+    if(cmds.count(PACK)) {
+        if(phase.count(PACK)) for(auto& modLoader : mods) modLoader->module()->pack(*this);
+        pack();
+    }
+    if(cmds.count(RUN) || cmds.count(DBG)) run(cmds.count(DBG));
+    CSM::INSTANCE().reset();
 }
 
 void maiken::Application::setup(){
@@ -308,7 +394,7 @@ void maiken::Application::setup(){
     this->resolveProperties();
     this->preSetupValidation();
     std::string buildD = kul::Dir::JOIN(BIN, p);
-    if(p.empty()) buildD = AppVars::INSTANCE().debug() ? kul::Dir::JOIN(BIN, DEBUG) : kul::Dir::JOIN(BIN, BUILD);
+    if(p.empty()) buildD = kul::Dir::JOIN(BIN, BUILD);
     this->bd = kul::Dir(project().dir().join(buildD));
     std::string profile(p);
     std::vector<YAML::Node> nodes;
@@ -335,36 +421,38 @@ void maiken::Application::setup(){
         c = 0;
         for (const auto& n : nodes) {
             if(n[NAME].Scalar() != profile) continue;
+            for(const auto& mod : n[MKN_MOD]) {
+                const std::string& cwd(kul::env::CWD());
+                kul::Dir projectDir(resolveDepOrModDirectory(mod, "MKN_MOD_REPO"));
+                if(!projectDir.is()){
+                    loadDepOrMod(mod, projectDir);
+                }
+                kul::env::CWD(cwd);
+            }
+            popDepOrMod(n, modDeps, MKN_MOD, "MKN_MOD_REPO");
+            profile = n[PARENT] ? resolveFromProperties(n[PARENT].Scalar()) : "";
+            c = !profile.empty();
+            break;
+        }
+    }
+    for(auto& mod : modDeps) mod.ig = 0;
+
+    c = 1;
+    profile = p.size() ? p : project().root()[NAME].Scalar();
+    while(c){
+        c = 0;
+        for (const auto& n : nodes) {
+            if(n[NAME].Scalar() != profile) continue;
             for(const auto& dep : n[MKN_DEP]) {
                 const std::string& cwd(kul::env::CWD());
-                kul::Dir projectDir(resolveDependencyDirectory(dep));
+                kul::Dir projectDir(resolveDepOrModDirectory(dep, "MKN_REPO"));
                 if(!projectDir.is()){
-                    KOUT(NON) << MKN_PROJECT_NOT_FOUND << projectDir;
-                    kul::env::CWD(this->project().dir());
-                    const std::string& tscr(dep[SCM] ? resolveFromProperties(dep[SCM].Scalar()) : dep[NAME].Scalar());
-                    const std::string& v(dep[VERSION] ? resolveFromProperties(dep[VERSION].Scalar()) : "");
-                    KOUT(NON) << SCMGetter::GET(projectDir, tscr)->co(projectDir.path(), SCMGetter::REPO(projectDir, tscr), v);
-                    kul::env::CWD(projectDir);
-                    if(_MKN_REMOTE_EXEC_){
-#ifdef _WIN32
-                        if(kul::File("mkn.bat").is() 
-                                && kul::proc::Call("mkn.bat", AppVars::INSTANCE().envVars()).run()) 
-                            KEXCEPTION("ERROR in "+projectDir.path()+"/mkn.bat");
-#else
-                        if(kul::File("mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh").is() 
-                            && kul::proc::Call("sh mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh", AppVars::INSTANCE().envVars()).run())
-                            KEXCEPTION("ERROR in "+projectDir.path()+"mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh");
-                        else
-                        if(kul::File("mkn.sh").is() && kul::proc::Call("sh mkn.sh", AppVars::INSTANCE().envVars()).run()) 
-                            KEXCEPTION("ERROR in "+projectDir.path()+"/mkn.sh");
-#endif
-                    }
-                    kul::env::CWD(this->project().dir());
+                    loadDepOrMod(dep, projectDir);
                 }
                 kul::env::CWD(cwd);
             }
             populateMaps(n);
-            populateDependencies(n);
+            popDepOrMod(n, deps, MKN_DEP, "MKN_REPO");
             profile = n[PARENT] ? resolveFromProperties(n[PARENT].Scalar()) : "";
             c = !profile.empty();
             break;
@@ -387,6 +475,7 @@ void maiken::Application::setup(){
             }
 
     this->populateMapsFromDependencies();
+    this->populateMapsFromModules();
     std::vector<std::string> fileStrings{ARCHIVER, COMPILER, LINKER};
     for(const auto& c : Settings::INSTANCE().root()[FILE])
         for(const std::string& s : fileStrings)
@@ -509,76 +598,6 @@ void maiken::Application::setup(){
     }
 }
 
-void maiken::Application::buildDepVec(const std::string* depVal){
-    kul::hash::set::String all, ignore, include;
-    ignore.insert("+");
-    if(depVal){
-        if(depVal->size()){
-            try{
-                AppVars::INSTANCE().dependencyLevel(kul::String::UINT16(*depVal));
-            }catch(const kul::StringException& e){
-                AppVars::INSTANCE().dependencyLevel(0);
-                for(auto s : kul::String::SPLIT(*depVal, ',')){
-                    kul::String::TRIM(s);
-                    kul::String::REPLACE_ALL(s, " ", "");
-                    include.insert(s);
-                }
-            }
-        }else 
-            AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
-    }
-
-    if(include.size() == 1 && include.count("+")){
-        AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
-        this->ig = 1;
-    }
-
-    std::vector<Application*> dePs;
-    for(Application& a : deps){
-        a.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), include);
-        const std::string& name(a.project().root()[NAME].Scalar());
-        std::stringstream ss;
-        ss << name << "[" << (a.p.empty() ? name : a.p) << "]";
-        if(AppVars::INSTANCE().dependencyLevel()
-            || include.count(name) || include.count(ss.str())) a.ig = 0;
-        all.insert(name);
-        all.insert(ss.str());
-    }
-    std::vector<Application> t;
-    for(const Application* a : dePs) t.push_back(*a);
-    for(const Application& a : t){
-        bool f = 0;
-        for(const auto& a1: deps)
-            if(a.project().dir() == a1.project().dir() && a.p == a1.p){
-                f = 1; break;
-            }
-        if(!f) deps.push_back(a);
-    }
-    for(const auto& d : include)
-        if(!all.count(d) && !ignore.count(d)) KEXCEPTION("Dependency project specified does not exist: "+ d);
-    if(include.size() && include.count("+")) this->ig = 1;
-}
-
-void maiken::Application::buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc){
-    for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
-        maiken::Application& a = (*app);
-        const std::string& name(a.project().root()[NAME].Scalar());
-        std::stringstream ss;
-        ss << name << "[" << (a.p.empty() ? name : a.p) << "]";
-        if(i > 0 || inc.count(name) || inc.count(ss.str())) a.ig = 0;
-        for(auto app1 = dePs.rbegin(); app1 != dePs.rend(); ++app1){
-            maiken::Application* a1 = (*app1);
-            if(a.project().dir() == a1->project().dir() && a.p == a1->p){
-                dePs.erase(std::remove(dePs.begin(), dePs.end(), &a), dePs.end());
-                dePs.push_back(&a);
-                break;
-            }
-        }
-        dePs.push_back(&a);
-        a.buildDepVecRec(dePs, --i, inc);
-    }
-}
-
 kul::hash::set::String maiken::Application::inactiveMains(){
     kul::hash::set::String iMs;
     std::string p;
@@ -601,22 +620,6 @@ kul::hash::set::String maiken::Application::inactiveMains(){
         }catch(const kul::Exception& e){ }
     }
     return iMs;
-}
-
-kul::Dir maiken::Application::resolveDependencyDirectory(const YAML::Node& n){
-    std::string d;
-    if(n[LOCAL]) d = resolveFromProperties(n[LOCAL].Scalar());
-    else{
-        d = (*AppVars::INSTANCE().properkeys().find("MKN_REPO")).second;
-        try{
-            std::string version(n[VERSION] ? resolveFromProperties(n[VERSION].Scalar()) : "default");
-            if(_MKN_REP_VERS_DOT_) kul::String::REPLACE_ALL(version, ".", kul::Dir::SEP());
-            std::string name(resolveFromProperties(n[NAME].Scalar()));
-            if(_MKN_REP_NAME_DOT_) kul::String::REPLACE_ALL(name, ".", kul::Dir::SEP());
-            d = kul::Dir::JOIN(d, kul::Dir::JOIN(name, version));
-        }catch(const kul::Exception& e){ KLOG(DBG) << e.debug(); }
-    }
-    return kul::Dir(d);
 }
 
 void maiken::Application::run(bool dbg){
@@ -707,28 +710,6 @@ void maiken::Application::trim(const kul::File& f){
     tmp.mv(f);
 }
 
-void maiken::Application::populateMapsFromDependencies(){
-    for(auto dep = dependencies().rbegin(); dep != dependencies().rend(); ++dep){
-        if((*dep).sources().empty()) continue;
-        const std::string& n((*dep).project().root()[NAME].Scalar());
-        const std::string& lib = (*dep).inst ? (*dep).p.empty() ? n : (n+"_"+(*dep).p) : n;
-        const auto& it(std::find(libraries().begin(), libraries().end(), lib));
-        if(it != libraries().end()) libs.erase(it);
-        libs.push_back(lib);
-    }
-    for(auto dep = dependencies().rbegin(); dep != dependencies().rend(); ++dep){
-        for(const auto& s : (*dep).includes())
-            if(s.second && std::find(includes().begin(), includes().end(), s) == includes().end())
-                incs.push_back(std::make_pair(s.first, true));
-        for(const std::string& s : (*dep).libraryPaths())
-            if(std::find(libraryPaths().begin(), libraryPaths().end(), s) == libraryPaths().end())
-                paths.push_back(s);
-        for(const std::string& s : (*dep).libraries())
-            if(std::find(libraries().begin(), libraries().end(), s) == libraries().end())
-                libs.push_back(s);
-    }
-}
-
 void maiken::Application::populateMaps(const YAML::Node& n){ //IS EITHER ROOT OR PROFILE NODE!
     using namespace kul::cli;
     for(const auto& c : n[ENV]){
@@ -773,71 +754,6 @@ void maiken::Application::populateMaps(const YAML::Node& n){ //IS EITHER ROOT OR
 
     for(const std::string& s : libraryPaths())
         if(!kul::Dir(s).is()) KEXCEPTION(s + " is not a valid directory\n"+project().dir().path());
-}
-
-void maiken::Application::populateDependencies(const YAML::Node& n) throw(kul::Exception){
-    std::vector<std::pair<std::string, std::string>> apps;
-    for(const auto& dep : n[MKN_DEP]){
-        const kul::Dir& projectDir = resolveDependencyDirectory(dep);
-        bool f = false;
-        for(const Application& a : this->dependencies())
-            if(projectDir == a.project().dir() && p == a.p){
-                f = true; break;
-            }
-        if(f) continue;
-        const maiken::Project c(maiken::Project::CREATE(projectDir));
-
-        if(dep[PROFILE]){
-            for(auto s : kul::String::SPLIT(resolveFromProperties(dep[PROFILE].Scalar()), ' ')){
-                if(s.empty()) continue;
-                f = 0;
-                if(s == "@") s = "";
-                else
-                    for(const auto& node : c.root()[PROFILE])
-                        if(node[NAME].Scalar() == s){
-                            f = 1;
-                            break;
-                        }
-                    
-                if(!f && !s.empty()) 
-                    KEXCEPTION("profile does not exist\n"+s+"\n"+project().dir().path());
-                Application app(c, s);
-                app.par = this;
-                if(dep[SCM]) app.scr = resolveFromProperties(dep[SCM].Scalar());
-                if(dep[VERSION]) app.scv = resolveFromProperties(dep[VERSION].Scalar());
-                this->deps.push_back(app);
-                apps.push_back(std::make_pair(app.project().dir().path(), app.p));
-            }
-        }else{
-            Application app(c, "");
-            app.par = this;
-            if(dep[SCM]) app.scr = resolveFromProperties(dep[SCM].Scalar());
-            if(dep[VERSION]) app.scv = resolveFromProperties(dep[VERSION].Scalar());
-            this->deps.push_back(app);
-            apps.push_back(std::make_pair(app.project().dir().path(), app.p));
-        }
-    }
-    if(n[SELF])
-        for(const auto& s : kul::String::SPLIT(resolveFromProperties(n[SELF].Scalar()), ' ')){
-            Application app(project(), s);
-            app.par = this;
-            app.scr = scr;
-            this->deps.push_back(app);
-            apps.push_back(std::make_pair(app.project().dir().path(), app.p));
-        }
-    cyclicCheck(apps);
-    for(auto& app : deps){
-        if(app.buildDir().path().size()) continue;
-        kul::env::CWD(app.project().dir());
-        app.setSuper(this);
-        app.setup();
-        if(app.project().root()[SCM]) app.scr = app.resolveFromProperties(app.project().root()[SCM].Scalar());
-        if(!app.sources().empty()){
-            app.buildDir().mk();
-            app.paths.push_back(app.inst ? app.inst.escr() : app.buildDir().escr());
-        }
-        kul::env::CWD(this->project().dir());
-    }
 }
 
 void maiken::Application::cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception){

@@ -30,15 +30,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::build() throw(kul::Exception){
-    showConfig();
-    const std::vector<std::string>& objects = this->compile();
-    if(objects.size() > 0){
-        buildDir().mk();
-        if(!main.empty())   buildExecutable(objects);
-        else                buildLibrary(objects);
-    }
-}
+// void maiken::Application::build() throw(kul::Exception){
+//     showConfig();
+//     const std::vector<std::string>& objects = this->compile();
+//     if(objects.size() > 0){
+//         buildDir().mk();
+//         if(!main.empty())   buildExecutable(objects);
+//         else                buildLibrary(objects);
+//     }
+// }
 
 void maiken::Application::link() throw(kul::Exception){
     showConfig();
@@ -62,6 +62,11 @@ void maiken::Application::link() throw(kul::Exception){
             KEXCEPTION("No compiler found for filetype " + ft.first);
         }
     }
+    link(objects);
+}
+
+
+void maiken::Application::link(const std::vector<std::string>& objects) throw(kul::Exception){
     if(objects.size() > 0){
         buildDir().mk();
         if(!main.empty())   buildExecutable(objects);
@@ -69,9 +74,8 @@ void maiken::Application::link() throw(kul::Exception){
     }else KEXCEPTION("No objects found, try \"compile\" first.");
 }
 
-std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
+void maiken::Application::compile(std::vector<std::string>& objects) throw(kul::Exception){
     showConfig();
-    std::vector<std::string> objects;
     if(!AppVars::INSTANCE().dryRun()){
         std::stringstream ss;
         ss << MKN_PROJECT << ": " << this->project().dir().path();
@@ -85,7 +89,7 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
     auto sources = sourceMap();
     if(!AppVars::INSTANCE().dryRun() && srcs.empty() && main.empty()){
         KOUT(NON) << "NO SOURCES";
-        return objects;
+        return;
     }
     buildDir().mk();
     std::vector<kul::File> cacheFiles;
@@ -203,7 +207,6 @@ std::vector<std::string> maiken::Application::compile() throw(kul::Exception){
             if(!(*compilers.find(src.name().substr(src.name().rfind(".") + 1))).second->sourceIsBin())
                 srcW << src.mini() << " " << src.timeStamps().modified() << kul::os::EOL();
     }
-    return objects;
 }
 
 kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > maiken::Application::sourceMap(){

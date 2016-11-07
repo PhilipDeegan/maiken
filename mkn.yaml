@@ -31,7 +31,7 @@ profile:
 
   - name: shared
     parent: base
-    mode: shared
+    mode: shared 
 
   - name: lib
     parent: base

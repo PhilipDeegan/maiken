@@ -43,6 +43,14 @@ const kul::yaml::Validator maiken::Project::validator() const{
         NodeValidator("local")
     }, 0, NodeType::LIST);
 
+    NodeValidator modules("mod", {
+        NodeValidator("name"),
+        NodeValidator("version"),
+        NodeValidator("profile"),
+        NodeValidator("scm"),
+        NodeValidator("local")
+    }, 0, NodeType::LIST);
+
     NodeValidator env("env", {
         NodeValidator("name", 1),
         NodeValidator("mode", 1),
@@ -74,6 +82,7 @@ const kul::yaml::Validator maiken::Project::validator() const{
         NodeValidator("self"),
         env,
         dependencies,
+        modules,
         if_arg,
         if_inc,
         if_lib,
@@ -94,6 +103,7 @@ const kul::yaml::Validator maiken::Project::validator() const{
             NodeValidator("self"),
             env,
             dependencies,
+            modules,
             if_arg,
             if_inc,
             if_lib,

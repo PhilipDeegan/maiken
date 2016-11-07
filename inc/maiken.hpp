@@ -39,10 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/threads.hpp"
 #include "kul/code/compilers.hpp"
 
-#include <maiken/module.hpp>
+#include "maiken/defs.hpp"
 #include "maiken/project.hpp"
 #include "maiken/settings.hpp"
-
 
 namespace maiken{
 
@@ -53,9 +52,10 @@ class Exception : public kul::Exception{
 
 class AppVars : public Constants{
     private:
-        bool b = 0, c = 0, d = 0, dr = 0, f = 0, g = 0, l = 0, p = 0, pk = 0, r = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
+        bool d = 0, dr = 0, f = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
         uint16_t dl = 0, ts = 1;
         std::string aa, al, la;
+        kul::hash::set::String cmds, modPhases;
         kul::hash::map::S2S evs, jas, pks;
         AppVars(){
             pks["OS"]   = KTOSTRING(__KUL_OS__);
@@ -68,6 +68,11 @@ class AppVars : public Constants{
                 pks["MKN_REPO"] = Settings::INSTANCE().root()[LOCAL][REPO].Scalar();
             else
                 pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(MAIKEN, REPO)).path();
+
+            if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][MOD_REPO])
+                pks["MKN_MOD_REPO"] = Settings::INSTANCE().root()[LOCAL][MOD_REPO].Scalar();
+            else
+                pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(MAIKEN, MOD_REPO)).path();
 
             if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][BIN])
                 pks["MKN_BIN"] = Settings::INSTANCE().root()[LOCAL][BIN].Scalar();
@@ -91,47 +96,20 @@ class AppVars : public Constants{
         const std::string& allinker() const  { return al;}
         void allinker(const std::string& al) { this->al = al;}
 
-        const bool& build() const { return this->b;}
-        void build(const bool& b) { this->b = b;}
-
-        const bool& clean() const { return this->c;}
-        void clean(const bool& c) { this->c = c;}
-
-        const bool& compile() const { return this->p;}
-        void compile(const bool& p) { this->p = p;}
-
-        const bool& dbg() const { return this->g;}
-        void dbg(const bool& g)   { this->g = g;}
-
-        const bool& debug() const { return this->d;}
-        void debug(const bool& d) { this->d = d;}
-
         const bool& dryRun() const { return this->dr;}
         void dryRun(const bool& dr) { this->dr = dr;}
 
+        const bool& update() const { return this->u;}
+        void update(const bool& u) { this->u = u;}
+
         const bool& fupdate() const { return this->f;}
         void fupdate(const bool& f) { this->f = f;}
-
-        const bool& link() const { return this->l;}
-        void link(const bool& l) { this->l = l;}
-
-        const bool& run() const { return this->r;}
-        void run(const bool& r) { this->r = r;}
-
-        const bool& pack() const { return this->pk;}
-        void pack(const bool& pk) { this->pk = pk;}
 
         const bool& show() const { return this->s;}
         void show(const bool& s){ this->s = s;}
 
         const bool& shar() const { return this->sh;}
         void shar(const bool& sh){ this->sh = sh;}
-
-        const bool& trim() const { return this->t;}
-        void trim(const bool& t) { this->t = t;}
-
-        const bool& update() const { return this->u;}
-        void update(const bool& u) { this->u = u;}
 
         const bool& stat() const  { return this->st;}
         void stat(const bool& st) { this->st = st;}
@@ -143,10 +121,16 @@ class AppVars : public Constants{
         void threads(const uint16_t& t) { this->ts = t;}
 
         const kul::hash::map::S2S& properkeys() const { return pks;}
-        void properkeys(const std::string& k, const std::string& v)  { pks[k] = v;}
+        void properkeys(const std::string& k, const std::string& v) { pks[k] = v;}
 
         const kul::hash::map::S2S& envVars() const { return evs;}
         void envVars(const std::string& k, const std::string& v)  { evs[k] = v;}
+
+        void command(const std::string& s)             { cmds.insert(s); }
+        const kul::hash::set::String& commands() const { return cmds; }
+
+        void modulePhase(const std::string& s)             { modPhases.insert(s); }
+        const kul::hash::set::String& modulePhases() const { return modPhases; }
 
         static AppVars& INSTANCE(){
             static AppVars instance;
@@ -154,6 +138,8 @@ class AppVars : public Constants{
         }
 };
 
+class Module;
+class ModuleLoader;
 class ThreadingCompiler;
 class KUL_PUBLISH Application : public Constants{
     friend class ThreadingCompiler;
@@ -170,44 +156,59 @@ class KUL_PUBLISH Application : public Constants{
         kul::hash::map::S2S includeStamps, itss, ps;
         kul::hash::map::S2T<kul::hash::set::String> args;
         kul::hash::map::S2T<uint16_t> stss;
-        std::vector<Application> deps;
+        std::vector<Application> deps, modDeps;
+        std::vector<std::shared_ptr<ModuleLoader>> mods;
         std::vector<kul::cli::EnvVar> evs;
         std::vector<std::string> libs, paths;
         std::vector<std::pair<std::string, bool> > incs, srcs;
         const kul::SCM* scm = 0;
-        
-        void buildDepVec(const std::string* depVal);
-        void buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc);
+
         kul::code::CompilerProcessCapture buildExecutable(const std::vector<std::string>& objects);
         kul::code::CompilerProcessCapture buildLibrary(const std::vector<std::string>& objects);
         void checkErrors(const kul::code::CompilerProcessCapture& cpc) throw(kul::Exception);
+
         void populateMaps(const YAML::Node& n);
-        void populateMapsFromDependencies();
-        void populateDependencies(const YAML::Node& n) throw(kul::Exception);
+
         void preSetupValidation() throw(Exception);
         void postSetupValidation() throw(Exception);
         void resolveProperties();
+
+        void compile(std::vector<std::string>& objects) throw(kul::Exception);
         void build() throw(kul::Exception);
-        void pack() throw(kul::Exception);
+        void pack()  throw(kul::Exception);
         void link()  throw(kul::Exception);
+        void link(const std::vector<std::string>& objects) throw(kul::Exception);
         void run(bool dbg);
         void trim();
         void trim(const kul::File& f);
+
         void scmStatus(const bool& deps = false) throw(kul::scm::Exception);
         void scmUpdate(const bool& f) throw(kul::scm::Exception);
         void scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo) throw(kul::scm::Exception);
+
         void setup();
         void setSuper(Application* app);
         void showConfig(bool force = 0);
         void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception);
         void showProfiles();
         void loadTimeStamps() throw (kul::StringException);
-        bool incSrc(const kul::File& f);
-        kul::Dir    resolveDependencyDirectory(const YAML::Node& d);
-        kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap();
-        std::vector<std::string> compile() throw(kul::Exception);
-        kul::hash::set::String   inactiveMains();
 
+        void buildDepVec(const std::string* depVal);
+        void buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc);
+        void loadDependencies();
+        void populateMapsFromDependencies();
+
+        void loadModules();
+        void populateMapsFromModules();
+
+        void loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod);
+        kul::Dir resolveDepOrModDirectory(const YAML::Node& d, const std::string dp);
+        void popDepOrMod(const YAML::Node& n, std::vector<Application>& vec, const std::string& s, std::string dp) throw(kul::Exception);
+
+        kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap();
+        kul::hash::set::String inactiveMains();
+
+        bool incSrc(const kul::File& f);
         void addSourceLine (const std::string& o) throw (kul::StringException);
         void addIncludeLine(const std::string& o) throw (kul::StringException);
 
@@ -218,18 +219,20 @@ class KUL_PUBLISH Application : public Constants{
         ~Application();
 
         virtual void                                       process()   throw(kul::Exception);
-        const kul::Dir&                                    buildDir()      const { return bd; }
-        const std::string&                                 profile()       const { return p; }
-        const maiken::Project&                             project()       const { return proj;}
-        const std::vector<Application>&                    dependencies()  const { return deps; }
-        const std::vector<kul::cli::EnvVar>&               envVars()       const { return evs; }
-        const kul::hash::map::S2T<kul::hash::map::S2S>&    files()         const { return fs; }
-        const std::vector<std::string>&                    libraries()     const { return libs;}
-        const std::vector<std::pair<std::string, bool> >&  sources()       const { return srcs;}
-        const std::vector<std::pair<std::string, bool> >&  includes()      const { return incs;}
-        const std::vector<std::string>&                    libraryPaths()  const { return paths;}
-        const kul::hash::map::S2S&                         properties()    const { return ps;}
-        const kul::hash::map::S2T<kul::hash::set::String>& arguments()     const { return args; }
+        const kul::Dir&                                    buildDir()            const { return bd; }
+        const std::string&                                 profile()             const { return p; }
+        const maiken::Project&                             project()             const { return proj;}
+        const std::vector<Application>&                    dependencies()        const { return deps; }
+        const std::vector<Application>&                    moduleDependencies()  const { return modDeps; }
+        const std::vector<std::shared_ptr<ModuleLoader>>&  modules()             const { return mods; }
+        const std::vector<kul::cli::EnvVar>&               envVars()             const { return evs; }
+        const kul::hash::map::S2T<kul::hash::map::S2S>&    files()               const { return fs; }
+        const std::vector<std::string>&                    libraries()           const { return libs;}
+        const std::vector<std::pair<std::string, bool> >&  sources()             const { return srcs;}
+        const std::vector<std::pair<std::string, bool> >&  includes()            const { return incs;}
+        const std::vector<std::string>&                    libraryPaths()        const { return paths;}
+        const kul::hash::map::S2S&                         properties()          const { return ps;}
+        const kul::hash::map::S2T<kul::hash::set::String>& arguments()           const { return args; }
         std::string                                        resolveFromProperties(const std::string& s) const;
 
         static std::shared_ptr<Application> CREATE(int16_t argc, char *argv[]) throw(kul::Exception);
@@ -291,4 +294,4 @@ class SCMGetter{
 }
 #endif /* _MAIKEN_APP_HPP_ */
 
-
+#include <maiken/module.hpp>
