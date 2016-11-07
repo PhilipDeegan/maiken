@@ -435,7 +435,11 @@ void maiken::Application::setup(){
             break;
         }
     }
-    for(auto& mod : modDeps) mod.ig = 0;
+    for(auto& mod : modDeps) {
+        std::string s(std::to_string(AppVars::INSTANCE().dependencyLevel()));
+        mod.ig = 0;
+        mod.buildDepVec(&s);
+    }
 
     c = 1;
     profile = p.size() ? p : project().root()[NAME].Scalar();

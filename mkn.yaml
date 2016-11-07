@@ -4,6 +4,9 @@ name: mkn
 version: master
 scm: https://github.com/dekken/maiken
 
+property:
+    DATE: 2016-11-11
+
 parent: base
 mode: none
 
@@ -21,7 +24,7 @@ profile:
     parent: header
     src: ./src
     main: cpp.cpp
-    arg: -D_MKN_VERSION_=${version}_${DATETIME}
+    arg: -D_MKN_VERSION_=${version}_${DATE}
     if_arg:
         win_shared: -DYAML_CPP_DLL
 
