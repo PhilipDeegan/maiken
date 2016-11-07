@@ -364,6 +364,7 @@ void maiken::Application::process() throw(kul::Exception){
         CSM::INSTANCE().add(BUILD);
         for(auto& m : ModuleMinimiser::INSTANCE().modules(*this))
             m.second.process();
+        CSM::INSTANCE().reset();
     }
 
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
@@ -381,7 +382,6 @@ void maiken::Application::process() throw(kul::Exception){
         pack();
     }
     if(cmds.count(RUN) || cmds.count(DBG)) run(cmds.count(DBG));
-    CSM::INSTANCE().reset();
 }
 
 void maiken::Application::setup(){
@@ -435,11 +435,14 @@ void maiken::Application::setup(){
             break;
         }
     }
+
+    auto depLevel(AppVars::INSTANCE().dependencyLevel())
     for(auto& mod : modDeps) {
-        std::string s(std::to_string(AppVars::INSTANCE().dependencyLevel()));
+        std::string s("");
         mod.ig = 0;
         mod.buildDepVec(&s);
     }
+    AppVars::INSTANCE().dependencyLevel(depLevel);
 
     c = 1;
     profile = p.size() ? p : project().root()[NAME].Scalar();
