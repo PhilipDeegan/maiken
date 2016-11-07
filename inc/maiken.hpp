@@ -55,6 +55,7 @@ class AppVars : public Constants{
         bool d = 0, dr = 0, f = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
         uint16_t dl = 0, ts = 1;
         std::string aa, al, la;
+        const std::string* dep;
         kul::hash::set::String cmds, modPhases;
         kul::hash::map::S2S evs, jas, pks;
         AppVars(){
@@ -113,6 +114,9 @@ class AppVars : public Constants{
 
         const bool& stat() const  { return this->st;}
         void stat(const bool& st) { this->st = st;}
+
+        const std::string* dependencyString()   const { return dep;}
+        void dependencyString(const std::string* dep) { this->dep = dep;}
 
         const uint16_t& dependencyLevel()  const { return dl;}
         void dependencyLevel(const uint16_t& dl) { this->dl = dl;}

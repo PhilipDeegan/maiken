@@ -206,9 +206,11 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
                 std::placeholders::_1, 
                 std::placeholders::_2));
 
+    AppVars::INSTANCE().dependencyString(args.has(MKN_DEP) ? &args.get(MKN_DEP) : 0);
+
     a.setSuper(0);
     a.setup();
-    a.buildDepVec(args.has(MKN_DEP) ? &args.get(MKN_DEP) : 0);
+    a.buildDepVec(AppVars::INSTANCE().dependencyString());
 
     if(args.has(MKN_MOD)){
         std::vector<std::string> vp { COMPILE, LINK, PACK };
@@ -361,10 +363,9 @@ void maiken::Application::process() throw(kul::Exception){
     };
 
     if(cmds.count(BUILD_ALL) || cmds.count(BUILD_MOD)){
-        CSM::INSTANCE().add(BUILD);
-        for(auto& m : ModuleMinimiser::INSTANCE().modules(*this))
-            m.second.process();
-        CSM::INSTANCE().reset();
+        auto _mods = ModuleMinimiser::INSTANCE().modules(*this);
+        if(_mods.size() && !cmds.count(BUILD_ALL)) CSM::INSTANCE().add(BUILD);
+        for(auto& m : _mods) m.second.process();
     }
 
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
@@ -382,6 +383,7 @@ void maiken::Application::process() throw(kul::Exception){
         pack();
     }
     if(cmds.count(RUN) || cmds.count(DBG)) run(cmds.count(DBG));
+    CSM::INSTANCE().reset();
 }
 
 void maiken::Application::setup(){
@@ -436,11 +438,10 @@ void maiken::Application::setup(){
         }
     }
 
-    auto depLevel(AppVars::INSTANCE().dependencyLevel())
+    auto depLevel(AppVars::INSTANCE().dependencyLevel());
     for(auto& mod : modDeps) {
-        std::string s("");
         mod.ig = 0;
-        mod.buildDepVec(&s);
+        mod.buildDepVec(AppVars::INSTANCE().dependencyString());
     }
     AppVars::INSTANCE().dependencyLevel(depLevel);
 
