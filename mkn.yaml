@@ -36,6 +36,14 @@ profile:
     parent: base
     mode: shared 
 
+  # - name: mod
+  #   parent: shared
+  #   mod:
+  #     - name: mkn-mod.min
+  #       arg:
+  #           compile:
+  #               file: path
+
   - name: lib
     parent: base
     if_arg:

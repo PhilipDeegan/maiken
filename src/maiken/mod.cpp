@@ -31,13 +31,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 void maiken::Application::populateMapsFromModules(){
-    for(auto mod = modDeps.rbegin(); mod != modDeps.rend(); ++mod){
-        for(const std::string& s : (*mod).libraryPaths())
-            if(std::find(libraryPaths().begin(), libraryPaths().end(), s) == libraryPaths().end())
-                paths.push_back(s);
-        for(const std::string& s : (*mod).libraries())
-            if(std::find(libraries().begin(), libraries().end(), s) == libraries().end())
-                libs.push_back(s);
-    }
+    // for(auto mod = modDeps.rbegin(); mod != modDeps.rend(); ++mod){
+    //     for(const std::string& s : (*mod).libraryPaths())
+    //         if(std::find(libraryPaths().begin(), libraryPaths().end(), s) == libraryPaths().end())
+    //             paths.push_back(s);
+    //     for(const std::string& s : (*mod).libraries())
+    //         if(std::find(libraries().begin(), libraries().end(), s) == libraries().end())
+    //             libs.push_back(s);
+    // }
 }
 
+kul::File maiken::ModuleLoader::FIND(const Application& ap) throw(kul::sys::Exception) {
+    std::string file;
+    for(const auto& f : ap.buildDir().files(0)){
+        const auto& name(f.name());
+        if(name.find(".") != std::string::npos 
+            && name.find(ap.project().root()["name"].Scalar()) != std::string::npos
+#ifdef _WIN32
+            && name.substr(name.rfind(".") + 1) == "dll"){
+#else
+            && name.substr(name.rfind(".") + 1) == "so"){
+#endif
+            file = ap.buildDir().join(name);
+            break;
+        }
+    }  
+    
+
+    kul::File lib(file);
+    if(!lib) KEXCEPT(kul::sys::Exception, "No loadable library found for project: ") << ap.project().dir();
+    return lib;
+}  
+
+std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(const Application& ap) throw(kul::sys::Exception) {  
+    for(auto dep = ap.dependencies().rbegin(); dep != ap.dependencies().rend(); ++dep)
+        if(!(*dep).sources().empty()) GlobalModules::INSTANCE().load(*dep);    
+    return std::make_shared<ModuleLoader>(ap, kul::File(FIND(ap)));
+}

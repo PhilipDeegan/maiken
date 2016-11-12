@@ -35,13 +35,13 @@ void maiken::Application::resolveProperties(){
     for(YAML::const_iterator it=project().root()[PROPERTY].begin();it!=project().root()[PROPERTY].end(); ++it)
         ps[it->first.as<std::string>()] = it->second.as<std::string>();
     for(YAML::const_iterator it=project().root()[PROPERTY].begin();it!=project().root()[PROPERTY].end(); ++it) {
-        std::string s = this->resolveFromProperties(it->second.as<std::string>());
+        std::string s = Properties::RESOLVE(*this, it->second.as<std::string>());
         if(ps.count(it->first.as<std::string>())) ps.erase(it->first.as<std::string>());
         ps[it->first.as<std::string>()] = s;
     }
 }
 
-std::string maiken::Application::resolveFromProperties(const std::string& s) const{
+std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(const kul::hash::map::S2S& ps, const std::string& s){
     std::string r = s;
     int lb  = s.find("${");
     int clb = s.find("\\${");
@@ -55,20 +55,34 @@ std::string maiken::Application::resolveFromProperties(const std::string& s) con
         rb  = r.substr(crb + 2).find("}");
         crb = r.substr(crb + 2).find("\\}");
     }
-    if(lb != -1 && clb == -1 && rb != -1 && crb == -1){
-        std::string k(r.substr(lb + 2, rb - 2 - lb));
+    if(lb != -1 && clb == -1 && rb != -1 && crb == -1)
+        return std::make_shared<std::tuple<std::string, int, int>>(r.substr(lb + 2, rb - 2 - lb), lb, rb);
+    return std::shared_ptr<std::tuple<std::string, int, int>>(0);
+}
+
+std::string maiken::Properties::RESOLVE(const Application& app, const std::string& s){
+    std::string r = s;
+    std::shared_ptr<std::tuple<std::string, int, int>> t = KEY(app.properties(), s);
+    if(t){
+        std::string k  = std::get<0>(*t);
+        const int&  lb = std::get<1>(*t);
+        const int&  rb = std::get<2>(*t);
+
         if(AppVars::INSTANCE().properkeys().count(k))
             k = (*AppVars::INSTANCE().properkeys().find(k)).second;
         else
-        if(ps.count(k) == 0){
-            if(project().root()[VERSION] && project().root()[VERSION].Type() == 2)
-                k = project().root()[VERSION].Scalar();
+        if(app.properties().count(k) == 0){
+            if(app.project().root()[VERSION] && app.project().root()[VERSION].Type() == 2)
+                k = app.project().root()[VERSION].Scalar();
             else KEXCEPT(Exception, "Property : '" + k + "' has not been defined");
-        }else k = (*ps.find(k)).second;
-        r = resolveFromProperties(r.substr(0, lb) + k + r.substr(rb + 1));
+        }else k = (*app.properties().find(k)).second;
+        r = Properties::RESOLVE(app, r.substr(0, lb) + k + r.substr(rb + 1));
     }
     kul::String::TRIM(r);
     return r;
 }
 
+std::string maiken::Properties::RESOLVE(const Settings& app, const std::string& s){
 
+    return s;
+}

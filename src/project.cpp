@@ -48,7 +48,12 @@ const kul::yaml::Validator maiken::Project::validator() const{
         NodeValidator("version"),
         NodeValidator("profile"),
         NodeValidator("scm"),
-        NodeValidator("local")
+        NodeValidator("local"),
+        NodeValidator("arg", {
+            NodeValidator("compile", { NodeValidator("*") }, 0, NodeType::MAP),
+            NodeValidator("link", { NodeValidator("*") }, 0, NodeType::MAP),
+            NodeValidator("pack", { NodeValidator("*") }, 0, NodeType::MAP)
+        }, 0, NodeType::MAP)
     }, 0, NodeType::LIST);
 
     NodeValidator env("env", {

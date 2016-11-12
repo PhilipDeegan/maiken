@@ -155,6 +155,7 @@ class KUL_PUBLISH Application : public Constants{
         std::string arg, main, lang, lnk, scr, scv;
         const std::string p;
         kul::Dir bd, inst;
+        YAML::Node modCArg, modLArg, modPArg;
         maiken::Project proj;
         kul::hash::map::S2T<kul::hash::map::S2S> fs;
         kul::hash::map::S2S includeStamps, itss, ps;
@@ -206,8 +207,8 @@ class KUL_PUBLISH Application : public Constants{
         void populateMapsFromModules();
 
         void loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module);
-        kul::Dir resolveDepOrModDirectory(const YAML::Node& d, const std::string dp);
-        void popDepOrMod(const YAML::Node& n, std::vector<Application>& vec, const std::string& s, std::string dp) throw(kul::Exception);
+        kul::Dir resolveDepOrModDirectory(const YAML::Node& d, bool module);
+        void popDepOrMod(const YAML::Node& n, std::vector<Application>& vec, const std::string& s, bool module) throw(kul::Exception);
 
         kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap();
         kul::hash::set::String inactiveMains();
@@ -215,6 +216,13 @@ class KUL_PUBLISH Application : public Constants{
         bool incSrc(const kul::File& f);
         void addSourceLine (const std::string& o) throw (kul::StringException);
         void addIncludeLine(const std::string& o) throw (kul::StringException);
+
+        void              modCompile(const YAML::Node& modArg){ modCArg = modArg; }
+        const YAML::Node& modCompile()                        { return modCArg; }
+        void              modLink   (const YAML::Node& modArg){ modLArg = modArg; }
+        const YAML::Node& modLink()                           { return modLArg; }
+        void              modPack   (const YAML::Node& modArg){ modPArg = modArg; }
+        const YAML::Node& modPack()                           { return modPArg; }
 
         static void showHelp();
     public:
@@ -237,7 +245,6 @@ class KUL_PUBLISH Application : public Constants{
         const std::vector<std::string>&                    libraryPaths()        const { return paths;}
         const kul::hash::map::S2S&                         properties()          const { return ps;}
         const kul::hash::map::S2T<kul::hash::set::String>& arguments()           const { return args; }
-        std::string                                        resolveFromProperties(const std::string& s) const;
 
         static std::shared_ptr<Application> CREATE(int16_t argc, char *argv[]) throw(kul::Exception);
 };
@@ -299,3 +306,4 @@ class SCMGetter{
 #endif /* _MAIKEN_APP_HPP_ */
 
 #include <maiken/module.hpp>
+#include <maiken/property.hpp>

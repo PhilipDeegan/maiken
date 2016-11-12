@@ -158,7 +158,7 @@ void maiken::Application::showProfiles(){
         if(!os.empty()) kul::String::PAD(os, o);
         std::stringstream s1;
         s1 << "\t" << s << os;
-        if(n[PARENT]) s1 << "\t" << MKN_PARENT << ": " << resolveFromProperties(n[PARENT].Scalar());
+        if(n[PARENT]) s1 << "\t" << MKN_PARENT << ": " << Properties::RESOLVE(*this, n[PARENT].Scalar());
         ss.push_back(s1.str());
     }
     KOUT(NON) << MKN_PROFILE;

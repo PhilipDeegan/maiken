@@ -59,10 +59,13 @@ enum MODULE_PHASE {
 };
 
 class ModuleLoader;
+class ModuleEnviron;
+
 class Module{
     friend class ModuleLoader;
+    friend class ModuleEnviron;
     private:
-        const Application * app;
+        const Application * app = nullptr;
         void application(const Application * _app){
             app = _app;
         }
@@ -70,41 +73,56 @@ class Module{
     	virtual ~Module(){}
     	Module() throw(ModuleException) {}
 
-        virtual void compile(Application& app) throw(ModuleException) {} 
-        virtual void link   (Application& app) throw(ModuleException) {}
-        virtual void pack   (Application& app) throw(ModuleException) {}
+        virtual void compile(Application& app, const YAML::Node& arg) throw(std::exception) {} 
+        virtual void link   (Application& app, const YAML::Node& arg) throw(std::exception) {}
+        virtual void pack   (Application& app, const YAML::Node& arg) throw(std::exception) {}
         virtual void destroy(Application& app) throw(ModuleException) {}
 };
 
+// class ModuleEnviron{
+//     private:
+//         std::string oldEnv;
+// #ifdef _WIN32
+//         static constexpr const char* KEY = "PATH";
+// #else
+//         static constexpr const char* KEY = "LD_LIBRARY_PATH";
+// #endif
+//         const Application& ap;
+
+//     public:
+//         ModuleEnviron(const Application& _ap) : ap(_ap)   { set(); }
+//         ModuleEnviron(const Module* _mod) : ap(*_mod->app){ set(); }
+
+//         void set(){
+//             oldEnv = kul::env::GET(KEY);
+//             KLOG(DBG) << oldEnv;
+//             std::stringstream ss;
+//             for(const std::string& s : ap.libraryPaths()) ss << s << kul::env::SEP();
+//             kul::cli::EnvVar var(KEY, ss.str(), kul::cli::EnvVarMode::PREP);
+            
+//             const auto newEnv(var.toString());
+//             KLOG(DBG) << newEnv;
+//             kul::env::SET(KEY, newEnv.c_str());
+//         }
+//         ~ModuleEnviron(){
+//             kul::env::SET(KEY, oldEnv.c_str());
+//         }
+// };
+
+class GlobalModules;
 class ModuleLoader : public kul::sys::SharedClass<maiken::Module> {
+    friend class GlobalModules;
     private:
         bool loaded = 0;
-        Module* p;
+        Module* p = nullptr;
+
+        static kul::File FIND(const Application& a) throw(kul::sys::Exception);
     public:
         ModuleLoader(const Application& ap, const kul::File& f) throw(kul::sys::Exception) 
             : kul::sys::SharedClass<maiken::Module>(f, "maiken_module_construct", "maiken_module_destruct") {
             construct(p);
             p->application(&ap);
             loaded = 1;
-        }
-        static std::shared_ptr<ModuleLoader> LOAD(const Application& ap) throw(kul::sys::Exception) {
-            std::string file;
-            for(const auto& f : ap.buildDir().files(0)){
-                const auto& name(f.name());
-                if(name.find(".") != std::string::npos 
-                    && name.find(ap.project().root()["name"].Scalar()) != std::string::npos
-#ifdef _WIN32
-                    && name.substr(name.rfind(".") + 1) == "dll"){
-#else
-                    && name.substr(name.rfind(".") + 1) == "so"){
-#endif
-                    file = ap.buildDir().join(name);
-                    break;
-                }
-            }
-            kul::File lib(file);
-            if(!lib) KEXCEPT(kul::sys::Exception, "No loadable library found.");
-            return std::make_shared<ModuleLoader>(ap, lib);
         }
         ~ModuleLoader(){
             if(loaded) KERR << "WARNING: ModuleLoader not unloaded, possible memory leak";
@@ -116,7 +134,36 @@ class ModuleLoader : public kul::sys::SharedClass<maiken::Module> {
         Module* module(){
             return p;
         }
+        const Application* app(){
+            return p->app;
+        }
 
+        static std::shared_ptr<ModuleLoader> LOAD(const Application& ap) throw(kul::sys::Exception);
+};
+
+class GlobalModules{
+    friend class ModuleLoader;
+    private:
+        kul::hash::map::S2T<std::shared_ptr<kul::sys::SharedLibrary>> libs;
+        static GlobalModules& INSTANCE(){
+            static GlobalModules i;
+            return i;
+        }
+        ~GlobalModules(){
+            libs.clear();
+        }
+        void load(const Application& ap) throw (kul::sys::Exception) {
+            if(!libs.count(ap.buildDir().real())){
+                libs.insert(
+                    std::make_pair(
+                        ap.buildDir().real(), 
+                        std::make_shared<kul::sys::SharedLibrary>(
+                            ModuleLoader::FIND(ap)
+                        )
+                    )
+                );
+            }
+        }
 };
 
 

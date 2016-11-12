@@ -28,23 +28,17 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "kul/log.hpp"
-#include "kul/signal.hpp"
-#include "maiken.hpp"
+#ifndef  _MAIKEN_PROPERTY_HPP_
+#define  _MAIKEN_PROPERTY_HPP_
 
-int main(int argc, char* argv[]) {
-    kul::Signal sig;
-    const int64_t s = kul::Now::MILLIS();
-    std::shared_ptr<maiken::Application> app;
-    try{
-        (app = maiken::Application::CREATE(argc, argv))->process();
-        KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
-        KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
-    }
-    catch(const kul::Exit& e){ if(e.code() != 0) KERR << e.stack(); return e.code(); }
-    catch(const kul::proc::ExitException& e){ KERR << e.what(); return e.code(); }
-    catch(const kul::Exception& e){ KERR << e.stack(); return 2; }
-    catch(const std::exception& e){ KERR << e.what(); return 3; }
+namespace maiken{
+class Properties : public Constants {
+    private:
+        static std::shared_ptr<std::tuple<std::string, int, int>> KEY(const kul::hash::map::S2S& ps, const std::string& s);
+    public:
+        static std::string RESOLVE(const Application& app, const std::string& s);
+        static std::string RESOLVE(const Settings& app, const std::string& s);
+};
 
-    return 0;
 }
+#endif//_MAIKEN_PROPERTY_HPP_

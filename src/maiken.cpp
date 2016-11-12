@@ -323,6 +323,22 @@ class CSM{ // CommandStateMachine
         }
 };
 
+class BuildRecorder{
+    friend class maiken::Application;
+    private:
+        kul::hash::set::String builds;
+        static BuildRecorder& INSTANCE(){
+            static BuildRecorder a;
+            return a;
+        }
+        void add(const std::string& k){
+            builds.insert(k);
+        }
+        bool has(const std::string& k){
+            return builds.count(k);
+        }
+};
+
 void maiken::Application::process() throw(kul::Exception){
     const kul::hash::set::String& cmds (CSM::INSTANCE().commands());
     const kul::hash::set::String& phase(AppVars::INSTANCE().modulePhases());
@@ -333,7 +349,10 @@ void maiken::Application::process() throw(kul::Exception){
                 app.mods.push_back(ModuleLoader::LOAD(*mod));
     };
 
-    auto proc = [&] (Application& app, bool work = 1) { 
+    auto proc = [&] (Application& app, bool work = 1) {
+        if(BuildRecorder::INSTANCE().has(app.buildDir().real())) return;
+        BuildRecorder::INSTANCE().add(app.buildDir().real());
+
         kul::env::CWD(app.project().dir());
         kul::Dir mkn(app.buildDir().join(".mkn"));
         std::vector<std::pair<std::string, std::string> > oldEvs;
@@ -351,11 +370,15 @@ void maiken::Application::process() throw(kul::Exception){
         
         std::vector<std::string> objects;
         if(cmds.count(BUILD_ALL) || cmds.count(BUILD) || cmds.count(COMPILE)){
-            if(phase.count(COMPILE)) for(auto& modLoader : app.mods) modLoader->module()->compile(app);
+            if(phase.count(COMPILE)) 
+                for(auto& modLoader : app.mods) 
+                    modLoader->module()->compile(app, modLoader->app()->modCArg);
             if(work) app.compile(objects);
         }
         if(cmds.count(BUILD_ALL) || cmds.count(BUILD) || cmds.count(LINK)){
-            if(phase.count(LINK)) for(auto& modLoader : app.mods) modLoader->module()->link(app);
+            if(phase.count(LINK)) 
+                for(auto& modLoader : app.mods)
+                    modLoader->module()->link(app, modLoader->app()->modLArg);
             if(work) objects.empty() ? app.link() : app.link(objects);
         }
         for(const std::pair<std::string, std::string>& oldEv : oldEvs)
@@ -367,10 +390,12 @@ void maiken::Application::process() throw(kul::Exception){
         if(_mods.size() && !cmds.count(BUILD_ALL)) CSM::INSTANCE().add(BUILD);
         for(auto& m : _mods) m.second.process();
     }
-
+    
+    KLOG(INF);
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
         if(!(*app).ig) loadModules(*app);
     if(!this->ig) loadModules(*this);
+    KLOG(INF);
 
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
         if((*app).ig) continue;
@@ -378,9 +403,11 @@ void maiken::Application::process() throw(kul::Exception){
     }
     if(!this->ig) proc(*this);
 
-    if(cmds.count(PACK)) {
-        if(phase.count(PACK)) for(auto& modLoader : mods) modLoader->module()->pack(*this);
+    if(cmds.count(PACK)){
         pack();
+        if(phase.count(PACK)) 
+            for(auto& modLoader : mods)
+                modLoader->module()->pack(*this, modLoader->app()->modPArg);
     }
     if(cmds.count(RUN) || cmds.count(DBG)) run(cmds.count(DBG));
     CSM::INSTANCE().reset();
@@ -425,14 +452,14 @@ void maiken::Application::setup(){
             if(n[NAME].Scalar() != profile) continue;
             for(const auto& mod : n[MKN_MOD]) {
                 const std::string& cwd(kul::env::CWD());
-                kul::Dir projectDir(resolveDepOrModDirectory(mod, "MKN_MOD_REPO"));
+                kul::Dir projectDir(resolveDepOrModDirectory(mod, 1));
                 if(!projectDir.is()){
                     loadDepOrMod(mod, projectDir, 1);
                 }
                 kul::env::CWD(cwd);
             }
-            popDepOrMod(n, modDeps, MKN_MOD, "MKN_MOD_REPO");
-            profile = n[PARENT] ? resolveFromProperties(n[PARENT].Scalar()) : "";
+            popDepOrMod(n, modDeps, MKN_MOD, 1);
+            profile = n[PARENT] ? Properties::RESOLVE(*this, n[PARENT].Scalar()) : "";
             c = !profile.empty();
             break;
         }
@@ -453,15 +480,15 @@ void maiken::Application::setup(){
             if(n[NAME].Scalar() != profile) continue;
             for(const auto& dep : n[MKN_DEP]) {
                 const std::string& cwd(kul::env::CWD());
-                kul::Dir projectDir(resolveDepOrModDirectory(dep, "MKN_REPO"));
+                kul::Dir projectDir(resolveDepOrModDirectory(dep, 0));
                 if(!projectDir.is()){
                     loadDepOrMod(dep, projectDir, 0);
                 }
                 kul::env::CWD(cwd);
             }
             populateMaps(n);
-            popDepOrMod(n, deps, MKN_DEP, "MKN_REPO");
-            profile = n[PARENT] ? resolveFromProperties(n[PARENT].Scalar()) : "";
+            popDepOrMod(n, deps, MKN_DEP, 0);
+            profile = n[PARENT] ? Properties::RESOLVE(*this, n[PARENT].Scalar()) : "";
             c = !profile.empty();
             break;
         }
@@ -470,14 +497,14 @@ void maiken::Application::setup(){
     if(Settings::INSTANCE().root()[MKN_INC])
         for(const auto& s : kul::cli::asArgs(Settings::INSTANCE().root()[MKN_INC].Scalar()))
             if(s.size()){
-                kul::Dir d(resolveFromProperties(s));
+                kul::Dir d(Properties::RESOLVE(*this, s));
                 if(d) incs.push_back(std::make_pair(d.real(), false));
                 else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+Settings::INSTANCE().file());
             }
     if(Settings::INSTANCE().root()[PATH])
         for(const auto& s : kul::cli::asArgs(Settings::INSTANCE().root()[PATH].Scalar()))
             if(s.size()){
-                kul::Dir d(resolveFromProperties(s));
+                kul::Dir d(Properties::RESOLVE(*this, s));
                 if(d) paths.push_back(d.escr());
                 else  KEXCEPTION("library path does not exist\n"+d.path()+"\n"+Settings::INSTANCE().file());
             }
@@ -507,7 +534,7 @@ void maiken::Application::setup(){
             }
             if(main.empty() && n[MAIN]) main = n[MAIN].Scalar();
             if(lang.empty() && n[LANG]) lang = n[LANG].Scalar();
-            profile = n[PARENT] ? resolveFromProperties(n[PARENT].Scalar()) : "";
+            profile = n[PARENT] ? Properties::RESOLVE(*this, n[PARENT].Scalar()) : "";
             c = !profile.empty();
             break;
         }
@@ -545,7 +572,7 @@ void maiken::Application::setup(){
                     && main.empty())
                     inst = kul::Dir((*propK.find("MKN_LIB")).second);
                 else
-                if(n[INSTALL]) inst = kul::Dir(resolveFromProperties(n[INSTALL].Scalar()));
+                if(n[INSTALL]) inst = kul::Dir(Properties::RESOLVE(*this, n[INSTALL].Scalar()));
                 if(!inst.path().empty()){
                     if(!inst && !inst.mk())
                         KEXCEPTION("install tag is not a valid directory\n" + project().dir().path());
@@ -562,7 +589,7 @@ void maiken::Application::setup(){
                     }
                     std::vector<std::string> ifArgs;
                     for(const auto& s : kul::String::SPLIT(it->second.Scalar(), ' '))
-                        ifArgs.push_back(resolveFromProperties(s));
+                        ifArgs.push_back(Properties::RESOLVE(*this, s));
                     if(lang.empty() && left == BIN) for(const auto& s : ifArgs) arg += s + " ";
                     else
                     if(main.empty() && left == LIB) for(const auto& s : ifArgs) arg += s + " ";
@@ -597,9 +624,9 @@ void maiken::Application::setup(){
                 for(YAML::const_iterator it = n[IF_LIB].begin(); it != n[IF_LIB].end(); ++it)
                     if(it->first.Scalar() == KTOSTRING(__KUL_OS__))
                         for(const auto& s : kul::String::SPLIT(it->second.Scalar(), ' '))
-                            if(s.size()) libs.push_back(resolveFromProperties(s));
+                            if(s.size()) libs.push_back(Properties::RESOLVE(*this, s));
 
-            profile = n[PARENT] ? resolveFromProperties(n[PARENT].Scalar()) : "";
+            profile = n[PARENT] ? Properties::RESOLVE(*this, n[PARENT].Scalar()) : "";
             c = !profile.empty();
             break;
         }
@@ -736,8 +763,8 @@ void maiken::Application::populateMaps(const YAML::Node& n){ //IS EITHER ROOT OR
         evs.push_back(EnvVar(p.first, p.second, EnvVarMode::PREP));
     }
 
-    if(n[ARG])  for(const auto& o : kul::String::LINES(n[ARG].Scalar()))  arg += resolveFromProperties(o) + " ";
-    if(n[LINK]) for(const auto& o : kul::String::LINES(n[LINK].Scalar())) lnk += resolveFromProperties(o) + " ";
+    if(n[ARG])  for(const auto& o : kul::String::LINES(n[ARG].Scalar()))  arg += Properties::RESOLVE(*this, o) + " ";
+    if(n[LINK]) for(const auto& o : kul::String::LINES(n[LINK].Scalar())) lnk += Properties::RESOLVE(*this, o) + " ";
     try{
         if(n[MKN_INC]) for(const auto& o : kul::String::LINES(n[MKN_INC].Scalar())) addIncludeLine(o);
     }catch(const kul::StringException){
@@ -751,14 +778,14 @@ void maiken::Application::populateMaps(const YAML::Node& n){ //IS EITHER ROOT OR
     if(n[PATH])
         for(const auto& s : kul::String::SPLIT(n[PATH].Scalar(), ' '))
             if(s.size()){
-                kul::Dir d(resolveFromProperties(s));
+                kul::Dir d(Properties::RESOLVE(*this, s));
                 if(d) paths.push_back(d.escr());
                 else KEXCEPTION("library path does not exist\n"+d.path()+"\n"+project().dir().path());
             }
 
     if(n[MKN_LIB])
         for(const auto& s : kul::String::SPLIT(n[MKN_LIB].Scalar(), ' '))
-            if(s.size()) libs.push_back(resolveFromProperties(s));
+            if(s.size()) libs.push_back(Properties::RESOLVE(*this, s));
 
     for(const std::string& s : libraryPaths())
         if(!kul::Dir(s).is()) KEXCEPTION(s + " is not a valid directory\n"+project().dir().path());
@@ -774,10 +801,10 @@ void maiken::Application::cyclicCheck(const std::vector<std::pair<std::string, s
 void maiken::Application::addSourceLine(const std::string& o) throw (kul::StringException){
     if(o.find(',') == std::string::npos){
         for(const auto& s : kul::cli::asArgs(o)){
-            kul::Dir d(resolveFromProperties(s));
+            kul::Dir d(Properties::RESOLVE(*this, s));
             if(d) srcs.push_back(std::make_pair(d.real(), true));
             else{
-                kul::File f(kul::Dir(resolveFromProperties(s)).locl());
+                kul::File f(kul::Dir(Properties::RESOLVE(*this, s)).locl());
                 if(f) srcs.push_back(std::make_pair(f.real(), false));
                 else  KEXCEPTION("source does not exist\n"+s+"\n"+project().dir().path());
             }
@@ -786,7 +813,7 @@ void maiken::Application::addSourceLine(const std::string& o) throw (kul::String
         std::vector<std::string> v;
         kul::String::SPLIT(o, ",", v);
         if(v.size() == 0 || v.size() > 2) KEXCEPTION("source invalid format\n" + project().dir().path());
-        kul::Dir d(resolveFromProperties(v[0]));
+        kul::Dir d(Properties::RESOLVE(*this, v[0]));
         if(d) srcs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
         else KEXCEPTION("source does not exist\n"+v[0]+"\n"+project().dir().path());
     }
@@ -795,7 +822,7 @@ void maiken::Application::addIncludeLine(const std::string& o) throw (kul::Strin
     if(o.find(',') == std::string::npos){
         for(const auto& s : kul::cli::asArgs(o))
             if(s.size()){
-                kul::Dir d(resolveFromProperties(s));
+                kul::Dir d(Properties::RESOLVE(*this, s));
                 if(d) incs.push_back(std::make_pair(d.real(), true));
                 else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
             }
@@ -803,7 +830,7 @@ void maiken::Application::addIncludeLine(const std::string& o) throw (kul::Strin
         std::vector<std::string> v;
         kul::String::SPLIT(o, ",", v);
         if(v.size() == 0 || v.size() > 2) KEXCEPTION("include invalid format\n" + project().dir().path());
-        kul::Dir d(resolveFromProperties(v[0]));
+        kul::Dir d(Properties::RESOLVE(*this, v[0]));
         if(d) incs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
         else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
     }

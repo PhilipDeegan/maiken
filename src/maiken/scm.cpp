@@ -71,7 +71,7 @@ void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
 
         const std::string& tscr(
             !this->scr.empty() ? this->scr
-                : this->project().root()[SCM] ? resolveFromProperties(this->project().root()[SCM].Scalar()) 
+                : this->project().root()[SCM] ? Properties::RESOLVE(*this, this->project().root()[SCM].Scalar()) 
                 : this->project().root()[NAME].Scalar());
 
         scmUpdate(f, scm, SCMGetter::REPO(this->project().dir(), tscr, 0));

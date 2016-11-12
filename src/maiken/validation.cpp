@@ -92,7 +92,7 @@ class Validator : public maiken::Constants{
             for(const auto& p1 : a.project().root()[PROFILE]){
                 if(p1[NAME].Scalar() != pr) continue;
                 if(p1[PARENT]){
-                    std::string resolved(a.resolveFromProperties(p1[PARENT].Scalar()));
+                    std::string resolved(maiken::Properties::RESOLVE(a, p1[PARENT].Scalar()));
                     if(resolved == pa) return true;
                     else return PARENT_CYCLE(a, resolved, pa);
                 }
@@ -101,7 +101,7 @@ class Validator : public maiken::Constants{
         }
         static void SELF_CHECK(const maiken::Application& a, const YAML::Node& n, const std::vector<std::string>& profiles){
             if(n[SELF])
-                for(const auto& s : kul::String::SPLIT(a.resolveFromProperties(n[SELF].Scalar()), ' '))
+                for(const auto& s : kul::String::SPLIT(maiken::Properties::RESOLVE(a, n[SELF].Scalar()), ' '))
                     if(std::find(profiles.begin(), profiles.end(), s) == profiles.end())
                         KEXCEPT(maiken::Exception, "Self tag references unknown profile:\n"+a.project().dir().path());
         }
@@ -130,7 +130,7 @@ void maiken::Application::preSetupValidation() throw (maiken::Exception){
         profiles.push_back(p);
         if(profile[PARENT]){
             bool f = 0;
-            std::string resolved(resolveFromProperties(profile[PARENT].Scalar()));
+            std::string resolved(Properties::RESOLVE(*this, profile[PARENT].Scalar()));
             if(resolved == profile[NAME].Scalar()) KEXCEPTION("Profile may not be its own parent");
             for(const auto& p1 : project().root()[PROFILE]){
                 if(profile[NAME].Scalar() == p1[NAME].Scalar()) continue;
@@ -140,10 +140,10 @@ void maiken::Application::preSetupValidation() throw (maiken::Exception){
                     break;
                 }
             }
-            if(!f) KEXCEPTION("parent profile not found: "+resolveFromProperties(profile[PARENT].Scalar())+"\n"+project().dir().path());
+            if(!f) KEXCEPTION("parent profile not found: "+Properties::RESOLVE(*this, profile[PARENT].Scalar())+"\n"+project().dir().path());
         }
         Validator::PRE_BUILD(*this, profile);
-        if(dpp && !dpf) dpf = resolveFromProperties(project().root()[PARENT].Scalar()) == p;
+        if(dpp && !dpf) dpf = Properties::RESOLVE(*this, project().root()[PARENT].Scalar()) == p;
     }
     if(dpp && !dpf) KEXCEPTION("Parent for default profile does not exist: \n"+project().dir().path());
     Validator::SELF_CHECK(*this, project().root(), profiles);
