@@ -350,8 +350,10 @@ void maiken::Application::process() throw(kul::Exception){
     };
 
     auto proc = [&] (Application& app, bool work = 1) {
-        if(BuildRecorder::INSTANCE().has(app.buildDir().real())) return;
-        BuildRecorder::INSTANCE().add(app.buildDir().real());
+        if(work){
+            if(BuildRecorder::INSTANCE().has(app.buildDir().real())) return;
+            BuildRecorder::INSTANCE().add(app.buildDir().real());            
+        }
 
         kul::env::CWD(app.project().dir());
         kul::Dir mkn(app.buildDir().join(".mkn"));
