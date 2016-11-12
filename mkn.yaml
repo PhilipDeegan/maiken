@@ -6,22 +6,20 @@ scm: https://github.com/dekken/maiken
 
 property:
     DATE: 2016-11-11
+    mkn_profile: "@" # change to "c++0x" for < c++11
 
 parent: base
 mode: none
 
 profile:
-  - name: header
+  - name: base
     inc: ./inc
     dep: 
       - name: mkn.kul
         version: master
-        #profile: c++0x
+        profile: ${mkn_profile}
       - name: parse.yaml
         version: master
-
-  - name: base
-    parent: header
     src: ./src
     main: cpp.cpp
     arg: -D_MKN_VERSION_=${version}_${DATE}
@@ -36,13 +34,23 @@ profile:
     parent: base
     mode: shared 
 
-  # - name: mod
-  #   parent: shared
-  #   mod:
-  #     - name: mkn-mod.min
-  #       arg:
-  #           compile:
-  #               file: path
+  - name: mod
+    inc: ./inc
+    dep: 
+      - name: mkn.kul
+        version: master
+        profile: ${mkn_profile}
+      - name: parse.yaml
+        version: master
+        profile: cmn
+
+  - name: mod-test
+    parent: base
+    mod:
+      - name: mkn-mod.min
+        arg:
+            compile:
+                file: path
 
   - name: lib
     parent: base

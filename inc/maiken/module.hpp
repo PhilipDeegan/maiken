@@ -110,7 +110,7 @@ class Module{
 // };
 
 class GlobalModules;
-class ModuleLoader : public kul::sys::SharedClass<maiken::Module> {
+class KUL_PUBLISH ModuleLoader : public kul::sys::SharedClass<maiken::Module> {
     friend class GlobalModules;
     private:
         bool loaded = 0;
