@@ -50,6 +50,7 @@ constexpr const char* maiken::Constants::VERSION;
 constexpr const char* maiken::Constants::PARENT;
 constexpr const char* maiken::Constants::SUPER;
 constexpr const char* maiken::Constants::PATH;
+constexpr const char* maiken::Constants::PACK;
 constexpr const char* maiken::Constants::BUILD;
 constexpr const char* maiken::Constants::FILE;
 constexpr const char* maiken::Constants::ARG;
@@ -71,6 +72,7 @@ constexpr const char* maiken::Constants::RUN;
 constexpr const char* maiken::Constants::PROJECT;
 constexpr const char* maiken::Constants::ARCHIVER;
 constexpr const char* maiken::Constants::COMPILER;
+constexpr const char* maiken::Constants::COMPILE;
 constexpr const char* maiken::Constants::LINKER;
 
 constexpr const char* maiken::Constants::MKN_LIB;
