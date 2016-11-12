@@ -148,7 +148,7 @@ class ThreadingCompiler;
 class KUL_PUBLISH Application : public Constants{
     friend class ThreadingCompiler;
     protected:
-        bool ig = 1;
+        bool ig = 1, isMod = 0;
         const Application* par = 0;
         std::shared_ptr<Application> sup;
         kul::code::Mode m;

@@ -84,6 +84,7 @@ void maiken::Application::popDepOrMod(
             if(node[ARG][COMPILE]) app.modCompile(node[ARG][COMPILE]);
             if(node[ARG][LINK])    app.modLink   (node[ARG][LINK]);
             if(node[ARG][PACK])    app.modPack   (node[ARG][PACK]);
+            app.isMod = 1;
         }
     };
 
