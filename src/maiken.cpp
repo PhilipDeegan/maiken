@@ -391,11 +391,9 @@ void maiken::Application::process() throw(kul::Exception){
         for(auto& m : _mods) m.second.process();
     }
     
-    KLOG(INF);
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
         if(!(*app).ig) loadModules(*app);
     if(!this->ig) loadModules(*this);
-    KLOG(INF);
 
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
         if((*app).ig) continue;

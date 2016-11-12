@@ -81,7 +81,6 @@ void maiken::Application::popDepOrMod(
         if(node[SCM]) app.scr = Properties::RESOLVE(*this, node[SCM].Scalar());
         if(node[VERSION]) app.scv = Properties::RESOLVE(*this, node[VERSION].Scalar());
         if(module && node[ARG]){
-            if(node[ARG][COMPILE]) KLOG(INF) << node[ARG][COMPILE];
             if(node[ARG][COMPILE]) app.modCompile(node[ARG][COMPILE]);
             if(node[ARG][LINK])    app.modLink   (node[ARG][LINK]);
             if(node[ARG][PACK])    app.modPack   (node[ARG][PACK]);

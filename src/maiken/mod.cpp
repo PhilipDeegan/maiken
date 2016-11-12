@@ -57,7 +57,6 @@ kul::File maiken::ModuleLoader::FIND(const Application& ap) throw(kul::sys::Exce
         }
     }  
     
-
     kul::File lib(file);
     if(!lib) KEXCEPT(kul::sys::Exception, "No loadable library found for project: ") << ap.project().dir();
     return lib;
