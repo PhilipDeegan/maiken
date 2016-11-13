@@ -50,9 +50,9 @@ const kul::yaml::Validator maiken::Project::validator() const{
         NodeValidator("scm"),
         NodeValidator("local"),
         NodeValidator("arg", {
-            NodeValidator("compile", { NodeValidator("*") }, 0, NodeType::MAP),
-            NodeValidator("link", { NodeValidator("*") }, 0, NodeType::MAP),
-            NodeValidator("pack", { NodeValidator("*") }, 0, NodeType::MAP)
+            NodeValidator("compile", { NodeValidator("*") }, 0, NodeType::NON),
+            NodeValidator("link",    { NodeValidator("*") }, 0, NodeType::NON),
+            NodeValidator("pack",    { NodeValidator("*") }, 0, NodeType::NON)
         }, 0, NodeType::MAP)
     }, 0, NodeType::LIST);
 
