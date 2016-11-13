@@ -345,7 +345,7 @@ void maiken::Application::process() throw(kul::Exception){
 
     auto loadModules = [&] (Application& app) { 
         if(phase.size())
-            for(auto mod = app.modDeps.rbegin(); mod != app.modDeps.rend(); ++mod)
+            for(auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod)
                 app.mods.push_back(ModuleLoader::LOAD(*mod));
     };
 
