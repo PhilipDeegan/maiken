@@ -48,9 +48,6 @@ profile:
     parent: base
     mod:
       - name: mkn-mod.min
-        arg:
-            compile:
-                file: path
 
   - name: lib
     parent: base
