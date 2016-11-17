@@ -31,47 +31,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 #include "kul/string.hpp"
 
-void maiken::Application::pack() throw(kul::Exception){
-    kul::Dir pk(buildDir().join("pack"));
-    if(!pk && !pk.mk()) KEXCEPTION("Cannot create: " + pk.path());
+class LibFinder{
 
-    kul::Dir bin(pk.join("bin"), main.size());
-    kul::Dir lib(pk.join("lib"));
-    
-    const auto& binar(buildDir().files(0));
-    if((!main.empty() || !srcs.empty()) && binar.size() == 0)
-        KEXCEPTION("No files found, try building");
-
-    for(const auto& f : binar) f.cp(main.size() ? bin : lib);
-
-    kul::hash::set::String libS;
-
-    for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
-        if(!(*app).srcs.empty()){ 
-            const auto& libar((*app).buildDir().files(0));
-            if(libar.size() == 0) KEXCEPTION("No files found, try building, " + (*app).project().dir().real());
-            for(const auto& f : libar) {
-                if(f.name().find(".") == std::string::npos) continue;
-                f.cp(lib);
-                libS.insert(f.name().substr(0, f.name().rfind(".")));
-            }
-        }
-    for(const auto& l : libs){
-        bool f1 = 0;
-        for(const auto& p : paths){
-            kul::Dir path(p);
-            if(!path) KEXCEPTION("Path does not exist: " + pk.path());
-            for(const auto& f : path.files(0)){
+    public:
+        static bool findAdd(const std::string& l, const kul::Dir& i, const kul::Dir& o){
+            bool found = 0;
+            for(const auto& f : i.files(0)){
                 const auto& fn(f.name());
                 if(fn.find(".") == std::string::npos) continue;
-                if(libS.count(f.name().substr(0, fn.rfind(".")))) {
-                    f1 = 1;
-                    break;
-                }
+
 #ifdef  _WIN32
-                if(f.name().substr(0, f.name().rfind(".")) == l){
+                if(fn.substr(0, fn.rfind(".")) == l){
 #else
-                if(fn.size() > (3 + l.size()) && f.name().substr(0, 3) == "lib" 
+                if(fn.size() > (3 + l.size()) && fn.substr(0, 3) == "lib" 
                     && kul::String::NO_CASE_CMP(fn.substr(3, l.size()), l)){
 
                     auto bits(kul::String::SPLIT(fn.substr(3 + l.size()), '.'));
@@ -84,12 +56,49 @@ void maiken::Application::pack() throw(kul::Exception){
                         && bits[bits.size() - 1] != "a") continue;
 
 #endif//_WIN32
-                    f.cp(lib);
-                    f1 = 1;
+                    f.cp(o);
+                    found = 1;
                 }
             }
-            if(f1) break;
+            return found;
         }
-        if(!f1) KOUT(NON) << "Could not find library, assumed system based for: " << l;
+
+};
+
+void maiken::Application::pack() throw(kul::Exception){
+
+    kul::Dir pk(buildDir().join("pack"));
+    if(!pk && !pk.mk()) KEXCEPTION("Cannot create: " + pk.path());
+
+    kul::Dir bin(pk.join("bin"), main.size());
+    kul::Dir lib(pk.join("lib"));
+
+    if(!main.empty() || !srcs.empty()){
+        bool found = 0;
+        const auto v((inst ? inst : buildDir()).files(0));
+        if(v.empty()) KEXCEPTION("Current project lib/bin not found during pack");
+        for(const auto& f : v) f.cp(main.size() ? bin : lib);
+    }
+
+    for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
+        if(!(*app).srcs.empty()){
+            if((*app).inst){
+                const std::string& n((*app).project().root()[NAME].Scalar());
+                if(!LibFinder::findAdd((*app).p.empty() ? n : n+"_"+(*app).p, (*app).inst, lib))
+                    KEXCEPTION("Depedency Project lib not found, try building: ") << (*app).buildDir().real();
+            }else{
+                if(!LibFinder::findAdd((*app).project().root()[NAME].Scalar(), (*app).buildDir(), lib))
+                    KEXCEPTION("Depedency Project lib not found, try building: ") << (*app).buildDir().real();
+            }
+        }
+    for(const auto& l : libs){
+        bool found = 0;
+        for(const auto& p : paths){
+            kul::Dir path(p);
+            if(!path) KEXCEPTION("Path does not exist: ") << pk.path();
+            found = LibFinder::findAdd(l, path, lib);
+            if(found) break;
+        }
+        if(!found) KOUT(NON) << "WARNING - Library not found during pack: " << l;
     }
 }
