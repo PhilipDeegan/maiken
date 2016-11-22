@@ -349,7 +349,7 @@ void maiken::Application::process() throw(kul::Exception){
                 app.mods.push_back(ModuleLoader::LOAD(*mod));
     };
 
-    auto proc = [&] (Application& app, bool work = 1) {
+    auto proc = [&] (Application& app, bool work) {
         kul::env::CWD(app.project().dir());
 
         if(work){
@@ -403,7 +403,7 @@ void maiken::Application::process() throw(kul::Exception){
         if((*app).ig) continue;
         proc(*app, !(*app).srcs.empty());
     }
-    if(!this->ig) proc(*this);
+    if(!this->ig) proc(*this, (!this->srcs.empty() || !this->main.empty()));
 
     if(cmds.count(PACK)){
         pack();
