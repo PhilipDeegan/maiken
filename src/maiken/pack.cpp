@@ -74,7 +74,6 @@ void maiken::Application::pack() throw(kul::Exception){
     kul::Dir lib(pk.join("lib"));
 
     if(!main.empty() || !srcs.empty()){
-        bool found = 0;
         const auto v((inst ? inst : buildDir()).files(0));
         if(v.empty()) KEXCEPTION("Current project lib/bin not found during pack");
         for(const auto& f : v) f.cp(main.size() ? bin : lib);

@@ -344,10 +344,15 @@ void maiken::Application::process() throw(kul::Exception){
     const kul::hash::set::String& phase(AppVars::INSTANCE().modulePhases());
 
     auto loadModules = [&] (Application& app) { 
+#ifndef _MKN_DISABLE_MODULES_
         if(phase.size())
             for(auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod)
                 app.mods.push_back(ModuleLoader::LOAD(*mod));
+#endif//_MKN_DISABLE_MODULES_
     };
+#ifdef _MKN_DISABLE_MODULES_
+    if(modDeps.size()) KOUT(ERR) << "Modules disabled in binary";
+#endif//_MKN_DISABLE_MODULES_
 
     auto proc = [&] (Application& app, bool work = 1) {
         kul::env::CWD(app.project().dir());

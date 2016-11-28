@@ -523,3 +523,9 @@ Key             _MKN_DISABLE_GIT_
 Type            flag
 Default         0
 Description     disables git
+
+Key             _MKN_DISABLE_MODULES_
+Type            flag
+Default         0
+Description     disables modules from executing at any point
+
