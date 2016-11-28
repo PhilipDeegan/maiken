@@ -235,15 +235,15 @@ Operations:
     - shared
         make nix
     - static
-        make nix LDFLAGS="-pthread -static"
+        make nix LDFLAGS="-pthread -ldl"
     WITH CLANG
         make nix CXX=clang++ 
     IF CLANG SECONDARY TO GCC
         LD_LIBRARY_PATH=<GCC_INSTALL>/lib64 make nix CXX=clang++ CXXFLAGS="-O2 -std=c++14 -Wall -I<GCC_INSTALL>/include/c++/5.2.0 -I<GCC_INSTALL>/include/c++/5.2.0/x86_64-unknown-linux-gnu" LDFLAGS="-L<GCC_INSTALL>/lib64" 
 
 Testing:
-    static : ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l -pthread
-    shared : ./mkn clean build -dtSa "-Os -std=c++14 -Wall -fPIC"
+    ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l "-pthread -ldl"
+    
 
 3.2.1 Mac/OSX
 
@@ -253,19 +253,17 @@ Operations:
     - make bsd CXX=clang++
 
 Testing:
-    static : ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l -pthread
-    shared : ./mkn clean build -dtSa "-Os -std=c++14 -Wall -fPIC"
+    ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l "-pthread -ldl"
 
 3.2.3 NetBSD
 
 Operations:
     - git clone http://www.github.com/Dekken/maiken.git maiken/master
     - cd maiken/master
-    - gmake bsd LDFLAGS="-pthread -lexecinfo"
+    - gmake bsd LDFLAGS="-pthread -ldl -lexecinfo"
 
 Operations:
-    static : ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l "-pthread -lexecinfo"
-    shared : ./mkn clean build -dtSa "-Os -std=c++14 -Wall -fPIC" -l -lexecinfo
+    ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l "-pthread -ldl -lexecinfo"
 
 3.2.3 FreeBSD
 
@@ -275,8 +273,7 @@ Operations:
     - gmake bsd CXXFLAGS="-std=c++14 -Os -Wall -D_GLIBCXX_USE_C99"
 
 Operations:
-    static : ./mkn clean build -dtKa "-Os -std=c++14 -Wall -D_GLIBCXX_USE_C99" -l -pthread
-    shared : ./mkn clean build -dtSa "-Os -std=c++14 -Wall -fPIC -D_GLIBCXX_USE_C99" 
+    ./mkn clean build -dtKa "-Os -std=c++14 -Wall -D_GLIBCXX_USE_C99" -l "-pthread -ldl" 
 
 
 4.1 Logging - 

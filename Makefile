@@ -19,7 +19,7 @@ INCS =  -Iinc \
 		-Iext/sparsehash/$(HASH_GIT)/google
 
 YAML = ext/yaml/$(YAML_GIT)/bin/libyaml.a
-LDFLAGS = -pthread
+LDFLAGS = -pthread -ldl
 LINKP= -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 
 EXE=mkn
