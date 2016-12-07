@@ -82,9 +82,16 @@ maiken::Application::~Application(){
 std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
     using namespace kul::cli;
 
+#ifdef _MKN_DISABLE_MODULES_
+    KOUT(NON) << "Warning: module functionality disabled";
+#endif//_MKN_DISABLE_MODULES_
+
     std::vector<Arg> argV { Arg('a', ARG    ,  ArgType::STRING), Arg('j', JARG   ,  ArgType::STRING),
                             Arg('l', LINKER ,  ArgType::STRING), Arg('L', ALINKER,  ArgType::STRING),
-                            Arg('d', MKN_DEP,  ArgType::MAYBE),  Arg('m', MKN_MOD,  ArgType::MAYBE),
+                            Arg('d', MKN_DEP,  ArgType::MAYBE),  
+#ifndef _MKN_DISABLE_MODULES_
+                            Arg('m', MKN_MOD,  ArgType::MAYBE),
+#endif//_MKN_DISABLE_MODULES_
                             Arg('E', ENV    ,  ArgType::STRING), Arg('p', PROFILE,  ArgType::STRING), 
                             Arg('P', PROPERTY, ArgType::STRING), Arg('t', THREADS,  ArgType::MAYBE),
                             Arg('u', SCM_UPDATE), Arg('U', SCM_FUPDATE), Arg('v', VERSION),    
@@ -93,11 +100,14 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
                             Arg('C', DIRECTORY, ArgType::STRING),
                             Arg('x', SETTINGS,  ArgType::STRING)};
     std::vector<Cmd> cmdV { Cmd(INIT),     Cmd(MKN_INC),   Cmd(MKN_SRC), 
-                            Cmd(MKN_MODS), Cmd(CLEAN),     Cmd(MKN_DEPS), 
-                            Cmd(BUILD),    Cmd(BUILD_ALL), Cmd(BUILD_MOD),
-                            Cmd(COMPILE),  Cmd(LINK),      Cmd(RUN),     
-                            Cmd(DBG),      Cmd(PACK),      Cmd(PROFILES), 
-                            Cmd(TRIM),     Cmd(INFO)};
+#ifndef _MKN_DISABLE_MODULES_
+                            Cmd(MKN_MODS), Cmd(BUILD_MOD),
+#endif//_MKN_DISABLE_MODULES_
+                            Cmd(CLEAN),    Cmd(MKN_DEPS), 
+                            Cmd(BUILD),    Cmd(BUILD_ALL), Cmd(RUN),
+                            Cmd(COMPILE),  Cmd(LINK),      Cmd(PROFILES), 
+                            Cmd(DBG),      Cmd(PACK),      Cmd(TRIM),     
+                            Cmd(INFO)};
     Args args(cmdV, argV);
     try{
         args.process(argc, argv);

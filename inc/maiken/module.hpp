@@ -33,7 +33,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "kul/os.hpp"
 #include "kul/log.hpp"
+
+#ifndef _MKN_DISABLE_MODULES_
 #include "kul/sys.hpp"
+#endif//_MKN_DISABLE_MODULES_
+
 
 #include "maiken/defs.hpp"
 
@@ -110,25 +114,42 @@ class Module{
 // };
 
 class GlobalModules;
-class KUL_PUBLISH ModuleLoader : public kul::sys::SharedClass<maiken::Module> {
+
+
+class KUL_PUBLISH ModuleLoader 
+#ifndef _MKN_DISABLE_MODULES_
+: public kul::sys::SharedClass<maiken::Module> 
+#endif//_MKN_DISABLE_MODULES_
+{
     friend class GlobalModules;
     private:
         bool loaded = 0;
         Module* p = nullptr;
 
-        static kul::File FIND(const Application& a) throw(kul::sys::Exception);
+        static kul::File FIND(const Application& a)
+#ifndef _MKN_DISABLE_MODULES_
+        throw(kul::sys::Exception)
+#endif//_MKN_DISABLE_MODULES_
+        ;
+
     public:
-        ModuleLoader(const Application& ap, const kul::File& f) throw(kul::sys::Exception) 
-            : kul::sys::SharedClass<maiken::Module>(f, "maiken_module_construct", "maiken_module_destruct") {
+        ModuleLoader(const Application& ap, const kul::File& f) 
+#ifndef _MKN_DISABLE_MODULES_
+               throw(kul::sys::Exception)  : kul::sys::SharedClass<maiken::Module>(f, "maiken_module_construct", "maiken_module_destruct") {
             construct(p);
             p->application(&ap);
+#else
+        {
+#endif//_MKN_DISABLE_MODULES_
             loaded = 1;
         }
         ~ModuleLoader(){
             if(loaded) KERR << "WARNING: ModuleLoader not unloaded, possible memory leak";
         }
         void unload(){
+#ifndef _MKN_DISABLE_MODULES_
             if(loaded) destruct(p);
+#endif//_MKN_DISABLE_MODULES_
             loaded = 0;
         }
         Module* module(){
@@ -138,17 +159,25 @@ class KUL_PUBLISH ModuleLoader : public kul::sys::SharedClass<maiken::Module> {
             return p->app;
         }
 
-        static std::shared_ptr<ModuleLoader> LOAD(const Application& ap) throw(kul::sys::Exception);
+        static std::shared_ptr<ModuleLoader> LOAD(const Application& ap) 
+#ifndef _MKN_DISABLE_MODULES_
+        throw(kul::sys::Exception)
+#endif//_MKN_DISABLE_MODULES_
+        ;
+
+        
 };
 
 class GlobalModules{
     friend class ModuleLoader;
     private:
-        kul::hash::map::S2T<std::shared_ptr<kul::sys::SharedLibrary>> libs;
         static GlobalModules& INSTANCE(){
             static GlobalModules i;
             return i;
         }
+#ifndef _MKN_DISABLE_MODULES_
+        kul::hash::map::S2T<std::shared_ptr<kul::sys::SharedLibrary>> libs;
+
         ~GlobalModules(){
             libs.clear();
         }
@@ -164,6 +193,9 @@ class GlobalModules{
                 );
             }
         }
+#else
+        void load(const Application& ap){}
+#endif//_MKN_DISABLE_MODULES_
 };
 
 
