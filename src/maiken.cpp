@@ -312,6 +312,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
 class CSM{ // CommandStateMachine
     friend class maiken::Application;
     private:
+        bool _main = 1;
         kul::hash::set::String cmds;
         CSM(){
             reset();
@@ -330,6 +331,12 @@ class CSM{ // CommandStateMachine
         }
         const kul::hash::set::String& commands(){
             return cmds;
+        }
+        void main(bool m){
+            _main = m;
+        }
+        bool main(){
+            return _main;
         }
 };
 
@@ -407,7 +414,9 @@ void maiken::Application::process() throw(kul::Exception){
     if(cmds.count(BUILD_ALL) || cmds.count(BUILD_MOD)){
         auto _mods = ModuleMinimiser::INSTANCE().modules(*this);
         if(_mods.size() && !cmds.count(BUILD_ALL)) CSM::INSTANCE().add(BUILD);
+        CSM::INSTANCE().main(0);
         for(auto& m : _mods) m.second.process();
+        CSM::INSTANCE().main(1);
     }
     
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
@@ -426,7 +435,7 @@ void maiken::Application::process() throw(kul::Exception){
             for(auto& modLoader : mods)
                 modLoader->module()->pack(*this, modLoader->app()->modPArg);
     }
-    if(cmds.count(RUN) || cmds.count(DBG)) run(cmds.count(DBG));
+    if(CSM::INSTANCE().main() && (cmds.count(RUN) || cmds.count(DBG))) run(cmds.count(DBG));
     CSM::INSTANCE().reset();
 }
 
