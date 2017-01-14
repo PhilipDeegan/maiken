@@ -28,10 +28,26 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "kul/code/compilers.hpp"
-#include "maiken/settings.hpp"
+#include "maiken.hpp"
 
 std::unique_ptr<maiken::Settings> maiken::Settings::instance;
+
+namespace maiken { 
+class SuperSettings{
+    friend class maiken::Settings;
+    private:
+        kul::hash::set::String files;
+        static SuperSettings& INSTANCE(){
+            static SuperSettings instance;
+            return instance;
+        }
+        void cycleCheck(const std::string& file) throw (maiken::SettingsException){
+            if(files.count(file))
+                KEXCEPT(maiken::SettingsException, "Super cycle detected in file: " + file);
+            files.insert(file);
+        }
+};
+}
 
 maiken::Settings::Settings(const std::string& s) : kul::yaml::File(s){
     if(root()[LOCAL] && root()[LOCAL][REPO]){
@@ -56,14 +72,26 @@ maiken::Settings::Settings(const std::string& s) : kul::yaml::File(s){
             rms.push_back(s);
     }
 
-    // if(root()[SUPER]){
-    //     kul::File f(root()[SUPER].Scalar());
-    //     if(!f) KEXCEPT(SettingsException, "Super in settings does not exist\n"+file());
-    // }
+    if(root()[SUPER]){
+        kul::File f(RESOLVE(root()[SUPER].Scalar()));
+        if(!f) KEXCEPT(SettingsException, "super file not found\n"+file());
+        if(f.real() == kul::File(file()).real())
+            KEXCEPT(SettingsException, "super cannot reference itself\n"+file());
+        SuperSettings::INSTANCE().cycleCheck(f.real());
+        sup = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
+        for(const auto& p : sup->properties()) 
+            if(!ps.count(p.first)) ps.insert(p.first, p.second);
+    }
     if(root()[COMPILER] && root()[COMPILER][MASK])
-        for(const auto& k : kul::code::Compilers::INSTANCE().keys())
-            for(const auto& m : root()[COMPILER][MASK][k])
-                kul::code::Compilers::INSTANCE().addMask(m.Scalar(), k);
+        for(const auto& k : kul::code::Compilers::INSTANCE().keys()){
+            KLOG(INF) << k;
+            if(root()[COMPILER][MASK][k])
+                for(const auto& s : kul::String::SPLIT(root()[COMPILER][MASK][k].Scalar(), ' ')){
+                    kul::code::Compilers::INSTANCE().addMask(s, k);
+                    KLOG(INF) << s;
+                }
+        }
+    resolveProperties();
 }
 
 maiken::Settings& maiken::Settings::INSTANCE(){
@@ -76,19 +104,26 @@ maiken::Settings& maiken::Settings::INSTANCE(){
     return *instance.get();
 }
 
+std::string maiken::Settings::RESOLVE(const std::string& s){
+    std::vector<kul::File> pos {
+        kul::File(s),
+        kul::File(s+".yaml"),
+        kul::File(s, kul::user::home("maiken")),        
+        kul::File(s+".yaml", kul::user::home("maiken"))
+    };
+
+    for(const auto& f : pos) if(f.is()) return f.real();
+
+    return "";
+}
+
 bool maiken::Settings::SET(const std::string& s){
-    if(kul::File(s).is())           instance = std::make_unique<Settings>(s);
-    else
-    if(kul::File(s+".yaml").is())   instance = std::make_unique<Settings>(s+".yaml");
-    else
-    if(kul::File(s, kul::user::home("maiken")).is())
-        instance = std::make_unique<Settings>(kul::user::home("maiken").join(s));
-    else
-    if(kul::File(s+".yaml", kul::user::home("maiken")).is())
-        instance = std::make_unique<Settings>(kul::user::home("maiken").join(s+".yaml"));
-    else
-        return 0;
-    return 1;
+    std::string file(RESOLVE(s));
+    if(s.size()){
+        instance = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(s));
+        return 1;
+    }
+    return 0;
 }
 
 const kul::yaml::Validator maiken::Settings::validator() const{
@@ -96,7 +131,7 @@ const kul::yaml::Validator maiken::Settings::validator() const{
 
     std::vector<NodeValidator> masks;
     for(const auto& s : kul::code::Compilers::INSTANCE().keys())
-        masks.push_back(NodeValidator(s, {}, 0, NodeType::LIST));
+        masks.push_back(NodeValidator(s, {}, 0, NodeType::STRING));
 
     NodeValidator compiler("compiler", {
         NodeValidator("mask", masks, 0, NodeType::MAP)
@@ -104,6 +139,7 @@ const kul::yaml::Validator maiken::Settings::validator() const{
 
     return Validator({
         NodeValidator("super"),
+        NodeValidator("property",  {NodeValidator("*")}, 0, NodeType::MAP),
         NodeValidator("inc"),
         NodeValidator("path"),
         NodeValidator("local", {

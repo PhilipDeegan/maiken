@@ -47,22 +47,28 @@ class SettingsException : public kul::Exception{
 class Settings : public kul::yaml::File, public Constants{
     private:
         std::vector<std::string> rrs, rms;
+        std::unique_ptr<Settings> sup;
+        kul::hash::map::S2S ps;
+
+        void resolveProperties();
+
         static std::unique_ptr<Settings> instance;
-        std::unique_ptr<Settings> supe;
         static void write(const kul::File& f);
     public:
         Settings(const std::string& s);
 
         const Settings* super() const{
-            return supe ? supe.get() : 0;
+            return sup.get();
         }
 
         const kul::yaml::Validator validator() const;
         const std::vector<std::string>& remoteModules() const { return rms; }
         const std::vector<std::string>& remoteRepos()   const { return rrs; }
+        const kul::hash::map::S2S&      properties()    const { return ps;}
 
         static Settings& INSTANCE();
         static bool SET(const std::string& s);
+        static std::string RESOLVE(const std::string& s);
 };
 
 }

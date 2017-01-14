@@ -31,10 +31,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 void maiken::Application::resolveProperties(){
-    ps.setDeletedKey("PLEASE");
+    ps.setDeletedKey("--DELETED--");
     for(YAML::const_iterator it=project().root()[PROPERTY].begin();it!=project().root()[PROPERTY].end(); ++it)
         ps[it->first.as<std::string>()] = it->second.as<std::string>();
     for(YAML::const_iterator it=project().root()[PROPERTY].begin();it!=project().root()[PROPERTY].end(); ++it) {
+        std::string s = Properties::RESOLVE(*this, it->second.as<std::string>());
+        if(ps.count(it->first.as<std::string>())) ps.erase(it->first.as<std::string>());
+        ps[it->first.as<std::string>()] = s;
+    }
+}
+
+void maiken::Settings::resolveProperties(){
+    ps.setDeletedKey("--DELETED--");
+    for(YAML::const_iterator it = root()[PROPERTY].begin(); it != root()[PROPERTY].end(); ++it)
+        ps[it->first.as<std::string>()] = it->second.as<std::string>();
+    for(YAML::const_iterator it = root()[PROPERTY].begin(); it != root()[PROPERTY].end(); ++it) {
         std::string s = Properties::RESOLVE(*this, it->second.as<std::string>());
         if(ps.count(it->first.as<std::string>())) ps.erase(it->first.as<std::string>());
         ps[it->first.as<std::string>()] = s;
@@ -82,7 +93,22 @@ std::string maiken::Properties::RESOLVE(const Application& app, const std::strin
     return r;
 }
 
-std::string maiken::Properties::RESOLVE(const Settings& app, const std::string& s){
+std::string maiken::Properties::RESOLVE(const Settings& set, const std::string& s){
+    std::string r = s;
+    std::shared_ptr<std::tuple<std::string, int, int>> t = KEY(set.properties(), s);
+    if(t){
+        std::string k  = std::get<0>(*t);
+        const int&  lb = std::get<1>(*t);
+        const int&  rb = std::get<2>(*t);
 
-    return s;
+        if(AppVars::INSTANCE().properkeys().count(k))
+            k = (*AppVars::INSTANCE().properkeys().find(k)).second;
+        else
+        if(set.properties().count(k) > 0)
+            k = (*set.properties().find(k)).second;
+        else KEXCEPT(Exception, "Property : '" + k + "' has not been defined");
+        r = Properties::RESOLVE(set, r.substr(0, lb) + k + r.substr(rb + 1));
+    }
+    kul::String::TRIM(r);
+    return r;
 }

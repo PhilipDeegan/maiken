@@ -192,8 +192,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
 
     auto splitArgs = [](const std::string& s, const std::string& t, const std::function<void(const std::string&, const std::string&)>& f){
         for(const auto& p : kul::String::ESC_SPLIT(s, ',')){
-            std::vector<std::string> ps;
-            kul::String::ESC_SPLIT(p, '=', ps);
+            std::vector<std::string> ps = kul::String::ESC_SPLIT(p, '=');
             if(ps.size() > 2) KEXCEPTION(t + " override invalid, escape extra \"=\"");
             f(ps[0], ps[1]);
         }
@@ -463,12 +462,14 @@ void maiken::Application::setup(){
 
     using namespace kul::cli;
     for(const YAML::Node& c : Settings::INSTANCE().root()[ENV]){
-        EnvVarMode mode = EnvVarMode::APPE;
+        EnvVarMode mode = EnvVarMode::PREP;
         if      (c[MODE].Scalar().compare(APPEND)   == 0) mode = EnvVarMode::APPE;
         else if (c[MODE].Scalar().compare(PREPEND)  == 0) mode = EnvVarMode::PREP;
         else if (c[MODE].Scalar().compare(REPLACE)  == 0) mode = EnvVarMode::REPL;
-        else KEXCEPT(Exception, "Unhandled EnvVar mode: " + c[MODE].Scalar());
-        evs.push_back(EnvVar(c[NAME].Scalar(), c[VALUE].Scalar(), mode));
+        evs.emplace_back(
+            c[NAME].Scalar(),
+            Properties::RESOLVE(*this, c[VALUE].Scalar()),
+            mode);
     }
 
     bool c = 1;
@@ -521,19 +522,26 @@ void maiken::Application::setup(){
     }
 
     if(Settings::INSTANCE().root()[MKN_INC])
-        for(const auto& s : kul::cli::asArgs(Settings::INSTANCE().root()[MKN_INC].Scalar()))
-            if(s.size()){
-                kul::Dir d(Properties::RESOLVE(*this, s));
-                if(d) incs.push_back(std::make_pair(d.real(), false));
-                else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+Settings::INSTANCE().file());
-            }
+        for(const auto& l : kul::String::LINES(Settings::INSTANCE().root()[MKN_INC].Scalar()))
+            for(const auto& s : kul::cli::asArgs(l))
+                if(s.size()){
+                    kul::Dir d(Properties::RESOLVE(*this, s));
+                    if(d) incs.push_back(std::make_pair(d.real(), false));
+                    else  KEXCEPTION("include does not exist\n")
+                        << d.path() << "\n"
+                        << Settings::INSTANCE().file();
+                }
     if(Settings::INSTANCE().root()[PATH])
-        for(const auto& s : kul::cli::asArgs(Settings::INSTANCE().root()[PATH].Scalar()))
-            if(s.size()){
-                kul::Dir d(Properties::RESOLVE(*this, s));
-                if(d) paths.push_back(d.escr());
-                else  KEXCEPTION("library path does not exist\n"+d.path()+"\n"+Settings::INSTANCE().file());
-            }
+        for(const auto& l : kul::String::LINES(Settings::INSTANCE().root()[PATH].Scalar()))
+            for(const auto& s : kul::cli::asArgs(l))
+                if(s.size()){
+                    kul::Dir d(Properties::RESOLVE(*this, s));
+                    if(d) paths.push_back(d.escr());
+                    else  
+                        KEXCEPTION("library path does not exist\n")
+                            << d.path() << "\n"
+                            << Settings::INSTANCE().file();
+                }
 
     this->populateMapsFromDependencies();
     this->populateMapsFromModules();
@@ -542,7 +550,7 @@ void maiken::Application::setup(){
         for(const std::string& s : fileStrings)
             for(const auto& t : kul::String::SPLIT(c[TYPE].Scalar(), ':'))
                 if(fs[t].count(s) == 0 && c[s])
-                    fs[t].insert(s, c[s].Scalar());
+                    fs[t].insert(s, Properties::RESOLVE(*this, c[s].Scalar()));
 
     this->postSetupValidation();
     profile = p.size() ? p : project().root()[NAME].Scalar();
@@ -795,14 +803,16 @@ void maiken::Application::trim(const kul::File& f){
 void maiken::Application::populateMaps(const YAML::Node& n){ //IS EITHER ROOT OR PROFILE NODE!
     using namespace kul::cli;
     for(const auto& c : n[ENV]){
-        EnvVarMode mode = EnvVarMode::APPE;
+        EnvVarMode mode = EnvVarMode::PREP;
         if      (c[MODE].Scalar().compare(APPEND)   == 0) mode = EnvVarMode::APPE;
         else if (c[MODE].Scalar().compare(PREPEND)  == 0) mode = EnvVarMode::PREP;
         else if (c[MODE].Scalar().compare(REPLACE)  == 0) mode = EnvVarMode::REPL;
-        else KEXCEPTION("Unhandled EnvVar mode: " + c[MODE].Scalar());
         evs.erase(std::remove_if(evs.begin(), evs.end(),
             [&c](const EnvVar& ev) {return ev.name() == c[NAME].Scalar();}), evs.end());
-        evs.push_back(EnvVar(c[NAME].Scalar(), c[VALUE].Scalar(), mode));
+        evs.emplace_back(
+            c[NAME].Scalar(), 
+            Properties::RESOLVE(*this, c[VALUE].Scalar()), 
+            mode);
     }
     for(const auto& p : AppVars::INSTANCE().envVars()){
         evs.erase(std::remove_if(evs.begin(), evs.end(),
@@ -931,6 +941,23 @@ void maiken::Application::loadTimeStamps() throw (kul::StringException){
     }
 }
 
+namespace maiken { 
+class SuperApplications{
+    friend class maiken::Application;
+    private:
+        kul::hash::set::String files;
+        static SuperApplications& INSTANCE(){
+            static SuperApplications instance;
+            return instance;
+        }
+        void cycleCheck(const std::string& file) throw (maiken::SettingsException){
+            if(files.count(file))
+                KEXCEPT(maiken::SettingsException, "Super cycle detected in file: " + file);
+            files.insert(file);
+        }
+};
+}
+
 void maiken::Application::setSuper(Application* app){
     if(sup.get()) return;
     if(project().root()[SUPER]){
@@ -941,6 +968,7 @@ void maiken::Application::setSuper(Application* app){
         std::string super(d.real());
         if(super == project().dir().real())
             KEXCEPTION("Super cannot reference itself: " + project().dir().real());
+        SuperApplications::INSTANCE().cycleCheck(super);
         Application* f = 0;
         for(auto* p : AppRecorder::INSTANCE().apps){
             if(p && p->project().dir().path() == super){
@@ -962,4 +990,6 @@ void maiken::Application::setSuper(Application* app){
         for(const auto& p : sup->properties()) if(!ps.count(p.first)) ps.insert(p.first, p.second);
         kul::env::CWD(cwd);
     }
+    for(const auto& p : Settings::INSTANCE().properties()) 
+        if(!ps.count(p.first)) ps.insert(p.first, p.second);
 }

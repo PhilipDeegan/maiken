@@ -41,7 +41,6 @@ main: cpp.cpp
 2.1.2 Library
 
 name: lib_project
-lang: cpp
 src: ./src
 
 
@@ -52,7 +51,8 @@ Values which allow property resolution are marked with ${aaa}
 name: name 
 version: version
 scm: string                         # Appended to remote URLs for lookup if non concrete URL, used if concrete
-parent: $directory                  # Inherit properties of project at directory, super (..) or sub directory advisable
+super: $directory                   # Inherit properties of project at directory, super (..) or sub directory advisable
+parent: $directory                  # See profile inheritence @ 2.2.4
 property:                                     
   - aaa: AAA
     bbb: ${aaa}.BBB
@@ -66,7 +66,8 @@ dep:
     scm: ${aaa}                     # Appended to remote URLs for lookup if non concrete URL, used if concrete
     local: ${aaa}                   # overrides local repository directory
 main: <file>
-arg: -DTHIS_PROFILE ${aaa}
+arg: -DTHIS_PROFILE ${aaa}          # Optional additional compiler arguments
+link: ${aaa}                        # Optional additional linker arguments, applied to end
 if_arg:                             # optional arguments if case is true
     shared: ${aaa}                  # Add arguments to compilation if mode is shared
     static: ${aaa}                  # Add arguments to compilation if mode is static
@@ -101,8 +102,8 @@ if_lib:                         # optional libraries if case is true
     win: ${aaa}
 env:
   - name: name
-    mode: prepend/append/replace
-    value: value
+    mode: prepend/append/replace    # optional default is prepend
+    value: ${aaa}
 profiles:
   - name: a
     inc: | 
@@ -166,7 +167,7 @@ profiles:
     
 2.2.1.4 Compiler deduction
 
-Compiler binares are expected to have their default names e.g. gcc/gcc.exe/cl.exe. This only applies to compilers and not archivers or linkers.
+Compiler binares are expected to have their default names e.g. gcc/gcc.exe/cl.exe. This only applies to compilers and not archivers or linkers. Compiler masking is provided to use alternate compiler binaries with the same functionality as the underlying compiler.  
 
 
 2.2.2 Properties
@@ -282,6 +283,8 @@ Operations:
 KLOG=1    - turns on INFO logging to std out
 KLOG=2    - turns on ERROR logging to std out
 KLOG=3    - turns on DEBUG logging to std out
+KLOG=4    - turns on OTHER logging to std out
+KLOG=5    - turns on TRACE logging to std out
 
 4.2 Activating Logging
 
@@ -302,18 +305,14 @@ The settings file is the default global configuration for projects.
 
 4.3.1 schema
 
-inc: <directory> <directory>            # Optional, add include directories compiling 
-path: <directory> <directory>           # Optional, add library path directories linking
+super: $directory                   # Inherit properties of project at directory, super (..) or sub directory advisable
+parent: $directory                  # See profile inheritence @ 2.2.4
 
-file:                                   # Must include at least one item in list
-  - type: c:cpp:cxx                     # Sources won't be compiled if the filetype is missing
-    archiver: archiver                  # Archiver is not used for C#
-    compiler: compiler
-    linker:   linker    
-env:                                    # Optional
-  - name: name
-    mode: prepend/append/replace
-    value: value
+
+property:                                     
+  - aaa: AAA
+    bbb: ${aaa}.BBB
+
 local:
     repo: <directory>                   # Optional, missing assumed ${4.3.2}/repo
     bin:  <directory>                   # Optional, successfully linked binaries are moved to <directory>, overrides install
@@ -321,6 +320,27 @@ local:
     debugger: <debug command>           # Optional debug command, overrides defaut, overriden by env var MKN_DBG string
 remote:
     repo: URL_ROOTA URL_ROOTB           # Optional, overrides switch _MKN_REMOTE_REPO_ for incomplete SCM URL lookups
+
+inc: <directory> <directory>            # Optional, add include directories compiling 
+path: <directory> <directory>           # Optional, add library path directories linking
+
+env:                                    # Optional
+  - name: name
+    mode: prepend/append/replace        # Optional default prepend
+    value: value
+
+compiler:
+    mask:                               # To use a compiler binary with a name other than the default
+        cl: $var_cl                     # masking is provided to alter the command line call
+        gcc: $var_gcc                   # while using the same functionality as the mask key
+                                        # e.g. gcc: gcc-armhf would allow the compiler tag to contain 
+                                        # gcc-armhf instead of just "gcc" 
+
+file:                                   # Must include at least one item in list
+  - type: c:cpp:cxx                     # Sources won't be compiled if the filetype is missing
+    archiver: ${aaa}                    # Archiver is not used for C#
+    compiler: ${aaa}
+    linker:   ${aaa}    
 
 4.3.2 Location
     - Linux   -    ~/.maiken/settings.yaml

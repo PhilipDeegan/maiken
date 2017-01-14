@@ -30,16 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-// void maiken::Application::build() throw(kul::Exception){
-//     showConfig();
-//     const std::vector<std::string>& objects = this->compile();
-//     if(objects.size() > 0){
-//         buildDir().mk();
-//         if(!main.empty())   buildExecutable(objects);
-//         else                buildLibrary(objects);
-//     }
-// }
-
 void maiken::Application::link() throw(kul::Exception){
     showConfig();
     std::vector<std::string> objects;
