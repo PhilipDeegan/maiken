@@ -584,8 +584,7 @@ void maiken::Application::setup(){
             size_t maxI = 0, maxO = 0;
             for(const auto& ft : srcMM) mapS.insert(ft.first, 0);
             for(const auto& ft : srcMM)
-                for(const auto& files : ft.second)
-                    mapS[ft.first] += mapS[ft.first]+1;
+                mapS[ft.first] = mapS[ft.first] + ft.second.size();
             for(const auto& s_i : mapS)
                 if(s_i.second > maxI){
                     maxI = s_i.second;

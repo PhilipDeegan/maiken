@@ -83,14 +83,11 @@ maiken::Settings::Settings(const std::string& s) : kul::yaml::File(s){
             if(!ps.count(p.first)) ps.insert(p.first, p.second);
     }
     if(root()[COMPILER] && root()[COMPILER][MASK])
-        for(const auto& k : kul::code::Compilers::INSTANCE().keys()){
-            KLOG(INF) << k;
+        for(const auto& k : kul::code::Compilers::INSTANCE().keys())
             if(root()[COMPILER][MASK][k])
-                for(const auto& s : kul::String::SPLIT(root()[COMPILER][MASK][k].Scalar(), ' ')){
+                for(const auto& s : kul::String::SPLIT(root()[COMPILER][MASK][k].Scalar(), ' '))
                     kul::code::Compilers::INSTANCE().addMask(s, k);
-                    KLOG(INF) << s;
-                }
-        }
+
     resolveProperties();
 }
 
@@ -111,16 +108,17 @@ std::string maiken::Settings::RESOLVE(const std::string& s){
         kul::File(s, kul::user::home("maiken")),        
         kul::File(s+".yaml", kul::user::home("maiken"))
     };
-
-    for(const auto& f : pos) if(f.is()) return f.real();
+    for(const auto& f : pos)
+        if(f.is())
+            return f.real();
 
     return "";
 }
 
 bool maiken::Settings::SET(const std::string& s){
     std::string file(RESOLVE(s));
-    if(s.size()){
-        instance = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(s));
+    if(file.size()){
+        instance = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(file));
         return 1;
     }
     return 0;
