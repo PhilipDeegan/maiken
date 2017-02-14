@@ -83,8 +83,8 @@ std::string maiken::Properties::RESOLVE(const Application& app, const std::strin
             k = (*AppVars::INSTANCE().properkeys().find(k)).second;
         else
         if(app.properties().count(k) == 0){
-            if(app.project().root()[VERSION] && app.project().root()[VERSION].Type() == 2)
-                k = app.project().root()[VERSION].Scalar();
+            if(app.project().root()[k] && app.project().root()[k].Type() == 2)
+                k = app.project().root()[k].Scalar();
             else KEXCEPT(Exception, "Property : '" + k + "' has not been defined");
         }else k = (*app.properties().find(k)).second;
         r = Properties::RESOLVE(app, r.substr(0, lb) + k + r.substr(rb + 1));
