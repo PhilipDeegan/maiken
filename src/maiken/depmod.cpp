@@ -97,7 +97,7 @@ void maiken::Application::popDepOrMod(
                 f = true; break;
             }
         if(f) continue;
-        const maiken::Project c(maiken::Project::CREATE(projectDir));
+        const maiken::Project& c(*maiken::Projects::INSTANCE().getOrCreate(projectDir));
 
         if(depOrMod[PROFILE]){
             for(auto s : kul::String::SPLIT(Properties::RESOLVE(*this, depOrMod[PROFILE].Scalar()), ' ')){

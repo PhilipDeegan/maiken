@@ -67,7 +67,7 @@ class ModuleMinimiser{
 
 struct noop_deleter { void operator ()(void *) {} };
 
-maiken::Application::Application(const maiken::Project& proj, const std::string profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){
+maiken::Application::Application(const maiken::Project& proj, const std::string& profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){
     AppRecorder::INSTANCE().apps.push_back(this);
 }
 maiken::Application::Application(const maiken::Project& proj) : m(kul::code::Mode::NONE), proj(proj){
@@ -157,7 +157,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
         if(!d) KEXCEPTION("DIRECTORY DOES NOT EXIST: " + args.get(DIRECTORY));
         kul::env::CWD(args.get(DIRECTORY));
     }
-    Project project(Project::CREATE());
+    const Project& project(*Projects::INSTANCE().getOrCreate(kul::env::CWD()));
     std::string profile;
     if(args.has(PROFILE)){
         profile = args.get(PROFILE);
@@ -441,7 +441,7 @@ void maiken::Application::process() throw(kul::Exception){
 void maiken::Application::setup(){
     if(AppVars::INSTANCE().update() || AppVars::INSTANCE().fupdate()) {
         scmUpdate(AppVars::INSTANCE().fupdate());
-        proj.reload();
+        Projects::INSTANCE().reload(proj);
     }
     if(scr.empty()) scr = project().root()[NAME].Scalar();
 
@@ -981,7 +981,7 @@ void maiken::Application::setSuper(Application* app){
         if(app && app->project().dir().real() == d.real())
             sup = std::shared_ptr<Application>(app, noop_deleter());
         else{
-            sup = std::make_shared<Application>(maiken::Project::CREATE(d), "");
+            sup = std::make_shared<Application>(*maiken::Projects::INSTANCE().getOrCreate(d), "");
             kul::env::CWD(d.real());
             sup->setSuper(app ? app : this);
             sup->setup();

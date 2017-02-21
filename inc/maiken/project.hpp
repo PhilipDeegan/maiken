@@ -46,25 +46,55 @@ class ProjectException : public kul::Exception{
         ProjectException(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
 };
 
+class Projects;
 class KUL_PUBLISH Project : public kul::yaml::File, public Constants{
+    friend class Projects;
     private:
-        const kul::Dir d;
+        const kul::Dir m_dir;
     protected:      
-        Project(const kul::Dir d) : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml")), d(d.real()){}
     public: 
-        Project(const Project& p) : kul::yaml::File(p), d(p.d){}
-        const kul::Dir&   dir() const { return d; }
+        Project(const kul::Dir& d) : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml")), m_dir(d.real()){}
+        Project(const Project& p) : kul::yaml::File(p), m_dir(p.m_dir){}
+        const kul::Dir&   dir() const { return m_dir; }
         const kul::yaml::Validator validator() const;
-        static Project CREATE(const kul::Dir& d){
-            kul::File f("mkn.yaml", d);
-            if(!f.is()) KEXCEPT(ProjectException, "project file does not exist:\n" + f.full());
-            return kul::yaml::File::CREATE<Project>(d.path());
-        }
-        static Project CREATE(){
-            return Project::CREATE(kul::Dir(kul::env::CWD()));
-        }
         friend class maiken::Application;
         friend class kul::yaml::File;
+};
+
+class KUL_PUBLISH Projects{
+    private:
+        std::vector<std::unique_ptr<Project>> m_pps;
+        kul::hash::set::String m_reloaded;
+        kul::hash::map::S2T<Project*> m_projects;
+
+    public:
+        static Projects& INSTANCE(){
+            static Projects p;
+            return p;
+        }
+        const Project* getOrCreate(const kul::Dir& d){
+            if(!d) KEXCEPT(ProjectException, "Directory does not exist:\n" + d.path());
+            if(!m_projects.count(d.real())){
+                kul::File f("mkn.yaml", d);
+                if(!f.is()) KEXCEPT(ProjectException, "project file does not exist:\n" + f.full());
+                auto project = std::make_unique<Project>(d);
+                try{
+                    kul::yaml::Item::VALIDATE(project->root(), project->validator().children());
+                }catch(const kul::yaml::Exception& e){
+                    KEXCEPT(ProjectException, "YAML error encountered in file: " + f.real());
+                }
+                auto pp = project.get();
+                m_pps.push_back(std::move(project));
+                m_projects.insert(d.real(), pp);
+            }
+            return m_projects[d.real()];
+        }
+        void reload(const Project& proj){
+            if(!m_reloaded.count(proj.file())){
+                m_projects[proj.file()]->reload();
+                m_reloaded.insert(proj.file());
+            }
+        }
 };
 
 class NewProject{

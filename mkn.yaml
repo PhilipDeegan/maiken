@@ -5,8 +5,8 @@ version: master
 scm: https://github.com/dekken/maiken
 
 property:
-    DATE: 30-12-2016
-    mkn_profile: "@" # change to "c++0x" for < c++11
+    DATE: 22-02-2017
+    mkn.kul.profile: "@" # change to "c++0x" for < c++11
 
 parent: base
 mode: none
@@ -17,7 +17,7 @@ profile:
     dep: 
       - name: mkn.kul
         version: master
-        profile: ${mkn_profile}
+        profile: ${mkn.kul.profile}
       - name: parse.yaml
         version: master
     src: ./src
@@ -39,7 +39,7 @@ profile:
     dep: 
       - name: mkn.kul
         version: master
-        profile: ${mkn_profile}
+        profile: ${mkn.kul.profile}
       - name: parse.yaml
         version: master
         profile: cmn

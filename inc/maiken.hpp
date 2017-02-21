@@ -156,7 +156,7 @@ class KUL_PUBLISH Application : public Constants{
         const std::string p;
         kul::Dir bd, inst;
         YAML::Node modCArg, modLArg, modPArg;
-        maiken::Project proj;
+        const maiken::Project& proj;
         kul::hash::map::S2T<kul::hash::map::S2S> fs;
         kul::hash::map::S2S includeStamps, itss, ps;
         kul::hash::map::S2T<kul::hash::set::String> args;
@@ -226,7 +226,7 @@ class KUL_PUBLISH Application : public Constants{
 
         static void showHelp();
     public:
-        Application(const maiken::Project& proj, const std::string profile);// : m(kul::code::Mode::NONE), p(profile), proj(proj){}
+        Application(const maiken::Project& proj, const std::string& profile);// : m(kul::code::Mode::NONE), p(profile), proj(proj){}
         Application(const maiken::Project& proj); // : m(kul::code::Mode::NONE), proj(proj);//{}
         ~Application();
 
