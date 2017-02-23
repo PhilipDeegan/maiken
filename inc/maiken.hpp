@@ -150,7 +150,7 @@ class KUL_PUBLISH Application : public Constants{
     protected:
         bool ig = 1, isMod = 0;
         const Application* par = 0;
-        std::shared_ptr<Application> sup;
+        Application* sup;
         kul::code::Mode m;
         std::string arg, main, lang, lnk, scr, scv;
         const std::string p;
@@ -192,7 +192,7 @@ class KUL_PUBLISH Application : public Constants{
         void scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo) throw(kul::scm::Exception);
 
         void setup();
-        void setSuper(Application* app);
+        void setSuper();
         void showConfig(bool force = 0);
         void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception);
         void showProfiles();
@@ -226,8 +226,7 @@ class KUL_PUBLISH Application : public Constants{
 
         static void showHelp();
     public:
-        Application(const maiken::Project& proj, const std::string& profile);// : m(kul::code::Mode::NONE), p(profile), proj(proj){}
-        Application(const maiken::Project& proj); // : m(kul::code::Mode::NONE), proj(proj);//{}
+        Application(const maiken::Project& proj, const std::string& profile = "");// : m(kul::code::Mode::NONE), p(profile), proj(proj){}
         ~Application();
 
         virtual void                                       process()   throw(kul::Exception);
@@ -246,7 +245,31 @@ class KUL_PUBLISH Application : public Constants{
         const kul::hash::map::S2S&                         properties()          const { return ps;}
         const kul::hash::map::S2T<kul::hash::set::String>& arguments()           const { return args; }
 
-        static std::shared_ptr<Application> CREATE(int16_t argc, char *argv[]) throw(kul::Exception);
+        static Application& CREATE(int16_t argc, char *argv[]) throw(kul::Exception);
+};
+
+class Applications{
+
+    private:
+        kul::hash::map::S2T<kul::hash::map::S2T<Application*>> m_apps;
+        std::vector<std::unique_ptr<Application>> m_appPs;
+        Applications(){}
+    public:
+        static Applications& INSTANCE(){
+            static Applications a;
+            return a;
+        }
+        Application* getOrCreate(const maiken::Project& proj, const std::string& _profile = ""){
+            std::string pDir(proj.dir().real());
+            std::string profile = _profile.empty() ? "@" : _profile;
+            if(!m_apps.count(pDir) || !m_apps[pDir].count("profile")){
+                auto app = std::make_unique<Application>(proj, _profile);
+                auto pp = app.get();
+                m_appPs.push_back(std::move(app));
+                m_apps[pDir][profile] = pp;
+            }
+            return m_apps[pDir][profile];
+        }
 };
 
 class ThreadingCompiler : public Constants{

@@ -55,7 +55,7 @@ class KUL_PUBLISH Project : public kul::yaml::File, public Constants{
     public: 
         Project(const kul::Dir& d) : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml")), m_dir(d.real()){}
         Project(const Project& p) : kul::yaml::File(p), m_dir(p.m_dir){}
-        const kul::Dir&   dir() const { return m_dir; }
+        const kul::Dir& dir() const { return m_dir; }
         const kul::yaml::Validator validator() const;
         friend class maiken::Application;
         friend class kul::yaml::File;

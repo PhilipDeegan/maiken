@@ -113,14 +113,14 @@ void maiken::Application::popDepOrMod(
                     
                 if(!f && !s.empty()) 
                     KEXCEPTION("profile does not exist\n"+s+"\n"+project().dir().path());
-                Application app(c, s);
+                auto& app = *Applications::INSTANCE().getOrCreate(c, s);
                 app.par = this;
                 setApp(app, depOrMod);
                 vec.push_back(app);
                 apps.push_back(std::make_pair(app.project().dir().path(), app.p));
             }
         }else{
-            Application app(c, "");
+            auto& app = *Applications::INSTANCE().getOrCreate(c, "");
             app.par = this;
             setApp(app, depOrMod);
             vec.push_back(app);
@@ -129,7 +129,7 @@ void maiken::Application::popDepOrMod(
     }
     if(n[SELF])
         for(const auto& s : kul::String::SPLIT(Properties::RESOLVE(*this, n[SELF].Scalar()), ' ')){
-            Application app(project(), s);
+            auto& app = *Applications::INSTANCE().getOrCreate(project(), s);
             app.par = this;
             app.scr = scr;
             vec.push_back(app);
@@ -139,7 +139,6 @@ void maiken::Application::popDepOrMod(
     for(auto& app : vec){
         if(app.buildDir().path().size()) continue;
         kul::env::CWD(app.project().dir());
-        app.setSuper(this);
         app.setup();
         if(app.project().root()[SCM]) app.scr = Properties::RESOLVE(app, app.project().root()[SCM].Scalar());
         if(!app.sources().empty()){

@@ -32,17 +32,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken.hpp"
 
-class AppRecorder{
-    friend class maiken::Application;
-    private:
-        std::vector<maiken::Application*> apps;
-    public:
-        static AppRecorder& INSTANCE(){
-            static AppRecorder a;
-            return a;
-        } 
-};
-
 class ModuleMinimiser{
     friend class maiken::Application;
     private:
@@ -65,21 +54,14 @@ class ModuleMinimiser{
         }
 };
 
-struct noop_deleter { void operator ()(void *) {} };
-
 maiken::Application::Application(const maiken::Project& proj, const std::string& profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){
-    AppRecorder::INSTANCE().apps.push_back(this);
-}
-maiken::Application::Application(const maiken::Project& proj) : m(kul::code::Mode::NONE), proj(proj){
-    AppRecorder::INSTANCE().apps.push_back(this);
-}
-maiken::Application::~Application(){
-    auto& apps(AppRecorder::INSTANCE().apps);
-    apps.erase(std::remove(apps.begin(), apps.end(), this), apps.end());
-    for(auto& mod : mods) mod->unload();
+    KLOG(INF) << proj.dir().real() << " : " << profile;
 }
 
-std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
+maiken::Application::~Application(){
+}
+
+maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
     using namespace kul::cli;
 
 #ifdef _MKN_DISABLE_MODULES_
@@ -171,8 +153,8 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
     if(args.has(SETTINGS) && !Settings::SET(args.get(SETTINGS)))
         KEXCEPT(Exception, "Unable to set specific settings xml");
     else Settings::INSTANCE();
-    auto app = std::make_shared<Application>(project, profile);
-    auto& a = *app.get();
+    auto* app = Applications::INSTANCE().getOrCreate(project, profile);
+    auto& a = *app;
     if(args.has(PROFILES)){
         a.showProfiles();
         KEXIT(0, "");
@@ -217,7 +199,6 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
 
     AppVars::INSTANCE().dependencyString(args.has(MKN_DEP) ? &args.get(MKN_DEP) : 0);
 
-    a.setSuper(0);
     a.setup();
     a.buildDepVec(AppVars::INSTANCE().dependencyString());
 
@@ -304,7 +285,7 @@ std::shared_ptr<maiken::Application> maiken::Application::CREATE(int16_t argc, c
     if(args.has(TRIM))      AppVars::INSTANCE().command(TRIM);
     if(args.has(PACK))      AppVars::INSTANCE().command(PACK);
 
-    return app;
+    return *app;
 }
 
 
@@ -443,6 +424,7 @@ void maiken::Application::setup(){
         scmUpdate(AppVars::INSTANCE().fupdate());
         Projects::INSTANCE().reload(proj);
     }
+    setSuper();
     if(scr.empty()) scr = project().root()[NAME].Scalar();
 
     this->resolveProperties();
@@ -957,8 +939,8 @@ class SuperApplications{
 };
 }
 
-void maiken::Application::setSuper(Application* app){
-    if(sup.get()) return;
+void maiken::Application::setSuper(){
+    if(sup) return;
     if(project().root()[SUPER]){
         const std::string& cwd(kul::env::CWD());
         kul::env::CWD(project().dir().real());
@@ -968,24 +950,9 @@ void maiken::Application::setSuper(Application* app){
         if(super == project().dir().real())
             KEXCEPTION("Super cannot reference itself: " + project().dir().real());
         SuperApplications::INSTANCE().cycleCheck(super);
-        Application* f = 0;
-        for(auto* p : AppRecorder::INSTANCE().apps){
-            if(p && p->project().dir().path() == super){
-                f = p;
-                break;
-            }
-        }
-        if(f)
-            sup = std::shared_ptr<Application>(f, noop_deleter());
-        else
-        if(app && app->project().dir().real() == d.real())
-            sup = std::shared_ptr<Application>(app, noop_deleter());
-        else{
-            sup = std::make_shared<Application>(*maiken::Projects::INSTANCE().getOrCreate(d), "");
-            kul::env::CWD(d.real());
-            sup->setSuper(app ? app : this);
-            sup->setup();
-        }
+        d = kul::Dir(super);
+        sup = Applications::INSTANCE().getOrCreate(
+            *maiken::Projects::INSTANCE().getOrCreate(d), "");
         for(const auto& p : sup->properties()) if(!ps.count(p.first)) ps.insert(p.first, p.second);
         kul::env::CWD(cwd);
     }
