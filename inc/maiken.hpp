@@ -262,7 +262,7 @@ class Applications{
         Application* getOrCreate(const maiken::Project& proj, const std::string& _profile = ""){
             std::string pDir(proj.dir().real());
             std::string profile = _profile.empty() ? "@" : _profile;
-            if(!m_apps.count(pDir) || !m_apps[pDir].count("profile")){
+            if(!m_apps.count(pDir) || !m_apps[pDir].count(profile)){
                 auto app = std::make_unique<Application>(proj, _profile);
                 auto pp = app.get();
                 m_appPs.push_back(std::move(app));

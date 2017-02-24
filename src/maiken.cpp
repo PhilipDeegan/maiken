@@ -54,12 +54,10 @@ class ModuleMinimiser{
         }
 };
 
-maiken::Application::Application(const maiken::Project& proj, const std::string& profile) : m(kul::code::Mode::NONE), p(profile), proj(proj){
-    KLOG(INF) << proj.dir().real() << " : " << profile;
-}
+maiken::Application::Application(const maiken::Project& proj, const std::string& profile) 
+    : m(kul::code::Mode::NONE), p(profile), proj(proj){}
 
-maiken::Application::~Application(){
-}
+maiken::Application::~Application(){}
 
 maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
     using namespace kul::cli;
