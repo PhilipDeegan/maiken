@@ -74,9 +74,9 @@ class KUL_PUBLISH Projects{
         }
         const Project* getOrCreate(const kul::Dir& d){
             if(!d) KEXCEPT(ProjectException, "Directory does not exist:\n" + d.path());
+            kul::File f("mkn.yaml", d);
+            if(!f.is()) KEXCEPT(ProjectException, "project file does not exist:\n" + f.full());
             if(!m_projects.count(d.real())){
-                kul::File f("mkn.yaml", d);
-                if(!f.is()) KEXCEPT(ProjectException, "project file does not exist:\n" + f.full());
                 auto project = std::make_unique<Project>(d);
                 try{
                     kul::yaml::Item::VALIDATE(project->root(), project->validator().children());
@@ -85,9 +85,9 @@ class KUL_PUBLISH Projects{
                 }
                 auto pp = project.get();
                 m_pps.push_back(std::move(project));
-                m_projects.insert(d.real(), pp);
+                m_projects.insert(f.real(), pp);
             }
-            return m_projects[d.real()];
+            return m_projects[f.real()];
         }
         void reload(const Project& proj){
             if(!m_reloaded.count(proj.file())){
