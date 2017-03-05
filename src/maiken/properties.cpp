@@ -32,9 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void maiken::Application::resolveProperties(){
     ps.setDeletedKey("--DELETED--");
-    for(YAML::const_iterator it=project().root()[PROPERTY].begin();it!=project().root()[PROPERTY].end(); ++it)
+    for(YAML::const_iterator it=project().root()[STR_PROPERTY].begin();it!=project().root()[STR_PROPERTY].end(); ++it)
         ps[it->first.as<std::string>()] = it->second.as<std::string>();
-    for(YAML::const_iterator it=project().root()[PROPERTY].begin();it!=project().root()[PROPERTY].end(); ++it) {
+    for(YAML::const_iterator it=project().root()[STR_PROPERTY].begin();it!=project().root()[STR_PROPERTY].end(); ++it) {
         std::string s = Properties::RESOLVE(*this, it->second.as<std::string>());
         if(ps.count(it->first.as<std::string>())) ps.erase(it->first.as<std::string>());
         ps[it->first.as<std::string>()] = s;
@@ -43,9 +43,9 @@ void maiken::Application::resolveProperties(){
 
 void maiken::Settings::resolveProperties(){
     ps.setDeletedKey("--DELETED--");
-    for(YAML::const_iterator it = root()[PROPERTY].begin(); it != root()[PROPERTY].end(); ++it)
+    for(YAML::const_iterator it = root()[STR_PROPERTY].begin(); it != root()[STR_PROPERTY].end(); ++it)
         ps[it->first.as<std::string>()] = it->second.as<std::string>();
-    for(YAML::const_iterator it = root()[PROPERTY].begin(); it != root()[PROPERTY].end(); ++it) {
+    for(YAML::const_iterator it = root()[STR_PROPERTY].begin(); it != root()[STR_PROPERTY].end(); ++it) {
         std::string s = Properties::RESOLVE(*this, it->second.as<std::string>());
         if(ps.count(it->first.as<std::string>())) ps.erase(it->first.as<std::string>());
         ps[it->first.as<std::string>()] = s;

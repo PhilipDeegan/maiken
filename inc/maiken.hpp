@@ -61,24 +61,24 @@ class AppVars : public Constants{
         AppVars(){
             pks["OS"]   = KTOSTRING(__KUL_OS__);
             pks["HOME"] = kul::user::home().path();
-            pks["MKN_HOME"] = kul::user::home(MAIKEN).path();
+            pks["MKN_HOME"] = kul::user::home(STR_MAIKEN).path();
             pks["DATETIME"] = kul::DateTime::NOW();
             pks["TIMESTAMP"] = std::time(NULL);
 
-            if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][REPO])
-                pks["MKN_REPO"] = Settings::INSTANCE().root()[LOCAL][REPO].Scalar();
+            if(Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_REPO])
+                pks["MKN_REPO"] = Settings::INSTANCE().root()[STR_LOCAL][STR_REPO].Scalar();
             else
-                pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(MAIKEN, REPO)).path();
+                pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
 
-            if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][MOD_REPO])
-                pks["MKN_MOD_REPO"] = Settings::INSTANCE().root()[LOCAL][MOD_REPO].Scalar();
+            if(Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO])
+                pks["MKN_MOD_REPO"] = Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar();
             else
-                pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(MAIKEN, MOD_REPO)).path();
+                pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 
-            if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][BIN])
-                pks["MKN_BIN"] = Settings::INSTANCE().root()[LOCAL][BIN].Scalar();
-            if(Settings::INSTANCE().root()[LOCAL] && Settings::INSTANCE().root()[LOCAL][LIB])
-                pks["MKN_LIB"] = Settings::INSTANCE().root()[LOCAL][LIB].Scalar();
+            if(Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_BIN])
+                pks["MKN_BIN"] = Settings::INSTANCE().root()[STR_LOCAL][STR_BIN].Scalar();
+            if(Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_LIB])
+                pks["MKN_LIB"] = Settings::INSTANCE().root()[STR_LOCAL][STR_LIB].Scalar();
 
             evs["MKN_OBJ"] = "o";
             std::string obj = kul::env::GET("MKN_OBJ");
@@ -152,7 +152,7 @@ class KUL_PUBLISH Application : public Constants{
         const Application* par = 0;
         Application* sup;
         kul::code::Mode m;
-        std::string arg, main, lang, lnk, scr, scv;
+        std::string arg, main, lang, lnk, out, scr, scv;
         const std::string p;
         kul::Dir bd, inst;
         YAML::Node modCArg, modLArg, modPArg;

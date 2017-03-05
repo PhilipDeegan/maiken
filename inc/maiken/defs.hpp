@@ -72,102 +72,105 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken{
 class Constants{
     public:
-        static constexpr const char* VERSION        = "version";
+        static constexpr const char* STR_VERSION        = "version";
 
-        static constexpr const char* MAIKEN         = "maiken";
+        static constexpr const char* STR_MAIKEN         = "maiken";
 
-        static constexpr const char* BIN            = "bin";
-        static constexpr const char* DBG            = "dbg";
-        static constexpr const char* OBJ            = "obj";
+        static constexpr const char* STR_BIN            = "bin";
+        static constexpr const char* STR_DBG            = "dbg";
+        static constexpr const char* STR_OBJ            = "obj";
 
-        static constexpr const char* BUILD          = "build";
-        static constexpr const char* BUILD_MOD      = "build-mod";
-        static constexpr const char* BUILD_ALL      = "build-all";
-        static constexpr const char* DEBUG          = "debug";
-        static constexpr const char* DEBUGGER       = "debugger";
-        static constexpr const char* CLEAN          = "clean";
-        static constexpr const char* COMPILE        = "compile";
-        static constexpr const char* HELP           = "help";
-        static constexpr const char* INIT           = "init";
-        static constexpr const char* INFO           = "info";
-        static constexpr const char* LINK           = "link";
-        static constexpr const char* PACK           = "pack";
-        static constexpr const char* RUN            = "run";
-        static constexpr const char* THREADS        = "threads";
-        static constexpr const char* TRIM           = "trim";
+        static constexpr const char* STR_BUILD          = "build";
+        static constexpr const char* STR_BUILD_MOD      = "build-mod";
+        static constexpr const char* STR_BUILD_ALL      = "build-all";
+        static constexpr const char* STR_DEBUG          = "debug";
+        static constexpr const char* STR_DEBUGGER       = "debugger";
+        static constexpr const char* STR_CLEAN          = "clean";
+        static constexpr const char* STR_COMPILE        = "compile";
+        static constexpr const char* STR_HELP           = "help";
+        static constexpr const char* STR_INIT           = "init";
+        static constexpr const char* STR_INFO           = "info";
+        static constexpr const char* STR_LINK           = "link";
+        static constexpr const char* STR_PACK           = "pack";
+        static constexpr const char* STR_RUN            = "run";
+        static constexpr const char* STR_THREADS        = "threads";
+        static constexpr const char* STR_TRIM           = "trim";
 
-        static constexpr const char* SCM_COMMIT     = "scm-commit";
-        static constexpr const char* SCM_STATUS     = "scm-status";
-        static constexpr const char* SCM_UPDATE     = "scm-update";
-        static constexpr const char* SCM_FUPDATE    = "scm-force-update";
+        static constexpr const char* STR_SCM_COMMIT     = "scm-commit";
+        static constexpr const char* STR_SCM_STATUS     = "scm-status";
+        static constexpr const char* STR_SCM_UPDATE     = "scm-update";
+        static constexpr const char* STR_SCM_FUPDATE    = "scm-force-update";
 
-        static constexpr const char* APPEND         = "append";
-        static constexpr const char* PREPEND        = "prepend";
-        static constexpr const char* REPLACE        = "replace";
+        static constexpr const char* STR_APPEND         = "append";
+        static constexpr const char* STR_PREPEND        = "prepend";
+        static constexpr const char* STR_REPLACE        = "replace";
 
-        static constexpr const char* REPO           = "repo";
-        static constexpr const char* MOD_REPO       = "mod-repo";
-        static constexpr const char* GIT            = "git";
-        static constexpr const char* SVN            = "svn";
+        static constexpr const char* STR_REPO           = "repo";
+        static constexpr const char* STR_MOD_REPO       = "mod-repo";
+        static constexpr const char* STR_GIT            = "git";
+        static constexpr const char* STR_SVN            = "svn";
 
-        static constexpr const char* LANG           = "lang";
-        static constexpr const char* HEADER         = "header";
-        static constexpr const char* MAIN           = "main";
-        static constexpr const char* INSTALL        = "install";
+        static constexpr const char* STR_LANG           = "lang";
+        static constexpr const char* STR_HEADER         = "header";
+        static constexpr const char* STR_MAIN           = "main";
+        static constexpr const char* STR_INSTALL        = "install";
+        static constexpr const char* STR_OUT            = "out";
 
-        static constexpr const char* PROJECT        = "project";
-        static constexpr const char* LOCAL          = "local";
-        static constexpr const char* REMOTE         = "remote";
-        static constexpr const char* SCM            = "scm";
-        static constexpr const char* SELF           = "self";
-        static constexpr const char* PROFILE        = "profile";
-        static constexpr const char* PROFILES       = "profiles";
+        static constexpr const char* STR_PROJECT        = "project";
+        static constexpr const char* STR_LOCAL          = "local";
+        static constexpr const char* STR_REMOTE         = "remote";
+        static constexpr const char* STR_SCM            = "scm";
+        static constexpr const char* STR_SELF           = "self";
+        static constexpr const char* STR_PROFILE        = "profile";
+        static constexpr const char* STR_PROFILES       = "profiles";
 
-        static constexpr const char* ENV            = "env";
-        static constexpr const char* LIB            = "lib";
-        static constexpr const char* VARS           = "vars";
+        static constexpr const char* STR_ENV            = "env";
+        static constexpr const char* STR_VARS           = "vars";
 
-        static constexpr const char* MODE           = "mode";
-        static constexpr const char* NONE           = "none";
-        static constexpr const char* SHARED         = "shared";
-        static constexpr const char* STATIC         = "static";
-        static constexpr const char* DRY_RUN        = "dry-run";
+        static constexpr const char* STR_MODE           = "mode";
+        static constexpr const char* STR_NONE           = "none";
+        static constexpr const char* STR_SHARED         = "shared";
+        static constexpr const char* STR_STATIC         = "static";
+        static constexpr const char* STR_DRY_RUN        = "dry-run";
 
-        static constexpr const char* ARCHIVER       = "archiver";
-        static constexpr const char* ASSEMBLER      = "assembler";
-        static constexpr const char* COMPILER       = "compiler";
-        static constexpr const char* LINKER         = "linker";
-        static constexpr const char* ALINKER        = "all-linker";
+        static constexpr const char* STR_ARCHIVER       = "archiver";
+        static constexpr const char* STR_ASSEMBLER      = "assembler";
+        static constexpr const char* STR_COMPILER       = "compiler";
+        static constexpr const char* STR_LINKER         = "linker";
+        static constexpr const char* STR_ALINKER        = "all-linker";
 
-        static constexpr const char* MASK           = "mask";
+        static constexpr const char* STR_MASK           = "mask";
 
-        static constexpr const char* PROPERTY       = "property";
-        static constexpr const char* FILE           = "file";
-        static constexpr const char* ARG            = "arg";
-        static constexpr const char* JARG           = "jarg";
-        static constexpr const char* MKN_SRC        = "src";
-        static constexpr const char* MKN_INC        = "inc";
-        static constexpr const char* MKN_LIB        = "lib";
-        static constexpr const char* MKN_DEP        = "dep";
-        static constexpr const char* MKN_DEPS       = "deps";
-        static constexpr const char* MKN_MOD        = "mod";
-        static constexpr const char* MKN_MODS       = "mods";
-        static constexpr const char* PATH           = "path";
-        static constexpr const char* DEPENDENCY     = "dependency";
-        static constexpr const char* MODULE         = "module";
-        static constexpr const char* NAME           = "name";
-        static constexpr const char* PARENT         = "parent";
-        static constexpr const char* TYPE           = "type";
-        static constexpr const char* VALUE          = "value";
-        static constexpr const char* SUPER          = "super";
+        static constexpr const char* STR_PROPERTY       = "property";
+        static constexpr const char* STR_FILE           = "file";
+        static constexpr const char* STR_ARG            = "arg";
+        static constexpr const char* STR_ADD            = "additional";        
+        static constexpr const char* STR_JARG           = "jarg";
+        static constexpr const char* STR_SRC            = "src";
+        static constexpr const char* STR_INC            = "inc";
+        static constexpr const char* STR_EXT            = "ext";
+        static constexpr const char* STR_LIB            = "lib";
+        static constexpr const char* STR_DEP            = "dep";
+        static constexpr const char* STR_DEPS           = "deps";
+        static constexpr const char* STR_MOD            = "mod";
+        static constexpr const char* STR_MODS           = "mods";
+        static constexpr const char* STR_PATH           = "path";
+        static constexpr const char* STR_DEPENDENCY     = "dependency";
+        static constexpr const char* STR_MODULE         = "module";
+        static constexpr const char* STR_NAME           = "name";
+        static constexpr const char* STR_PARENT         = "parent";
+        static constexpr const char* STR_TYPE           = "type";
+        static constexpr const char* STR_VALUE          = "value";
+        static constexpr const char* STR_SUPER          = "super";
 
-        static constexpr const char* DIRECTORY      = "directory";
-        static constexpr const char* SETTINGS       = "settings";
+        static constexpr const char* STR_DIR            = "directory";
+        static constexpr const char* STR_SETTINGS       = "settings";
 
-        static constexpr const char* IF_ARG         = "if_arg";
-        static constexpr const char* IF_INC         = "if_inc";
-        static constexpr const char* IF_SRC         = "if_src";
-        static constexpr const char* IF_LIB         = "if_lib";
+        static constexpr const char* STR_IF_DEP         = "if_dep";
+        static constexpr const char* STR_IF_ARG         = "if_arg";
+        static constexpr const char* STR_IF_INC         = "if_inc";
+        static constexpr const char* STR_IF_SRC         = "if_src";
+        static constexpr const char* STR_IF_LIB         = "if_lib";
 };
 }
 #endif /* _MAIKEN_DEFS_HPP_ */

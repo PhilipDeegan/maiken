@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 std::unique_ptr<maiken::Settings> maiken::Settings::instance;
 
-namespace maiken { 
+namespace maiken {
 class SuperSettings{
     friend class maiken::Settings;
     private:
@@ -50,12 +50,12 @@ class SuperSettings{
 }
 
 maiken::Settings::Settings(const std::string& s) : kul::yaml::File(s){
-    if(root()[LOCAL] && root()[LOCAL][REPO]){
-        kul::Dir d(root()[LOCAL][REPO].Scalar());
+    if(root()[STR_LOCAL] && root()[STR_LOCAL][STR_REPO]){
+        kul::Dir d(root()[STR_LOCAL][STR_REPO].Scalar());
         if(!d.is() && !d.mk()) KEXCEPT(SettingsException, "settings.yaml local/repo is not a valid directory");
     }
-    if(root()[REMOTE] && root()[REMOTE][REPO])
-        for(const auto& s : kul::String::SPLIT(root()[REMOTE][REPO].Scalar(), ' '))
+    if(root()[STR_REMOTE] && root()[STR_REMOTE][STR_REPO])
+        for(const auto& s : kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
             rrs.push_back(s);
     else{
         const std::string& rr = _MKN_REMOTE_REPO_;
@@ -63,8 +63,8 @@ maiken::Settings::Settings(const std::string& s) : kul::yaml::File(s){
             rrs.push_back(s);
     }
 
-    if(root()[REMOTE] && root()[REMOTE][MOD_REPO])
-        for(const auto& s : kul::String::SPLIT(root()[REMOTE][MOD_REPO].Scalar(), ' '))
+    if(root()[STR_REMOTE] && root()[STR_REMOTE][STR_MOD_REPO])
+        for(const auto& s : kul::String::SPLIT(root()[STR_REMOTE][STR_MOD_REPO].Scalar(), ' '))
             rms.push_back(s);
     else{
         const std::string& rr = _MKN_REMOTE_MOD_;
@@ -72,20 +72,20 @@ maiken::Settings::Settings(const std::string& s) : kul::yaml::File(s){
             rms.push_back(s);
     }
 
-    if(root()[SUPER]){
-        kul::File f(RESOLVE(root()[SUPER].Scalar()));
+    if(root()[STR_SUPER]){
+        kul::File f(RESOLVE(root()[STR_SUPER].Scalar()));
         if(!f) KEXCEPT(SettingsException, "super file not found\n"+file());
         if(f.real() == kul::File(file()).real())
             KEXCEPT(SettingsException, "super cannot reference itself\n"+file());
         SuperSettings::INSTANCE().cycleCheck(f.real());
         sup = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
-        for(const auto& p : sup->properties()) 
+        for(const auto& p : sup->properties())
             if(!ps.count(p.first)) ps.insert(p.first, p.second);
     }
-    if(root()[COMPILER] && root()[COMPILER][MASK])
+    if(root()[STR_COMPILER] && root()[STR_COMPILER][STR_MASK])
         for(const auto& k : kul::code::Compilers::INSTANCE().keys())
-            if(root()[COMPILER][MASK][k])
-                for(const auto& s : kul::String::SPLIT(root()[COMPILER][MASK][k].Scalar(), ' '))
+            if(root()[STR_COMPILER][STR_MASK][k])
+                for(const auto& s : kul::String::SPLIT(root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
                     kul::code::Compilers::INSTANCE().addMask(s, k);
 
     resolveProperties();
@@ -105,7 +105,7 @@ std::string maiken::Settings::RESOLVE(const std::string& s){
     std::vector<kul::File> pos {
         kul::File(s),
         kul::File(s+".yaml"),
-        kul::File(s, kul::user::home("maiken")),        
+        kul::File(s, kul::user::home("maiken")),
         kul::File(s+".yaml", kul::user::home("maiken"))
     };
     for(const auto& f : pos)

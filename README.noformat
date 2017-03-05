@@ -65,6 +65,14 @@ dep:
     version: version                # git branch and directory name of dependency under $name if no local tag
     scm: ${aaa}                     # Appended to remote URLs for lookup if non concrete URL, used if concrete
     local: ${aaa}                   # overrides local repository directory
+    profile: ${aaa}                 # choose profile from config
+if_dep:                             # optional deps for OS valid values [ bsd / nix / win ]
+    win: 
+      - name: name                  # Used in URL lookup if ${scm} is missing
+        version: version            # git branch and directory name of dependency under $name if no local tag
+        scm: ${aaa}                 # Appended to remote URLs for lookup if non concrete URL, used if concrete
+        local: ${aaa}               # overrides local repository directory
+        profile: ${aaa}             # choose profile from config
 main: <file>
 arg: -DTHIS_PROFILE ${aaa}          # Optional additional compiler arguments
 link: ${aaa}                        # Optional additional linker arguments, applied to end
@@ -130,6 +138,7 @@ profiles:
   - name: test
     self: ${OS} ${aaa}              # dependencies on current project profiles, cycles detected
     main: test.cpp
+    out: ${aaa}                     # override default binary/library name
     install: ${aaa}                 # install binary or library to directory specified
                                     # library naming convention is libname_profile.a/so if linux, name_profile.lib if windows 
 
@@ -415,28 +424,36 @@ main: cpp.cpp
 5.1.1 Commands
 
 Available commands
-    - build    - Compiles all supported files to the profile binary (./bin/profile) directory, and creates library/executable depending
-    - clean    - deletes all files from the profile directory recursively.
-    - compile  - Compiles all supported file to the profile binary directory
-    - link     - Creates a library/executable from found compiled files
-    - profiles - displays $(PWD)/mkn.xml profiles to std::out - then exits (--version takes precendence)
-    - init     - Create a minimal project file ${PWD}/mkn.xml, exits, error if one exists
-    - inc      - Print include directories to std out
-    - src      - Print found source files to std out [allows -d].
-    - pack     - Copy binary files & library files into bin/$profile/pack
-    - run      - Starts the application automatically linking libraries for dependencies on dynamic libraries, supports -a and -p/-D
-    - dbg      - Same as run but uses debugger - see 4.6
+    - build     - Compiles all supported files to the profile binary (./bin/profile) directory, and creates library/executable depending
+    - build-mod - Compile/link modules
+    - build-all - Compile/link modules and projects
+    - clean     - deletes all files from the profile directory recursively.
+    - compile   - Compiles all supported file to the profile binary directory
+    - link      - Creates a library/executable from found compiled files
+    - profiles  - displays $(PWD)/mkn.xml profiles to std::out - then exits (--version takes precendence)
+    - init      - Create a minimal project file ${PWD}/mkn.xml, exits, error if one exists
+    - inc       - Print include directories to std out
+    - src       - Print found source files to std out [allows -d].
+    - pack      - Copy binary files & library files into bin/$profile/pack
+    - run       - Starts the application automatically linking libraries for dependencies on dynamic libraries, supports -a and -p/-D
+    - dbg       - Same as run but uses debugger - see 4.6
+    - trim      - Removes trailing whitespace from active sources
 
 5.1.2 Arguments
 
 Available arguments:
-    -a --args $a          - Adds $arg to the compile command if compile/build, passes arguments to application if run
+    -a --args $arg        - Adds $arg to the compile command if compile/build, passes arguments to application if run
+    -A --add  $arg        - CSV list of additional sources to compile/link, disable recursive finding with "<dir>\,0"
     -C --directory $d     - Execute on directory $d rather than current directory 
     -d --dependencies     - See 4.8
     -e --env $e           - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
     -h --help             - Print help
     -j --jargs $j         - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing file-type specific args to compiler
     -l --linker $t        - Adds $t to linking of root project
+    -L --all-linker $t    - Adds $t to linking of all projects
+    -m --mod [$p]         - Activate modules, no argument all implies all phases, otherwise $p = CSV of phases to activate
+    -M --main $f          - Set main file as $f, overrides yaml main tag
+    -o --out $f           - Set output binary/lib name to be $f, overrides yaml out tag
     -L --all-linker $t    - Adds $t to linking of all projects
     -p --profile $p       - Activate profile p
     -P --property $p      - CSV key=value properties override format -P "k1=v1,k2=v2" , backslash escaps , and =

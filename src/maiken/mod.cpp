@@ -41,7 +41,7 @@ void maiken::Application::populateMapsFromModules(){
     // }
 }
 
-kul::File maiken::ModuleLoader::FIND(const Application& ap) 
+kul::File maiken::ModuleLoader::FIND(const Application& ap)
 #ifndef _MKN_DISABLE_MODULES_
         throw(kul::sys::Exception)
 #endif//_MKN_DISABLE_MODULES_
@@ -53,7 +53,7 @@ kul::File maiken::ModuleLoader::FIND(const Application& ap)
     std::string file;
     for(const auto& f : ap.buildDir().files(0)){
         const auto& name(f.name());
-        if(name.find(".") != std::string::npos 
+        if(name.find(".") != std::string::npos
             && name.find(ap.project().root()["name"].Scalar()) != std::string::npos
 #ifdef _WIN32
             && name.substr(name.rfind(".") + 1) == "dll"){
@@ -63,21 +63,21 @@ kul::File maiken::ModuleLoader::FIND(const Application& ap)
             file = ap.buildDir().join(name);
             break;
         }
-    }  
-    
+    }
+
     kul::File lib(file);
-#ifndef _MKN_DISABLE_MODULES_    
+#ifndef _MKN_DISABLE_MODULES_
     if(!lib) KEXCEPT(kul::sys::Exception, "No loadable library found for project: ") << ap.project().dir();
 #endif//_MKN_DISABLE_MODULES_
     return lib;
-}  
+}
 
-std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(const Application& ap) 
+std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(const Application& ap)
 #ifndef _MKN_DISABLE_MODULES_
         throw(kul::sys::Exception)
 #endif//_MKN_DISABLE_MODULES_
 {
     for(auto dep = ap.dependencies().rbegin(); dep != ap.dependencies().rend(); ++dep)
-        if(!(*dep).sources().empty()) GlobalModules::INSTANCE().load(*dep);    
+        if(!(*dep).sources().empty()) GlobalModules::INSTANCE().load(*dep);
     return std::make_shared<ModuleLoader>(ap, kul::File(FIND(ap)));
 }

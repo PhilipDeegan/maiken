@@ -35,9 +35,9 @@ void maiken::Application::link() throw(kul::Exception){
     std::vector<std::string> objects;
     for(const auto& ft : sourceMap()){
         try{
-            if(!(*files().find(ft.first)).second.count(COMPILER))
+            if(!(*files().find(ft.first)).second.count(STR_COMPILER))
                 KEXCEPTION("No compiler found for filetype " + ft.first);
-            const auto* compiler = kul::code::Compilers::INSTANCE().get((*(*files().find(ft.first)).second.find(COMPILER)).second);
+            const auto* compiler = kul::code::Compilers::INSTANCE().get((*(*files().find(ft.first)).second.find(STR_COMPILER)).second);
             if(!compiler->sourceIsBin()){
                 if(!buildDir().is()) KEXCEPT(maiken::Exception, "Cannot link without compiling.");
                 for(const kul::File f : buildDir().files(true)){
@@ -104,9 +104,9 @@ void maiken::Application::compile(std::vector<std::string>& objects) throw(kul::
         kul::Dir objD(buildDir().join("obj")); objD.mk();
         const kul::code::Compiler* compiler;
         try{
-            if(!(*files().find(ft.first)).second.count(COMPILER))
+            if(!(*files().find(ft.first)).second.count(STR_COMPILER))
                 KEXCEPT(Exception, "No compiler found for filetype " + ft.first);
-            compiler = kul::code::Compilers::INSTANCE().get((*(*files().find(ft.first)).second.find(COMPILER)).second);
+            compiler = kul::code::Compilers::INSTANCE().get((*(*files().find(ft.first)).second.find(STR_COMPILER)).second);
         }catch(const kul::code::CompilerNotFoundException& e){
             KEXCEPT(Exception, "No compiler found for filetype " + ft.first);
         }
@@ -127,7 +127,7 @@ void maiken::Application::compile(std::vector<std::string>& objects) throw(kul::
                     ss << std::hex << std::hash<std::string>()(source.real()) << oType;
                     kul::File object(ss.str(), objD);
                     sourceQueue.push(std::pair<std::string, std::string>(
-                        AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(), 
+                        AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
                         AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
                 }
             }
@@ -148,7 +148,7 @@ void maiken::Application::compile(std::vector<std::string>& objects) throw(kul::
                 auto o = [] (const std::string& s) { if(s.size()) KOUT(NON) << s; };
                 auto e = [] (const std::string& s) { if(s.size()) KERR << s; };
                 std::exception_ptr ep;
-                
+
                 for(const kul::code::CompilerProcessCapture& cpc : tc.processCaptures()){
                     if(!AppVars::INSTANCE().dryRun()){
                         if(cpc.exception()) ep = cpc.exception();
@@ -179,7 +179,7 @@ void maiken::Application::compile(std::vector<std::string>& objects) throw(kul::
             const kul::code::Compiler* compiler;
             if(compilers.count(ft)) compiler = (*compilers.find(ft)).second;
             else{
-                compiler = kul::code::Compilers::INSTANCE().get((*(*files().find(ft)).second.find(COMPILER)).second);
+                compiler = kul::code::Compilers::INSTANCE().get((*(*files().find(ft)).second.find(STR_COMPILER)).second);
                 compilers.insert(ft, compiler);
             }
             if(compiler->sourceIsBin())
@@ -257,7 +257,7 @@ kul::code::CompilerProcessCapture maiken::Application::buildExecutable(const std
     const std::string& file     = main;
     const std::string& fileType = file.substr(file.rfind(".") + 1);
     if(fs.count(fileType) > 0){
-        if(!(*files().find(fileType)).second.count(COMPILER)) KEXCEPT(Exception, "No compiler found for filetype " + fileType);
+        if(!(*files().find(fileType)).second.count(STR_COMPILER)) KEXCEPT(Exception, "No compiler found for filetype " + fileType);
         if(!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && !this->libraries().empty()){
             KOUT(NON) << "LIBRARIES";
             for(const std::string& s : this->libraries()) KOUT(NON) << "\t" << s;
@@ -267,17 +267,17 @@ kul::code::CompilerProcessCapture maiken::Application::buildExecutable(const std
             for(const std::string& s : this->libraryPaths()) KOUT(NON) << "\t" << s;
         }
         try{
-            std::string linker = fs[fileType][LINKER];
+            std::string linker = fs[fileType][STR_LINKER];
             std::string linkEnd = AppVars::INSTANCE().linker();
             if(!AppVars::INSTANCE().allinker().empty()) linkEnd += " " + AppVars::INSTANCE().allinker();
             if(!lnk.empty()) linkEnd += " " + lnk;
-            kul::Dir out(inst ? inst.real() : buildDir());
-            if(!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && linkEnd.size()) 
+            kul::Dir outD(inst ? inst.real() : buildDir());
+            if(!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && linkEnd.size())
                 KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
-            const std::string& n(project().root()[NAME].Scalar());
-            std::string bin(AppVars::INSTANCE().dryRun() ? kul::File(out.join(n)).esc() : kul::File(out.join(n)).escm());
+            const std::string& n(out.empty() ? project().root()[STR_NAME].Scalar() : out);
+            std::string bin(AppVars::INSTANCE().dryRun() ? kul::File(outD.join(n)).esc() : kul::File(outD.join(n)).escm());
             const kul::code::CompilerProcessCapture& cpc =
-                kul::code::Compilers::INSTANCE().get((*(*files().find(fileType)).second.find(COMPILER)).second)
+                kul::code::Compilers::INSTANCE().get((*(*files().find(fileType)).second.find(STR_COMPILER)).second)
                     ->buildExecutable(linker, linkEnd, objects,
                         libraries(), libraryPaths(), bin, m, AppVars::INSTANCE().dryRun());
             if(AppVars::INSTANCE().dryRun()) KOUT(NON) << cpc.cmd();
@@ -298,21 +298,21 @@ kul::code::CompilerProcessCapture maiken::Application::buildLibrary(const std::v
     if(fs.count(lang) > 0){
         if(m == kul::code::Mode::NONE)
             KEXCEPTION("Library requires mode for linking, " + this->project().dir().real());
-        if(!(*files().find(lang)).second.count(COMPILER)) KEXCEPT(Exception, "No compiler found for filetype " + lang);
-        std::string linker = fs[lang][LINKER];
+        if(!(*files().find(lang)).second.count(STR_COMPILER)) KEXCEPT(Exception, "No compiler found for filetype " + lang);
+        std::string linker = fs[lang][STR_LINKER];
         std::string linkEnd;
         if(!par) linkEnd = AppVars::INSTANCE().linker();
         if(!AppVars::INSTANCE().allinker().empty()) linkEnd += " " + AppVars::INSTANCE().allinker();
         if(!lnk.empty()) linkEnd += " " + lnk;
-        if(!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && linkEnd.size()) 
+        if(!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && linkEnd.size())
             KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
-        if(m == kul::code::Mode::STAT) linker = fs[lang][ARCHIVER];
-        const std::string& n(project().root()[NAME].Scalar());
-        kul::Dir out(inst ? inst.real() : buildDir());
-        std::string lib(inst ? p.empty() ? n : n+"_"+p : n);
-        lib = AppVars::INSTANCE().dryRun() ? kul::File(lib, out).esc() : kul::File(lib, out).escm();
+        if(m == kul::code::Mode::STAT) linker = fs[lang][STR_ARCHIVER];
+        const std::string& n(project().root()[STR_NAME].Scalar());
+        kul::Dir outD(inst ? inst.real() : buildDir());
+        std::string lib(out.empty() ? inst ? p.empty() ? n : n+"_"+p : n : out);
+        lib = AppVars::INSTANCE().dryRun() ? kul::File(lib, outD).esc() : kul::File(lib, outD).escm();
         const kul::code::CompilerProcessCapture& cpc =
-            kul::code::Compilers::INSTANCE().get((*(*files().find(lang)).second.find(COMPILER)).second)
+            kul::code::Compilers::INSTANCE().get((*(*files().find(lang)).second.find(STR_COMPILER)).second)
                 ->buildLibrary(linker, linkEnd, objects,
                     libraries(), libraryPaths(), lib, m, AppVars::INSTANCE().dryRun());
         if(AppVars::INSTANCE().dryRun()) KOUT(NON) << cpc.cmd();
@@ -335,4 +335,3 @@ void maiken::Application::checkErrors(const kul::code::CompilerProcessCapture& c
         e(cpc.errs());
     if(cpc.exception()) std::rethrow_exception(cpc.exception());
 }
-

@@ -35,12 +35,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class Validator : public maiken::Constants{
     private:
         std::vector<std::string> ifArgsLefts   { "bin", "lib", "shared", "static"};
-        std::vector<std::string> ifIncSrcLefts { "bsd", "nix", "win"};
+        std::vector<std::string> ifOSLefts { "bsd", "nix", "win"};
         Validator(){
             std::vector<std::string> ifLefts;
-            for(const std::string& is : ifIncSrcLefts) for(const std::string& a : ifArgsLefts) ifLefts.push_back(is + "_" + a);
+            for(const std::string& is : ifOSLefts) for(const std::string& a : ifArgsLefts) ifLefts.push_back(is + "_" + a);
             for(const std::string& s : ifLefts) ifArgsLefts.push_back(s);
-            for(const std::string& s : ifIncSrcLefts) ifArgsLefts.push_back(s);
+            for(const std::string& s : ifOSLefts) ifArgsLefts.push_back(s);
         }
         static Validator& INSTANCE(){
             static Validator v;
@@ -57,42 +57,43 @@ class Validator : public maiken::Constants{
         }
     public:
         static void PRE_BUILD(const maiken::Application& a, const YAML::Node& n) throw (maiken::Exception){
-            if(n[MAIN] && n[LANG])
+            if(n[STR_MAIN] && n[STR_LANG])
                 KEXCEPT(maiken::Exception, "cannot have both main and lang tag\n"+a.project().dir().path());
-            if(n[MAIN]){
-                const std::string& m(n[MAIN].Scalar());
+            if(n[STR_MAIN]){
+                const std::string& m(n[STR_MAIN].Scalar());
                 if(m.find(".") == std::string::npos)
                     KEXCEPT(maiken::Exception, "main tag invalid format, expects <file>.<type>\n"+a.project().dir().path());
             }
-            if(n[MODE]){
-                const auto& s(n[MODE].Scalar());
-                if(s != NONE && s != STATIC && s != SHARED)
+            if(n[STR_MODE]){
+                const auto& s(n[STR_MODE].Scalar());
+                if(s != STR_NONE && s != STR_STATIC && s != STR_SHARED)
                     KEXCEPT(maiken::Exception, "mode tag invalid value, expects none/static/shared\n"+a.project().dir().path());
             }
-            if(n[IF_ARG]) IF_VALUEDATER(a, n[IF_ARG], IF_ARG, INSTANCE().ifArgsLefts);
-            if(n[IF_INC]) IF_VALUEDATER(a, n[IF_INC], IF_ARG, INSTANCE().ifIncSrcLefts);
-            if(n[IF_SRC]) IF_VALUEDATER(a, n[IF_SRC], IF_ARG, INSTANCE().ifIncSrcLefts);
-            if(n[IF_LIB]) IF_VALUEDATER(a, n[IF_SRC], IF_ARG, INSTANCE().ifIncSrcLefts);
-            if(n[MKN_DEP])
-                for(const auto& d : n[MKN_DEP])
-                    if(!d[LOCAL] && !d[NAME])
+            if(n[STR_IF_ARG]) IF_VALUEDATER(a, n[STR_IF_ARG], STR_IF_ARG, INSTANCE().ifArgsLefts);
+            if(n[STR_IF_INC]) IF_VALUEDATER(a, n[STR_IF_INC], STR_IF_ARG, INSTANCE().ifOSLefts);
+            if(n[STR_IF_SRC]) IF_VALUEDATER(a, n[STR_IF_SRC], STR_IF_ARG, INSTANCE().ifOSLefts);
+            if(n[STR_IF_LIB]) IF_VALUEDATER(a, n[STR_IF_SRC], STR_IF_ARG, INSTANCE().ifOSLefts);
+            if(n[STR_IF_DEP]) IF_VALUEDATER(a, n[STR_IF_SRC], STR_IF_DEP, INSTANCE().ifOSLefts);
+            if(n[STR_DEP])
+                for(const auto& d : n[STR_DEP])
+                    if(!d[STR_LOCAL] && !d[STR_NAME])
                         KEXCEPT(maiken::Exception, "dependency name must exist if local tag does not\n"+a.project().dir().path());
 
         }
         static void POST_BUILD(const maiken::Application& a, const YAML::Node& n) throw (maiken::Exception){
             std::stringstream ss;
             for(const auto f : a.files()) ss << f.first << " ";
-            if(n[MAIN] && !a.files().count(n[MAIN].Scalar().substr(n[MAIN].Scalar().rfind(".")+1)))
+            if(n[STR_MAIN] && !a.files().count(n[STR_MAIN].Scalar().substr(n[STR_MAIN].Scalar().rfind(".")+1)))
                 KEXCEPT(maiken::Exception, "main tag invalid type, valid types are\n"+ss.str()+"\n"+a.project().dir().path());
             else
-            if(n[LANG] && !a.files().count(n[LANG].Scalar()))
+            if(n[STR_LANG] && !a.files().count(n[STR_LANG].Scalar()))
                 KEXCEPT(maiken::Exception, "lang tag invalid type, valid types are\n"+ss.str()+"\n"+a.project().dir().path());
         }
         static bool PARENT_CYCLE(const maiken::Application& a, const std::string& pr, const std::string& pa){
-            for(const auto& p1 : a.project().root()[PROFILE]){
-                if(p1[NAME].Scalar() != pr) continue;
-                if(p1[PARENT]){
-                    std::string resolved(maiken::Properties::RESOLVE(a, p1[PARENT].Scalar()));
+            for(const auto& p1 : a.project().root()[STR_PROFILE]){
+                if(p1[STR_NAME].Scalar() != pr) continue;
+                if(p1[STR_PARENT]){
+                    std::string resolved(maiken::Properties::RESOLVE(a, p1[STR_PARENT].Scalar()));
                     if(resolved == pa) return true;
                     else return PARENT_CYCLE(a, resolved, pa);
                 }
@@ -100,8 +101,8 @@ class Validator : public maiken::Constants{
             return false;
         }
         static void SELF_CHECK(const maiken::Application& a, const YAML::Node& n, const std::vector<std::string>& profiles){
-            if(n[SELF])
-                for(const auto& s : kul::String::SPLIT(maiken::Properties::RESOLVE(a, n[SELF].Scalar()), ' '))
+            if(n[STR_SELF])
+                for(const auto& s : kul::String::SPLIT(maiken::Properties::RESOLVE(a, n[STR_SELF].Scalar()), ' '))
                     if(std::find(profiles.begin(), profiles.end(), s) == profiles.end())
                         KEXCEPT(maiken::Exception, "Self tag references unknown profile:\n"+a.project().dir().path());
         }
@@ -110,47 +111,47 @@ class Validator : public maiken::Constants{
 void maiken::Application::preSetupValidation() throw (maiken::Exception){
     {
         kul::hash::set::String keys;
-        for(YAML::const_iterator it=project().root()[PROPERTY].begin();it!=project().root()[PROPERTY].end(); ++it){
+        for(YAML::const_iterator it=project().root()[STR_PROPERTY].begin();it!=project().root()[STR_PROPERTY].end(); ++it){
             if(keys.count(it->first.Scalar())) KEXCEPTION("Duplicate PROPERTIES: "+it->first.Scalar()+"\n"+project().dir().path());
             keys.insert(it->first.Scalar());
         }
     }
-    bool dpp = project().root()[PARENT];
+    bool dpp = project().root()[STR_PARENT];
     bool dpf = 0;
     Validator::PRE_BUILD(*this, project().root());
     std::vector<std::string> profiles;
-    for(const auto& profile : project().root()[PROFILE]){
-        const std::string& p(profile[NAME].Scalar());
+    for(const auto& profile : project().root()[STR_PROFILE]){
+        const std::string& p(profile[STR_NAME].Scalar());
         if(p.find("[") != std::string::npos || p.find("]") != std::string::npos)
             KEXCEPTION("Profile may not contain character \"[\" or \"]\"");
-        if(p == project().root()[NAME].Scalar())
+        if(p == project().root()[STR_NAME].Scalar())
             KEXCEPTION("Profile may not have same name as project");
         if(std::find(profiles.begin(), profiles.end(), p) != profiles.end())
             KEXCEPTION("Duplicate profile name found");
         profiles.push_back(p);
-        if(profile[PARENT]){
+        if(profile[STR_PARENT]){
             bool f = 0;
-            std::string resolved(Properties::RESOLVE(*this, profile[PARENT].Scalar()));
-            if(resolved == profile[NAME].Scalar()) KEXCEPTION("Profile may not be its own parent");
-            for(const auto& p1 : project().root()[PROFILE]){
-                if(profile[NAME].Scalar() == p1[NAME].Scalar()) continue;
-                if(resolved == p1[NAME].Scalar()) f = 1;
+            std::string resolved(Properties::RESOLVE(*this, profile[STR_PARENT].Scalar()));
+            if(resolved == profile[STR_NAME].Scalar()) KEXCEPTION("Profile may not be its own parent");
+            for(const auto& p1 : project().root()[STR_PROFILE]){
+                if(profile[STR_NAME].Scalar() == p1[STR_NAME].Scalar()) continue;
+                if(resolved == p1[STR_NAME].Scalar()) f = 1;
                 if(f) {
-                    if(Validator::PARENT_CYCLE(*this, p1[NAME].Scalar(), profile[NAME].Scalar())) KEXCEPTION("Profile inheritence cycle detected");
+                    if(Validator::PARENT_CYCLE(*this, p1[STR_NAME].Scalar(), profile[STR_NAME].Scalar())) KEXCEPTION("Profile inheritence cycle detected");
                     break;
                 }
             }
-            if(!f) KEXCEPTION("parent profile not found: "+Properties::RESOLVE(*this, profile[PARENT].Scalar())+"\n"+project().dir().path());
+            if(!f) KEXCEPTION("parent profile not found: "+Properties::RESOLVE(*this, profile[STR_PARENT].Scalar())+"\n"+project().dir().path());
         }
         Validator::PRE_BUILD(*this, profile);
-        if(dpp && !dpf) dpf = Properties::RESOLVE(*this, project().root()[PARENT].Scalar()) == p;
+        if(dpp && !dpf) dpf = Properties::RESOLVE(*this, project().root()[STR_PARENT].Scalar()) == p;
     }
     if(dpp && !dpf) KEXCEPTION("Parent for default profile does not exist: \n"+project().dir().path());
     Validator::SELF_CHECK(*this, project().root(), profiles);
-    for(const auto& n : project().root()[PROFILE]) Validator::SELF_CHECK(*this, n, profiles);
+    for(const auto& n : project().root()[STR_PROFILE]) Validator::SELF_CHECK(*this, n, profiles);
 }
 
 void maiken::Application::postSetupValidation() throw (maiken::Exception){
     Validator::POST_BUILD(*this, project().root());
-    for(const auto& profile : project().root()[PROFILE]) Validator::POST_BUILD(*this, profile);
+    for(const auto& profile : project().root()[STR_PROFILE]) Validator::POST_BUILD(*this, profile);
 }

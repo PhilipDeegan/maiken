@@ -41,7 +41,7 @@ void maiken::ThreadingCompiler::operator()() throw(kul::Exception){
     const std::string obj(p.second);
     if(!f){
         const std::string& fileType = src.substr(src.rfind(".") + 1);
-        const std::string& compiler = (*(*app.files().find(fileType)).second.find(COMPILER)).second;
+        const std::string& compiler = (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
         std::vector<std::string> args;
         if(app.arguments().count(fileType) > 0)
             for(const std::string& o : (*app.arguments().find(fileType)).second)
@@ -52,7 +52,7 @@ void maiken::ThreadingCompiler::operator()() throw(kul::Exception){
         if(AppVars::INSTANCE().jargs().count(fileType) > 0)
             cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;
         // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
-        const kul::code::CompilerProcessCapture& cpc 
+        const kul::code::CompilerProcessCapture& cpc
             = kul::code::Compilers::INSTANCE().get(compiler)
                 ->compileSource(cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
         kul::ScopeLock lock(push);

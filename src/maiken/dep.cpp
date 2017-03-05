@@ -45,7 +45,7 @@ void maiken::Application::buildDepVec(const std::string* depVal){
                     include.insert(s);
                 }
             }
-        }else 
+        }else
             AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
     }
 
@@ -57,7 +57,7 @@ void maiken::Application::buildDepVec(const std::string* depVal){
     std::vector<Application*> dePs;
     for(Application& a : deps){
         a.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), include);
-        const std::string& name(a.project().root()[NAME].Scalar());
+        const std::string& name(a.project().root()[STR_NAME].Scalar());
         std::stringstream ss;
         ss << name << "[" << (a.p.empty() ? name : a.p) << "]";
         if(AppVars::INSTANCE().dependencyLevel()
@@ -83,7 +83,7 @@ void maiken::Application::buildDepVec(const std::string* depVal){
 void maiken::Application::buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc){
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
         maiken::Application& a = (*app);
-        const std::string& name(a.project().root()[NAME].Scalar());
+        const std::string& name(a.project().root()[STR_NAME].Scalar());
         std::stringstream ss;
         ss << name << "[" << (a.p.empty() ? name : a.p) << "]";
         if(i > 0 || inc.count(name) || inc.count(ss.str())) a.ig = 0;
@@ -101,22 +101,23 @@ void maiken::Application::buildDepVecRec(std::vector<Application*>& dePs, int16_
 }
 
 void maiken::Application::populateMapsFromDependencies(){
-    for(auto dep = dependencies().rbegin(); dep != dependencies().rend(); ++dep){
-        if((*dep).sources().empty()) continue;
-        const std::string& n((*dep).project().root()[NAME].Scalar());
-        const std::string& lib = (*dep).inst ? (*dep).p.empty() ? n : (n+"_"+(*dep).p) : n;
-        const auto& it(std::find(libraries().begin(), libraries().end(), lib));
-        if(it != libraries().end()) libs.erase(it);
-        libs.push_back(lib);
-    }
-    for(auto dep = dependencies().rbegin(); dep != dependencies().rend(); ++dep){
-        for(const auto& s : (*dep).includes())
+    for(auto depP = dependencies().rbegin(); depP != dependencies().rend(); ++depP){
+        const auto& dep(*depP);
+        if(!dep.sources().empty()){
+            const std::string& n(dep.project().root()[STR_NAME].Scalar());
+            const std::string& lib = dep.out.empty() ? dep.inst ? dep.p.empty() ? n : (n+"_"+dep.p) : n : dep.out;
+            const auto& it(std::find(libraries().begin(), libraries().end(), lib));
+            if(it != libraries().end()) libs.erase(it);
+            libs.push_back(lib);
+        }
+
+        for(const auto& s : dep.includes())
             if(s.second && std::find(includes().begin(), includes().end(), s) == includes().end())
                 incs.push_back(std::make_pair(s.first, true));
-        for(const std::string& s : (*dep).libraryPaths())
+        for(const std::string& s : dep.libraryPaths())
             if(std::find(libraryPaths().begin(), libraryPaths().end(), s) == libraryPaths().end())
                 paths.push_back(s);
-        for(const std::string& s : (*dep).libraries())
+        for(const std::string& s : dep.libraries())
             if(std::find(libraries().begin(), libraries().end(), s) == libraries().end())
                 libs.push_back(s);
     }

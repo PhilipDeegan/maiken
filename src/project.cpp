@@ -35,13 +35,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const kul::yaml::Validator maiken::Project::validator() const{
     using namespace kul::yaml;
-    NodeValidator dependencies("dep", {
+
+    std::vector<NodeValidator> depVals {
         NodeValidator("name"),
         NodeValidator("version"),
         NodeValidator("profile"),
         NodeValidator("scm"),
         NodeValidator("local")
-    }, 0, NodeType::LIST);
+    };
+
+    NodeValidator dep("dep", depVals, 0, NodeType::LIST);
+    NodeValidator if_dep("if_dep", { NodeValidator("*", depVals, 0, NodeType::LIST) }, 0, NodeType::MAP);
 
     NodeValidator modules("mod", {
         NodeValidator("name"),
@@ -84,9 +88,12 @@ const kul::yaml::Validator maiken::Project::validator() const{
         NodeValidator("mode"),
         NodeValidator("arg"),
         NodeValidator("install"),
+        NodeValidator("out"),
+        NodeValidator("ext"),
         NodeValidator("self"),
         env,
-        dependencies,
+        dep,
+        if_dep,
         modules,
         if_arg,
         if_inc,
@@ -105,9 +112,12 @@ const kul::yaml::Validator maiken::Project::validator() const{
             NodeValidator("mode"),
             NodeValidator("arg"),
             NodeValidator("install"),
+            NodeValidator("out"),
+            NodeValidator("ext"),
             NodeValidator("self"),
             env,
-            dependencies,
+            dep,
+            if_dep,
             modules,
             if_arg,
             if_inc,

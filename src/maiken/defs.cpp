@@ -30,62 +30,62 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/defs.hpp"
 
-constexpr const char* maiken::Constants::MODE;
+constexpr const char* maiken::Constants::STR_MODE;
 
-constexpr const char* maiken::Constants::ENV;
-constexpr const char* maiken::Constants::MKN_INC;
-constexpr const char* maiken::Constants::MKN_SRC;
+constexpr const char* maiken::Constants::STR_ENV;
+constexpr const char* maiken::Constants::STR_INC;
+constexpr const char* maiken::Constants::STR_SRC;
 
-constexpr const char* maiken::Constants::TYPE;
+constexpr const char* maiken::Constants::STR_TYPE;
 
-constexpr const char* maiken::Constants::BIN;
-constexpr const char* maiken::Constants::LIB;
-constexpr const char* maiken::Constants::GIT;
-constexpr const char* maiken::Constants::SVN;
-constexpr const char* maiken::Constants::SCM;
-constexpr const char* maiken::Constants::NAME;
-constexpr const char* maiken::Constants::MASK;
+constexpr const char* maiken::Constants::STR_BIN;
+constexpr const char* maiken::Constants::STR_LIB;
+constexpr const char* maiken::Constants::STR_GIT;
+constexpr const char* maiken::Constants::STR_SVN;
+constexpr const char* maiken::Constants::STR_SCM;
+constexpr const char* maiken::Constants::STR_NAME;
+constexpr const char* maiken::Constants::STR_MASK;
 
-constexpr const char* maiken::Constants::VERSION;
-constexpr const char* maiken::Constants::PARENT;
-constexpr const char* maiken::Constants::SUPER;
-constexpr const char* maiken::Constants::PATH;
-constexpr const char* maiken::Constants::PACK;
-constexpr const char* maiken::Constants::BUILD;
-constexpr const char* maiken::Constants::FILE;
-constexpr const char* maiken::Constants::ARG;
-constexpr const char* maiken::Constants::INSTALL;
-constexpr const char* maiken::Constants::SELF;
+constexpr const char* maiken::Constants::STR_VERSION;
+constexpr const char* maiken::Constants::STR_PARENT;
+constexpr const char* maiken::Constants::STR_SUPER;
+constexpr const char* maiken::Constants::STR_PATH;
+constexpr const char* maiken::Constants::STR_PACK;
+constexpr const char* maiken::Constants::STR_BUILD;
+constexpr const char* maiken::Constants::STR_FILE;
+constexpr const char* maiken::Constants::STR_ARG;
+constexpr const char* maiken::Constants::STR_INSTALL;
+constexpr const char* maiken::Constants::STR_SELF;
 
-constexpr const char* maiken::Constants::VALUE;
-constexpr const char* maiken::Constants::MAIN;
-constexpr const char* maiken::Constants::LANG;
-constexpr const char* maiken::Constants::LINK;
-constexpr const char* maiken::Constants::LOCAL;
-constexpr const char* maiken::Constants::REMOTE;
-constexpr const char* maiken::Constants::REPO;
-constexpr const char* maiken::Constants::MOD_REPO;
-constexpr const char* maiken::Constants::DEBUGGER;
-constexpr const char* maiken::Constants::DBG;
-constexpr const char* maiken::Constants::RUN;
+constexpr const char* maiken::Constants::STR_VALUE;
+constexpr const char* maiken::Constants::STR_MAIN;
+constexpr const char* maiken::Constants::STR_LANG;
+constexpr const char* maiken::Constants::STR_LINK;
+constexpr const char* maiken::Constants::STR_LOCAL;
+constexpr const char* maiken::Constants::STR_REMOTE;
+constexpr const char* maiken::Constants::STR_REPO;
+constexpr const char* maiken::Constants::STR_MOD_REPO;
+constexpr const char* maiken::Constants::STR_DEBUGGER;
+constexpr const char* maiken::Constants::STR_DBG;
+constexpr const char* maiken::Constants::STR_RUN;
 
-constexpr const char* maiken::Constants::PROJECT;
-constexpr const char* maiken::Constants::ARCHIVER;
-constexpr const char* maiken::Constants::COMPILER;
-constexpr const char* maiken::Constants::COMPILE;
-constexpr const char* maiken::Constants::LINKER;
+constexpr const char* maiken::Constants::STR_PROJECT;
+constexpr const char* maiken::Constants::STR_ARCHIVER;
+constexpr const char* maiken::Constants::STR_COMPILER;
+constexpr const char* maiken::Constants::STR_COMPILE;
+constexpr const char* maiken::Constants::STR_LINKER;
 
-constexpr const char* maiken::Constants::MKN_LIB;
-constexpr const char* maiken::Constants::PROFILE;
-constexpr const char* maiken::Constants::PROFILES;
-constexpr const char* maiken::Constants::PROPERTY;
-constexpr const char* maiken::Constants::MKN_MOD;
-constexpr const char* maiken::Constants::MKN_MODS;
-constexpr const char* maiken::Constants::MKN_DEP;
-constexpr const char* maiken::Constants::MKN_DEPS;
+constexpr const char* maiken::Constants::STR_LIB;
+constexpr const char* maiken::Constants::STR_PROFILE;
+constexpr const char* maiken::Constants::STR_PROFILES;
+constexpr const char* maiken::Constants::STR_PROPERTY;
+constexpr const char* maiken::Constants::STR_MOD;
+constexpr const char* maiken::Constants::STR_MODS;
+constexpr const char* maiken::Constants::STR_DEP;
+constexpr const char* maiken::Constants::STR_DEPS;
 
-
-constexpr const char* maiken::Constants::IF_ARG;
-constexpr const char* maiken::Constants::IF_INC;
-constexpr const char* maiken::Constants::IF_LIB;
-constexpr const char* maiken::Constants::IF_SRC;
+constexpr const char* maiken::Constants::STR_IF_DEP;
+constexpr const char* maiken::Constants::STR_IF_ARG;
+constexpr const char* maiken::Constants::STR_IF_INC;
+constexpr const char* maiken::Constants::STR_IF_LIB;
+constexpr const char* maiken::Constants::STR_IF_SRC;

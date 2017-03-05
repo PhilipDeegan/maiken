@@ -43,7 +43,7 @@ class LibFinder{
 #ifdef  _WIN32
                 if(fn.substr(0, fn.rfind(".")) == l){
 #else
-                if(fn.size() > (3 + l.size()) && fn.substr(0, 3) == "lib" 
+                if(fn.size() > (3 + l.size()) && fn.substr(0, 3) == "lib"
                     && kul::String::NO_CASE_CMP(fn.substr(3, l.size()), l)){
 
                     auto bits(kul::String::SPLIT(fn.substr(3 + l.size()), '.'));
@@ -82,11 +82,11 @@ void maiken::Application::pack() throw(kul::Exception){
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
         if(!(*app).srcs.empty()){
             if((*app).inst){
-                const std::string& n((*app).project().root()[NAME].Scalar());
+                const std::string& n((*app).project().root()[STR_NAME].Scalar());
                 if(!LibFinder::findAdd((*app).p.empty() ? n : n+"_"+(*app).p, (*app).inst, lib))
                     KEXCEPTION("Depedency Project lib not found, try building: ") << (*app).buildDir().real();
             }else{
-                if(!LibFinder::findAdd((*app).project().root()[NAME].Scalar(), (*app).buildDir(), lib))
+                if(!LibFinder::findAdd((*app).project().root()[STR_NAME].Scalar(), (*app).buildDir(), lib))
                     KEXCEPTION("Depedency Project lib not found, try building: ") << (*app).buildDir().real();
             }
         }

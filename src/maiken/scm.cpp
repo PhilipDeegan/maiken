@@ -44,7 +44,7 @@ class UpdateTracker{
 
 void maiken::Application::scmStatus(const bool& deps) throw (kul::scm::Exception){
     std::vector<Application*> v;
-    if(deps) 
+    if(deps)
         for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
             const std::string& s((*app).project().dir().real());
             auto it = std::find_if(v.begin(), v.end(), [&s](const Application* app) {return (*app).project().dir().real() == s;});
@@ -71,8 +71,8 @@ void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
 
         const std::string& tscr(
             !this->scr.empty() ? this->scr
-                : this->project().root()[SCM] ? Properties::RESOLVE(*this, this->project().root()[SCM].Scalar()) 
-                : this->project().root()[NAME].Scalar());
+                : this->project().root()[STR_SCM] ? Properties::RESOLVE(*this, this->project().root()[STR_SCM].Scalar())
+                : this->project().root()[STR_NAME].Scalar());
 
         scmUpdate(f, scm, SCMGetter::REPO(this->project().dir(), tscr, isMod));
         UpdateTracker::INSTANCE().add(this->project().dir().real());
@@ -80,8 +80,8 @@ void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
 }
 
 void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const std::string& url) throw (kul::scm::Exception){
-    const std::string& ver(!this->scv.empty() ? this->scv 
-        : this->project().root()[VERSION] ? this->project().root()[VERSION].Scalar() : "");
+    const std::string& ver(!this->scv.empty() ? this->scv
+        : this->project().root()[STR_VERSION] ? this->project().root()[STR_VERSION].Scalar() : "");
     bool c = true;
     if(!f){
         KOUT(NON) << "CHECKING: " << this->project().dir().real() << " FROM " << url;
