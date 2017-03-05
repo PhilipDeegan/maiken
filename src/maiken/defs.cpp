@@ -75,7 +75,6 @@ constexpr const char* maiken::Constants::STR_COMPILER;
 constexpr const char* maiken::Constants::STR_COMPILE;
 constexpr const char* maiken::Constants::STR_LINKER;
 
-constexpr const char* maiken::Constants::STR_LIB;
 constexpr const char* maiken::Constants::STR_PROFILE;
 constexpr const char* maiken::Constants::STR_PROFILES;
 constexpr const char* maiken::Constants::STR_PROPERTY;
