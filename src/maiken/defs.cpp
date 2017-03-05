@@ -43,6 +43,7 @@ constexpr const char* maiken::Constants::STR_LIB;
 constexpr const char* maiken::Constants::STR_GIT;
 constexpr const char* maiken::Constants::STR_SVN;
 constexpr const char* maiken::Constants::STR_SCM;
+constexpr const char* maiken::Constants::STR_OUT;
 constexpr const char* maiken::Constants::STR_NAME;
 constexpr const char* maiken::Constants::STR_MASK;
 
