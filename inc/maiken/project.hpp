@@ -61,7 +61,7 @@ class KUL_PUBLISH Project : public kul::yaml::File, public Constants{
         friend class kul::yaml::File;
 };
 
-class KUL_PUBLISH Projects{
+class Projects{
     private:
         std::vector<std::unique_ptr<Project>> m_pps;
         kul::hash::set::String m_reloaded;

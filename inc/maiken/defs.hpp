@@ -167,6 +167,7 @@ class Constants{
         static constexpr const char* STR_SETTINGS       = "settings";
 
         static constexpr const char* STR_IF_DEP         = "if_dep";
+        static constexpr const char* STR_IF_MOD         = "if_mod";
         static constexpr const char* STR_IF_ARG         = "if_arg";
         static constexpr const char* STR_IF_INC         = "if_inc";
         static constexpr const char* STR_IF_SRC         = "if_src";

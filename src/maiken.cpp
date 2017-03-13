@@ -57,7 +57,9 @@ class ModuleMinimiser{
 maiken::Application::Application(const maiken::Project& proj, const std::string& profile)
     : m(kul::code::Mode::NONE), p(profile), proj(proj){}
 
-maiken::Application::~Application(){}
+maiken::Application::~Application(){
+    for(auto mod: mods) mod->unload();
+}
 
 maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
     using namespace kul::cli;
@@ -300,16 +302,16 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) thr
 }
 
 
-class CSM{ // CommandStateMachine
+class CommandStateMachine{
     friend class maiken::Application;
     private:
         bool _main = 1;
         kul::hash::set::String cmds;
-        CSM(){
+        CommandStateMachine(){
             reset();
         }
-        static CSM& INSTANCE(){
-            static CSM a;
+        static CommandStateMachine& INSTANCE(){
+            static CommandStateMachine a;
             return a;
         }
         void reset(){
@@ -348,7 +350,7 @@ class BuildRecorder{
 };
 
 void maiken::Application::process() throw(kul::Exception){
-    const kul::hash::set::String& cmds (CSM::INSTANCE().commands());
+    const kul::hash::set::String& cmds (CommandStateMachine::INSTANCE().commands());
     const kul::hash::set::String& phase(AppVars::INSTANCE().modulePhases());
 
     auto loadModules = [&] (Application& app) {
@@ -404,10 +406,10 @@ void maiken::Application::process() throw(kul::Exception){
 
     if(cmds.count(STR_BUILD_ALL) || cmds.count(STR_BUILD_MOD)){
         auto _mods = ModuleMinimiser::INSTANCE().modules(*this);
-        if(_mods.size() && !cmds.count(STR_BUILD_ALL)) CSM::INSTANCE().add(STR_BUILD);
-        CSM::INSTANCE().main(0);
+        if(_mods.size() && !cmds.count(STR_BUILD_ALL)) CommandStateMachine::INSTANCE().add(STR_BUILD);
+        CommandStateMachine::INSTANCE().main(0);
         for(auto& m : _mods) m.second.process();
-        CSM::INSTANCE().main(1);
+        CommandStateMachine::INSTANCE().main(1);
     }
 
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
@@ -426,8 +428,8 @@ void maiken::Application::process() throw(kul::Exception){
             for(auto& modLoader : mods)
                 modLoader->module()->pack(*this, modLoader->app()->modPArg);
     }
-    if(CSM::INSTANCE().main() && (cmds.count(STR_RUN) || cmds.count(STR_DBG))) run(cmds.count(STR_DBG));
-    CSM::INSTANCE().reset();
+    if(CommandStateMachine::INSTANCE().main() && (cmds.count(STR_RUN) || cmds.count(STR_DBG))) run(cmds.count(STR_DBG));
+    CommandStateMachine::INSTANCE().reset();
 }
 
 void maiken::Application::setup(){
@@ -465,20 +467,25 @@ void maiken::Application::setup(){
             mode);
     }
 
+    auto getIfMissing = [&](const YAML::Node& n, const bool mod){
+        const std::string& cwd(kul::env::CWD());
+        kul::Dir projectDir(resolveDepOrModDirectory(n, mod));
+        if(!projectDir.is()) loadDepOrMod(n, projectDir, mod);
+        kul::env::CWD(cwd);
+    };
+
     bool c = 1;
     while(c){
         c = 0;
         for (const auto& n : nodes) {
             if(n[STR_NAME].Scalar() != profile) continue;
-            for(const auto& mod : n[STR_MOD]) {
-                const std::string& cwd(kul::env::CWD());
-                kul::Dir projectDir(resolveDepOrModDirectory(mod, 1));
-                if(!projectDir.is()){
-                    loadDepOrMod(mod, projectDir, 1);
-                }
-                kul::env::CWD(cwd);
-            }
+            for(const auto& mod : n[STR_MOD]) getIfMissing(mod, 1);
             popDepOrMod(n, modDeps, STR_MOD, 1);
+            if(n[STR_IF_MOD] && n[STR_IF_MOD][KTOSTRING(__KUL_OS__)]) {
+                for(const auto& mod : n[STR_IF_MOD][KTOSTRING(__KUL_OS__)]) 
+                    getIfMissing(mod, 1);
+                popDepOrMod(n[STR_IF_MOD], modDeps, KTOSTRING(__KUL_OS__), 1);
+            }
             profile = n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
             c = !profile.empty();
             break;
@@ -498,21 +505,14 @@ void maiken::Application::setup(){
         c = 0;
         for (const auto& n : nodes) {
             if(n[STR_NAME].Scalar() != profile) continue;
-            for(const auto& dep : n[STR_DEP]) {
-                const std::string& cwd(kul::env::CWD());
-                kul::Dir projectDir(resolveDepOrModDirectory(dep, 0));
-                if(!projectDir.is()) loadDepOrMod(dep, projectDir, 0);
-                kul::env::CWD(cwd);
-            }
-            if(n[STR_IF_DEP] && n[STR_IF_DEP][KTOSTRING(__KUL_OS__)])
-                for(const auto& dep : n[STR_IF_DEP][KTOSTRING(__KUL_OS__)]) {
-                    const std::string& cwd(kul::env::CWD());
-                    kul::Dir projectDir(resolveDepOrModDirectory(dep, 0));
-                    if(!projectDir.is()) loadDepOrMod(dep, projectDir, 0);
-                    kul::env::CWD(cwd);
-                }
+            for(const auto& dep : n[STR_DEP]) getIfMissing(dep, 0);
             populateMaps(n);
             popDepOrMod(n, deps, STR_DEP, 0);
+            if(n[STR_IF_DEP] && n[STR_IF_DEP][KTOSTRING(__KUL_OS__)]){
+                for(const auto& dep : n[STR_IF_DEP][KTOSTRING(__KUL_OS__)])
+                    getIfMissing(dep, 0);
+                popDepOrMod(n[STR_IF_DEP], deps, KTOSTRING(__KUL_OS__), 0);
+            }
             profile = n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
             c = !profile.empty();
             break;
@@ -542,7 +542,6 @@ void maiken::Application::setup(){
                 }
 
     this->populateMapsFromDependencies();
-    this->populateMapsFromModules();
     std::vector<std::string> fileStrings{STR_ARCHIVER, STR_COMPILER, STR_LINKER};
     for(const auto& c : Settings::INSTANCE().root()[STR_FILE])
         for(const std::string& s : fileStrings)
