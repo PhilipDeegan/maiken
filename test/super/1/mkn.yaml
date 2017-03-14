@@ -1,0 +1,8 @@
+
+
+name: super1
+super: ../2
+property:
+    right: right
+
+inc: ${left}

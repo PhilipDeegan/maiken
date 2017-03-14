@@ -100,7 +100,7 @@ void maiken::Application::buildDepVecRec(std::vector<Application*>& dePs, int16_
     }
 }
 
-void maiken::Application::populateMapsFromDependencies(){
+void maiken::Application::populateMapsFromDependencies() throw (kul::Exception) {
     for(auto depP = dependencies().rbegin(); depP != dependencies().rend(); ++depP){
         const auto& dep(*depP);
         if(!dep.sources().empty()){

@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module){
+void maiken::Application::loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module) throw (kul::Exception) {
     KOUT(NON) << MKN_PROJECT_NOT_FOUND << depOrMod;
     kul::env::CWD(this->project().dir());
     const std::string& tscr(node[STR_SCM] ? Properties::RESOLVE(*this, node[STR_SCM].Scalar()) : node[STR_NAME].Scalar());
@@ -142,7 +142,7 @@ void maiken::Application::popDepOrMod(
         if(!app.sources().empty()){
             app.buildDir().mk();
             std::string _path(app.inst ? app.inst.escr() : app.buildDir().escr());
-            if(std::find(app.paths.begin(), app.paths.end(), _path) != app.paths.end())
+            if(std::find(app.paths.begin(), app.paths.end(), _path) == app.paths.end())
                 app.paths.push_back(_path);
         }
         kul::env::CWD(this->project().dir());

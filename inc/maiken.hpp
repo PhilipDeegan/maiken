@@ -174,11 +174,11 @@ class KUL_PUBLISH Application : public Constants{
         kul::code::CompilerProcessCapture buildLibrary(const std::vector<std::string>& objects);
         void checkErrors(const kul::code::CompilerProcessCapture& cpc) throw(kul::Exception);
 
-        void populateMaps(const YAML::Node& n);
+        void populateMaps(const YAML::Node& n) throw (kul::Exception);
 
         void preSetupValidation() throw(Exception);
         void postSetupValidation() throw(Exception);
-        void resolveProperties();
+        void resolveProperties() throw(Exception);
 
         void compile(std::vector<std::string>& objects) throw(kul::Exception);
         void build() throw(kul::Exception);
@@ -193,7 +193,7 @@ class KUL_PUBLISH Application : public Constants{
         void scmUpdate(const bool& f) throw(kul::scm::Exception);
         void scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo) throw(kul::scm::Exception);
 
-        void setup();
+        void setup() throw (kul::Exception);
         void setSuper();
         void showConfig(bool force = 0);
         void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception);
@@ -202,12 +202,10 @@ class KUL_PUBLISH Application : public Constants{
 
         void buildDepVec(const std::string* depVal);
         void buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc);
-        void loadDependencies();
-        void populateMapsFromDependencies();
 
-        void loadModules();
+        void populateMapsFromDependencies() throw (kul::Exception);
 
-        void loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module);
+        void loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module) throw (kul::Exception);
         kul::Dir resolveDepOrModDirectory(const YAML::Node& d, bool module);
         void popDepOrMod(const YAML::Node& n, std::vector<Application>& vec, const std::string& s, bool module) throw(kul::Exception);
 
@@ -215,8 +213,8 @@ class KUL_PUBLISH Application : public Constants{
         kul::hash::set::String inactiveMains();
 
         bool incSrc(const kul::File& f);
-        void addSourceLine (const std::string& o) throw (kul::StringException);
-        void addIncludeLine(const std::string& o) throw (kul::StringException);
+        void addSourceLine (const std::string& o) throw (kul::Exception);
+        void addIncludeLine(const std::string& o) throw (kul::Exception);
 
         void              modCompile(const YAML::Node& modArg){ modCArg = modArg; }
         const YAML::Node& modCompile()                        { return modCArg; }
@@ -250,7 +248,6 @@ class KUL_PUBLISH Application : public Constants{
 };
 
 class Applications{
-
     private:
         kul::hash::map::S2T<kul::hash::map::S2T<Application*>> m_apps;
         std::vector<std::unique_ptr<Application>> m_appPs;
@@ -260,20 +257,20 @@ class Applications{
             static Applications a;
             return a;
         }
-        Application* getOrCreate(const maiken::Project& proj, const std::string& _profile = ""){
+        Application* getOrCreate(const maiken::Project& proj, const std::string& _profile = "") throw (kul::Exception) {
             std::string pDir(proj.dir().real());
             std::string profile = _profile.empty() ? "@" : _profile;
             if(!m_apps.count(pDir) || !m_apps[pDir].count(profile)){
                 auto app = std::make_unique<Application>(proj, _profile);
-                {
-                    const std::string& cwd(kul::env::CWD());
-                    kul::env::CWD(proj.dir());
-                    app->setup();
-                    kul::env::CWD(cwd);
-                }
                 auto pp = app.get();
                 m_appPs.push_back(std::move(app));
                 m_apps[pDir][profile] = pp;
+                {
+                    const std::string& cwd(kul::env::CWD());
+                    kul::env::CWD(proj.dir());
+                    pp->setup();
+                    kul::env::CWD(cwd);
+                }
             }
             return m_apps[pDir][profile];
         }

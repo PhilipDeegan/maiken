@@ -78,7 +78,6 @@ class Module{
         virtual void compile(Application& app, const YAML::Node& arg) throw(std::exception) {} 
         virtual void link   (Application& app, const YAML::Node& arg) throw(std::exception) {}
         virtual void pack   (Application& app, const YAML::Node& arg) throw(std::exception) {}
-        virtual void destroy(Application& app) throw(ModuleException) {}
 };
 
 
@@ -130,9 +129,7 @@ class KUL_PUBLISH ModuleLoader
 #ifndef _MKN_DISABLE_MODULES_
         throw(kul::sys::Exception)
 #endif//_MKN_DISABLE_MODULES_
-        ;
-
-        
+        ;        
 };
 
 class GlobalModules{

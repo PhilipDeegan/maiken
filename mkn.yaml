@@ -5,7 +5,7 @@ version: master
 scm: https://github.com/dekken/maiken
 
 property:
-    DATE: 13-MAR-2017
+    DATE: 14-MAR-2017
     mkn.kul.profile: "@" # change to "c++0x" for < c++11
 
 parent: base
@@ -43,24 +43,6 @@ profile:
       - name: parse.yaml
         version: master
         profile: cmn
-
-  - name: mod-test
-    parent: base
-    mod:
-      - name: mkn-mod.min
-    if_mod:
-        bsd:
-          - name: mkn-mod.exec
-            arg:
-                compile: echo HELLO BSD
-        nix:
-          - name: mkn-mod.exec
-            arg:
-                compile: echo HELLO *NIX
-        win:
-          - name: mkn-mod.exec
-            arg:
-                compile: cmd /c echo hello maiken! 
 
   - name: lib
     parent: base

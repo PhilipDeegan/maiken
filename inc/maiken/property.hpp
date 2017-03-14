@@ -34,10 +34,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken{
 class Properties : public Constants {
     private:
-        static std::shared_ptr<std::tuple<std::string, int, int>> KEY(const kul::hash::map::S2S& ps, const std::string& s);
+        static std::shared_ptr<std::tuple<std::string, int, int>> KEY(const kul::hash::map::S2S& ps, const std::string& s) throw(kul::Exception);
     public:
-        static std::string RESOLVE(const Application& app, const std::string& s);
-        static std::string RESOLVE(const Settings& app, const std::string& s);
+        static std::string RESOLVE(const Application& app, const std::string& s) throw(kul::Exception);
+        static std::string RESOLVE(const Settings& app, const std::string& s) throw(kul::Exception);
 };
 
 }

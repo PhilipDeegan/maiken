@@ -101,7 +101,18 @@ maiken::Settings& maiken::Settings::INSTANCE(){
     return *instance.get();
 }
 
-std::string maiken::Settings::RESOLVE(const std::string& s){
+void maiken::Settings::resolveProperties() throw(SettingsException) {
+    ps.setDeletedKey("--DELETED--");
+    for(YAML::const_iterator it = root()[STR_PROPERTY].begin(); it != root()[STR_PROPERTY].end(); ++it)
+        ps[it->first.as<std::string>()] = it->second.as<std::string>();
+    for(YAML::const_iterator it = root()[STR_PROPERTY].begin(); it != root()[STR_PROPERTY].end(); ++it) {
+        std::string s = Properties::RESOLVE(*this, it->second.as<std::string>());
+        if(ps.count(it->first.as<std::string>())) ps.erase(it->first.as<std::string>());
+        ps[it->first.as<std::string>()] = s;
+    }
+}
+
+std::string maiken::Settings::RESOLVE(const std::string& s) throw(SettingsException) {
     std::vector<kul::File> pos {
         kul::File(s),
         kul::File(s+".yaml"),

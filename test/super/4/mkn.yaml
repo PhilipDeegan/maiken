@@ -1,0 +1,9 @@
+
+
+name: super4
+super: ../3
+
+property:
+    left: left
+
+inc: ${right}    

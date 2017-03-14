@@ -1,0 +1,8 @@
+
+
+name: super3
+
+property:
+    right: right
+
+inc: ${right}    
