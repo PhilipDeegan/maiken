@@ -34,12 +34,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Validator : public maiken::Constants{
     private:
-        std::vector<std::string> ifArgsLefts   { "bin", "lib", "shared", "static"};
-        std::vector<std::string> ifOSLefts { "bsd", "nix", "win"};
+        std::vector<std::string> ifArgsLefts{ "bin", "lib", "shared", "static"};
+        std::vector<std::string> ifOSLefts  { "bsd", "nix", "win"};
         Validator(){
             std::vector<std::string> ifLefts;
             for(const std::string& is : ifOSLefts) for(const std::string& a : ifArgsLefts) ifLefts.push_back(is + "_" + a);
-            for(const std::string& s : ifLefts) ifArgsLefts.push_back(s);
+            for(const std::string& s : ifLefts)   ifArgsLefts.push_back(s);
             for(const std::string& s : ifOSLefts) ifArgsLefts.push_back(s);
         }
         static Validator& INSTANCE(){
@@ -70,10 +70,11 @@ class Validator : public maiken::Constants{
                     KEXCEPT(maiken::Exception, "mode tag invalid value, expects none/static/shared\n"+a.project().dir().path());
             }
             if(n[STR_IF_ARG]) IF_VALUEDATER(a, n[STR_IF_ARG], STR_IF_ARG, INSTANCE().ifArgsLefts);
-            if(n[STR_IF_INC]) IF_VALUEDATER(a, n[STR_IF_INC], STR_IF_ARG, INSTANCE().ifOSLefts);
-            if(n[STR_IF_SRC]) IF_VALUEDATER(a, n[STR_IF_SRC], STR_IF_ARG, INSTANCE().ifOSLefts);
-            if(n[STR_IF_LIB]) IF_VALUEDATER(a, n[STR_IF_SRC], STR_IF_ARG, INSTANCE().ifOSLefts);
-            if(n[STR_IF_DEP]) IF_VALUEDATER(a, n[STR_IF_SRC], STR_IF_DEP, INSTANCE().ifOSLefts);
+            if(n[STR_IF_INC]) IF_VALUEDATER(a, n[STR_IF_INC], STR_IF_INC, INSTANCE().ifOSLefts);
+            if(n[STR_IF_SRC]) IF_VALUEDATER(a, n[STR_IF_SRC], STR_IF_SRC, INSTANCE().ifOSLefts);
+            if(n[STR_IF_LIB]) IF_VALUEDATER(a, n[STR_IF_LIB], STR_IF_LIB, INSTANCE().ifOSLefts);
+            if(n[STR_IF_DEP]) IF_VALUEDATER(a, n[STR_IF_DEP], STR_IF_DEP, INSTANCE().ifOSLefts);
+            if(n[STR_IF_MOD]) IF_VALUEDATER(a, n[STR_IF_MOD], STR_IF_MOD, INSTANCE().ifOSLefts);
             if(n[STR_DEP])
                 for(const auto& d : n[STR_DEP])
                     if(!d[STR_LOCAL] && !d[STR_NAME])

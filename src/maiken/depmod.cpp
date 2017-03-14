@@ -127,8 +127,6 @@ void maiken::Application::popDepOrMod(
         }
     };
     for(const auto& depOrMod : n[s]) lam(depOrMod);
-    if(!module && n[STR_IF_DEP] && n[STR_IF_DEP][KTOSTRING(__KUL_OS__)])
-        for(const auto& depOrMod : n[STR_IF_DEP][KTOSTRING(__KUL_OS__)]) lam(depOrMod);
 
     if(n[STR_SELF])
         for(const auto& s : kul::String::SPLIT(Properties::RESOLVE(*this, n[STR_SELF].Scalar()), ' ')){

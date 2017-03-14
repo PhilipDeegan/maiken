@@ -30,17 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::populateMapsFromModules(){
-    // for(auto mod = modDeps.rbegin(); mod != modDeps.rend(); ++mod){
-    //     for(const std::string& s : (*mod).libraryPaths())
-    //         if(std::find(libraryPaths().begin(), libraryPaths().end(), s) == libraryPaths().end())
-    //             paths.push_back(s);
-    //     for(const std::string& s : (*mod).libraries())
-    //         if(std::find(libraries().begin(), libraries().end(), s) == libraries().end())
-    //             libs.push_back(s);
-    // }
-}
-
 kul::File maiken::ModuleLoader::FIND(const Application& ap)
 #ifndef _MKN_DISABLE_MODULES_
         throw(kul::sys::Exception)

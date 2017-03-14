@@ -43,11 +43,10 @@ const kul::yaml::Validator maiken::Project::validator() const{
         NodeValidator("scm"),
         NodeValidator("local")
     };
-
     NodeValidator dep("dep", depVals, 0, NodeType::LIST);
     NodeValidator if_dep("if_dep", { NodeValidator("*", depVals, 0, NodeType::LIST) }, 0, NodeType::MAP);
 
-    NodeValidator modules("mod", {
+    std::vector<NodeValidator> modVals {
         NodeValidator("name"),
         NodeValidator("version"),
         NodeValidator("profile"),
@@ -58,7 +57,9 @@ const kul::yaml::Validator maiken::Project::validator() const{
             NodeValidator("link",    { NodeValidator("*") }, 0, NodeType::NON),
             NodeValidator("pack",    { NodeValidator("*") }, 0, NodeType::NON)
         }, 0, NodeType::MAP)
-    }, 0, NodeType::LIST);
+    };
+    NodeValidator mod("mod", modVals, 0, NodeType::LIST);
+    NodeValidator if_mod("if_mod", { NodeValidator("*", modVals, 0, NodeType::LIST) }, 0, NodeType::MAP);
 
     NodeValidator env("env", {
         NodeValidator("name", 1),
@@ -94,7 +95,8 @@ const kul::yaml::Validator maiken::Project::validator() const{
         env,
         dep,
         if_dep,
-        modules,
+        mod,
+        if_mod,
         if_arg,
         if_inc,
         if_lib,
@@ -118,7 +120,8 @@ const kul::yaml::Validator maiken::Project::validator() const{
             env,
             dep,
             if_dep,
-            modules,
+            mod,
+            if_mod,
             if_arg,
             if_inc,
             if_lib,

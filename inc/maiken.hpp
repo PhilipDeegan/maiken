@@ -206,7 +206,6 @@ class KUL_PUBLISH Application : public Constants{
         void populateMapsFromDependencies();
 
         void loadModules();
-        void populateMapsFromModules();
 
         void loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module);
         kul::Dir resolveDepOrModDirectory(const YAML::Node& d, bool module);

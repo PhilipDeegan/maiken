@@ -63,11 +63,9 @@ enum MODULE_PHASE {
 };
 
 class ModuleLoader;
-class ModuleEnviron;
 
 class Module{
     friend class ModuleLoader;
-    friend class ModuleEnviron;
     private:
         const Application * app = nullptr;
         void application(const Application * _app){
@@ -83,39 +81,8 @@ class Module{
         virtual void destroy(Application& app) throw(ModuleException) {}
 };
 
-// class ModuleEnviron{
-//     private:
-//         std::string oldEnv;
-// #ifdef _WIN32
-//         static constexpr const char* KEY = "PATH";
-// #else
-//         static constexpr const char* KEY = "LD_LIBRARY_PATH";
-// #endif
-//         const Application& ap;
-
-//     public:
-//         ModuleEnviron(const Application& _ap) : ap(_ap)   { set(); }
-//         ModuleEnviron(const Module* _mod) : ap(*_mod->app){ set(); }
-
-//         void set(){
-//             oldEnv = kul::env::GET(KEY);
-//             KLOG(DBG) << oldEnv;
-//             std::stringstream ss;
-//             for(const std::string& s : ap.libraryPaths()) ss << s << kul::env::SEP();
-//             kul::cli::EnvVar var(KEY, ss.str(), kul::cli::EnvVarMode::PREP);
-            
-//             const auto newEnv(var.toString());
-//             KLOG(DBG) << newEnv;
-//             kul::env::SET(KEY, newEnv.c_str());
-//         }
-//         ~ModuleEnviron(){
-//             kul::env::SET(KEY, oldEnv.c_str());
-//         }
-// };
 
 class GlobalModules;
-
-
 class KUL_PUBLISH ModuleLoader 
 #ifndef _MKN_DISABLE_MODULES_
 : public kul::sys::SharedClass<maiken::Module> 

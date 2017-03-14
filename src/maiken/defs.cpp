@@ -85,6 +85,7 @@ constexpr const char* maiken::Constants::STR_DEP;
 constexpr const char* maiken::Constants::STR_DEPS;
 
 constexpr const char* maiken::Constants::STR_IF_DEP;
+constexpr const char* maiken::Constants::STR_IF_MOD;
 constexpr const char* maiken::Constants::STR_IF_ARG;
 constexpr const char* maiken::Constants::STR_IF_INC;
 constexpr const char* maiken::Constants::STR_IF_LIB;
