@@ -109,9 +109,9 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) thr
         std::stringstream ss;
         ss << KTOSTRING(_MKN_VERSION_) << " (" << KTOSTRING(__KUL_OS__) << ")";
 #ifdef _MKN_DISABLE_MODULES_
-        ss << "w/o[mod]";
+        ss << " w/o[mod]";
 #else
-        ss << "w/[mod]";
+        ss << " w/[mod]";
 #endif//_MKN_DISABLE_MODULES_
         KOUT(NON) << ss.str();
         KEXIT(0, "");
