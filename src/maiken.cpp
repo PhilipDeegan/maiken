@@ -158,13 +158,7 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) thr
     if(args.has(STR_SETTINGS) && !Settings::SET(args.get(STR_SETTINGS)))
         KEXCEPT(Exception, "Unable to set specific settings xml");
     else Settings::INSTANCE();
-    auto* app = Applications::INSTANCE().getOrCreate(project, profile);
-    auto& a = *app;
-    if(args.has(STR_PROFILES)){
-        a.showProfiles();
-        KEXIT(0, "");
-    }
-    a.ig = 0;
+
     if(args.has(STR_DRY_RUN))       AppVars::INSTANCE().dryRun(true);
     if(args.has(STR_SHARED))        AppVars::INSTANCE().shar(true);
     if(args.has(STR_STATIC))        AppVars::INSTANCE().stat(true);
@@ -172,10 +166,15 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) thr
         KEXCEPT(Exception, "Cannot specify shared and static simultaneously");
     if(args.has(STR_SCM_FUPDATE))   AppVars::INSTANCE().fupdate(true);
     if(args.has(STR_SCM_UPDATE))    AppVars::INSTANCE().update(true);
+    if(args.has(STR_DEP))           AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
 
-    if(project.root()[STR_SCM])     a.scr = project.root()[STR_SCM].Scalar();
-
-    if(args.has(STR_DEP)) AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
+    auto* app = Applications::INSTANCE().getOrCreate(project, profile);
+    auto& a = *app;
+    if(args.has(STR_PROFILES)){
+        a.showProfiles();
+        KEXIT(0, "");
+    }
+    a.ig = 0;
 
     auto splitArgs = [](const std::string& s, const std::string& t, const std::function<void(const std::string&, const std::string&)>& f){
         for(const auto& p : kul::String::ESC_SPLIT(s, ',')){
@@ -203,8 +202,6 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) thr
                 std::placeholders::_2));
 
     AppVars::INSTANCE().dependencyString(args.has(STR_DEP) ? &args.get(STR_DEP) : 0);
-
-    a.setup();
     a.buildDepVec(AppVars::INSTANCE().dependencyString());
 
     if(args.has(STR_MOD)){
@@ -431,6 +428,7 @@ void maiken::Application::process() throw(kul::Exception){
 }
 
 void maiken::Application::setup(){
+    if(project().root()[STR_SCM]) scr = Properties::RESOLVE(*this, project().root()[STR_SCM].Scalar());
     if(AppVars::INSTANCE().update() || AppVars::INSTANCE().fupdate()) {
         scmUpdate(AppVars::INSTANCE().fupdate());
         Projects::INSTANCE().reload(proj);
@@ -890,71 +888,6 @@ void maiken::Application::addIncludeLine(const std::string& o) throw (kul::Strin
     }
 }
 
-void maiken::Application::loadTimeStamps() throw (kul::StringException){
-    if(_MKN_TIMESTAMPS_){
-        kul::Dir mkn(buildDir().join(".mkn"));
-        kul::File src("src_stamp", mkn);
-        if(mkn && src){
-            kul::io::Reader r(src);
-            const char* c = 0;
-            while((c = r.readLine())){
-                std::string s(c);
-                if(s.size() == 0) continue;
-                std::vector<std::string> bits;
-                kul::String::SPLIT(s, ' ', bits);
-                if(bits.size() != 2) KEXCEPTION("timestamp file invalid format\n"+src.full());
-                try{
-                    stss.insert(bits[0], kul::String::UINT16(bits[1]));
-                }catch(const kul::StringException& e){
-                    KEXCEPTION("timestamp file invalid format\n"+src.full());
-                }
-            }
-        }
-        kul::File inc("inc_stamp", mkn);
-        if(mkn && inc){
-            kul::io::Reader r(inc);
-            const char* c = 0;
-            while((c = r.readLine())){
-                std::string s(c);
-                if(s.size() == 0) continue;
-                std::vector<std::string> bits;
-                kul::String::SPLIT(s, ' ', bits);
-                if(bits.size() != 2) KEXCEPTION("timestamp file invalid format\n"+inc.full());
-                try{
-                    itss.insert(bits[0], bits[1]);
-                }catch(const kul::StringException& e){
-                    KEXCEPTION("timestamp file invalid format\n"+src.full());
-                }
-            }
-        }
-        for(const auto& i : includes()){
-            kul::Dir inc(i.first);
-            ulonglong includeStamp = inc.timeStamps().modified();
-            for(const auto fi : inc.files(1)) includeStamp += fi.timeStamps().modified();
-            std::ostringstream os;
-            os << std::hex << includeStamp;
-            includeStamps.insert(inc.mini(), os.str());
-        }
-    }
-}
-
-namespace maiken {
-class SuperApplications{
-    friend class maiken::Application;
-    private:
-        kul::hash::set::String files;
-        static SuperApplications& INSTANCE(){
-            static SuperApplications instance;
-            return instance;
-        }
-        void cycleCheck(const std::string& file) throw (maiken::SettingsException){
-            if(files.count(file))
-                KEXCEPT(maiken::SettingsException, "Super cycle detected in file: " + file);
-            files.insert(file);
-        }
-};
-}
-
 void maiken::Application::setSuper(){
     if(sup) return;
     if(project().root()[STR_SUPER]){
@@ -965,7 +898,6 @@ void maiken::Application::setSuper(){
         std::string super(d.real());
         if(super == project().dir().real())
             KEXCEPTION("Super cannot reference itself: " + project().dir().real());
-        SuperApplications::INSTANCE().cycleCheck(super);
         d = kul::Dir(super);
         sup = Applications::INSTANCE().getOrCreate(
             *maiken::Projects::INSTANCE().getOrCreate(d), "");

@@ -145,12 +145,14 @@ class AppVars : public Constants{
 class Module;
 class ModuleLoader;
 class ThreadingCompiler;
+class Applications;
 class KUL_PUBLISH Application : public Constants{
+    friend class Applications;
     friend class ThreadingCompiler;
     protected:
         bool ig = 1, isMod = 0;
-        const Application* par = 0;
-        Application* sup;
+        const Application* par = nullptr;
+        Application* sup = nullptr;
         kul::code::Mode m;
         std::string arg, main, lang, lnk, out, scr, scv;
         const std::string p;
@@ -264,6 +266,12 @@ class Applications{
             std::string profile = _profile.empty() ? "@" : _profile;
             if(!m_apps.count(pDir) || !m_apps[pDir].count(profile)){
                 auto app = std::make_unique<Application>(proj, _profile);
+                {
+                    const std::string& cwd(kul::env::CWD());
+                    kul::env::CWD(proj.dir());
+                    app->setup();
+                    kul::env::CWD(cwd);
+                }
                 auto pp = app.get();
                 m_appPs.push_back(std::move(app));
                 m_apps[pDir][profile] = pp;
