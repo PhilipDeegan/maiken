@@ -277,6 +277,33 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) thr
     return *app;
 }
 
+void maiken::Application::resolveLang() throw(maiken::Exception) {
+    const auto& mains(inactiveMains());
+    if(mains.size()) lang = (*mains.begin()).substr((*mains.begin()).rfind(".")+1);
+    else
+    if(sources().size()){
+        const auto srcMM = sourceMap();
+        std::string maxS;
+        kul::hash::map::S2T<size_t> mapS;
+        size_t maxI = 0, maxO = 0;
+        for(const auto& ft : srcMM) mapS.insert(ft.first, 0);
+        for(const auto& ft : srcMM)
+            mapS[ft.first] = mapS[ft.first] + ft.second.size();
+        for(const auto& s_i : mapS)
+            if(s_i.second > maxI){
+                maxI = s_i.second;
+                maxS = s_i.first;
+            }
+        for(const auto s_i : mapS) if(s_i.second == maxI) maxO++;
+        if(maxO > 1)
+            KEXCEPSTREAM
+                << "file type conflict: linker filetype cannot be deduced, "
+                << "specify lang tag to override\n"
+                << project().dir().path();
+        lang = maxS;
+    }
+}
+
 kul::hash::set::String maiken::Application::inactiveMains(){
     kul::hash::set::String iMs;
     std::string p;
@@ -448,7 +475,7 @@ void maiken::Application::setSuper(){
             KLOG(INF);
         }catch(const std::exception& e){
             KEXCEPTION("Possible super cycle detected: " + project().dir().real());
-        }        
+        }
         auto cycle = sup;
         while(cycle){
             if(cycle->project().dir() == project().dir())

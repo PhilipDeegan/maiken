@@ -44,6 +44,6 @@ int main(int argc, char* argv[]) {
     catch(const kul::proc::ExitException& e){ KERR << e.what(); return e.code(); }
     catch(const kul::Exception& e){ KERR << e.stack(); return 2; }
     catch(const std::exception& e){ KERR << e.what(); return 3; }
-
+    maiken::Applications::INSTANCE().clear();
     return 0;
 }

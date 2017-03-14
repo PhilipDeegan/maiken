@@ -81,7 +81,7 @@ void maiken::Application::setup() throw (kul::Exception) {
             for(const auto& mod : n[STR_MOD]) getIfMissing(mod, 1);
             popDepOrMod(n, modDeps, STR_MOD, 1);
             if(n[STR_IF_MOD] && n[STR_IF_MOD][KTOSTRING(__KUL_OS__)]) {
-                for(const auto& mod : n[STR_IF_MOD][KTOSTRING(__KUL_OS__)]) 
+                for(const auto& mod : n[STR_IF_MOD][KTOSTRING(__KUL_OS__)])
                     getIfMissing(mod, 1);
                 popDepOrMod(n[STR_IF_MOD], modDeps, KTOSTRING(__KUL_OS__), 1);
             }
@@ -170,32 +170,7 @@ void maiken::Application::setup() throw (kul::Exception) {
             break;
         }
     }
-    if(main.empty() && lang.empty()){
-        const auto& mains(inactiveMains());
-        if(mains.size()) lang = (*mains.begin()).substr((*mains.begin()).rfind(".")+1);
-        else
-        if(sources().size()){
-            const auto srcMM = sourceMap();
-            std::string maxS;
-            kul::hash::map::S2T<size_t> mapS;
-            size_t maxI = 0, maxO = 0;
-            for(const auto& ft : srcMM) mapS.insert(ft.first, 0);
-            for(const auto& ft : srcMM)
-                mapS[ft.first] = mapS[ft.first] + ft.second.size();
-            for(const auto& s_i : mapS)
-                if(s_i.second > maxI){
-                    maxI = s_i.second;
-                    maxS = s_i.first;
-                }
-            for(const auto s_i : mapS) if(s_i.second == maxI) maxO++;
-            if(maxO > 1)
-                KEXCEPSTREAM
-                    << "file type conflict: linker filetype cannot be deduced, "
-                    << "specify lang tag to override\n"
-                    << project().dir().path();
-            lang = maxS;
-        }
-    }
+    if(main.empty() && lang.empty()) resolveLang();
     if(par){
         if(!main.empty() && lang.empty()) lang = main.substr(main.rfind(".")+1);
         main.clear();

@@ -165,6 +165,8 @@ void maiken::Application::process() throw(kul::Exception){
 
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
         if((*app).ig) continue;
+        if((*app).lang.empty()) (*app).resolveLang();
+        (*app).main.clear();
         proc(*app, !(*app).srcs.empty());
     }
     if(!this->ig) proc(*this, (!this->srcs.empty() || !this->main.empty()));

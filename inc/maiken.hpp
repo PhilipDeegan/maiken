@@ -43,6 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/project.hpp"
 #include "maiken/settings.hpp"
 
+int main(int argc, char* argv[]);
+
 namespace maiken{
 
 class Exception : public kul::Exception{
@@ -179,6 +181,7 @@ class KUL_PUBLISH Application : public Constants{
         void preSetupValidation() throw(Exception);
         void postSetupValidation() throw(Exception);
         void resolveProperties() throw(Exception);
+        void resolveLang() throw(Exception);
 
         void compile(std::vector<std::string>& objects) throw(kul::Exception);
         void build() throw(kul::Exception);
@@ -248,10 +251,15 @@ class KUL_PUBLISH Application : public Constants{
 };
 
 class Applications{
+    friend int ::main(int argc, char* argv[]);
     private:
         kul::hash::map::S2T<kul::hash::map::S2T<Application*>> m_apps;
         std::vector<std::unique_ptr<Application>> m_appPs;
         Applications(){}
+        void clear(){
+            m_apps.clear();
+            m_appPs.clear();
+        }
     public:
         static Applications& INSTANCE(){
             static Applications a;
