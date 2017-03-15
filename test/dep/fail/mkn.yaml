@@ -1,0 +1,9 @@
+
+
+name: mkn-dep-test
+main: cpp.cpp
+
+dep:
+  - local: mkn.ram
+    name: mkn.ram
+    scm: notRight

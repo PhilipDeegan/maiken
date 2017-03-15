@@ -265,7 +265,7 @@ class Applications{
             static Applications a;
             return a;
         }
-        Application* getOrCreate(const maiken::Project& proj, const std::string& _profile = "") throw (kul::Exception) {
+        Application* getOrCreate(const maiken::Project& proj, const std::string& _profile = "", bool setup = 1) throw (kul::Exception) {
             std::string pDir(proj.dir().real());
             std::string profile = _profile.empty() ? "@" : _profile;
             if(!m_apps.count(pDir) || !m_apps[pDir].count(profile)){
@@ -273,7 +273,7 @@ class Applications{
                 auto pp = app.get();
                 m_appPs.push_back(std::move(app));
                 m_apps[pDir][profile] = pp;
-                {
+                if(setup){
                     const std::string& cwd(kul::env::CWD());
                     kul::env::CWD(proj.dir());
                     pp->setup();
@@ -282,7 +282,7 @@ class Applications{
             }
             return m_apps[pDir][profile];
         }
-};
+}; 
 
 class ThreadingCompiler : public Constants{
     private:

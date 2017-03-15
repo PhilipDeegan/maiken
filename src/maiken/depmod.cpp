@@ -112,14 +112,14 @@ void maiken::Application::popDepOrMod(
 
                 if(!f && !s.empty())
                     KEXCEPTION("profile does not exist\n"+s+"\n"+project().dir().path());
-                auto& app = *Applications::INSTANCE().getOrCreate(c, s);
+                auto& app = *Applications::INSTANCE().getOrCreate(c, s, 0);
                 app.par = this;
                 setApp(app, depOrMod);
                 vec.push_back(app);
                 apps.push_back(std::make_pair(app.project().dir().path(), app.p));
             }
         }else{
-            auto& app = *Applications::INSTANCE().getOrCreate(c, "");
+            auto& app = *Applications::INSTANCE().getOrCreate(c, "", 0);
             app.par = this;
             setApp(app, depOrMod);
             vec.push_back(app);
@@ -138,12 +138,13 @@ void maiken::Application::popDepOrMod(
         }
     cyclicCheck(apps);
     for(auto& app : vec){
+        if(app.buildDir().path().size()) continue;
         kul::env::CWD(app.project().dir());
+        app.setup();
+        if(app.project().root()[STR_SCM]) app.scr = Properties::RESOLVE(app, app.project().root()[STR_SCM].Scalar());
         if(!app.sources().empty()){
             app.buildDir().mk();
-            std::string _path(app.inst ? app.inst.escr() : app.buildDir().escr());
-            if(std::find(app.paths.begin(), app.paths.end(), _path) == app.paths.end())
-                app.paths.push_back(_path);
+            app.paths.push_back(app.inst ? app.inst.escr() : app.buildDir().escr());
         }
         kul::env::CWD(this->project().dir());
     }

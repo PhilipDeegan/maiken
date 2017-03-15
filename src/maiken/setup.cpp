@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 void maiken::Application::setup() throw (kul::Exception) {
-    if(project().root()[STR_SCM]) scr = Properties::RESOLVE(*this, project().root()[STR_SCM].Scalar());
+    if(scr.empty() && project().root()[STR_SCM]) scr = Properties::RESOLVE(*this, project().root()[STR_SCM].Scalar());
     if(AppVars::INSTANCE().update() || AppVars::INSTANCE().fupdate()) {
         scmUpdate(AppVars::INSTANCE().fupdate());
         Projects::INSTANCE().reload(proj);
