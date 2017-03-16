@@ -138,14 +138,15 @@ void maiken::Application::popDepOrMod(
         }
     cyclicCheck(apps);
     for(auto& app : vec){
-        if(app.buildDir().path().size()) continue;
-        kul::env::CWD(app.project().dir());
-        app.setup();
-        if(app.project().root()[STR_SCM]) app.scr = Properties::RESOLVE(app, app.project().root()[STR_SCM].Scalar());
-        if(!app.sources().empty()){
-            app.buildDir().mk();
-            app.paths.push_back(app.inst ? app.inst.escr() : app.buildDir().escr());
+        if(app.buildDir().path().empty()){
+            kul::env::CWD(app.project().dir());
+            if(app.project().root()[STR_SCM]) app.scr = Properties::RESOLVE(app, app.project().root()[STR_SCM].Scalar());
+            app.setup();
+            if(app.sources().size()) app.buildDir().mk();
+            kul::env::CWD(this->project().dir());
         }
-        kul::env::CWD(this->project().dir());
+        std::string _path(app.inst ? app.inst.escr() : app.buildDir().escr());
+        if(app.sources().size() && std::find(app.paths.begin(), app.paths.end(), _path) == app.paths.end())
+            app.paths.push_back(_path);
     }
 }

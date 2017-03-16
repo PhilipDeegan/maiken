@@ -282,7 +282,7 @@ class Applications{
             }
             return m_apps[pDir][profile];
         }
-}; 
+};
 
 class ThreadingCompiler : public Constants{
     private:
