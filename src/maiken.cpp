@@ -149,14 +149,6 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) thr
     if(args.has(STR_SCM_UPDATE))    AppVars::INSTANCE().update(true);
     if(args.has(STR_DEP))           AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
 
-    auto* app = Applications::INSTANCE().getOrCreate(project, profile);
-    auto& a = *app;
-    if(args.has(STR_PROFILES)){
-        a.showProfiles();
-        KEXIT(0, "");
-    }
-    a.ig = 0;
-
     auto splitArgs = [](const std::string& s, const std::string& t, const std::function<void(const std::string&, const std::string&)>& f){
         for(const auto& p : kul::String::ESC_SPLIT(s, ',')){
             std::vector<std::string> ps = kul::String::ESC_SPLIT(p, '=');
@@ -181,6 +173,14 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) thr
                 std::ref(AppVars::INSTANCE()),
                 std::placeholders::_1,
                 std::placeholders::_2));
+
+    auto* app = Applications::INSTANCE().getOrCreate(project, profile);
+    auto& a = *app;
+    if(args.has(STR_PROFILES)){
+        a.showProfiles();
+        KEXIT(0, "");
+    }
+    a.ig = 0;
 
     AppVars::INSTANCE().dependencyString(args.has(STR_DEP) ? &args.get(STR_DEP) : 0);
     a.buildDepVec(AppVars::INSTANCE().dependencyString());

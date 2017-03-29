@@ -32,11 +32,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void maiken::Application::loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module) throw (kul::Exception) {
     KOUT(NON) << MKN_PROJECT_NOT_FOUND << depOrMod;
+#ifdef _MKN_DISABLE_SCM_
+    KEXCEPTION("dep does not exist and remote retrieval is disabled - path: " + depOrMod.path());
+#endif
+    if(!node[STR_SCM] && !node[STR_NAME])
+        KEXCEPTION("dep has no name or scm tag so cannot be resolved automatically from remote repositories - path: " + depOrMod.path());
     kul::env::CWD(this->project().dir());
     const std::string& tscr(node[STR_SCM] ? Properties::RESOLVE(*this, node[STR_SCM].Scalar()) : node[STR_NAME].Scalar());
     const std::string& v(node[STR_VERSION] ? Properties::RESOLVE(*this, node[STR_VERSION].Scalar()) : "");
     KOUT(NON) << SCMGetter::GET(depOrMod, tscr, module)->co(depOrMod.path(), SCMGetter::REPO(depOrMod, tscr, module), v);
     kul::env::CWD(depOrMod);
+
     if(_MKN_REMOTE_EXEC_){
 #ifdef _WIN32
         if(kul::File("mkn.bat").is()

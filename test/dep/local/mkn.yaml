@@ -1,0 +1,7 @@
+
+
+name: mkn-dep-test
+main: cpp.cpp
+
+dep:
+  - local: not.a.directory
