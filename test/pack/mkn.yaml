@@ -1,0 +1,21 @@
+
+
+name: mkn_pack_win
+
+parent: base
+
+profile:
+  - name: base
+    src: cpp.cpp
+    out: packer
+    install: bin/packer
+    dep:
+      - local: ../..
+        profile: shared
+
+  - name: second
+    src: cpp.cpp
+    install: bin/second
+
+  - name: third
+    src: cpp.cpp

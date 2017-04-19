@@ -32,14 +32,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/string.hpp"
 
 class LibFinder{
-
     public:
         static bool findAdd(const std::string& l, const kul::Dir& i, const kul::Dir& o){
             bool found = 0;
             for(const auto& f : i.files(0)){
                 const auto& fn(f.name());
                 if(fn.find(".") == std::string::npos) continue;
-
 #ifdef  _WIN32
                 if(fn.substr(0, fn.rfind(".")) == l){
 #else
@@ -47,7 +45,6 @@ class LibFinder{
                     && kul::String::NO_CASE_CMP(fn.substr(3, l.size()), l)){
 
                     auto bits(kul::String::SPLIT(fn.substr(3 + l.size()), '.'));
-
 #ifdef  __APPLE__
                     if(bits[bits.size() - 1] != "dyn"
 #else
@@ -62,7 +59,6 @@ class LibFinder{
             }
             return found;
         }
-
 };
 
 void maiken::Application::pack() throw(kul::Exception){
@@ -81,14 +77,12 @@ void maiken::Application::pack() throw(kul::Exception){
 
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
         if(!(*app).srcs.empty()){
-            if((*app).inst){
-                const std::string& n((*app).project().root()[STR_NAME].Scalar());
-                if(!LibFinder::findAdd((*app).p.empty() ? n : n+"_"+(*app).p, (*app).inst, lib))
-                    KEXCEPTION("Depedency Project lib not found, try building: ") << (*app).buildDir().real();
-            }else{
-                if(!LibFinder::findAdd((*app).project().root()[STR_NAME].Scalar(), (*app).buildDir(), lib))
-                    KEXCEPTION("Depedency Project lib not found, try building: ") << (*app).buildDir().real();
-            }
+            auto a = (*app);
+            kul::Dir outD(a.inst ? a.inst.real() : a.buildDir());
+            std::string n = a.project().root()[STR_NAME].Scalar();
+            std::string libN(a.out.empty() ? a.inst ? a.p.empty() ? n : n+"_"+a.p : n : a.out);
+            if(!LibFinder::findAdd(libN, outD, lib))
+                KEXCEPTION("Depedency Project lib not found, try building: ") << a.buildDir().real();
         }
     for(const auto& l : libs){
         bool found = 0;
