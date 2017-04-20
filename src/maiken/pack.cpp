@@ -80,8 +80,7 @@ void maiken::Application::pack() throw(kul::Exception){
             auto a = (*app);
             kul::Dir outD(a.inst ? a.inst.real() : a.buildDir());
             std::string n = a.project().root()[STR_NAME].Scalar();
-            std::string libN(a.out.empty() ? a.inst ? a.p.empty() ? n : n+"_"+a.p : n : a.out);
-            if(!LibFinder::findAdd(libN, outD, lib))
+            if(!LibFinder::findAdd(a.baseLibFilename(), outD, lib))
                 KEXCEPTION("Depedency Project lib not found, try building: ") << a.buildDir().real();
         }
     for(const auto& l : libs){

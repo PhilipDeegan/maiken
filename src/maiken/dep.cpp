@@ -104,8 +104,8 @@ void maiken::Application::populateMapsFromDependencies() throw (kul::Exception) 
     for(auto depP = dependencies().rbegin(); depP != dependencies().rend(); ++depP){
         const auto& dep(*depP);
         if(!dep.sources().empty()){
-            const std::string& n(dep.project().root()[STR_NAME].Scalar());
-            const std::string& lib = dep.out.empty() ? dep.inst ? dep.p.empty() ? n : (n+"_"+dep.p) : n : dep.out;
+            const std::string n(dep.project().root()[STR_NAME].Scalar());
+            const std::string lib = dep.baseLibFilename();
             const auto& it(std::find(libraries().begin(), libraries().end(), lib));
             if(it != libraries().end()) libs.erase(it);
             libs.push_back(lib);

@@ -2,13 +2,14 @@
 
 name: mkn_pack_win
 
-parent: base
+parent: first
+out: pack
 
 profile:
-  - name: base
+  - name: first
     src: cpp.cpp
     out: packer
-    install: bin/packer
+    install: bin/first
     dep:
       - local: ../..
         profile: shared

@@ -247,6 +247,11 @@ class KUL_PUBLISH Application : public Constants{
         const kul::hash::map::S2S&                         properties()          const { return ps;}
         const kul::hash::map::S2T<kul::hash::set::String>& arguments()           const { return args; }
 
+        std::string                                        baseLibFilename()     const {
+            std::string n = project().root()[STR_NAME].Scalar(); 
+            return out.empty() ? inst ? p.empty() ? n : n + "_" + p : n : out;
+        }
+
         static Application& CREATE(int16_t argc, char *argv[]) throw(kul::Exception);
 };
 
