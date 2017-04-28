@@ -470,9 +470,7 @@ void maiken::Application::setSuper(){
             KEXCEPTION("Super cannot reference itself: " + project().dir().real());
         d = kul::Dir(super);
         try{
-            KLOG(INF);
             sup = Applications::INSTANCE().getOrCreate(*maiken::Projects::INSTANCE().getOrCreate(d), "");
-            KLOG(INF);
         }catch(const std::exception& e){
             KEXCEPTION("Possible super cycle detected: " + project().dir().real());
         }
