@@ -40,20 +40,20 @@ maiken::Application::~Application(){
 maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
     using namespace kul::cli;
 
-    std::vector<Arg> argV { Arg('a', STR_ARG    ,  ArgType::STRING), Arg('A', STR_ADD, ArgType::STRING),
+    std::vector<Arg> argV { Arg('a', STR_ARG    , ArgType::STRING), Arg('A', STR_ADD, ArgType::STRING),
                             Arg('C', STR_DIR    , ArgType::STRING),
-                            Arg('d', STR_DEP    ,  ArgType::MAYBE), Arg('D', STR_DEBUG),
-                            Arg('E', STR_ENV    ,  ArgType::STRING),
+                            Arg('d', STR_DEP    , ArgType::MAYBE), Arg('D', STR_DEBUG),
+                            Arg('E', STR_ENV    , ArgType::STRING),
                             Arg('h', STR_HELP),
-                            Arg('j', STR_JARG   ,  ArgType::STRING),
+                            Arg('j', STR_JARG   , ArgType::STRING),
                             Arg('K', STR_STATIC),
-                            Arg('l', STR_LINKER ,  ArgType::STRING), Arg('L', STR_ALINKER,  ArgType::STRING),
+                            Arg('l', STR_LINKER , ArgType::STRING), Arg('L', STR_ALINKER,  ArgType::STRING),
 #ifndef _MKN_DISABLE_MODULES_
                             Arg('m', STR_MOD,  ArgType::MAYBE),
 #endif//_MKN_DISABLE_MODULES_
-                            Arg('M', STR_MAIN, ArgType::MAYBE),
-                            Arg('o', STR_OUT,      ArgType::STRING),
-                            Arg('p', STR_PROFILE,  ArgType::STRING), Arg('P', STR_PROPERTY, ArgType::STRING),
+                            Arg('M', STR_MAIN   , ArgType::MAYBE),
+                            Arg('o', STR_OUT    , ArgType::STRING),
+                            Arg('p', STR_PROFILE, ArgType::STRING), Arg('P', STR_PROPERTY, ArgType::STRING),
                             Arg('R', STR_DRY_RUN),
                             Arg('s', STR_SCM_STATUS), Arg('S', STR_SHARED),
                             Arg('t', STR_THREADS, ArgType::MAYBE),
@@ -471,6 +471,7 @@ void maiken::Application::setSuper(){
         d = kul::Dir(super);
         try{
             sup = Applications::INSTANCE().getOrCreate(*maiken::Projects::INSTANCE().getOrCreate(d), "");
+            sup->resolveProperties();
         }catch(const std::exception& e){
             KEXCEPTION("Possible super cycle detected: " + project().dir().real());
         }
