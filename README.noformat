@@ -49,7 +49,7 @@ src: ./src
 Values which allow property resolution are marked with ${aaa}
 
 name: name 
-version: version
+version: version                    # considered git branch for pulling 
 scm: string                         # Appended to remote URLs for lookup if non concrete URL, used if concrete
 super: $directory                   # Inherit properties of project at directory, super (..) or sub directory advisable
 parent: $directory                  # See profile inheritence @ 2.2.4
@@ -115,13 +115,13 @@ env:
 profiles:
   - name: a
     inc: | 
-        <directory>, false/no/0     # Don't include if dependency / private include
+        <directory>, false/no/0     # Don't expose if dependency / private include
         <directory>, true/yes/1     # Include if dependency / public include
         <directory> <directory>     # Include both if dependency / public includes
     src: | 
         <directory>, false/no/0     # Don't find sources recursively
-        <directory>, true/yes/1     # Find sources recursively
-        <directory> <file>          # Find sources recursively in both
+        <directory>, true/yes/1     # Find/add sources recursively
+        <directory> <file>          # Find/add sources recursively, add file
     dep:
       - name: name
         version: version
@@ -149,7 +149,7 @@ profiles:
 
 If no main tag is found, library linking is assumed
 If no lang tag is found, language is deduced from first main tag found in file
-    langauge cannot be deduced if there are no main tags
+    else linker inferred from max(file type)
 If the project is a dependency, even if a main tag is present, library linking is assumed.
 
 
@@ -230,6 +230,9 @@ Testing:
     shared : ./mkn clean build -dtSa -EHsc
 
 Example Windows settings can be found at: https://github.com/Dekken/maiken/wiki
+
+Binary available @ https://github.com/Dekken/maiken/tree/binaries
+
 
 3.2 Unix
 
@@ -315,8 +318,6 @@ The settings file is the default global configuration for projects.
 4.3.1 schema
 
 super: $directory                   # Inherit properties of project at directory, super (..) or sub directory advisable
-parent: $directory                  # See profile inheritence @ 2.2.4
-
 
 property:                                     
   - aaa: AAA
@@ -333,7 +334,7 @@ remote:
 inc: <directory> <directory>            # Optional, add include directories compiling 
 path: <directory> <directory>           # Optional, add library path directories linking
 
-env:                                    # Optional
+env:                                    # Optional, useful for compiler specific settings
   - name: name
     mode: prepend/append/replace        # Optional default prepend
     value: value
