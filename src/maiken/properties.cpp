@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::resolveProperties() throw(maiken::Exception) {
+void maiken::Application::resolveProperties() KTHROW(maiken::Exception) {
     ps.setDeletedKey("--DELETED--");
     for(YAML::const_iterator it=project().root()[STR_PROPERTY].begin();it!=project().root()[STR_PROPERTY].end(); ++it)
         ps[it->first.as<std::string>()] = it->second.as<std::string>();
@@ -41,7 +41,7 @@ void maiken::Application::resolveProperties() throw(maiken::Exception) {
     }
 }
 
-std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(const kul::hash::map::S2S& ps, const std::string& s) throw(kul::Exception) {
+std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(const kul::hash::map::S2S& ps, const std::string& s) KTHROW(kul::Exception) {
     std::string r = s;
     int lb  = s.find("${");
     int clb = s.find("\\${");
@@ -60,7 +60,7 @@ std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(const
     return std::shared_ptr<std::tuple<std::string, int, int>>(0);
 }
 
-std::string maiken::Properties::RESOLVE(const Application& app, const std::string& s) throw(kul::Exception) {
+std::string maiken::Properties::RESOLVE(const Application& app, const std::string& s) KTHROW(kul::Exception) {
     std::string r = s;
     std::shared_ptr<std::tuple<std::string, int, int>> t = KEY(app.properties(), s);
     if(t){
@@ -82,7 +82,7 @@ std::string maiken::Properties::RESOLVE(const Application& app, const std::strin
     return r;
 }
 
-std::string maiken::Properties::RESOLVE(const Settings& set, const std::string& s) throw(kul::Exception) {
+std::string maiken::Properties::RESOLVE(const Settings& set, const std::string& s) KTHROW(kul::Exception) {
     std::string r = s;
     std::shared_ptr<std::tuple<std::string, int, int>> t = KEY(set.properties(), s);
     if(t){

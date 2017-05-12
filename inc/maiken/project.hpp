@@ -103,7 +103,7 @@ class NewProject{
         void write();
         const kul::File& file() const { return f; }
     public:
-        NewProject() throw(ProjectException) : f("mkn.yaml", kul::env::CWD()){
+        NewProject() KTHROW(ProjectException) : f("mkn.yaml", kul::env::CWD()){
             if(!f.is())
                 write();
             else

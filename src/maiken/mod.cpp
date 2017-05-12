@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 kul::File maiken::ModuleLoader::FIND(const Application& ap)
 #ifndef _MKN_DISABLE_MODULES_
-        throw(kul::sys::Exception)
+        KTHROW(kul::sys::Exception)
 #endif//_MKN_DISABLE_MODULES_
 {
 #ifdef _MKN_DISABLE_MODULES_
@@ -63,7 +63,7 @@ kul::File maiken::ModuleLoader::FIND(const Application& ap)
 
 std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(const Application& ap)
 #ifndef _MKN_DISABLE_MODULES_
-        throw(kul::sys::Exception)
+        KTHROW(kul::sys::Exception)
 #endif//_MKN_DISABLE_MODULES_
 {
     for(auto dep = ap.dependencies().rbegin(); dep != ap.dependencies().rend(); ++dep)

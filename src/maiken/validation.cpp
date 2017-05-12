@@ -56,7 +56,7 @@ class Validator : public maiken::Constants{
             }
         }
     public:
-        static void PRE_BUILD(const maiken::Application& a, const YAML::Node& n) throw (maiken::Exception){
+        static void PRE_BUILD(const maiken::Application& a, const YAML::Node& n) KTHROW(maiken::Exception){
             if(n[STR_MAIN] && n[STR_LANG])
                 KEXCEPT(maiken::Exception, "cannot have both main and lang tag\n"+a.project().dir().path());
             if(n[STR_MAIN]){
@@ -81,7 +81,7 @@ class Validator : public maiken::Constants{
                         KEXCEPT(maiken::Exception, "dependency name must exist if local tag does not\n"+a.project().dir().path());
 
         }
-        static void POST_BUILD(const maiken::Application& a, const YAML::Node& n) throw (maiken::Exception){
+        static void POST_BUILD(const maiken::Application& a, const YAML::Node& n) KTHROW(maiken::Exception){
             std::stringstream ss;
             for(const auto f : a.files()) ss << f.first << " ";
             if(n[STR_MAIN] && !a.files().count(n[STR_MAIN].Scalar().substr(n[STR_MAIN].Scalar().rfind(".")+1)))
@@ -109,7 +109,7 @@ class Validator : public maiken::Constants{
         }
 };
 
-void maiken::Application::preSetupValidation() throw (maiken::Exception){
+void maiken::Application::preSetupValidation() KTHROW(maiken::Exception){
     {
         kul::hash::set::String keys;
         for(YAML::const_iterator it=project().root()[STR_PROPERTY].begin();it!=project().root()[STR_PROPERTY].end(); ++it){
@@ -152,7 +152,7 @@ void maiken::Application::preSetupValidation() throw (maiken::Exception){
     for(const auto& n : project().root()[STR_PROFILE]) Validator::SELF_CHECK(*this, n, profiles);
 }
 
-void maiken::Application::postSetupValidation() throw (maiken::Exception){
+void maiken::Application::postSetupValidation() KTHROW(maiken::Exception){
     Validator::POST_BUILD(*this, project().root());
     for(const auto& profile : project().root()[STR_PROFILE]) Validator::POST_BUILD(*this, profile);
 }

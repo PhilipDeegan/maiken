@@ -61,7 +61,7 @@ class LibFinder{
         }
 };
 
-void maiken::Application::pack() throw(kul::Exception){
+void maiken::Application::pack() KTHROW(kul::Exception){
 
     kul::Dir pk(buildDir().join("pack"));
     if(!pk && !pk.mk()) KEXCEPTION("Cannot create: " + pk.path());

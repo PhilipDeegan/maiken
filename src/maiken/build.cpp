@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::link() throw(kul::Exception){
+void maiken::Application::link() KTHROW(kul::Exception){
     showConfig();
     std::vector<std::string> objects;
     for(const auto& ft : sourceMap()){
@@ -56,7 +56,7 @@ void maiken::Application::link() throw(kul::Exception){
 }
 
 
-void maiken::Application::link(const std::vector<std::string>& objects) throw(kul::Exception){
+void maiken::Application::link(const std::vector<std::string>& objects) KTHROW(kul::Exception){
     if(objects.size() > 0){
         buildDir().mk();
         if(!main.empty())   buildExecutable(objects);
@@ -64,7 +64,7 @@ void maiken::Application::link(const std::vector<std::string>& objects) throw(ku
     }else KEXCEPTION("No objects found, try \"compile\" first.");
 }
 
-void maiken::Application::compile(std::vector<std::string>& objects) throw(kul::Exception){
+void maiken::Application::compile(std::vector<std::string>& objects) KTHROW(kul::Exception){
     showConfig();
     if(!AppVars::INSTANCE().dryRun()){
         std::stringstream ss;
@@ -123,9 +123,10 @@ void maiken::Application::compile(std::vector<std::string>& objects) throw(kul::
             for(const std::pair<std::string, kul::hash::set::String>& kv : ft.second){
                 for(const std::string& s : kv.second){
                     const kul::File source(s);
-                    std::stringstream ss;
-                    ss << std::hex << std::hash<std::string>()(source.real()) << oType;
-                    kul::File object(ss.str(), objD);
+                    std::stringstream ss, os;
+                    ss << std::hex << std::hash<std::string>()(source.real());
+                    os << ss.str() << "-" << source.name() << oType;
+                    kul::File object(os.str(), objD);
                     sourceQueue.push(std::pair<std::string, std::string>(
                         AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
                         AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
@@ -326,7 +327,7 @@ kul::code::CompilerProcessCapture maiken::Application::buildLibrary(const std::v
         KEXCEPTION("Unable to handle artifact: \"" + lang + "\" - type is not in file list");
 }
 
-void maiken::Application::checkErrors(const kul::code::CompilerProcessCapture& cpc) throw(kul::Exception){
+void maiken::Application::checkErrors(const kul::code::CompilerProcessCapture& cpc) KTHROW(kul::Exception){
     auto o = [] (const std::string& s) { if(s.size()) KOUT(NON) << s; };
     auto e = [] (const std::string& s) { if(s.size()) KERR << s; };
     if(kul::LogMan::INSTANCE().inf() || cpc.exception())

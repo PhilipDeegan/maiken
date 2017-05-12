@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::ThreadingCompiler::operator()() throw(kul::Exception){
+void maiken::ThreadingCompiler::operator()() KTHROW(kul::Exception){
     std::pair<std::string, std::string> p;
     {
         kul::ScopeLock lock(compile);

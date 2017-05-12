@@ -99,7 +99,7 @@ class BuildRecorder{
         }
 };
 
-void maiken::Application::process() throw(kul::Exception){
+void maiken::Application::process() KTHROW(kul::Exception){
     const kul::hash::set::String& cmds (CommandStateMachine::INSTANCE().commands());
     const kul::hash::set::String& phase(AppVars::INSTANCE().modulePhases());
 

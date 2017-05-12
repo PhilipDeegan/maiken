@@ -41,7 +41,7 @@ class SuperSettings{
             static SuperSettings instance;
             return instance;
         }
-        void cycleCheck(const std::string& file) throw (maiken::SettingsException){
+        void cycleCheck(const std::string& file) KTHROW (maiken::SettingsException){
             if(files.count(file))
                 KEXCEPT(maiken::SettingsException, "Super cycle detected in file: " + file);
             files.insert(file);
@@ -101,7 +101,7 @@ maiken::Settings& maiken::Settings::INSTANCE(){
     return *instance.get();
 }
 
-void maiken::Settings::resolveProperties() throw(SettingsException) {
+void maiken::Settings::resolveProperties() KTHROW(SettingsException) {
     ps.setDeletedKey("--DELETED--");
     for(YAML::const_iterator it = root()[STR_PROPERTY].begin(); it != root()[STR_PROPERTY].end(); ++it)
         ps[it->first.as<std::string>()] = it->second.as<std::string>();
@@ -112,7 +112,7 @@ void maiken::Settings::resolveProperties() throw(SettingsException) {
     }
 }
 
-std::string maiken::Settings::RESOLVE(const std::string& s) throw(SettingsException) {
+std::string maiken::Settings::RESOLVE(const std::string& s) KTHROW(SettingsException) {
     std::vector<kul::File> pos {
         kul::File(s),
         kul::File(s+".yaml"),
@@ -229,5 +229,4 @@ void maiken::Settings::write(const kul::File& f){
     w.write("#  - type: cs", true);
     w.write("#    compiler: csc", true);
     w.write("#    linker: csc", true);
-
 }

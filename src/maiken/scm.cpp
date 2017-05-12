@@ -42,7 +42,7 @@ class UpdateTracker{
         }
 };
 
-void maiken::Application::scmStatus(const bool& deps) throw (kul::scm::Exception){
+void maiken::Application::scmStatus(const bool& deps) KTHROW(kul::scm::Exception){
     std::vector<Application*> v;
     if(deps)
         for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
@@ -60,7 +60,7 @@ void maiken::Application::scmStatus(const bool& deps) throw (kul::scm::Exception
     }
 }
 
-void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
+void maiken::Application::scmUpdate(const bool& f) KTHROW(kul::scm::Exception){
     uint i = 0;
     const Application* p = this;
     while((p = p->par)) i++;
@@ -79,7 +79,7 @@ void maiken::Application::scmUpdate(const bool& f) throw (kul::scm::Exception){
     }
 }
 
-void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const std::string& url) throw (kul::scm::Exception){
+void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const std::string& url) KTHROW(kul::scm::Exception){
     const std::string& ver(!this->scv.empty() ? this->scv
         : this->project().root()[STR_VERSION] ? this->project().root()[STR_VERSION].Scalar() : "");
     bool c = true;

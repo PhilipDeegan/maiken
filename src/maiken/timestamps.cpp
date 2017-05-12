@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::loadTimeStamps() throw (kul::StringException){
+void maiken::Application::loadTimeStamps() KTHROW(kul::StringException){
     if(_MKN_TIMESTAMPS_){
         kul::Dir mkn(buildDir().join(".mkn"));
         kul::File src("src_stamp", mkn);

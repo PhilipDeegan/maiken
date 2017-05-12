@@ -174,50 +174,50 @@ class KUL_PUBLISH Application : public Constants{
 
         kul::code::CompilerProcessCapture buildExecutable(const std::vector<std::string>& objects);
         kul::code::CompilerProcessCapture buildLibrary(const std::vector<std::string>& objects);
-        void checkErrors(const kul::code::CompilerProcessCapture& cpc) throw(kul::Exception);
+        void checkErrors(const kul::code::CompilerProcessCapture& cpc) KTHROW(kul::Exception);
 
-        void populateMaps(const YAML::Node& n) throw (kul::Exception);
+        void populateMaps(const YAML::Node& n) KTHROW(kul::Exception);
 
-        void preSetupValidation() throw(Exception);
-        void postSetupValidation() throw(Exception);
-        void resolveProperties() throw(Exception);
-        void resolveLang() throw(Exception);
+        void preSetupValidation() KTHROW(Exception);
+        void postSetupValidation() KTHROW(Exception);
+        void resolveProperties() KTHROW(Exception);
+        void resolveLang() KTHROW(Exception);
 
-        void compile(std::vector<std::string>& objects) throw(kul::Exception);
-        void build() throw(kul::Exception);
-        void pack()  throw(kul::Exception);
-        void link()  throw(kul::Exception);
-        void link(const std::vector<std::string>& objects) throw(kul::Exception);
+        void compile(std::vector<std::string>& objects) KTHROW(kul::Exception);
+        void build() KTHROW(kul::Exception);
+        void pack()  KTHROW(kul::Exception);
+        void link()  KTHROW(kul::Exception);
+        void link(const std::vector<std::string>& objects) KTHROW(kul::Exception);
         void run(bool dbg);
         void trim();
         void trim(const kul::File& f);
 
-        void scmStatus(const bool& deps = false) throw(kul::scm::Exception);
-        void scmUpdate(const bool& f) throw(kul::scm::Exception);
-        void scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo) throw(kul::scm::Exception);
+        void scmStatus(const bool& deps = false) KTHROW(kul::scm::Exception);
+        void scmUpdate(const bool& f) KTHROW(kul::scm::Exception);
+        void scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo) KTHROW(kul::scm::Exception);
 
-        void setup() throw (kul::Exception);
+        void setup() KTHROW(kul::Exception);
         void setSuper();
         void showConfig(bool force = 0);
-        void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception);
+        void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const KTHROW(kul::Exception);
         void showProfiles();
-        void loadTimeStamps() throw (kul::StringException);
+        void loadTimeStamps() KTHROW(kul::StringException);
 
         void buildDepVec(const std::string* depVal);
         void buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc);
 
-        void populateMapsFromDependencies() throw (kul::Exception);
+        void populateMapsFromDependencies() KTHROW(kul::Exception);
 
-        void loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module) throw (kul::Exception);
+        void loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module) KTHROW(kul::Exception);
         kul::Dir resolveDepOrModDirectory(const YAML::Node& d, bool module);
-        void popDepOrMod(const YAML::Node& n, std::vector<Application>& vec, const std::string& s, bool module) throw(kul::Exception);
+        void popDepOrMod(const YAML::Node& n, std::vector<Application>& vec, const std::string& s, bool module) KTHROW(kul::Exception);
 
         kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap();
         kul::hash::set::String inactiveMains();
 
         bool incSrc(const kul::File& f);
-        void addSourceLine (const std::string& o) throw (kul::Exception);
-        void addIncludeLine(const std::string& o) throw (kul::Exception);
+        void addSourceLine (const std::string& o) KTHROW(kul::Exception);
+        void addIncludeLine(const std::string& o) KTHROW(kul::Exception);
 
         void              modCompile(const YAML::Node& modArg){ modCArg = modArg; }
         const YAML::Node& modCompile()                        { return modCArg; }
@@ -231,7 +231,7 @@ class KUL_PUBLISH Application : public Constants{
         Application(const maiken::Project& proj, const std::string& profile = "");// : m(kul::code::Mode::NONE), p(profile), proj(proj){}
         ~Application();
 
-        virtual void                                       process()   throw(kul::Exception);
+        virtual void                                       process()   KTHROW(kul::Exception);
         const kul::Dir&                                    buildDir()            const { return bd; }
         const std::string&                                 profile()             const { return p; }
         const maiken::Project&                             project()             const { return proj;}
@@ -252,7 +252,7 @@ class KUL_PUBLISH Application : public Constants{
             return out.empty() ? inst ? p.empty() ? n : n + "_" + p : n : out;
         }
 
-        static Application& CREATE(int16_t argc, char *argv[]) throw(kul::Exception);
+        static Application& CREATE(int16_t argc, char *argv[]) KTHROW(kul::Exception);
 };
 
 class Applications{
@@ -270,7 +270,7 @@ class Applications{
             static Applications a;
             return a;
         }
-        Application* getOrCreate(const maiken::Project& proj, const std::string& _profile = "", bool setup = 1) throw (kul::Exception) {
+        Application* getOrCreate(const maiken::Project& proj, const std::string& _profile = "", bool setup = 1) KTHROW(kul::Exception) {
             std::string pDir(proj.dir().real());
             std::string profile = _profile.empty() ? "@" : _profile;
             if(!m_apps.count(pDir) || !m_apps[pDir].count(profile)){
@@ -308,7 +308,7 @@ class ThreadingCompiler : public Constants{
                     else           incs.push_back(".");
                 }
             }
-        void operator()() throw(kul::Exception);
+        void operator()() KTHROW(kul::Exception);
         const std::vector<kul::code::CompilerProcessCapture>& processCaptures(){return cpcs;}
 };
 

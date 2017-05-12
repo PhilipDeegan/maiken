@@ -73,11 +73,11 @@ class Module{
         }
     public:
     	virtual ~Module(){}
-    	Module() throw(ModuleException) {}
+    	Module() KTHROW(ModuleException) {}
 
-        virtual void compile(Application& app, const YAML::Node& arg) throw(std::exception) {} 
-        virtual void link   (Application& app, const YAML::Node& arg) throw(std::exception) {}
-        virtual void pack   (Application& app, const YAML::Node& arg) throw(std::exception) {}
+        virtual void compile(Application& app, const YAML::Node& arg) KTHROW(std::exception) {} 
+        virtual void link   (Application& app, const YAML::Node& arg) KTHROW(std::exception) {}
+        virtual void pack   (Application& app, const YAML::Node& arg) KTHROW(std::exception) {}
 };
 
 
@@ -94,14 +94,14 @@ class KUL_PUBLISH ModuleLoader
 
         static kul::File FIND(const Application& a)
 #ifndef _MKN_DISABLE_MODULES_
-        throw(kul::sys::Exception)
+        KTHROW(kul::sys::Exception)
 #endif//_MKN_DISABLE_MODULES_
         ;
 
     public:
         ModuleLoader(const Application& ap, const kul::File& f) 
 #ifndef _MKN_DISABLE_MODULES_
-               throw(kul::sys::Exception)  : kul::sys::SharedClass<maiken::Module>(f, "maiken_module_construct", "maiken_module_destruct") {
+               KTHROW(kul::sys::Exception)  : kul::sys::SharedClass<maiken::Module>(f, "maiken_module_construct", "maiken_module_destruct") {
             construct(p);
             p->application(&ap);
 #else
@@ -127,7 +127,7 @@ class KUL_PUBLISH ModuleLoader
 
         static std::shared_ptr<ModuleLoader> LOAD(const Application& ap) 
 #ifndef _MKN_DISABLE_MODULES_
-        throw(kul::sys::Exception)
+        KTHROW(kul::sys::Exception)
 #endif//_MKN_DISABLE_MODULES_
         ;        
 };
@@ -145,7 +145,7 @@ class GlobalModules{
         ~GlobalModules(){
             libs.clear();
         }
-        void load(const Application& ap) throw (kul::sys::Exception) {
+        void load(const Application& ap) KTHROW(kul::sys::Exception) {
             if(!libs.count(ap.buildDir().real())){
                 libs.insert(
                     std::make_pair(

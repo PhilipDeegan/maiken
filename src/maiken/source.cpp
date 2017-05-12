@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2013, Philip Deegan.
+Copyright (c) 2017, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -28,17 +28,27 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef  _MAIKEN_PROPERTY_HPP_
-#define  _MAIKEN_PROPERTY_HPP_
+#include "maiken.hpp"
 
-namespace maiken{
-class Properties : public Constants {
-    private:
-        static std::shared_ptr<std::tuple<std::string, int, int>> KEY(const kul::hash::map::S2S& ps, const std::string& s) KTHROW(kul::Exception);
-    public:
-        static std::string RESOLVE(const Application& app, const std::string& s) KTHROW(kul::Exception);
-        static std::string RESOLVE(const Settings& app, const std::string& s) KTHROW(kul::Exception);
-};
-
+void maiken::Application::addSourceLine(const std::string& s) KTHROW(kul::Exception){
+    std::string o = s;
+    kul::String::TRIM(o);
+    if(o.find(',') == std::string::npos){
+        for(const auto& s : kul::cli::asArgs(o)){
+            kul::Dir d(Properties::RESOLVE(*this, s));
+            if(d) srcs.push_back(std::make_pair(d.real(), true));
+            else{
+                kul::File f(kul::Dir(Properties::RESOLVE(*this, s)).locl());
+                if(f) srcs.push_back(std::make_pair(f.real(), false));
+                else  KEXCEPTION("source does not exist\n"+s+"\n"+project().dir().path());
+            }
+        }
+    }else{
+        std::vector<std::string> v;
+        kul::String::SPLIT(o, ",", v);
+        if(v.size() == 0 || v.size() > 2) KEXCEPTION("source invalid format\n" + project().dir().path());
+        kul::Dir d(Properties::RESOLVE(*this, v[0]));
+        if(d) srcs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
+        else KEXCEPTION("source does not exist\n"+v[0]+"\n"+project().dir().path());
+    }
 }
-#endif//_MAIKEN_PROPERTY_HPP_

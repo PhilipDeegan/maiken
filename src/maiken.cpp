@@ -37,7 +37,7 @@ maiken::Application::~Application(){
     for(auto mod: mods) mod->unload();
 }
 
-maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) throw(kul::Exception){
+maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTHROW(kul::Exception){
     using namespace kul::cli;
 
     std::vector<Arg> argV { Arg('a', STR_ARG    , ArgType::STRING), Arg('A', STR_ADD, ArgType::STRING),
@@ -277,7 +277,7 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) thr
     return *app;
 }
 
-void maiken::Application::resolveLang() throw(maiken::Exception) {
+void maiken::Application::resolveLang() KTHROW(maiken::Exception) {
     const auto& mains(inactiveMains());
     if(mains.size()) lang = (*mains.begin()).substr((*mains.begin()).rfind(".")+1);
     else
@@ -365,7 +365,7 @@ void maiken::Application::trim(const kul::File& f){
     tmp.mv(f);
 }
 
-void maiken::Application::populateMaps(const YAML::Node& n) throw(kul::Exception) { //IS EITHER ROOT OR PROFILE NODE!
+void maiken::Application::populateMaps(const YAML::Node& n) KTHROW(kul::Exception) { //IS EITHER ROOT OR PROFILE NODE!
     using namespace kul::cli;
     for(const auto& c : n[STR_ENV]){
         EnvVarMode mode = EnvVarMode::PREP;
@@ -413,34 +413,14 @@ void maiken::Application::populateMaps(const YAML::Node& n) throw(kul::Exception
         if(!kul::Dir(s).is()) KEXCEPTION(s + " is not a valid directory\n"+project().dir().path());
 }
 
-void maiken::Application::cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const throw(kul::Exception){
+void maiken::Application::cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const KTHROW(kul::Exception){
     if(par) par->cyclicCheck(apps);
     for(const auto& pa : apps)
         if(project().dir() == pa.first  && p == pa.second)
             KEXCEPTION("Cyclical dependency found\n"+project().dir().path());
 }
 
-void maiken::Application::addSourceLine(const std::string& o) throw (kul::Exception){
-    if(o.find(',') == std::string::npos){
-        for(const auto& s : kul::cli::asArgs(o)){
-            kul::Dir d(Properties::RESOLVE(*this, s));
-            if(d) srcs.push_back(std::make_pair(d.real(), true));
-            else{
-                kul::File f(kul::Dir(Properties::RESOLVE(*this, s)).locl());
-                if(f) srcs.push_back(std::make_pair(f.real(), false));
-                else  KEXCEPTION("source does not exist\n"+s+"\n"+project().dir().path());
-            }
-        }
-    }else{
-        std::vector<std::string> v;
-        kul::String::SPLIT(o, ",", v);
-        if(v.size() == 0 || v.size() > 2) KEXCEPTION("source invalid format\n" + project().dir().path());
-        kul::Dir d(Properties::RESOLVE(*this, v[0]));
-        if(d) srcs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
-        else KEXCEPTION("source does not exist\n"+v[0]+"\n"+project().dir().path());
-    }
-}
-void maiken::Application::addIncludeLine(const std::string& o) throw (kul::Exception){
+void maiken::Application::addIncludeLine(const std::string& o) KTHROW(kul::Exception){
     if(o.find(',') == std::string::npos){
         for(const auto& s : kul::cli::asArgs(o))
             if(s.size()){

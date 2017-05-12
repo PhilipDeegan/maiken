@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module) throw (kul::Exception) {
+void maiken::Application::loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module) KTHROW(kul::Exception) {
     KOUT(NON) << MKN_PROJECT_NOT_FOUND << depOrMod;
 #ifdef _MKN_DISABLE_SCM_
     KEXCEPTION("dep does not exist and remote retrieval is disabled - path: " + depOrMod.path());
@@ -81,7 +81,7 @@ void maiken::Application::popDepOrMod(
         const YAML::Node& n,
         std::vector<Application>& vec,
         const std::string& s,
-        bool module) throw(kul::Exception){
+        bool module) KTHROW(kul::Exception){
 
     auto setApp = [&](Application& app, const YAML::Node& node){
         if(node[STR_SCM]) app.scr = Properties::RESOLVE(*this, node[STR_SCM].Scalar());
