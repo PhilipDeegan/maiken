@@ -76,7 +76,7 @@ class Projects{
             if(!d) KEXCEPT(ProjectException, "Directory does not exist:\n" + d.path());
             kul::File f("mkn.yaml", d);
             if(!f.is()) KEXCEPT(ProjectException, "project file does not exist:\n" + f.full());
-            if(!m_projects.count(d.real())){
+            if(!m_projects.count(f.real())){
                 auto project = std::make_unique<Project>(d);
                 try{
                     kul::yaml::Item::VALIDATE(project->root(), project->validator().children());
