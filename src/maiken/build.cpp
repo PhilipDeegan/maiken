@@ -308,7 +308,6 @@ kul::code::CompilerProcessCapture maiken::Application::buildLibrary(const std::v
         if(!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && linkEnd.size())
             KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
         if(m == kul::code::Mode::STAT) linker = fs[lang][STR_ARCHIVER];
-        const std::string& n(project().root()[STR_NAME].Scalar());
         kul::Dir outD(inst ? inst.real() : buildDir());
         std::string lib(baseLibFilename());
         lib = AppVars::INSTANCE().dryRun() ? kul::File(lib, outD).esc() : kul::File(lib, outD).escm();
