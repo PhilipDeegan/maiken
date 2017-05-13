@@ -1,3 +1,5 @@
+[![Build Status](https://semaphoreci.com/api/v1/dekken/maiken/branches/master/badge.svg)](https://semaphoreci.com/dekken/maiken)
+
 # maiken
 
 **Cross platform build tool for C/C++/Obj-C/C#/CUDA/opencl** 
