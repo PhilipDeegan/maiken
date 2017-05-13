@@ -56,7 +56,7 @@ class AppVars : public Constants{
     private:
         bool d = 0, dr = 0, f = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
         uint16_t dl = 0, ts = 1;
-        std::string aa, al, la;
+        std::string aa, al, la, ra;
         const std::string* dep;
         kul::hash::set::String cmds, modPhases;
         kul::hash::map::S2S evs, jas, pks;
@@ -89,6 +89,9 @@ class AppVars : public Constants{
     public:
         const std::string& args() const  { return aa;}
         void args(const std::string& aa) { this->aa = aa;}
+
+        const std::string& runArgs() const  { return ra;}
+        void runArgs(const std::string& ra) { this->ra = ra;}
 
         const kul::hash::map::S2S& jargs() const { return jas;}
         void jargs(const std::string& a, const std::string& b) { jas[a] = b; }

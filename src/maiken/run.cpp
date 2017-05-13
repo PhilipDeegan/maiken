@@ -60,7 +60,17 @@ void maiken::Application::run(bool dbg){
     }
     else
         p = std::make_unique<kul::Process>(f.escm());
-    for(const auto& s : kul::cli::asArgs(AppVars::INSTANCE().args())) p->arg(s);
+
+    if(AppVars::INSTANCE().runArgs().size()){
+        for(const auto& s : kul::cli::asArgs(AppVars::INSTANCE().runArgs())) p->arg(s);
+    }else{
+        const auto& cmds = AppVars::INSTANCE().commands();
+        if(!cmds.count(STR_BUILD) && !cmds.count(STR_BUILD_MOD) && 
+           !cmds.count(STR_BUILD_ALL) && !cmds.count(STR_COMPILE)){
+            for(const auto& s : kul::cli::asArgs(AppVars::INSTANCE().args())) p->arg(s);
+        }
+    }
+
     if(m != kul::code::Mode::STAT){
         std::string arg;
         for(const auto& s : libraryPaths()) arg += s + kul::env::SEP();

@@ -444,10 +444,11 @@ Available commands
 
 Available arguments:
     -a --args $arg        - Adds $arg to the compile command if compile/build, passes arguments to application if run
-    -A --add  $arg        - CSV list of additional sources to compile/link, disable recursive finding with "<dir>\,0"
+    -A --add  $arg        - CSV list of additional sources to compile/link, disable recursive finding with "<dir>\, 0"
     -C --directory $d     - Execute on directory $d rather than current directory 
     -d --dependencies     - See 4.8
-    -e --env $e           - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
+    -E --env $e           - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
+    -G --get $k           - Returns string value for property K in either local yaml or settings.yaml, failure is no string 0 exit code
     -h --help             - Print help
     -j --jargs $j         - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing file-type specific args to compiler
     -l --linker $t        - Adds $t to linking of root project
@@ -458,6 +459,7 @@ Available arguments:
     -L --all-linker $t    - Adds $t to linking of all projects
     -p --profile $p       - Activate profile p
     -P --property $p      - CSV key=value properties override format -P "k1=v1,k2=v2" , backslash escaps , and =
+    -r --run-args $a      - Passes $a to running binary as arguments, suppercedes -a
     -R --dry-run $f       - Do not compile/link, but print out compiler process strings, do not run etc
     -s --scm-status       - Display SCM status of project, allows -d
     -u --scm-update       - Update project from SCM when permitted, allows -d

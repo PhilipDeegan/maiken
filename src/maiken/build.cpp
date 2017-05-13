@@ -39,11 +39,10 @@ void maiken::Application::link() KTHROW(kul::Exception){
                 KEXCEPTION("No compiler found for filetype " + ft.first);
             const auto* compiler = kul::code::Compilers::INSTANCE().get((*(*files().find(ft.first)).second.find(STR_COMPILER)).second);
             if(!compiler->sourceIsBin()){
-                if(!buildDir().is()) KEXCEPT(maiken::Exception, "Cannot link without compiling.");
-                for(const kul::File f : buildDir().files(true)){
-                    if(f.name().substr(f.name().rfind(".") + 1).compare("obj") == 0)
-                        objects.push_back(f.real());
-                }
+                if(!buildDir().is()) KEXCEPT(maiken::Exception, "Cannot link without compiling.\n" + project().dir().path());
+                kul::Dir objDir("obj", buildDir());
+                if(!buildDir().is()) KEXCEPT(maiken::Exception, "No object directory found.\n" + project().dir().path());
+                for(const kul::File f : objDir.files(true)) objects.push_back(f.real());
             }else{
                 for(const auto& kv : ft.second)
                     for(const auto& f : kv.second) objects.push_back(kul::File(f).mini());
@@ -297,8 +296,7 @@ kul::code::CompilerProcessCapture maiken::Application::buildExecutable(const std
 
 kul::code::CompilerProcessCapture maiken::Application::buildLibrary(const std::vector<std::string>& objects){
     if(fs.count(lang) > 0){
-        if(m == kul::code::Mode::NONE)
-            KEXCEPTION("Library requires mode for linking, " + this->project().dir().real());
+        if(m == kul::code::Mode::NONE) m = kul::code::Mode::SHAR;
         if(!(*files().find(lang)).second.count(STR_COMPILER)) KEXCEPT(Exception, "No compiler found for filetype " + lang);
         std::string linker = fs[lang][STR_LINKER];
         std::string linkEnd;

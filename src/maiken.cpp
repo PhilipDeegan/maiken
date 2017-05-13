@@ -44,6 +44,7 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
                             Arg('C', STR_DIR    , ArgType::STRING),
                             Arg('d', STR_DEP    , ArgType::MAYBE), Arg('D', STR_DEBUG),
                             Arg('E', STR_ENV    , ArgType::STRING),
+                            Arg('G', STR_GET    , ArgType::STRING),
                             Arg('h', STR_HELP),
                             Arg('j', STR_JARG   , ArgType::STRING),
                             Arg('K', STR_STATIC),
@@ -54,7 +55,7 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
                             Arg('M', STR_MAIN   , ArgType::MAYBE),
                             Arg('o', STR_OUT    , ArgType::STRING),
                             Arg('p', STR_PROFILE, ArgType::STRING), Arg('P', STR_PROPERTY, ArgType::STRING),
-                            Arg('R', STR_DRY_RUN),
+                            Arg('r', STR_RUN_ARG, ArgType::STRING), Arg('R', STR_DRY_RUN),
                             Arg('s', STR_SCM_STATUS), Arg('S', STR_SHARED),
                             Arg('t', STR_THREADS, ArgType::MAYBE),
                             Arg('u', STR_SCM_UPDATE), Arg('U', STR_SCM_FUPDATE),
@@ -185,6 +186,17 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
     AppVars::INSTANCE().dependencyString(args.has(STR_DEP) ? &args.get(STR_DEP) : 0);
     a.buildDepVec(AppVars::INSTANCE().dependencyString());
 
+    if(args.has(STR_GET)){
+        const auto& get(args.get(STR_GET));
+        if(a.properties().count(get)){
+            KOUT(NON) << (*a.properties().find(get)).second;
+        }
+        if(AppVars::INSTANCE().properkeys().count(get)){
+            KOUT(NON) << (*AppVars::INSTANCE().properkeys().find(get)).second;
+        }
+        KEXIT(0, "");
+    }
+
     if(args.has(STR_MOD)){
         std::vector<std::string> vp { STR_COMPILE, STR_LINK, STR_PACK };
         if(args.get(STR_MOD).size()){
@@ -203,6 +215,7 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
     if(!args.has(STR_MOD) && !(args.has(STR_BUILD_MOD) || args.has(STR_BUILD_ALL))) a.modDeps.clear();
 
     if(args.has(STR_ARG))     AppVars::INSTANCE().args    (args.get(STR_ARG));
+    if(args.has(STR_RUN_ARG)) AppVars::INSTANCE().runArgs (args.get(STR_RUN_ARG));
     if(args.has(STR_LINKER))  AppVars::INSTANCE().linker  (args.get(STR_LINKER));
     if(args.has(STR_ALINKER)) AppVars::INSTANCE().allinker(args.get(STR_ALINKER));
     if(args.has(STR_THREADS)){

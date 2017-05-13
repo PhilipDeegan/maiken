@@ -5,11 +5,11 @@
 ## Building maiken prerequisites
   Linux/BSD: GCC 5.0 (or CLANG equivalent) / git 2.0
   
-  Windows:   Visual C++ 2015 / Windows SDK 10+ / git 2.0
+  Windows  : Visual C++ 2015 / Windows SDK 10+ / git 2.0
 
 [README](https://raw.githubusercontent.com/Dekken/maiken/master/README.noformat)
 
-[Windows Binaries available](https://github.com/Dekken/maiken/tree/binaries)
+[Binaries available](https://github.com/Dekken/maiken/tree/binaries)
 
 Testers/comments/suggestions/feature requests welcome. Email me or make an issue. Or head on over to [/r/mkn](http://reddit.com/r/mkn)
 

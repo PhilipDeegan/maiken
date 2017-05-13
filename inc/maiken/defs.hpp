@@ -114,6 +114,7 @@ class Constants{
         static constexpr const char* STR_HEADER         = "header";
         static constexpr const char* STR_MAIN           = "main";
         static constexpr const char* STR_INSTALL        = "install";
+        static constexpr const char* STR_GET            = "get";
         static constexpr const char* STR_OUT            = "out";
 
         static constexpr const char* STR_PROJECT        = "project";
@@ -162,6 +163,8 @@ class Constants{
         static constexpr const char* STR_TYPE           = "type";
         static constexpr const char* STR_VALUE          = "value";
         static constexpr const char* STR_SUPER          = "super";
+
+        static constexpr const char* STR_RUN_ARG        = "run-arg";
 
         static constexpr const char* STR_DIR            = "directory";
         static constexpr const char* STR_SETTINGS       = "settings";
