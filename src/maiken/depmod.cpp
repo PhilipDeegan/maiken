@@ -50,10 +50,10 @@ void maiken::Application::loadDepOrMod(const YAML::Node& node, const kul::Dir& d
             KEXCEPTION("ERROR in "+depOrMod.path()+"/mkn.bat");
 #else
         if(kul::File("mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh").is()
-            && kul::proc::Call("sh mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh", AppVars::INSTANCE().envVars()).run())
+            && kul::proc::Call("./mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh", AppVars::INSTANCE().envVars()).run())
             KEXCEPTION("ERROR in "+depOrMod.path()+"mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh");
         else
-        if(kul::File("mkn.sh").is() && kul::proc::Call("sh mkn.sh", AppVars::INSTANCE().envVars()).run())
+        if(kul::File("mkn.sh").is() && kul::proc::Call("./mkn.sh", AppVars::INSTANCE().envVars()).run())
             KEXCEPTION("ERROR in "+depOrMod.path()+"/mkn.sh");
 #endif
     }
