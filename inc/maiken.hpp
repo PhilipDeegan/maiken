@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2013, Philip Deegan.
+Copyright (c) 2017, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,11 +37,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/proc.hpp"
 #include "kul/scm/man.hpp"
 #include "kul/threads.hpp"
-#include "kul/code/compilers.hpp"
 
 #include "maiken/defs.hpp"
 #include "maiken/project.hpp"
 #include "maiken/settings.hpp"
+#include "maiken/compiler.hpp"
+#include "maiken/compiler/compilers.hpp"
 
 int main(int argc, char* argv[]);
 
@@ -158,7 +159,7 @@ class KUL_PUBLISH Application : public Constants{
         bool ig = 1, isMod = 0;
         const Application* par = nullptr;
         Application* sup = nullptr;
-        kul::code::Mode m;
+        compiler::Mode m;
         std::string arg, main, lang, lnk, out, scr, scv;
         const std::string p;
         kul::Dir bd, inst;
@@ -167,7 +168,7 @@ class KUL_PUBLISH Application : public Constants{
         kul::hash::map::S2T<kul::hash::map::S2S> fs;
         kul::hash::map::S2S includeStamps, itss, ps;
         kul::hash::map::S2T<kul::hash::set::String> args;
-        kul::hash::map::S2T<uint16_t> stss;
+        kul::hash::map::S2T<uint64_t> stss;
         std::vector<Application> deps, modDeps;
         std::vector<std::shared_ptr<ModuleLoader>> mods;
         std::vector<kul::cli::EnvVar> evs;
@@ -175,9 +176,9 @@ class KUL_PUBLISH Application : public Constants{
         std::vector<std::pair<std::string, bool> > incs, srcs;
         const kul::SCM* scm = 0;
 
-        kul::code::CompilerProcessCapture buildExecutable(const std::vector<std::string>& objects);
-        kul::code::CompilerProcessCapture buildLibrary(const std::vector<std::string>& objects);
-        void checkErrors(const kul::code::CompilerProcessCapture& cpc) KTHROW(kul::Exception);
+        CompilerProcessCapture buildExecutable(const kul::hash::set::String& objects);
+        CompilerProcessCapture buildLibrary(const kul::hash::set::String& objects);
+        void checkErrors(const CompilerProcessCapture& cpc) KTHROW(kul::Exception);
 
         void populateMaps(const YAML::Node& n) KTHROW(kul::Exception);
 
@@ -186,11 +187,11 @@ class KUL_PUBLISH Application : public Constants{
         void resolveProperties() KTHROW(Exception);
         void resolveLang() KTHROW(Exception);
 
-        void compile(std::vector<std::string>& objects) KTHROW(kul::Exception);
+        void compile(kul::hash::set::String& objects) KTHROW(kul::Exception);
         void build() KTHROW(kul::Exception);
         void pack()  KTHROW(kul::Exception);
-        void link()  KTHROW(kul::Exception);
-        void link(const std::vector<std::string>& objects) KTHROW(kul::Exception);
+        void findObjects(kul::hash::set::String& objects) const;
+        void link(const kul::hash::set::String& objects) KTHROW(kul::Exception);
         void run(bool dbg);
         void trim();
         void trim(const kul::File& f);
@@ -204,6 +205,8 @@ class KUL_PUBLISH Application : public Constants{
         void showConfig(bool force = 0);
         void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const KTHROW(kul::Exception);
         void showProfiles();
+
+        void writeTimeStamps(kul::hash::set::String& objects, std::vector<kul::File>& cacheFiles);
         void loadTimeStamps() KTHROW(kul::StringException);
 
         void buildDepVec(const std::string* depVal);
@@ -215,10 +218,10 @@ class KUL_PUBLISH Application : public Constants{
         kul::Dir resolveDepOrModDirectory(const YAML::Node& d, bool module);
         void popDepOrMod(const YAML::Node& n, std::vector<Application>& vec, const std::string& s, bool module) KTHROW(kul::Exception);
 
-        kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap();
-        kul::hash::set::String inactiveMains();
+        kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap() const;
+        kul::hash::set::String inactiveMains() const;
 
-        bool incSrc(const kul::File& f);
+        bool incSrc(const kul::File& f) const;
         void addSourceLine (const std::string& o) KTHROW(kul::Exception);
         void addIncludeLine(const std::string& o) KTHROW(kul::Exception);
 
@@ -231,7 +234,7 @@ class KUL_PUBLISH Application : public Constants{
 
         static void showHelp();
     public:
-        Application(const maiken::Project& proj, const std::string& profile = "");// : m(kul::code::Mode::NONE), p(profile), proj(proj){}
+        Application(const maiken::Project& proj, const std::string& profile = "");// : m(Mode::NONE), p(profile), proj(proj){}
         ~Application();
 
         virtual void                                       process()   KTHROW(kul::Exception);
@@ -299,7 +302,7 @@ class ThreadingCompiler : public Constants{
         kul::Mutex push;
         maiken::Application& app;
         std::queue<std::pair<std::string, std::string> >& sources;
-        std::vector<kul::code::CompilerProcessCapture> cpcs;
+        std::vector<CompilerProcessCapture> cpcs;
         std::vector<std::string> incs;
     public:
         ThreadingCompiler(maiken::Application& app, std::queue<std::pair<std::string, std::string> >& sources)
@@ -312,7 +315,7 @@ class ThreadingCompiler : public Constants{
                 }
             }
         void operator()() KTHROW(kul::Exception);
-        const std::vector<kul::code::CompilerProcessCapture>& processCaptures(){return cpcs;}
+        const std::vector<CompilerProcessCapture>& processCaptures(){return cpcs;}
 };
 
 class SCMGetter{

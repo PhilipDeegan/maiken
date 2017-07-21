@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2013, Philip Deegan.
+Copyright (c) 2017, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 maiken::Application::Application(const maiken::Project& proj, const std::string& profile)
-    : m(kul::code::Mode::NONE), p(profile), proj(proj){}
+    : m(compiler::Mode::NONE), p(profile), proj(proj){}
 
 maiken::Application::~Application(){
     for(auto mod: mods) mod->unload();
@@ -107,13 +107,15 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
         KEXIT(0, "");
     }
     if(args.has(STR_VERSION)){
-        std::stringstream ss;
-        ss << KTOSTRING(_MKN_VERSION_) << " (" << KTOSTRING(__KUL_OS__) << ")";
-#ifdef _MKN_DISABLE_MODULES_
-        ss << " w/o[mod]";
-#else
-        ss << " w/[mod]";
+        std::stringstream ss, mod;
+        ss << KTOSTRING(_MKN_VERSION_) << " (" << KTOSTRING(__KUL_OS__) << ") w/[";
+#ifndef _MKN_DISABLE_MODULES_
+        mod << "mod,";
 #endif//_MKN_DISABLE_MODULES_
+        if(_MKN_TIMESTAMPS_) mod << "ts,";
+        if(mod.str().size()) mod.seekp(-1, mod.cur);
+        mod << "]";
+        ss << mod.str();
         KOUT(NON) << ss.str();
         KEXIT(0, "");
     }
@@ -317,7 +319,7 @@ void maiken::Application::resolveLang() KTHROW(maiken::Exception) {
     }
 }
 
-kul::hash::set::String maiken::Application::inactiveMains(){
+kul::hash::set::String maiken::Application::inactiveMains() const{
     kul::hash::set::String iMs;
     std::string p;
     try{

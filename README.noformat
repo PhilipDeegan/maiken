@@ -498,6 +498,12 @@ Type            String
 Default         "o"
 Description     Sets the file type to compile object files to
 
+Key             MKN_LIB_LINK_LIB
+Type            bool
+Default         false
+Description     Links libraries with dependency libraries (gcc and  derivatives only)
+
+
 7. Switches
  
 Key             _MKN_REP_NAME_DOT_ 

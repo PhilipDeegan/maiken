@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2013, Philip Deegan.
+Copyright (c) 2017, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,7 @@ void maiken::Application::showConfig(bool force){
                     std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ?
                         f.name().substr(0, f.name().size() - 4) : f.name();
                     if(!g && c[STR_COMPILER])
-                        for(const auto& k : kul::code::Compilers::INSTANCE().keys())
+                        for(const auto& k : Compilers::INSTANCE().keys())
                             if(b == k) {
                                 KOUT(NON) << "COMPILER: " << f.full();
                                 g = 1;

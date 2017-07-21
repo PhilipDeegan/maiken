@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2013, Philip Deegan.
+Copyright (c) 2017, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,8 @@ void maiken::ThreadingCompiler::operator()() KTHROW(kul::Exception){
         if(AppVars::INSTANCE().jargs().count(fileType) > 0)
             cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;
         // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
-        const kul::code::CompilerProcessCapture& cpc
-            = kul::code::Compilers::INSTANCE().get(compiler)
+        const CompilerProcessCapture& cpc
+            = Compilers::INSTANCE().get(compiler)
                 ->compileSource(cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
         kul::ScopeLock lock(push);
         cpcs.push_back(cpc);

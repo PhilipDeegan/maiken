@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2013, Philip Deegan.
+Copyright (c) 2017, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -134,7 +134,7 @@ void maiken::Application::process() KTHROW(kul::Exception){
         app.loadTimeStamps();
         if(cmds.count(STR_TRIM)) app.trim();
 
-        std::vector<std::string> objects;
+        kul::hash::set::String objects;
         if(cmds.count(STR_BUILD_ALL) || cmds.count(STR_BUILD) || cmds.count(STR_COMPILE)){
             if(phase.count(STR_COMPILE))
                 for(auto& modLoader : app.mods)
@@ -145,7 +145,10 @@ void maiken::Application::process() KTHROW(kul::Exception){
             if(phase.count(STR_LINK))
                 for(auto& modLoader : app.mods)
                     modLoader->module()->link(app, modLoader->app()->modLArg);
-            if(work) objects.empty() ? app.link() : app.link(objects);
+            if(work) {
+                app.findObjects(objects);
+                app.link(objects);
+            }
         }
         for(const std::pair<std::string, std::string>& oldEv : oldEvs)
             kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());

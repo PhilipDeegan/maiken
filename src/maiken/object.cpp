@@ -28,17 +28,26 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef  _MAIKEN_PROPERTY_HPP_
-#define  _MAIKEN_PROPERTY_HPP_
+#include "maiken.hpp"
 
-namespace maiken{
-class Properties : public Constants {
-    private:
-        static std::shared_ptr<std::tuple<std::string, int, int>> KEY(const kul::hash::map::S2S& ps, const std::string& s) KTHROW(kul::Exception);
-    public:
-        static std::string RESOLVE(const Application& app, const std::string& s) KTHROW(kul::Exception);
-        static std::string RESOLVE(const Settings& app, const std::string& s) KTHROW(kul::Exception);
-};
+void maiken::Application::findObjects(kul::hash::set::String& objects) const {
 
+    for(const auto& ft : sourceMap()){
+        try{
+            if(!(*files().find(ft.first)).second.count(STR_COMPILER))
+                KEXCEPTION("No compiler found for filetype " + ft.first);
+            const auto* compiler = Compilers::INSTANCE().get((*(*files().find(ft.first)).second.find(STR_COMPILER)).second);
+            if(!compiler->sourceIsBin()){
+                if(!buildDir().is()) KEXCEPT(maiken::Exception, "Cannot link without compiling.\n" + project().dir().path());
+                kul::Dir objDir("obj", buildDir());
+                if(!buildDir().is()) KEXCEPT(maiken::Exception, "No object directory found.\n" + project().dir().path());
+                for(const kul::File f : objDir.files(true)) objects.insert(f.real());
+            }else{
+                for(const auto& kv : ft.second) for(const auto& f : kv.second) objects.insert(kul::File(f).mini());                
+            }
+        }catch(const CompilerNotFoundException& e){
+            KEXCEPTION("No compiler found for filetype " + ft.first);
+        }
+    }
 }
-#endif//_MAIKEN_PROPERTY_HPP_
+

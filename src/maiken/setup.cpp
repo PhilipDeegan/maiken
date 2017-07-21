@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2013, Philip Deegan.
+Copyright (c) 2017, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -157,9 +157,9 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
         for(const auto& n : nodes){
             if(n[STR_NAME].Scalar() != profile) continue;
             if(n[STR_MODE] && nm){
-                m = n[STR_MODE].Scalar() == STR_STATIC ? kul::code::Mode::STAT
-                : n[STR_MODE].Scalar() == STR_SHARED ? kul::code::Mode::SHAR
-                : kul::code::Mode::NONE;
+                m = n[STR_MODE].Scalar() == STR_STATIC ? compiler::Mode::STAT
+                : n[STR_MODE].Scalar() == STR_SHARED ? compiler::Mode::SHAR
+                : compiler::Mode::NONE;
                 nm = 0;
             }
             if(out.empty()  && n[STR_OUT])  out  = Properties::RESOLVE(*this, n[STR_OUT].Scalar());
@@ -176,9 +176,9 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
         main.clear();
     }
     if(nm){
-        if(AppVars::INSTANCE().shar()) m = kul::code::Mode::SHAR;
+        if(AppVars::INSTANCE().shar()) m = compiler::Mode::SHAR;
         else
-        if(AppVars::INSTANCE().stat()) m = kul::code::Mode::STAT;
+        if(AppVars::INSTANCE().stat()) m = compiler::Mode::STAT;
     }
     profile = p.size() ? p : project().root()[STR_NAME].Scalar();
     c = 1;
@@ -219,10 +219,10 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
                     if(lang.empty() && left == STR_BIN) for(const auto& s : ifArgs) arg += s + " ";
                     else
                     if(main.empty() && left == STR_LIB) for(const auto& s : ifArgs) arg += s + " ";
-                    if(m == kul::code::Mode::SHAR && left == STR_SHARED)
+                    if(m == compiler::Mode::SHAR && left == STR_SHARED)
                         for(const auto& s : ifArgs) arg += s + " ";
                     else
-                    if(m == kul::code::Mode::STAT && left == STR_STATIC)
+                    if(m == compiler::Mode::STAT && left == STR_STATIC)
                         for(const auto& s : ifArgs) arg += s + " ";
                     else
                     if(left == KTOSTRING(__KUL_OS__)) for(const auto& s : ifArgs) arg += s + " ";

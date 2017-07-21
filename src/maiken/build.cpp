@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2013, Philip Deegan.
+Copyright (c) 2017, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,32 +30,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::link() KTHROW(kul::Exception){
+void 
+maiken::Application::link(const kul::hash::set::String& objects) KTHROW(kul::Exception){
     showConfig();
-    std::vector<std::string> objects;
-    for(const auto& ft : sourceMap()){
-        try{
-            if(!(*files().find(ft.first)).second.count(STR_COMPILER))
-                KEXCEPTION("No compiler found for filetype " + ft.first);
-            const auto* compiler = kul::code::Compilers::INSTANCE().get((*(*files().find(ft.first)).second.find(STR_COMPILER)).second);
-            if(!compiler->sourceIsBin()){
-                if(!buildDir().is()) KEXCEPT(maiken::Exception, "Cannot link without compiling.\n" + project().dir().path());
-                kul::Dir objDir("obj", buildDir());
-                if(!buildDir().is()) KEXCEPT(maiken::Exception, "No object directory found.\n" + project().dir().path());
-                for(const kul::File f : objDir.files(true)) objects.push_back(f.real());
-            }else{
-                for(const auto& kv : ft.second)
-                    for(const auto& f : kv.second) objects.push_back(kul::File(f).mini());
-            }
-        }catch(const kul::code::CompilerNotFoundException& e){
-            KEXCEPTION("No compiler found for filetype " + ft.first);
-        }
-    }
-    link(objects);
-}
-
-
-void maiken::Application::link(const std::vector<std::string>& objects) KTHROW(kul::Exception){
     if(objects.size() > 0){
         buildDir().mk();
         if(!main.empty())   buildExecutable(objects);
@@ -63,7 +40,8 @@ void maiken::Application::link(const std::vector<std::string>& objects) KTHROW(k
     }else KEXCEPTION("No objects found, try \"compile\" first.");
 }
 
-void maiken::Application::compile(std::vector<std::string>& objects) KTHROW(kul::Exception){
+void 
+maiken::Application::compile(kul::hash::set::String& objects) KTHROW(kul::Exception){
     showConfig();
     if(!AppVars::INSTANCE().dryRun()){
         std::stringstream ss;
@@ -101,19 +79,19 @@ void maiken::Application::compile(std::vector<std::string>& objects) KTHROW(kul:
     const std::string oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
     for(const std::pair<std::string, kul::hash::map::S2T<kul::hash::set::String> >& ft : sources){
         kul::Dir objD(buildDir().join("obj")); objD.mk();
-        const kul::code::Compiler* compiler;
+        const Compiler* compiler;
         try{
             if(!(*files().find(ft.first)).second.count(STR_COMPILER))
                 KEXCEPT(Exception, "No compiler found for filetype " + ft.first);
-            compiler = kul::code::Compilers::INSTANCE().get((*(*files().find(ft.first)).second.find(STR_COMPILER)).second);
-        }catch(const kul::code::CompilerNotFoundException& e){
+            compiler = Compilers::INSTANCE().get((*(*files().find(ft.first)).second.find(STR_COMPILER)).second);
+        }catch(const CompilerNotFoundException& e){
             KEXCEPT(Exception, "No compiler found for filetype " + ft.first);
         }
         if(compiler->sourceIsBin()){
             for(const std::pair<std::string, kul::hash::set::String>& kv : ft.second)
                 for(const std::string& s : kv.second){
                     kul::File source(s);
-                    objects.push_back(source.escm());
+                    objects.insert(source.escm());
                     cacheFiles.push_back(source);
                 }
         }else{
@@ -122,6 +100,7 @@ void maiken::Application::compile(std::vector<std::string>& objects) KTHROW(kul:
             for(const std::pair<std::string, kul::hash::set::String>& kv : ft.second){
                 for(const std::string& s : kv.second){
                     const kul::File source(s);
+                    if(!incSrc(source)) continue;
                     std::stringstream ss, os;
                     ss << std::hex << std::hash<std::string>()(source.real());
                     os << ss.str() << "-" << source.name() << oType;
@@ -149,7 +128,7 @@ void maiken::Application::compile(std::vector<std::string>& objects) KTHROW(kul:
                 auto e = [] (const std::string& s) { if(s.size()) KERR << s; };
                 std::exception_ptr ep;
 
-                for(const kul::code::CompilerProcessCapture& cpc : tc.processCaptures()){
+                for(const CompilerProcessCapture& cpc : tc.processCaptures()){
                     if(!AppVars::INSTANCE().dryRun()){
                         if(cpc.exception()) ep = cpc.exception();
                         if(kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
@@ -159,100 +138,18 @@ void maiken::Application::compile(std::vector<std::string>& objects) KTHROW(kul:
                 }
                 if(ep) std::rethrow_exception(ep);
                 while(cQueue.size()){
-                    objects.push_back(cQueue.front().second);
+                    objects.insert(cQueue.front().second);
                     cacheFiles.push_back(kul::File(cQueue.front().first));
                     cQueue.pop();
                 }
             }
         }
     }
-    if(_MKN_TIMESTAMPS_){
-        kul::Dir mkn(buildDir().join(".mkn"), 1);
-        kul::File srcStamps("src_stamp", mkn);
-        kul::File incStamps("inc_stamp", mkn);
-        for(const auto& src : stss)
-            if(std::find(cacheFiles.begin(), cacheFiles.end(), src.first) == cacheFiles.end())
-                cacheFiles.push_back(src.first);
-        kul::hash::map::S2T<const kul::code::Compiler*> compilers;
-        for(const auto& f: cacheFiles){
-            std::string ft = f.name().substr(f.name().rfind(".") + 1);
-            const kul::code::Compiler* compiler;
-            if(compilers.count(ft)) compiler = (*compilers.find(ft)).second;
-            else{
-                compiler = kul::code::Compilers::INSTANCE().get((*(*files().find(ft)).second.find(STR_COMPILER)).second);
-                compilers.insert(ft, compiler);
-            }
-            if(compiler->sourceIsBin())
-                if(std::find(objects.begin(), objects.end(), f.escm()) == objects.end()) objects.push_back(f.escm());
-        }
-        for(const auto& f : buildDir().files(1))
-            if(f.name().size() > 4 && f.name().substr(f.name().size() - 4) == oType)
-                if(std::find(objects.begin(), objects.end(), f.escm()) == objects.end()) objects.push_back(f.escm());
-
-        kul::io::Writer srcW(srcStamps);
-        kul::io::Writer incW(incStamps);
-        for(const auto& i : includeStamps)
-            incW << i.first << " " << i.second << kul::os::EOL();
-        for(const auto& src : cacheFiles)
-            if(!(*compilers.find(src.name().substr(src.name().rfind(".") + 1))).second->sourceIsBin())
-                srcW << src.mini() << " " << src.timeStamps().modified() << kul::os::EOL();
-    }
+    if(_MKN_TIMESTAMPS_) writeTimeStamps(objects, cacheFiles);
 }
 
-kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > maiken::Application::sourceMap(){
-    const kul::hash::set::String iMs = inactiveMains();
-    kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> sm;
-    if(main.size()){
-        kul::File f(kul::Dir(main).locl());
-        if(!f)      f = kul::File(main, project().dir());
-        if(f.is() && incSrc(f)) sm[f.name().substr(f.name().rfind(".") + 1)][f.dir().real()].insert(f.real());
-        else
-        if(!AppVars::INSTANCE().dryRun() && !f.is()) KOUT(NON)  << "WARN : main does not exist: " << f;
-    }
-    for(const std::pair<std::string, bool>& sourceDir : sources()){
-        std::vector<kul::File> files;
-        kul::Dir d(sourceDir.first);
-        if(d) for(const auto& f : d.files(sourceDir.second)) files.push_back(f);
-        else  files.push_back(sourceDir.first);
-        for(const kul::File& file : files){
-            if(file.name().find(".") == std::string::npos || file.name().substr(0, 1).compare(".") == 0) continue;
-            const std::string ft = file.name().substr(file.name().rfind(".") + 1);
-            if(fs.count(ft) > 0){
-                const std::string& rl(file.real());
-                bool a = false;
-                for(const std::string& s : iMs){
-                    a = rl.compare(s) == 0;
-                    if(a) break;
-                }
-                if(!a && incSrc(file)) sm[ft][sourceDir.first].insert(rl);
-            }
-        }
-    }
-    return sm;
-}
-
-bool maiken::Application::incSrc(const kul::File& file){
-    bool c = 1;
-    if(_MKN_TIMESTAMPS_){
-        const std::string& rl(file.mini());
-        c = !stss.count(rl);
-        if(!c){
-            const uint& mod = file.timeStamps().modified();
-            if(mod == (*stss.find(rl)).second){
-                for(const auto& i : includes()){
-                    kul::Dir inc(i.first);
-                    if(itss.count(inc.mini()) && includeStamps.count(inc.mini())){
-                        if((*includeStamps.find(inc.mini())).second != (*itss.find(inc.mini())).second) c = 1;
-                    }else c = 1;
-                    if(c) break;
-                }
-            }else c = 1;
-        }
-    }
-    return c;
-}
-
-kul::code::CompilerProcessCapture maiken::Application::buildExecutable(const std::vector<std::string>& objects){
+maiken::CompilerProcessCapture 
+maiken::Application::buildExecutable(const kul::hash::set::String& objects){
     using namespace kul;
     const std::string& file     = main;
     const std::string& fileType = file.substr(file.rfind(".") + 1);
@@ -276,9 +173,11 @@ kul::code::CompilerProcessCapture maiken::Application::buildExecutable(const std
                 KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
             const std::string& n(out.empty() ? project().root()[STR_NAME].Scalar() : out);
             std::string bin(AppVars::INSTANCE().dryRun() ? kul::File(outD.join(n)).esc() : kul::File(outD.join(n)).escm());
-            const kul::code::CompilerProcessCapture& cpc =
-                kul::code::Compilers::INSTANCE().get((*(*files().find(fileType)).second.find(STR_COMPILER)).second)
-                    ->buildExecutable(linker, linkEnd, objects,
+            std::vector<std::string> obV;
+            for(const auto& o : objects) obV.emplace_back(o);
+            const CompilerProcessCapture& cpc =
+                Compilers::INSTANCE().get((*(*files().find(fileType)).second.find(STR_COMPILER)).second)
+                    ->buildExecutable(linker, linkEnd, obV,
                         libraries(), libraryPaths(), bin, m, AppVars::INSTANCE().dryRun());
             if(AppVars::INSTANCE().dryRun()) KOUT(NON) << cpc.cmd();
             else{
@@ -287,16 +186,17 @@ kul::code::CompilerProcessCapture maiken::Application::buildExecutable(const std
                 KOUT(NON) << "Creating bin: " << kul::File(cpc.file()).real();
             }
             return cpc;
-        }catch(const kul::code::CompilerNotFoundException& e){
+        }catch(const CompilerNotFoundException& e){
             KEXCEPTION("UNSUPPORTED COMPILER EXCEPTION");
         }
     }else
         KEXCEPTION("Unable to handle artifact: \"" + file + "\" - type is not in file list");
 }
 
-kul::code::CompilerProcessCapture maiken::Application::buildLibrary(const std::vector<std::string>& objects){
+maiken::CompilerProcessCapture 
+maiken::Application::buildLibrary(const kul::hash::set::String& objects){
     if(fs.count(lang) > 0){
-        if(m == kul::code::Mode::NONE) m = kul::code::Mode::SHAR;
+        if(m == compiler::Mode::NONE) m = compiler::Mode::SHAR;
         if(!(*files().find(lang)).second.count(STR_COMPILER)) KEXCEPT(Exception, "No compiler found for filetype " + lang);
         std::string linker = fs[lang][STR_LINKER];
         std::string linkEnd;
@@ -305,13 +205,15 @@ kul::code::CompilerProcessCapture maiken::Application::buildLibrary(const std::v
         if(!lnk.empty()) linkEnd += " " + lnk;
         if(!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && linkEnd.size())
             KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
-        if(m == kul::code::Mode::STAT) linker = fs[lang][STR_ARCHIVER];
+        if(m == compiler::Mode::STAT) linker = fs[lang][STR_ARCHIVER];
         kul::Dir outD(inst ? inst.real() : buildDir());
         std::string lib(baseLibFilename());
         lib = AppVars::INSTANCE().dryRun() ? kul::File(lib, outD).esc() : kul::File(lib, outD).escm();
-        const kul::code::CompilerProcessCapture& cpc =
-            kul::code::Compilers::INSTANCE().get((*(*files().find(lang)).second.find(STR_COMPILER)).second)
-                ->buildLibrary(linker, linkEnd, objects,
+        std::vector<std::string> obV;
+        for(const auto& o : objects) obV.emplace_back(o);
+        const CompilerProcessCapture& cpc =
+            Compilers::INSTANCE().get((*(*files().find(lang)).second.find(STR_COMPILER)).second)
+                ->buildLibrary(linker, linkEnd, obV,
                     libraries(), libraryPaths(), lib, m, AppVars::INSTANCE().dryRun());
         if(AppVars::INSTANCE().dryRun()) KOUT(NON) << cpc.cmd();
         else{
@@ -324,7 +226,8 @@ kul::code::CompilerProcessCapture maiken::Application::buildLibrary(const std::v
         KEXCEPTION("Unable to handle artifact: \"" + lang + "\" - type is not in file list");
 }
 
-void maiken::Application::checkErrors(const kul::code::CompilerProcessCapture& cpc) KTHROW(kul::Exception){
+void 
+maiken::Application::checkErrors(const CompilerProcessCapture& cpc) KTHROW(kul::Exception){
     auto o = [] (const std::string& s) { if(s.size()) KOUT(NON) << s; };
     auto e = [] (const std::string& s) { if(s.size()) KERR << s; };
     if(kul::LogMan::INSTANCE().inf() || cpc.exception())

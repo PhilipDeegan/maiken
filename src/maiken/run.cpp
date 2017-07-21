@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2013, Philip Deegan.
+Copyright (c) 2017, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@ void maiken::Application::run(bool dbg){
         }
     }
 
-    if(m != kul::code::Mode::STAT){
+    if(m != compiler::Mode::STAT){
         std::string arg;
         for(const auto& s : libraryPaths()) arg += s + kul::env::SEP();
         arg.pop_back();

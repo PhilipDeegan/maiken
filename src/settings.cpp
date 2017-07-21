@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2013, Philip Deegan.
+Copyright (c) 2017, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -83,10 +83,10 @@ maiken::Settings::Settings(const std::string& s) : kul::yaml::File(s){
             if(!ps.count(p.first)) ps.insert(p.first, p.second);
     }
     if(root()[STR_COMPILER] && root()[STR_COMPILER][STR_MASK])
-        for(const auto& k : kul::code::Compilers::INSTANCE().keys())
+        for(const auto& k : Compilers::INSTANCE().keys())
             if(root()[STR_COMPILER][STR_MASK][k])
                 for(const auto& s : kul::String::SPLIT(root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
-                    kul::code::Compilers::INSTANCE().addMask(s, k);
+                    Compilers::INSTANCE().addMask(s, k);
 
     resolveProperties();
 }
@@ -139,7 +139,7 @@ const kul::yaml::Validator maiken::Settings::validator() const{
     using namespace kul::yaml;
 
     std::vector<NodeValidator> masks;
-    for(const auto& s : kul::code::Compilers::INSTANCE().keys())
+    for(const auto& s : Compilers::INSTANCE().keys())
         masks.push_back(NodeValidator(s, {}, 0, NodeType::STRING));
 
     NodeValidator compiler("compiler", {
