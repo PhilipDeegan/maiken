@@ -64,14 +64,14 @@ class LibFinder{
 void maiken::Application::pack() KTHROW(kul::Exception){
 
     kul::Dir pk(buildDir().join("pack"));
-    if(!pk && !pk.mk()) KEXCEPTION("Cannot create: " + pk.path());
+    if(!pk && !pk.mk()) KEXIT(1, "Cannot create: " + pk.path());
 
     kul::Dir bin(pk.join("bin"), main.size());
     kul::Dir lib(pk.join("lib"));
 
     if(!main.empty() || !srcs.empty()){
         const auto v((inst ? inst : buildDir()).files(0));
-        if(v.empty()) KEXCEPTION("Current project lib/bin not found during pack");
+        if(v.empty()) KEXIT(1, "Current project lib/bin not found during pack");
         for(const auto& f : v) f.cp(main.size() ? bin : lib);
     }
 
@@ -81,13 +81,13 @@ void maiken::Application::pack() KTHROW(kul::Exception){
             kul::Dir outD(a.inst ? a.inst.real() : a.buildDir());
             std::string n = a.project().root()[STR_NAME].Scalar();
             if(!LibFinder::findAdd(a.baseLibFilename(), outD, lib))
-                KEXCEPTION("Depedency Project lib not found, try building: ") << a.buildDir().real();
+                KEXIT(1, "Depedency Project lib not found, try building: ") << a.buildDir().real();
         }
     for(const auto& l : libs){
         bool found = 0;
         for(const auto& p : paths){
             kul::Dir path(p);
-            if(!path) KEXCEPTION("Path does not exist: ") << pk.path();
+            if(!path) KEXIT(1, "Path does not exist: ") << pk.path();
             found = LibFinder::findAdd(l, path, lib);
             if(found) break;
         }

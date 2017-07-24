@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void 
+void
 maiken::Application::addSourceLine(const std::string& s) KTHROW(kul::Exception){
     std::string o = s;
     kul::String::TRIM(o);
@@ -41,20 +41,20 @@ maiken::Application::addSourceLine(const std::string& s) KTHROW(kul::Exception){
             else{
                 kul::File f(kul::Dir(Properties::RESOLVE(*this, s)).locl());
                 if(f) srcs.push_back(std::make_pair(f.real(), false));
-                else  KEXCEPTION("source does not exist\n"+s+"\n"+project().dir().path());
+                else  KEXIT(1, "source does not exist\n"+s+"\n"+project().dir().path());
             }
         }
     }else{
         std::vector<std::string> v;
         kul::String::SPLIT(o, ",", v);
-        if(v.size() == 0 || v.size() > 2) KEXCEPTION("source invalid format\n" + project().dir().path());
+        if(v.size() == 0 || v.size() > 2) KEXIT(1, "source invalid format\n" + project().dir().path());
         kul::Dir d(Properties::RESOLVE(*this, v[0]));
         if(d) srcs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
-        else KEXCEPTION("source does not exist\n"+v[0]+"\n"+project().dir().path());
+        else KEXIT(1, "source does not exist\n"+v[0]+"\n"+project().dir().path());
     }
 }
 
-kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > 
+kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> >
 maiken::Application::sourceMap() const{
     const kul::hash::set::String iMs = inactiveMains();
     kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> sm;
@@ -87,7 +87,7 @@ maiken::Application::sourceMap() const{
     return sm;
 }
 
-bool 
+bool
 maiken::Application::incSrc(const kul::File& file) const {
     bool c = 1;
     if(_MKN_TIMESTAMPS_){

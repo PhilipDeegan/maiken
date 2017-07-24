@@ -42,11 +42,13 @@ void maiken::Application::showConfig(bool force){
         std::string path = kul::env::GET("PATH");
         for(const YAML::Node& c : Settings::INSTANCE().root()[STR_ENV]){
             if(c[STR_NAME].Scalar() != "PATH") continue;
-            EnvVarMode mode = EnvVarMode::APPE;
-            if      (c[STR_MODE].Scalar().compare(STR_APPEND)   == 0) mode = EnvVarMode::APPE;
-            else if (c[STR_MODE].Scalar().compare(STR_PREPEND)  == 0) mode = EnvVarMode::PREP;
-            else if (c[STR_MODE].Scalar().compare(STR_REPLACE)  == 0) mode = EnvVarMode::REPL;
-            else KEXCEPT(Exception, "Unhandled EnvVar mode: " + c[STR_MODE].Scalar());
+            EnvVarMode mode = EnvVarMode::PREP;
+            if(c[STR_MODE]){
+                if      (c[STR_MODE].Scalar().compare(STR_APPEND)   == 0) mode = EnvVarMode::APPE;
+                else if (c[STR_MODE].Scalar().compare(STR_PREPEND)  == 0) mode = EnvVarMode::PREP;
+                else if (c[STR_MODE].Scalar().compare(STR_REPLACE)  == 0) mode = EnvVarMode::REPL;
+                else KEXIT(1, "Unhandled EnvVar mode: " + c[STR_MODE].Scalar());
+            }
             path = EnvVar(c[STR_NAME].Scalar(), c[STR_VALUE].Scalar(), mode).toString();
             break;
         }
@@ -119,7 +121,7 @@ void maiken::Application::showHelp(){
     ss.push_back("");
     ss.push_back(MKN_DEFS_ARG);
     ss.push_back(MKN_DEFS_ARGS);
-    ss.push_back(MKN_DEFS_ADD);    
+    ss.push_back(MKN_DEFS_ADD);
     ss.push_back(MKN_DEFS_DIRC);
     ss.push_back(MKN_DEFS_DEPS);
     ss.push_back(MKN_DEFS_EVSA);

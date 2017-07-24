@@ -164,8 +164,8 @@ const kul::yaml::Validator maiken::Settings::validator() const{
         }, 0, NodeType::MAP),
         NodeValidator("env", {
             NodeValidator("name", 1),
-            NodeValidator("mode", 1),
-            NodeValidator("value", 1)
+            NodeValidator("value", 1),
+            NodeValidator("mode")
         }, 0, NodeType::LIST),
         NodeValidator("file", {
             NodeValidator("type", 1),

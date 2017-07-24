@@ -384,9 +384,12 @@ void maiken::Application::populateMaps(const YAML::Node& n) KTHROW(kul::Exceptio
     using namespace kul::cli;
     for(const auto& c : n[STR_ENV]){
         EnvVarMode mode = EnvVarMode::PREP;
-        if      (c[STR_MODE].Scalar().compare(STR_APPEND)   == 0) mode = EnvVarMode::APPE;
-        else if (c[STR_MODE].Scalar().compare(STR_PREPEND)  == 0) mode = EnvVarMode::PREP;
-        else if (c[STR_MODE].Scalar().compare(STR_REPLACE)  == 0) mode = EnvVarMode::REPL;
+        if(c[STR_MODE]){
+            if      (c[STR_MODE].Scalar().compare(STR_APPEND)   == 0) mode = EnvVarMode::APPE;
+            else if (c[STR_MODE].Scalar().compare(STR_PREPEND)  == 0) mode = EnvVarMode::PREP;
+            else if (c[STR_MODE].Scalar().compare(STR_REPLACE)  == 0) mode = EnvVarMode::REPL;
+            else KEXIT(1, "Unhandled EnvVar mode: " + c[STR_MODE].Scalar());
+        }
         evs.erase(std::remove_if(evs.begin(), evs.end(),
             [&c](const EnvVar& ev) {return ev.name() == c[STR_NAME].Scalar();}), evs.end());
         evs.emplace_back(

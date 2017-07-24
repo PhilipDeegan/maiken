@@ -33,10 +33,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 void maiken::Application::loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module) KTHROW(kul::Exception) {
     KOUT(NON) << MKN_PROJECT_NOT_FOUND << depOrMod;
 #ifdef _MKN_DISABLE_SCM_
-    KEXCEPTION("dep does not exist and remote retrieval is disabled - path: " + depOrMod.path());
+    KEXIT(1, "dep does not exist and remote retrieval is disabled - path: " + depOrMod.path());
 #endif
     if(!node[STR_SCM] && !node[STR_NAME])
-        KEXCEPTION("dep has no name or scm tag so cannot be resolved automatically from remote repositories - path: " + depOrMod.path());
+        KEXIT(1, "dep has no name or scm tag so cannot be resolved automatically from remote repositories - path: " + depOrMod.path());
     kul::env::CWD(this->project().dir());
     const std::string& tscr(node[STR_SCM] ? Properties::RESOLVE(*this, node[STR_SCM].Scalar()) : node[STR_NAME].Scalar());
     const std::string& v(node[STR_VERSION] ? Properties::RESOLVE(*this, node[STR_VERSION].Scalar()) : "");
@@ -47,14 +47,14 @@ void maiken::Application::loadDepOrMod(const YAML::Node& node, const kul::Dir& d
 #ifdef _WIN32
         if(kul::File("mkn.bat").is()
                 && kul::proc::Call("mkn.bat", AppVars::INSTANCE().envVars()).run())
-            KEXCEPTION("ERROR in "+depOrMod.path()+"/mkn.bat");
+            KEXIT(1, "ERROR in "+depOrMod.path()+"/mkn.bat");
 #else
         if(kul::File("mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh").is()
             && kul::proc::Call("./mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh", AppVars::INSTANCE().envVars()).run())
-            KEXCEPTION("ERROR in "+depOrMod.path()+"mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh");
+            KEXIT(1, "ERROR in "+depOrMod.path()+"mkn."+std::string(KTOSTRING(__KUL_OS__))+".sh");
         else
         if(kul::File("mkn.sh").is() && kul::proc::Call("./mkn.sh", AppVars::INSTANCE().envVars()).run())
-            KEXCEPTION("ERROR in "+depOrMod.path()+"/mkn.sh");
+            KEXIT(1, "ERROR in "+depOrMod.path()+"/mkn.sh");
 #endif
     }
     kul::env::CWD(this->project().dir());
@@ -117,7 +117,7 @@ void maiken::Application::popDepOrMod(
                         }
 
                 if(!f && !s.empty())
-                    KEXCEPTION("profile does not exist\n"+s+"\n"+project().dir().path());
+                    KEXIT(1, "profile does not exist\n"+s+"\n"+project().dir().path());
                 auto& app = *Applications::INSTANCE().getOrCreate(c, s, 0);
                 app.par = this;
                 setApp(app, depOrMod);

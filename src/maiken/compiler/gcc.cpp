@@ -30,14 +30,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/compiler/cpp.hpp"
 
-maiken::CompilerProcessCapture 
+maiken::CompilerProcessCapture
 maiken::cpp::GccCompiler::buildExecutable(
         const std::string& linker,
         const std::string& linkerEnd,
         const std::vector<std::string>& objects,
         const std::vector<std::string>& libs,
         const std::vector<std::string>& libPaths,
-        const std::string& out, 
+        const std::string& out,
         const maiken::compiler::Mode& mode,
         bool dryRun) const KTHROW(kul::Exception) {
 
@@ -58,7 +58,7 @@ maiken::cpp::GccCompiler::buildExecutable(
     for(const std::string& d : dirs) p.arg(kul::File(oStar(objects), d).escm());
     for(const std::string& lib : libs)  p.arg("-l" + lib);
     for(const std::string& s: kul::cli::asArgs(linkerEnd)) p.arg(s);
-    
+
     CompilerProcessCapture pc;
     try{
         if(!dryRun) p.start();
@@ -67,17 +67,17 @@ maiken::cpp::GccCompiler::buildExecutable(
     }
     pc.file(out);
     pc.cmd(p.toString());
-    return pc; 
+    return pc;
 }
 
-maiken::CompilerProcessCapture 
+maiken::CompilerProcessCapture
 maiken::cpp::GccCompiler::buildLibrary(
-        const std::string& linker, 
+        const std::string& linker,
         const std::string& linkerEnd,
         const std::vector<std::string>& objects,
         const std::vector<std::string>& libs,
         const std::vector<std::string>& libPaths,
-        const kul::File& out, 
+        const kul::File& out,
         const maiken::compiler::Mode& mode,
         bool dryRun) const KTHROW(kul::Exception) {
 
@@ -114,18 +114,18 @@ maiken::cpp::GccCompiler::buildLibrary(
     }
     pc.file(lib);
     pc.cmd(p.toString());
-    return pc; 
+    return pc;
 }
 
-maiken::CompilerProcessCapture 
+maiken::CompilerProcessCapture
 maiken::cpp::GccCompiler::compileSource(
-        const std::string& compiler, 
-        const std::vector<std::string>& args, 
+        const std::string& compiler,
+        const std::vector<std::string>& args,
         const std::vector<std::string>& incs,
-        const std::string& in, 
-        const std::string& out, 
+        const std::string& in,
+        const std::string& out,
         const maiken::compiler::Mode& mode,
-        bool dryRun) const KTHROW(kul::Exception){ 
+        bool dryRun) const KTHROW(kul::Exception){
 
     std::string cmd = compiler;
     std::vector<std::string> bits;
@@ -151,16 +151,16 @@ maiken::cpp::GccCompiler::compileSource(
 }
 
 void
-maiken::cpp::GccCompiler::preCompileHeader(          
+maiken::cpp::GccCompiler::preCompileHeader(
         const std::vector<std::string>& incs,
-        const std::vector<std::string>& args, 
-        const std::string& in, 
+        const std::vector<std::string>& args,
+        const std::string& in,
         const std::string& out,
         bool dryRun) const KTHROW(kul::Exception) {
 
     if(in.rfind(".") == std::string::npos)
         KEXCEPT(Exception, "Unknown header type");
-    
+
     std::string cmd;// = compiler + " -x";
     std::string h = in.substr(in.rfind(".") + 1);
 

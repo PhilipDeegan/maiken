@@ -74,7 +74,7 @@ std::string maiken::Properties::RESOLVE(const Application& app, const std::strin
         if(app.properties().count(k) == 0){
             if(app.project().root()[k] && app.project().root()[k].Type() == 2)
                 k = app.project().root()[k].Scalar();
-            else KEXCEPTION("Property : '" + k + "' has not been defined");
+            else KEXIT(1, "Property : '" + k + "' has not been defined");
         }else k = (*app.properties().find(k)).second;
         r = Properties::RESOLVE(app, r.substr(0, lb) + k + r.substr(rb + 1));
     }
@@ -95,7 +95,7 @@ std::string maiken::Properties::RESOLVE(const Settings& set, const std::string& 
         else
         if(set.properties().count(k) > 0)
             k = (*set.properties().find(k)).second;
-        else KEXCEPTION("Property : '" + k + "' has not been defined");
+        else KEXIT(1, "Property : '" + k + "' has not been defined");
         r = Properties::RESOLVE(set, r.substr(0, lb) + k + r.substr(rb + 1));
     }
     kul::String::TRIM(r);

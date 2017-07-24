@@ -32,15 +32,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 maiken::CompilerProcessCapture
 maiken::csharp::WINCompiler::buildExecutable(
-        const std::string& linker, 
+        const std::string& linker,
         const std::string& linkerEnd,
         const std::vector<std::string>& objects,
         const std::vector<std::string>& libs,
         const std::vector<std::string>& libPaths,
-        const std::string& out, 
+        const std::string& out,
         const maiken::compiler::Mode& mode,
         bool dryRun) const KTHROW(kul::Exception){
-    
+
     std::string exe = out + ".exe";
     std::string cmd = linker;
     std::vector<std::string> bits;
@@ -64,7 +64,7 @@ maiken::csharp::WINCompiler::buildExecutable(
         s.pop_back();
         p.arg("/REFERENCE:" + s);
     }
-    
+
     for(const std::string& o : objects) p.arg(o);
     if(linkerEnd.find(" ") != std::string::npos)
         for(const std::string& s: kul::String::SPLIT(linkerEnd, ' '))
@@ -81,14 +81,14 @@ maiken::csharp::WINCompiler::buildExecutable(
     return pc;
 }
 
-maiken::CompilerProcessCapture 
+maiken::CompilerProcessCapture
 maiken::csharp::WINCompiler::buildLibrary(
-        const std::string& linker, 
+        const std::string& linker,
         const std::string& linkerEnd,
         const std::vector<std::string>& objects,
         const std::vector<std::string>& libs,
         const std::vector<std::string>& libPaths,
-        const kul::File& out, 
+        const kul::File& out,
         const maiken::compiler::Mode& mode,
         bool dryRun) const KTHROW(kul::Exception){
 

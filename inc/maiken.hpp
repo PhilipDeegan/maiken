@@ -254,7 +254,7 @@ class KUL_PUBLISH Application : public Constants{
         const kul::hash::map::S2T<kul::hash::set::String>& arguments()           const { return args; }
 
         std::string                                        baseLibFilename()     const {
-            std::string n = project().root()[STR_NAME].Scalar(); 
+            std::string n = project().root()[STR_NAME].Scalar();
             return out.empty() ? inst ? p.empty() ? n : n + "_" + p : n : out;
         }
 

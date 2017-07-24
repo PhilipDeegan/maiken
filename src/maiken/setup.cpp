@@ -124,7 +124,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
                 if(s.size()){
                     kul::Dir d(Properties::RESOLVE(*this, s));
                     if(d) incs.push_back(std::make_pair(d.real(), false));
-                    else  KEXCEPTION("include does not exist\n")
+                    else  KEXIT(1, "include does not exist\n")
                         << d.path() << "\n"
                         << Settings::INSTANCE().file();
                 }
@@ -135,7 +135,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
                     kul::Dir d(Properties::RESOLVE(*this, s));
                     if(d) paths.push_back(d.escr());
                     else
-                        KEXCEPTION("library path does not exist\n")
+                        KEXIT(1, "library path does not exist\n")
                             << d.path() << "\n"
                             << Settings::INSTANCE().file();
                 }
@@ -201,7 +201,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
                 if(n[STR_INSTALL]) inst = kul::Dir(Properties::RESOLVE(*this, n[STR_INSTALL].Scalar()));
                 if(!inst.path().empty()){
                     if(!inst && !inst.mk())
-                        KEXCEPTION("install tag is not a valid directory\n" + project().dir().path());
+                        KEXIT(1, "install tag is not a valid directory\n" + project().dir().path());
                     inst = kul::Dir(inst.real());
                 }
             }
@@ -235,7 +235,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
                                 addIncludeLine(s);
             }catch(const kul::StringException& e){
                 KLOG(ERR) << e.what();
-                KEXCEPTION("if_inc contains invalid bool value\n"+project().dir().path());
+                KEXIT(1, "if_inc contains invalid bool value\n"+project().dir().path());
             }
             try{
                 if(n[STR_IF_SRC])
@@ -244,7 +244,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
                             for(const auto& s : kul::String::SPLIT(it->second.Scalar(), ' '))
                                 addSourceLine(s);
             }catch(const kul::StringException){
-                KEXCEPTION("if_src contains invalid bool value\n"+project().dir().path());
+                KEXIT(1, "if_src contains invalid bool value\n"+project().dir().path());
             }
             if(n[STR_IF_LIB])
                 for(YAML::const_iterator it = n[STR_IF_LIB].begin(); it != n[STR_IF_LIB].end(); ++it)

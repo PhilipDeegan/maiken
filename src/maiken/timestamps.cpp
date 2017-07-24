@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void 
+void
 maiken::Application::writeTimeStamps(kul::hash::set::String& objects, std::vector<kul::File>& cacheFiles){
     const std::string oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
     kul::Dir mkn(buildDir().join(".mkn"), 1);
@@ -64,7 +64,7 @@ maiken::Application::writeTimeStamps(kul::hash::set::String& objects, std::vecto
             srcW << src.mini() << " " << src.timeStamps().modified() << kul::os::EOL();
 }
 
-void 
+void
 maiken::Application::loadTimeStamps() KTHROW(kul::StringException){
     if(_MKN_TIMESTAMPS_){
         kul::Dir mkn(buildDir().join(".mkn"));
@@ -77,11 +77,11 @@ maiken::Application::loadTimeStamps() KTHROW(kul::StringException){
                 if(s.size() == 0) continue;
                 std::vector<std::string> bits;
                 kul::String::SPLIT(s, ' ', bits);
-                if(bits.size() != 2) KEXCEPTION("timestamp file invalid format\n"+src.full());
+                if(bits.size() != 2) KEXIT(1, "timestamp file invalid format\n"+src.full());
                 try{
                     stss.insert(bits[0], kul::String::UINT64(bits[1]));
                 }catch(const kul::StringException& e){
-                    KEXCEPTION("timestamp file invalid format\n"+src.full());
+                    KEXIT(1, "timestamp file invalid format\n"+src.full());
                 }
             }
         }
@@ -94,7 +94,7 @@ maiken::Application::loadTimeStamps() KTHROW(kul::StringException){
                 if(s.size() == 0) continue;
                 std::vector<std::string> bits;
                 kul::String::SPLIT(s, ' ', bits);
-                if(bits.size() != 2) KEXCEPTION("timestamp file invalid format\n"+inc.full());
+                if(bits.size() != 2) KEXIT(1, "timestamp file invalid format\n"+inc.full());
                 itss.insert(bits[0], bits[1]);
             }
         }

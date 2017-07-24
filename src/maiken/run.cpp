@@ -36,7 +36,7 @@ void maiken::Application::run(bool dbg){
     bin += ".exe";
 #endif
     kul::File f(bin, inst ? inst : buildDir());
-    if(!f) KEXCEPTION("binary does not exist \n" + f.full());
+    if(!f) KEXIT(1, "binary does not exist \n" + f.full());
     std::unique_ptr<kul::Process> p;
     if(dbg){
         std::string dbg = kul::env::GET("MKN_DBG");
@@ -65,7 +65,7 @@ void maiken::Application::run(bool dbg){
         for(const auto& s : kul::cli::asArgs(AppVars::INSTANCE().runArgs())) p->arg(s);
     }else{
         const auto& cmds = AppVars::INSTANCE().commands();
-        if(!cmds.count(STR_BUILD) && !cmds.count(STR_BUILD_MOD) && 
+        if(!cmds.count(STR_BUILD) && !cmds.count(STR_BUILD_MOD) &&
            !cmds.count(STR_BUILD_ALL) && !cmds.count(STR_COMPILE)){
             for(const auto& s : kul::cli::asArgs(AppVars::INSTANCE().args())) p->arg(s);
         }

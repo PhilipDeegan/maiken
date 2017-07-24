@@ -31,16 +31,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/compiler/cpp.hpp"
 
-maiken::CompilerProcessCapture 
+maiken::CompilerProcessCapture
 maiken::cpp::WINCompiler::buildExecutable(
-        const std::string& linker, 
+        const std::string& linker,
         const std::string& linkerEnd,
         const std::vector<std::string>& objects,
         const std::vector<std::string>& libs,
         const std::vector<std::string>& libPaths,
-        const std::string& out, 
+        const std::string& out,
         const maiken::compiler::Mode& mode,
-        bool dryRun) const KTHROW(kul::Exception){ 
+        bool dryRun) const KTHROW(kul::Exception){
 
     std::string exe = out + ".exe";
 
@@ -69,17 +69,17 @@ maiken::cpp::WINCompiler::buildExecutable(
     }
     pc.file(exe);
     pc.cmd(p.toString());
-    return pc; 
+    return pc;
 }
 
-maiken::CompilerProcessCapture 
+maiken::CompilerProcessCapture
 maiken::cpp::WINCompiler::buildLibrary(
-        const std::string& linker, 
+        const std::string& linker,
         const std::string& linkerEnd,
         const std::vector<std::string>& objects,
         const std::vector<std::string>& libs,
         const std::vector<std::string>& libPaths,
-        const kul::File& out, 
+        const kul::File& out,
         const maiken::compiler::Mode& mode,
         bool dryRun) const KTHROW(kul::Exception) {
 
@@ -113,18 +113,18 @@ maiken::cpp::WINCompiler::buildLibrary(
     }
     pc.file(lib);
     pc.cmd(p.toString());
-    return pc; 
+    return pc;
 }
 
-maiken::CompilerProcessCapture 
+maiken::CompilerProcessCapture
 maiken::cpp::WINCompiler::compileSource(
-        const std::string& compiler, 
-        const std::vector<std::string>& args, 
+        const std::string& compiler,
+        const std::vector<std::string>& args,
         const std::vector<std::string>& incs,
-        const std::string& in, 
-        const std::string& out, 
+        const std::string& in,
+        const std::string& out,
         const maiken::compiler::Mode& mode,
-        bool dryRun) const KTHROW(kul::Exception){ 
+        bool dryRun) const KTHROW(kul::Exception){
 
     std::string cmd = compiler;
     std::vector<std::string> bits;

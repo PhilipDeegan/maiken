@@ -68,9 +68,9 @@ const kul::SCM* maiken::SCMGetter::GET_SCM(const kul::Dir& d, const std::string&
 // #endif//_MKN_DISABLE_SVN_
     }
 #else
-    KEXCEPT(Exception, "SCM disabled, cannot resolve dependency, check local paths and configurations");
+    KEXIT(1, "SCM disabled, cannot resolve dependency, check local paths and configurations");
 #endif//_MKN_DISABLE_SCM_
     std::stringstream ss;
     for(const auto& s : repos) ss << s << "\n";
-    KEXCEPT(Exception, "SCM not found or not supported type(git/svn) for repo(s)\n"+ss.str()+"project:"+d.path());
+    KEXIT(1, "SCM not found or not supported type(git/svn) for repo(s)\n"+ss.str()+"project:"+d.path());
 }
