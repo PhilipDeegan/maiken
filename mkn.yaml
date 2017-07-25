@@ -5,7 +5,7 @@ version: master
 scm: https://github.com/dekken/maiken
 
 property:
-    DATE: 24-JUL-2017
+    DATE: 25-JUL-2017
     mkn.kul.profile: "@" # change to "c++0x" for < c++11
 
 parent: base

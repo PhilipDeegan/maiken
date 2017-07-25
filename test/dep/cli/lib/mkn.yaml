@@ -1,0 +1,18 @@
+
+
+name: lib
+
+install: bin/z
+out:  z
+src:  z.cpp
+
+profile:
+  - name: a
+    out:  a
+    src:  a.cpp
+
+  - name: b
+    out:  b
+    src:  b.cpp
+
+

@@ -1,0 +1,13 @@
+
+
+name: cli
+main: cpp.cpp
+
+dep:
+  - local: lib
+    profile: a
+
+  - local: lib
+    profile: b
+
+  - local: lib

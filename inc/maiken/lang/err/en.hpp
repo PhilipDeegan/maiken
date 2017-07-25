@@ -28,15 +28,11 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#ifndef _MAIKEN_LANG_ERR_HPP_
+#define _MAIKEN_LANG_ERR_HPP_
 
-#include <iostream>
-
-
-int main(int argc, char* argv[]){
-
-
-    std::cout << "HELLO WORLD!" << std::endl;
+#define MKN_ERR_SQRBRKT_MISMATCH_DEP_CLI      "Square bracket [] mismatch in dependency arguments"
+#define MKN_ERR_INVALID_DEP_CLI               "Invalid -d argument provided"
 
 
-    return 0;
-}
+#endif /* _MAIKEN_DEFS_LANG_HPP_ */

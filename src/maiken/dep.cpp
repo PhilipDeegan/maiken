@@ -30,6 +30,61 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
+void includeDependency(const std::string& s, const std::string& p, kul::hash::set::String& include){
+    if(s == "+"){
+        include.insert(s);
+    }
+    else{
+        std::stringstream ss;
+        ss << s << "[" << p << "]";
+        include.insert(ss.str());
+    }
+}
+
+void parseDepedencyString(std::string s, kul::hash::set::String& include){
+    kul::String::REPLACE_ALL(s, " ", "");
+    std::stringstream dep, pro;
+    bool lB = 0, rB = 0;
+    for(const auto& c : s){
+        if(c == '[' && (lB || rB)) KEXIT(1, MKN_ERR_SQRBRKT_MISMATCH_DEP_CLI);
+        else
+        if(c == '[' && !lB) {
+            if(dep.str().empty()) KEXIT(1, MKN_ERR_INVALID_DEP_CLI);
+            lB = 1;
+        }
+        else
+        if(c == ']'){
+            if(pro.str().empty()) KEXIT(1, MKN_ERR_INVALID_DEP_CLI);
+            lB = 0;
+            rB = 1;
+            includeDependency(dep.str(), pro.str(), include);
+            pro.str(std::string());
+            dep.str(std::string());
+        }
+        else
+        if(c == ','){
+            if(lB){
+                includeDependency(dep.str(), pro.str(), include);
+                pro.str(std::string());
+            }
+            else
+            if(rB){
+                rB = 0;
+            }
+            else{
+                includeDependency(dep.str(), "@", include);
+                dep.str(std::string());
+            }
+        }
+        else{
+            if(!lB) dep << c;
+            else    pro << c;
+        }
+    }
+    if(!rB) includeDependency(dep.str(), "@", include);
+    if(lB) KEXIT(1, MKN_ERR_SQRBRKT_MISMATCH_DEP_CLI);
+}
+
 void maiken::Application::buildDepVec(const std::string* depVal){
     kul::hash::set::String all, ignore, include;
     ignore.insert("+");
@@ -39,11 +94,7 @@ void maiken::Application::buildDepVec(const std::string* depVal){
                 AppVars::INSTANCE().dependencyLevel(kul::String::UINT16(*depVal));
             }catch(const kul::StringException& e){
                 AppVars::INSTANCE().dependencyLevel(0);
-                for(auto s : kul::String::SPLIT(*depVal, ',')){
-                    kul::String::TRIM(s);
-                    kul::String::REPLACE_ALL(s, " ", "");
-                    include.insert(s);
-                }
+                parseDepedencyString(*depVal, include);
             }
         }else
             AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
@@ -59,10 +110,8 @@ void maiken::Application::buildDepVec(const std::string* depVal){
         a.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), include);
         const std::string& name(a.project().root()[STR_NAME].Scalar());
         std::stringstream ss;
-        ss << name << "[" << (a.p.empty() ? name : a.p) << "]";
-        if(AppVars::INSTANCE().dependencyLevel()
-            || include.count(name) || include.count(ss.str())) a.ig = 0;
-        all.insert(name);
+        ss << name << "[" << (a.p.empty() ? "@" : a.p) << "]";
+        if(AppVars::INSTANCE().dependencyLevel() || include.count(ss.str())) a.ig = 0;
         all.insert(ss.str());
     }
     std::vector<Application> t;
@@ -76,7 +125,7 @@ void maiken::Application::buildDepVec(const std::string* depVal){
         if(!f) deps.push_back(a);
     }
     for(const auto& d : include)
-        if(!all.count(d) && !ignore.count(d)) KEXCEPTION("Dependency project specified does not exist: "+ d);
+        if(!all.count(d) && !ignore.count(d)) KEXIT(1, "Dependency project specified does not exist: "+ d);
     if(include.size() && include.count("+")) this->ig = 1;
 }
 

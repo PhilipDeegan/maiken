@@ -29,14 +29,4 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <iostream>
-
-
-int main(int argc, char* argv[]){
-
-
-    std::cout << "HELLO WORLD!" << std::endl;
-
-
-    return 0;
-}
+void z();
