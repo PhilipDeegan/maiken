@@ -203,6 +203,8 @@ class KUL_PUBLISH Application : public Constants{
         void setup() KTHROW(kul::Exception);
         void setSuper();
         void showConfig(bool force = 0);
+        void showTree() const;
+        void showTreeRecursive(uint8_t i) const;
         void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const KTHROW(kul::Exception);
         void showProfiles();
 

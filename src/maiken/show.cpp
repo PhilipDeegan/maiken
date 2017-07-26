@@ -175,3 +175,22 @@ void maiken::Application::showProfiles(){
     KOUT(NON) << MKN_PROFILE;
     for(const auto& s : ss) KOUT(NON) << s;
 }
+
+void maiken::Application::showTree() const {
+    KOUT(NON) << "++++++++ PROJECT TREE +++++++";
+    KOUT(NON) << " " << this->project().root()[STR_NAME].Scalar() << "["
+              << (this->p.empty() ? "@" : this->p) << "]";
+    showTreeRecursive(1);
+    KOUT(NON) << "+++++++++++++++++++++++++++++";
+
+}
+
+void maiken::Application::showTreeRecursive(uint8_t i) const {
+    for(const auto& d : deps){
+        std::stringstream ss;
+        for(size_t r = 0; r < i; r++) ss << "+";
+        KOUT(NON) << " " << ss.str() << " " << d.project().root()[STR_NAME].Scalar()
+                  << "[" << (d.p.empty() ? "@" : d.p) << "]";
+        d.showTreeRecursive(++i);
+    }
+}

@@ -68,8 +68,8 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
                             Cmd(STR_CLEAN),    Cmd(STR_DEPS),
                             Cmd(STR_BUILD),    Cmd(STR_BUILD_ALL), Cmd(STR_RUN),
                             Cmd(STR_COMPILE),  Cmd(STR_LINK),      Cmd(STR_PROFILES),
-                            Cmd(STR_DBG),      Cmd(STR_PACK),      Cmd(STR_TRIM),
-                            Cmd(STR_INFO)};
+                            Cmd(STR_DBG),      Cmd(STR_PACK),      Cmd(STR_INFO),
+                            Cmd(STR_TRIM),     Cmd(STR_TREE)};
     Args args(cmdV, argV);
     try{
         args.process(argc, argv);
@@ -185,6 +185,9 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
     }
     a.ig = 0;
 
+    if(args.has(STR_INFO)) a.showConfig(1);
+    if(args.has(STR_TREE)) a.showTree();
+
     AppVars::INSTANCE().dependencyString(args.has(STR_DEP) ? &args.get(STR_DEP) : 0);
     a.buildDepVec(AppVars::INSTANCE().dependencyString());
 
@@ -270,7 +273,6 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
         a.scmStatus(args.has(STR_DEP));
         KEXIT(0, "");
     }
-    if(args.has(STR_INFO)) a.showConfig(1);
 
     if(args.has(STR_ADD))
         for(const auto& s : kul::String::ESC_SPLIT(args.get(STR_ADD), ','))
