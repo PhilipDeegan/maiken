@@ -115,35 +115,37 @@ maiken::Application::compile(kul::hash::set::String& objects) KTHROW(kul::Except
                         AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
                 }
             }
-            while(sourceQueue.size() > 0){
-                std::queue<std::pair<std::string, std::string> > cQueue, tQueue;
-                for(unsigned int i = 0; i < AppVars::INSTANCE().threads() && sourceQueue.size() > 0; i++){
-                    cQueue.push(sourceQueue.front());
-                    tQueue.push(sourceQueue.front());
-                    sourceQueue.pop();
-                }
-                if(tQueue.size() == 0 && sourceQueue.size() == 0) break;
-                ThreadingCompiler tc(*this, tQueue);
-                kul::PredicatedThreadQueue<std::queue<std::pair<std::string, std::string> > > tp(std::ref(tc), tQueue);
-                tp.setMax(AppVars::INSTANCE().threads());
-                tp.run();
-                tp.join();
 
-                std::exception_ptr ep;
-                for(const CompilerProcessCapture& cpc : tc.processCaptures()){
-                    if(!AppVars::INSTANCE().dryRun()){
-                        if(cpc.exception()) ep = cpc.exception();
-                        if(kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
-                        if(kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
-                        KOUT(INF) << cpc.cmd();
-                    }else KOUT(NON) << cpc.cmd();
-                }
-                if(ep) std::rethrow_exception(ep);
-                while(cQueue.size()){
-                    objects.insert(cQueue.front().second);
-                    cacheFiles.push_back(kul::File(cQueue.front().first));
-                    cQueue.pop();
-                }
+            ThreadingCompiler tc(*this);
+            kul::ConcurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1);
+            auto lambda = [&](const std::pair<std::string, std::string>& pair){
+                if(ctp.exception()) ctp.interrupt();
+                const CompilerProcessCapture cpc = tc.compile(pair);
+                if(!AppVars::INSTANCE().dryRun()){
+                    if(kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
+                    if(kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
+                    KOUT(INF) << cpc.cmd();
+                }else KOUT(NON) << cpc.cmd();
+                if(cpc.exception()) std::rethrow_exception(cpc.exception());
+            };
+            auto lambex = [&](const kul::Exception& e){
+                ctp.stop();
+                throw e;
+            };
+
+            std::queue<std::pair<std::string, std::string> > cQueue;
+            while(sourceQueue.size() > 0){
+                ctp.async(std::bind(lambda, sourceQueue.front()), std::bind(lambex, std::placeholders::_1));
+                cQueue.push(sourceQueue.front());
+                sourceQueue.pop();
+            }
+            ctp.finish(1000000 * 1000);
+            if(ctp.exception()) KEXIT(1, "Compile error detected");
+
+            while(cQueue.size()){
+                objects.insert(cQueue.front().second);
+                cacheFiles.push_back(kul::File(cQueue.front().first));
+                cQueue.pop();
             }
         }
     }

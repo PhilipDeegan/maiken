@@ -299,16 +299,10 @@ class Applications{
 
 class ThreadingCompiler : public Constants{
     private:
-        bool f;
-        kul::Mutex compile;
-        kul::Mutex push;
         maiken::Application& app;
-        std::queue<std::pair<std::string, std::string> >& sources;
-        std::vector<CompilerProcessCapture> cpcs;
         std::vector<std::string> incs;
     public:
-        ThreadingCompiler(maiken::Application& app, std::queue<std::pair<std::string, std::string> >& sources)
-            : f(0), app(app), sources(sources){
+        ThreadingCompiler(maiken::Application& app) : app(app){
                 for(const auto& s : app.includes()){
                     kul::Dir d(s.first);
                     const std::string& m(AppVars::INSTANCE().dryRun() ? d.esc() : d.escm());
@@ -316,8 +310,7 @@ class ThreadingCompiler : public Constants{
                     else           incs.push_back(".");
                 }
             }
-        void operator()() KTHROW(kul::Exception);
-        const std::vector<CompilerProcessCapture>& processCaptures(){return cpcs;}
+        CompilerProcessCapture compile(const std::pair<std::string, std::string>& pair) const KTHROW(kul::Exception);
 };
 
 class SCMGetter{

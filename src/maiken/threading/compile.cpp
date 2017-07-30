@@ -30,33 +30,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::ThreadingCompiler::operator()() KTHROW(kul::Exception){
-    std::pair<std::string, std::string> p;
-    {
-        kul::ScopeLock lock(compile);
-        p = sources.front();
-        sources.pop();
-    }
+maiken::CompilerProcessCapture
+maiken::ThreadingCompiler::compile(
+            const std::pair<std::string, std::string>& p
+        ) const KTHROW(kul::Exception) {
+
     const std::string src(p.first);
     const std::string obj(p.second);
-    if(!f){
-        const std::string& fileType = src.substr(src.rfind(".") + 1);
-        const std::string& compiler = (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
-        std::vector<std::string> args;
-        if(app.arguments().count(fileType) > 0)
-            for(const std::string& o : (*app.arguments().find(fileType)).second)
-                for(const auto& s : kul::cli::asArgs(o))
-                    args.push_back(s);
-        for(const auto& s : kul::cli::asArgs(app.arg)) args.push_back(s);
-        std::string cmd = compiler + " " + AppVars::INSTANCE().args();
-        if(AppVars::INSTANCE().jargs().count(fileType) > 0)
-            cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;
-        // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
-        const CompilerProcessCapture& cpc
-            = Compilers::INSTANCE().get(compiler)
-                ->compileSource(cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
-        kul::ScopeLock lock(push);
-        cpcs.push_back(cpc);
-        if(cpc.exception()) f = 1;
-    }
+    const std::string& fileType = src.substr(src.rfind(".") + 1);
+    const std::string& compiler = (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
+    std::vector<std::string> args;
+    if(app.arguments().count(fileType) > 0)
+        for(const std::string& o : (*app.arguments().find(fileType)).second)
+            for(const auto& s : kul::cli::asArgs(o))
+                args.push_back(s);
+    for(const auto& s : kul::cli::asArgs(app.arg)) args.push_back(s);
+    std::string cmd = compiler + " " + AppVars::INSTANCE().args();
+    if(AppVars::INSTANCE().jargs().count(fileType) > 0)
+        cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;
+    // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
+    return Compilers::INSTANCE().get(compiler)
+        ->compileSource(cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
 }

@@ -34,6 +34,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char* argv[]) {
     kul::Signal sig;
+    sig.intr([=](int16_t){
+        KERR << "Interrupted";
+        exit(2);
+    });
     uint8_t ret = 0;
     const int64_t s = kul::Now::MILLIS();
     try{
