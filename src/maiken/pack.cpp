@@ -76,8 +76,8 @@ void maiken::Application::pack() KTHROW(kul::Exception){
     }
 
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
-        if(!(*app).srcs.empty()){
-            auto a = (*app);
+        if(!(*app)->srcs.empty()){
+            auto& a = **app;
             kul::Dir outD(a.inst ? a.inst.real() : a.buildDir());
             std::string n = a.project().root()[STR_NAME].Scalar();
             if(!LibFinder::findAdd(a.baseLibFilename(), outD, lib))

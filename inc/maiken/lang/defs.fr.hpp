@@ -31,6 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_DEFS_LANG_HPP_
 #define _MAIKEN_DEFS_LANG_HPP_
 
+#include "maiken/lang/err/fr.hpp"
+
 #define MKN_DEFS_CMD        "Commands:"
 #define MKN_DEFS_BUILD      "   build     | Compile and link all active projects"
 #define MKN_DEFS_BUILD_ALL  "   build-all | Compile and link all active projects and modules"
@@ -46,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_INC        "   inc       | Print include directories to std out"
 #define MKN_DEFS_SRC        "   src       | Print found source files to std out [allows -d]."
 #define MKN_DEFS_TRIM       "   trim      | Removes trailing whitespace from inc/src files under project directory"
+#define MKN_DEFS_TREE       "   tree      | Display dependency tree"
 
 #define MKN_DEFS_ARG        "Arguments:"
 #define MKN_DEFS_ARGS       "   -a/--args $a           | Add $arg to compilation on build, passed to run if no build/compile processing"
@@ -55,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_EVSA       "   -E/--env $a            | CSV key=value environment variables override, format \"k1=v1,k2=v2\""
 #define MKN_DEFS_GET        "   -G/--get $k            | Returns string value for property K in either local yaml or settings.yaml, failure is no string 0 exit code"
 #define MKN_DEFS_HELP       "   -h/--help              | Print help to console"
+#define MKN_DEFS_INCL       "   -i/--inc $i            | Add include directory to compile commands, seperated by standard system PATH environment ; for windows : for others"
 #define MKN_DEFS_JARG       "   -j/--jargs             | File type specifc args as json like '{\"c\": \"-DC_ARG1\", \"cpp\": \"-DCXX_ARG1\"}'"
 #define MKN_DEFS_LINKER     "   -l/--linker $t         | Adds $t to linking of root project profile"
 #define MKN_DEFS_ALINKR     "   -L/--all-linker $t     | Adds $t to linking of all projects with link operations"

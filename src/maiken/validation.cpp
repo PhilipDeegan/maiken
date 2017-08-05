@@ -105,7 +105,7 @@ class Validator : public maiken::Constants{
             if(n[STR_SELF])
                 for(const auto& s : kul::String::SPLIT(maiken::Properties::RESOLVE(a, n[STR_SELF].Scalar()), ' '))
                     if(std::find(profiles.begin(), profiles.end(), s) == profiles.end())
-                        KEXIT(1, "Self tag references unknown profile:\n"+a.project().dir().path());
+                        KEXIT(1, "Self tag references unknown profile: \""+s+"\" in "+a.project().dir().path());
         }
 };
 

@@ -87,6 +87,7 @@ maiken::cpp::WINCompiler::buildLibrary(
     for(const auto& o : objects) dirs.insert(kul::File(o).dir().real());
 
     std::string lib = out.dir().join(sharedLib(out.name()));
+    std::string imp = out.dir().join(staticLib(out.name()));
     if(mode == compiler::Mode::STAT) lib = out.dir().join(staticLib(out.name()));
     std::string cmd = linker;
     std::vector<std::string> bits;
@@ -96,10 +97,12 @@ maiken::cpp::WINCompiler::buildLibrary(
     }
     kul::Process p(cmd);
     for(unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
-    p.arg("-OUT:\"" + lib + "\"").arg("-nologo");
-    if(mode == compiler::Mode::STAT) p.arg("-LTCG");
-    else {
-        p.arg("-DLL");
+    p.arg("-nologo");
+    if(mode == compiler::Mode::STAT)
+        p.arg("-LTCG");
+    p.arg("-OUT:\"" + lib + "\"");
+    if(mode == compiler::Mode::SHAR){
+        p.arg("-IMPLIB:\"" + imp + "\"").arg("-DLL");
         for(const std::string& path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
         for(const std::string& lib : libs) p.arg(staticLib(lib));
     }

@@ -67,6 +67,6 @@ std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(const Applicati
 #endif//_MKN_DISABLE_MODULES_
 {
     for(auto dep = ap.dependencies().rbegin(); dep != ap.dependencies().rend(); ++dep)
-        if(!(*dep).sources().empty()) GlobalModules::INSTANCE().load(*dep);
+        if(!(**dep).sources().empty()) GlobalModules::INSTANCE().load(**dep);
     return std::make_shared<ModuleLoader>(ap, kul::File(FIND(ap)));
 }

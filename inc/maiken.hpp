@@ -169,7 +169,7 @@ class KUL_PUBLISH Application : public Constants{
         kul::hash::map::S2S includeStamps, itss, ps;
         kul::hash::map::S2T<kul::hash::set::String> args;
         kul::hash::map::S2T<uint64_t> stss;
-        std::vector<Application> deps, modDeps;
+        std::vector<Application*> deps, modDeps;
         std::vector<std::shared_ptr<ModuleLoader>> mods;
         std::vector<kul::cli::EnvVar> evs;
         std::vector<std::string> libs, paths;
@@ -212,18 +212,19 @@ class KUL_PUBLISH Application : public Constants{
         void loadTimeStamps() KTHROW(kul::StringException);
 
         void buildDepVec(const std::string* depVal);
-        void buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc);
+        void buildDepVecRec(std::unordered_map<uint16_t, std::vector<Application*>>& dePs, int16_t ig, int16_t i, const kul::hash::set::String& inc);
 
         void populateMapsFromDependencies() KTHROW(kul::Exception);
 
         void loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module) KTHROW(kul::Exception);
         kul::Dir resolveDepOrModDirectory(const YAML::Node& d, bool module);
-        void popDepOrMod(const YAML::Node& n, std::vector<Application>& vec, const std::string& s, bool module) KTHROW(kul::Exception);
+        void popDepOrMod(const YAML::Node& n, std::vector<Application*>& vec, const std::string& s, bool module) KTHROW(kul::Exception);
 
         kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap() const;
         kul::hash::set::String inactiveMains() const;
 
         bool incSrc(const kul::File& f) const;
+        void addCLIArgs(const kul::cli::Args& args);
         void addSourceLine (const std::string& o) KTHROW(kul::Exception);
         void addIncludeLine(const std::string& o) KTHROW(kul::Exception);
 
@@ -237,14 +238,17 @@ class KUL_PUBLISH Application : public Constants{
         static void showHelp();
     public:
         Application(const maiken::Project& proj, const std::string& profile = "");// : m(Mode::NONE), p(profile), proj(proj){}
+        Application(const Application& a) = delete;
+        Application(const Application&& a) = delete;
+        Application& operator=(const Application& a) = delete;
         ~Application();
 
         virtual void                                       process()   KTHROW(kul::Exception);
         const kul::Dir&                                    buildDir()            const { return bd; }
         const std::string&                                 profile()             const { return p; }
         const maiken::Project&                             project()             const { return proj;}
-        const std::vector<Application>&                    dependencies()        const { return deps; }
-        const std::vector<Application>&                    moduleDependencies()  const { return modDeps; }
+        const std::vector<Application*>&                   dependencies()        const { return deps; }
+        const std::vector<Application*>&                   moduleDependencies()  const { return modDeps; }
         const std::vector<std::shared_ptr<ModuleLoader>>&  modules()             const { return mods; }
         const std::vector<kul::cli::EnvVar>&               envVars()             const { return evs; }
         const kul::hash::map::S2T<kul::hash::map::S2S>&    files()               const { return fs; }
@@ -302,14 +306,14 @@ class ThreadingCompiler : public Constants{
         maiken::Application& app;
         std::vector<std::string> incs;
     public:
-        ThreadingCompiler(maiken::Application& app) : app(app){
-                for(const auto& s : app.includes()){
-                    kul::Dir d(s.first);
-                    const std::string& m(AppVars::INSTANCE().dryRun() ? d.esc() : d.escm());
-                    if(!m.empty()) incs.push_back(m);
-                    else           incs.push_back(".");
-                }
+        ThreadingCompiler(maiken::Application& app) : app(app) {
+            for(const auto& s : app.includes()){
+                kul::Dir d(s.first);
+                const std::string& m(AppVars::INSTANCE().dryRun() ? d.esc() : d.escm());
+                if(!m.empty()) incs.push_back(m);
+                else           incs.push_back(".");
             }
+        }
         CompilerProcessCapture compile(const std::pair<std::string, std::string>& pair) const KTHROW(kul::Exception);
 };
 

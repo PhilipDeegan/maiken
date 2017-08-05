@@ -33,21 +33,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class ModuleMinimiser{
     friend class maiken::Application;
     private:
-        void add(const std::vector<maiken::Application>& mods, kul::hash::map::S2T<maiken::Application>& apps){
-            for(const auto& m : mods)
-                if(!apps.count(m.buildDir().real()))
-                    apps.insert(m.buildDir().real(), m);
+        void add(const std::vector<maiken::Application*>& mods, kul::hash::map::S2T<maiken::Application*>& apps){
+            for(auto*const m : mods)
+                if(!apps.count(m->buildDir().real()))
+                    apps.insert(m->buildDir().real(), m);
         }
     public:
         static ModuleMinimiser& INSTANCE(){
             static ModuleMinimiser a;
             return a;
         }
-        kul::hash::map::S2T<maiken::Application> modules(maiken::Application& app){
-            kul::hash::map::S2T<maiken::Application> apps;
+        kul::hash::map::S2T<maiken::Application*> modules(maiken::Application& app){
+            kul::hash::map::S2T<maiken::Application*> apps;
             add(app.moduleDependencies(), apps);
             for(auto dep = app.dependencies().rbegin(); dep != app.dependencies().rend(); ++dep)
-                add(dep->moduleDependencies(), apps);
+                add((*dep)->moduleDependencies(), apps);
             return apps;
         }
 };
@@ -107,7 +107,7 @@ void maiken::Application::process() KTHROW(kul::Exception){
 #ifndef _MKN_DISABLE_MODULES_
         if(phase.size())
             for(auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod){
-                app.mods.push_back(ModuleLoader::LOAD(*mod));
+                app.mods.push_back(ModuleLoader::LOAD(**mod));
             }
 #endif//_MKN_DISABLE_MODULES_
     };
@@ -158,19 +158,19 @@ void maiken::Application::process() KTHROW(kul::Exception){
         auto _mods = ModuleMinimiser::INSTANCE().modules(*this);
         if(_mods.size() && !cmds.count(STR_BUILD_ALL)) CommandStateMachine::INSTANCE().add(STR_BUILD);
         CommandStateMachine::INSTANCE().main(0);
-        for(auto& m : _mods) m.second.process();
+        for(auto& m : _mods) m.second->process();
         CommandStateMachine::INSTANCE().main(1);
     }
 
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
-        if(!(*app).ig) loadModules(*app);
+        if(!(*app)->ig) loadModules(**app);
     if(!this->ig) loadModules(*this);
 
     for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
-        if((*app).ig) continue;
-        if((*app).lang.empty()) (*app).resolveLang();
-        (*app).main.clear();
-        proc(*app, !(*app).srcs.empty());
+        if((*app)->ig) continue;
+        if((*app)->lang.empty()) (*app)->resolveLang();
+        (*app)->main.clear();
+        proc(**app, !(*app)->srcs.empty());
     }
     if(!this->ig) proc(*this, (!this->srcs.empty() || !this->main.empty()));
 

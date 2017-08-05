@@ -79,7 +79,7 @@ kul::Dir maiken::Application::resolveDepOrModDirectory(const YAML::Node& n, bool
 
 void maiken::Application::popDepOrMod(
         const YAML::Node& n,
-        std::vector<Application>& vec,
+        std::vector<Application*>& vec,
         const std::string& s,
         bool module) KTHROW(kul::Exception){
 
@@ -97,53 +97,54 @@ void maiken::Application::popDepOrMod(
     auto lam = [&](const auto& depOrMod){
         const kul::Dir& projectDir = resolveDepOrModDirectory(depOrMod, module);
         bool f = false;
-        for(const Application& a : vec)
-            if(projectDir == a.project().dir() && p == a.p){
+        for(const Application* ap : vec)
+            if(projectDir == ap->project().dir() && p == ap->p){
                 f = true; break;
             }
         if(f) return;
         const maiken::Project& c(*maiken::Projects::INSTANCE().getOrCreate(projectDir));
 
         if(depOrMod[STR_PROFILE]){
-            for(auto s : kul::String::SPLIT(Properties::RESOLVE(*this, depOrMod[STR_PROFILE].Scalar()), ' ')){
-                if(s.empty()) continue;
+            for(auto p : kul::String::SPLIT(Properties::RESOLVE(*this, depOrMod[STR_PROFILE].Scalar()), ' ')){
+                if(p.empty()) continue;
                 f = 0;
-                if(s == "@") s = "";
+                if(p == "@") p = "";
                 else
                     for(const auto& node : c.root()[STR_PROFILE])
-                        if(node[STR_NAME].Scalar() == s){
+                        if(node[STR_NAME].Scalar() == p){
                             f = 1;
                             break;
                         }
 
-                if(!f && !s.empty())
-                    KEXIT(1, "profile does not exist\n"+s+"\n"+project().dir().path());
-                auto& app = *Applications::INSTANCE().getOrCreate(c, s, 0);
-                app.par = this;
-                setApp(app, depOrMod);
+                if(!f && !p.empty())
+                    KEXIT(1, "profile does not exist\n"+p+"\n"+project().dir().path());
+                auto* app = Applications::INSTANCE().getOrCreate(c, p, 0);
+                app->par = this;
+                setApp(*app, depOrMod);
                 vec.push_back(app);
-                apps.push_back(std::make_pair(app.project().dir().path(), app.p));
+                apps.push_back(std::make_pair(app->project().dir().path(), app->p));
             }
         }else{
-            auto& app = *Applications::INSTANCE().getOrCreate(c, "", 0);
-            app.par = this;
-            setApp(app, depOrMod);
+            auto* app = Applications::INSTANCE().getOrCreate(c, "", 0);
+            app->par = this;
+            setApp(*app, depOrMod);
             vec.push_back(app);
-            apps.push_back(std::make_pair(app.project().dir().path(), app.p));
+            apps.push_back(std::make_pair(app->project().dir().path(), app->p));
         }
     };
     for(const auto& depOrMod : n[s]) lam(depOrMod);
 
-    if(n[STR_SELF])
+    if(!module && n[STR_SELF])
         for(const auto& s : kul::String::SPLIT(Properties::RESOLVE(*this, n[STR_SELF].Scalar()), ' ')){
-            auto& app = *Applications::INSTANCE().getOrCreate(project(), s);
-            app.par = this;
-            app.scr = scr;
+            auto* app = Applications::INSTANCE().getOrCreate(project(), s);
+            app->par = this;
+            app->scr = scr;
             vec.push_back(app);
-            apps.push_back(std::make_pair(app.project().dir().path(), app.p));
+            apps.push_back(std::make_pair(app->project().dir().path(), app->p));
         }
     cyclicCheck(apps);
-    for(auto& app : vec){
+    for(auto* ap : vec){
+        auto& app(*ap);
         if(app.buildDir().path().empty()){
             kul::env::CWD(app.project().dir());
             if(app.project().root()[STR_SCM]) app.scr = Properties::RESOLVE(app, app.project().root()[STR_SCM].Scalar());

@@ -40,10 +40,12 @@ maiken::Application::~Application(){
 maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTHROW(kul::Exception){
     using namespace kul::cli;
 
-    std::vector<Arg> argV { Arg('a', STR_ARG    , ArgType::STRING), Arg('A', STR_ADD, ArgType::STRING),
+    std::vector<Arg> argV { Arg('a', STR_ARG    , ArgType::STRING), Arg('A', STR_ADD  , ArgType::STRING),
+                            Arg('b', STR_BINC   , ArgType::STRING), Arg('B', STR_BPATH, ArgType::STRING),
                             Arg('C', STR_DIR    , ArgType::STRING),
-                            Arg('d', STR_DEP    , ArgType::MAYBE), Arg('D', STR_DEBUG),
+                            Arg('d', STR_DEP    , ArgType::MAYBE) , Arg('D', STR_DEBUG),
                             Arg('E', STR_ENV    , ArgType::STRING),
+                            Arg('f', STR_FINC   , ArgType::STRING), Arg('F', STR_FPATH, ArgType::STRING),
                             Arg('G', STR_GET    , ArgType::STRING),
                             Arg('h', STR_HELP),
                             Arg('j', STR_JARG   , ArgType::STRING),
@@ -74,13 +76,12 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
     try{
         args.process(argc, argv);
     }catch(const kul::cli::Exception& e){
-        showHelp();
-        KEXIT(0, "");
+        KEXIT(1, e.what());
     }
     if(args.empty() || (args.size() == 1 && args.has(STR_DIR))){
         if(args.size() == 1 && args.has(STR_DIR)){
             kul::Dir d(args.get(STR_DIR));
-            if(!d) KEXCEPTION("STR_DIR DOES NOT EXIST: " + args.get(STR_DIR));
+            if(!d) KEXIT(1, "STR_DIR DOES NOT EXIST: " + args.get(STR_DIR));
             kul::env::CWD(d);
         }
         kul::File yml("mkn.yaml");
@@ -125,7 +126,7 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
     }
     if(args.has(STR_DIR)) {
         kul::Dir d(args.get(STR_DIR));
-        if(!d) KEXCEPTION("STR_DIR DOES NOT EXIST: " + args.get(STR_DIR));
+        if(!d) KEXIT(1, "STR_DIR DOES NOT EXIST: " + args.get(STR_DIR));
         kul::env::CWD(args.get(STR_DIR));
     }
     const Project& project(*Projects::INSTANCE().getOrCreate(kul::env::CWD()));
@@ -137,17 +138,17 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
             f = n[STR_NAME].Scalar() == profile;
             if(f) break;
         }
-        if(!f) KEXCEPT(Exception, "profile does not exist");
+        if(!f) KEXIT(1, "profile does not exist");
     }
     if(args.has(STR_SETTINGS) && !Settings::SET(args.get(STR_SETTINGS)))
-        KEXCEPT(Exception, "Unable to set specific settings xml");
+        KEXIT(1, "Unable to set specific settings xml");
     else Settings::INSTANCE();
 
     if(args.has(STR_DRY_RUN))       AppVars::INSTANCE().dryRun(true);
     if(args.has(STR_SHARED))        AppVars::INSTANCE().shar(true);
     if(args.has(STR_STATIC))        AppVars::INSTANCE().stat(true);
     if(AppVars::INSTANCE().shar() && AppVars::INSTANCE().stat())
-        KEXCEPT(Exception, "Cannot specify shared and static simultaneously");
+        KEXIT(1, "Cannot specify shared and static simultaneously");
     if(args.has(STR_SCM_FUPDATE))   AppVars::INSTANCE().fupdate(true);
     if(args.has(STR_SCM_UPDATE))    AppVars::INSTANCE().update(true);
     if(args.has(STR_DEP))           AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
@@ -155,7 +156,7 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
     auto splitArgs = [](const std::string& s, const std::string& t, const std::function<void(const std::string&, const std::string&)>& f){
         for(const auto& p : kul::String::ESC_SPLIT(s, ',')){
             std::vector<std::string> ps = kul::String::ESC_SPLIT(p, '=');
-            if(ps.size() > 2) KEXCEPTION(t + " override invalid, escape extra \"=\"");
+            if(ps.size() > 2) KEXIT(1, t + " override invalid, escape extra \"=\"");
             f(ps[0], ps[1]);
         }
     };
@@ -202,6 +203,8 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
         KEXIT(0, "");
     }
 
+    a.addCLIArgs(args);
+
     if(args.has(STR_MOD)){
         std::vector<std::string> vp { STR_COMPILE, STR_LINK, STR_PACK };
         if(args.get(STR_MOD).size()){
@@ -234,17 +237,17 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
             for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
                 for(const auto& s : kul::String::SPLIT(it->first.Scalar(), ':'))
                     AppVars::INSTANCE().jargs(s, it->second.Scalar());
-        }catch(const std::exception& e){ KEXCEPTION("JSON args failed to parse"); }
+        }catch(const std::exception& e){ KEXIT(1, "JSON args failed to parse"); }
     }
 
-    auto printDeps = [&] (const std::vector<Application>& vec) {
+    auto printDeps = [&] (const std::vector<Application*>& vec) {
         std::vector<const Application*> v;
         for(auto app = vec.rbegin(); app != vec.rend(); ++app){
-            const std::string& s((*app).project().dir().real());
-            auto it = std::find_if(v.begin(), v.end(), [&s](const Application* app) { return (*app).project().dir().real() == s;});
-            if (it == v.end()) v.push_back(&(*app));
+            const std::string& s((*app)->project().dir().real());
+            auto it = std::find_if(v.begin(), v.end(), [&s](const Application* a) { return a->project().dir().real() == s;});
+            if (it == v.end()) v.push_back(*app);
         }
-        for(auto* app : v) KOUT(NON) <<  (*app).project().dir();
+        for(auto* app : v) KOUT(NON) <<  app->project().dir();
         KEXIT(0, "");
     };
 
@@ -262,8 +265,8 @@ maiken::Application& maiken::Application::CREATE(int16_t argc, char *argv[]) KTH
                 for(const auto& p3 : p2.second)
                     KOUT(NON) << kul::File(p3).full();
         for(auto app = a.deps.rbegin(); app != a.deps.rend(); ++app)
-            for(const auto& p1 : (*app).sourceMap())
-                if(!(*app).ig)
+            for(const auto& p1 : (*app)->sourceMap())
+                if(!(*app)->ig)
                     for(const auto& p2 : p1.second)
                         for(const auto& p3 : p2.second)
                             KOUT(NON) << kul::File(p3).full();
@@ -410,19 +413,19 @@ void maiken::Application::populateMaps(const YAML::Node& n) KTHROW(kul::Exceptio
     try{
         if(n[STR_INC]) for(const auto& o : kul::String::LINES(n[STR_INC].Scalar())) addIncludeLine(o);
     }catch(const kul::StringException){
-        KEXCEPT(Exception, "include contains invalid bool value\n"+project().dir().path());
+        KEXIT(1, "include contains invalid bool value\n"+project().dir().path());
     }
     try{
         if(n[STR_SRC]) for(const auto& o : kul::String::LINES(n[STR_SRC].Scalar())) addSourceLine(o);
     }catch(const kul::StringException){
-        KEXCEPT(Exception, "source contains invalid bool value\n"+project().dir().path());
+        KEXIT(1, "source contains invalid bool value\n"+project().dir().path());
     }
     if(n[STR_PATH])
         for(const auto& s : kul::String::SPLIT(n[STR_PATH].Scalar(), ' '))
             if(s.size()){
                 kul::Dir d(Properties::RESOLVE(*this, s));
                 if(d) paths.push_back(d.escr());
-                else KEXCEPTION("library path does not exist\n"+d.path()+"\n"+project().dir().path());
+                else KEXIT(1, "library path does not exist\n"+d.path()+"\n"+project().dir().path());
             }
 
     if(n[STR_LIB])
@@ -430,14 +433,14 @@ void maiken::Application::populateMaps(const YAML::Node& n) KTHROW(kul::Exceptio
             if(s.size()) libs.push_back(Properties::RESOLVE(*this, s));
 
     for(const std::string& s : libraryPaths())
-        if(!kul::Dir(s).is()) KEXCEPTION(s + " is not a valid directory\n"+project().dir().path());
+        if(!kul::Dir(s).is()) KEXIT(1, s + " is not a valid directory\n"+project().dir().path());
 }
 
 void maiken::Application::cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const KTHROW(kul::Exception){
     if(par) par->cyclicCheck(apps);
     for(const auto& pa : apps)
         if(project().dir() == pa.first  && p == pa.second)
-            KEXCEPTION("Cyclical dependency found\n"+project().dir().path());
+            KEXIT(1, "Cyclical dependency found\n"+project().dir().path());
 }
 
 void maiken::Application::addIncludeLine(const std::string& o) KTHROW(kul::Exception){
@@ -446,15 +449,15 @@ void maiken::Application::addIncludeLine(const std::string& o) KTHROW(kul::Excep
             if(s.size()){
                 kul::Dir d(Properties::RESOLVE(*this, s));
                 if(d) incs.push_back(std::make_pair(d.real(), true));
-                else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
+                else  KEXIT(1, "include does not exist\n"+d.path()+"\n"+project().dir().path());
             }
     }else{
         std::vector<std::string> v;
         kul::String::SPLIT(o, ",", v);
-        if(v.size() == 0 || v.size() > 2) KEXCEPTION("include invalid format\n" + project().dir().path());
+        if(v.size() == 0 || v.size() > 2) KEXIT(1, "include invalid format\n" + project().dir().path());
         kul::Dir d(Properties::RESOLVE(*this, v[0]));
         if(d) incs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
-        else  KEXCEPTION("include does not exist\n"+d.path()+"\n"+project().dir().path());
+        else  KEXIT(1, "include does not exist\n"+d.path()+"\n"+project().dir().path());
     }
 }
 
@@ -464,21 +467,21 @@ void maiken::Application::setSuper(){
         const std::string& cwd(kul::env::CWD());
         kul::env::CWD(project().dir().real());
         kul::Dir d(project().root()[STR_SUPER].Scalar());
-        if(!d) KEXCEPTION("Super does not exist in project: " + project().dir().real());
+        if(!d) KEXIT(1, "Super does not exist in project: " + project().dir().real());
         std::string super(d.real());
         if(super == project().dir().real())
-            KEXCEPTION("Super cannot reference itself: " + project().dir().real());
+            KEXIT(1, "Super cannot reference itself: " + project().dir().real());
         d = kul::Dir(super);
         try{
             sup = Applications::INSTANCE().getOrCreate(*maiken::Projects::INSTANCE().getOrCreate(d), "");
             sup->resolveProperties();
         }catch(const std::exception& e){
-            KEXCEPTION("Possible super cycle detected: " + project().dir().real());
+            KEXIT(1, "Possible super cycle detected: " + project().dir().real());
         }
         auto cycle = sup;
         while(cycle){
             if(cycle->project().dir() == project().dir())
-                KEXCEPTION("Super cycle detected: " + project().dir().real());
+                KEXIT(1, "Super cycle detected: " + project().dir().real());
             cycle = cycle->sup;
         }
         for(const auto& p : sup->properties()) if(!ps.count(p.first)) ps.insert(p.first, p.second);

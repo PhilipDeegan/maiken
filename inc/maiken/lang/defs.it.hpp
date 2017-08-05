@@ -27,10 +27,11 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-// Translation gratefully received from https://github.com/eantcal
+*/// Translation gratefully received from https://github.com/eantcal
 #ifndef _MAIKEN_DEFS_LANG_HPP_
 #define _MAIKEN_DEFS_LANG_HPP_
+
+#include "maiken/lang/err/it.hpp"
 
 #define MKN_DEFS_CMD        "Comandi :"
 #define MKN_DEFS_BUILD      "   build     | Compila e collega (link)"
@@ -47,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_INC        "   inc       | Stampa le cartelle di inclusione (include) sullo standard output"
 #define MKN_DEFS_SRC        "   src       | Stampa i file sorgenti trovati sullo standard output [consente l'opzione -d]."
 #define MKN_DEFS_TRIM       "   trim      | Rimuove gli spazi finali dai file sorgenti (inc/src) sotto la cartella di progetto"
+#define MKN_DEFS_TREE       "   tree      | Display dependency tree"
 
 #define MKN_DEFS_ARG        "Argomenti:"
 #define MKN_DEFS_ARGS       "   -a/--args $a           | Aggiunge l'argomento $arg in fase di compilazione, lo passa al processo in fase di esecuzione"
@@ -56,6 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_EVSA       "   -E/--env $a            | Sovrascrive le variabili di ambiente specificate come lista di chiave=valore separate da virgola: \"k1=v1,k2=v2\""
 #define MKN_DEFS_GET        "   -G/--get $k            | Returns string value for property K in either local yaml or settings.yaml, failure is no string 0 exit code"
 #define MKN_DEFS_HELP       "   -h/--help              | Mostra l'help sulla console"
+#define MKN_DEFS_INCL       "   -i/--inc $i            | Add include directory to compile commands, seperated by standard system PATH environment ; for windows : for others"
 #define MKN_DEFS_JARG       "   -j/--jargs             | Argomenti specifici per tipo di file in formato JSON, ad es. '{\"c\": \"-DC_ARG1\", \"cpp\": \"-DCXX_ARG1\"}'"
 #define MKN_DEFS_LINKER     "   -l/--linker $t         | Aggiunge $t per il collegamento (link) del profilo del progetto radice (root project)"
 #define MKN_DEFS_ALINKR     "   -L/--all-linker $t     | Aggiunge $t per il collegamento (link) di tutti i progetti che lo prevedono"

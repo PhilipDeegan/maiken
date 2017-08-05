@@ -149,7 +149,11 @@ class Constants{
         static constexpr const char* STR_ADD            = "additional";        
         static constexpr const char* STR_JARG           = "jarg";
         static constexpr const char* STR_SRC            = "src";
+        static constexpr const char* STR_BINC           = "binc";
+        static constexpr const char* STR_BPATH          = "bpath";
         static constexpr const char* STR_INC            = "inc";
+        static constexpr const char* STR_FINC           = "finc";
+        static constexpr const char* STR_FPATH          = "flib";
         static constexpr const char* STR_EXT            = "ext";
         static constexpr const char* STR_LIB            = "lib";
         static constexpr const char* STR_DEP            = "dep";

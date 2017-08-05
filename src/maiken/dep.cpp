@@ -105,53 +105,61 @@ void maiken::Application::buildDepVec(const std::string* depVal){
         this->ig = 1;
     }
 
-    std::vector<Application*> dePs;
-    for(Application& a : deps){
-        a.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), include);
+    uint16_t i = 0;
+    std::unordered_map<uint16_t, std::vector<Application*>> dePs;
+    for(Application* ap : deps){
+        Application& a(*ap);        
+        a.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), i, include);
         const std::string& name(a.project().root()[STR_NAME].Scalar());
         std::stringstream ss;
         ss << name << "[" << (a.p.empty() ? "@" : a.p) << "]";
         if(AppVars::INSTANCE().dependencyLevel() || include.count(ss.str())) a.ig = 0;
         all.insert(ss.str());
     }
-    std::vector<Application> t;
-    for(const Application* a : dePs) t.push_back(*a);
-    for(const Application& a : t){
-        bool f = 0;
-        for(const auto& a1: deps)
-            if(a.project().dir() == a1.project().dir() && a.p == a1.p){
-                f = 1; break;
-            }
-        if(!f) deps.push_back(a);
+
+    std::vector<Application*> t;
+    for(size_t i = 0; i < dePs.size(); i++){
+        for(auto*const ap : dePs[dePs.size() - (1 + i)]){
+            const std::string& s(ap->project().dir().real());
+            const std::string& p(ap->p);
+            const auto it = std::find_if(t.begin(), t.end(), 
+                [&s, &p](Application*const a) {
+                    return a->project().dir().real() == s && a->p == p;
+                });
+            if(it != t.end()) t.erase(it);
+            t.push_back(ap);
+        }
+    }
+
+    for(auto app1 = t.rbegin(); app1 != t.rend(); ++app1) {
+        const std::string& s((*app1)->project().dir().real());
+        const std::string& p((*app1)->p);
+        const auto it = std::find_if(deps.begin(), deps.end(), 
+            [&s, &p](Application*const a) {
+                return a->project().dir().real() == s && a->p == p;
+            });
+        if(it != deps.end()) deps.erase(it);
+        deps.push_back(*app1);
     }
     for(const auto& d : include)
         if(!all.count(d) && !ignore.count(d)) KEXIT(1, "Dependency project specified does not exist: "+ d);
     if(include.size() && include.count("+")) this->ig = 1;
 }
 
-void maiken::Application::buildDepVecRec(std::vector<Application*>& dePs, int16_t i, const kul::hash::set::String& inc){
-    for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
-        maiken::Application& a = (*app);
-        const std::string& name(a.project().root()[STR_NAME].Scalar());
+void maiken::Application::buildDepVecRec(std::unordered_map<uint16_t, std::vector<Application*>>& dePs, int16_t ig, int16_t i, const kul::hash::set::String& inc){
+    for(auto*const a : deps){
+        const std::string& name(a->project().root()[STR_NAME].Scalar());
         std::stringstream ss;
-        ss << name << "[" << (a.p.empty() ? name : a.p) << "]";
-        if(i > 0 || inc.count(name) || inc.count(ss.str())) a.ig = 0;
-        for(auto app1 = dePs.rbegin(); app1 != dePs.rend(); ++app1){
-            maiken::Application* a1 = (*app1);
-            if(a.project().dir() == a1->project().dir() && a.p == a1->p){
-                dePs.erase(std::remove(dePs.begin(), dePs.end(), &a), dePs.end());
-                dePs.push_back(&a);
-                break;
-            }
-        }
-        dePs.push_back(&a);
-        a.buildDepVecRec(dePs, --i, inc);
+        ss << name << "[" << (a->p.empty() ? name : a->p) << "]";
+        if(ig > 0 || inc.count(name) || inc.count(ss.str())) a->ig = 0;
+        dePs[i].push_back(a);
+        a->buildDepVecRec(dePs, --ig, (++i)--, inc);
     }
 }
 
 void maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception) {
     for(auto depP = dependencies().rbegin(); depP != dependencies().rend(); ++depP){
-        const auto& dep(*depP);
+        const auto& dep(**depP);
         if(!dep.sources().empty()){
             const std::string n(dep.project().root()[STR_NAME].Scalar());
             const std::string lib = dep.baseLibFilename();

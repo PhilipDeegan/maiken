@@ -74,6 +74,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     };
 
     bool c = 1;
+#ifndef _MKN_DISABLE_MODULES_
     while(c){
         c = 0;
         for (const auto& n : nodes) {
@@ -89,14 +90,16 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
             c = !profile.empty();
             break;
         }
-    }
+    } 
 
     auto depLevel(AppVars::INSTANCE().dependencyLevel());
-    for(auto& mod : modDeps) {
-        mod.ig = 0;
-        mod.buildDepVec(AppVars::INSTANCE().dependencyString());
+    for(auto* mod : modDeps) {
+        mod->ig = 0;
+        KLOG(INF) << "wit";
+        mod->buildDepVec(AppVars::INSTANCE().dependencyString());
     }
     AppVars::INSTANCE().dependencyLevel(depLevel);
+#endif
 
     c = 1;
     profile = p.size() ? p : project().root()[STR_NAME].Scalar();

@@ -46,12 +46,12 @@ void maiken::Application::scmStatus(const bool& deps) KTHROW(kul::scm::Exception
     std::vector<Application*> v;
     if(deps)
         for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
-            const std::string& s((*app).project().dir().real());
-            auto it = std::find_if(v.begin(), v.end(), [&s](const Application* app) {return (*app).project().dir().real() == s;});
-            if (it == v.end() && (*app).project().dir().real() != this->project().dir().real()) v.push_back(&(*app));
+            const std::string& s((*app)->project().dir().real());
+            auto it = std::find_if(v.begin(), v.end(), [&s](const Application* a) {return a->project().dir().real() == s;});
+            if (it == v.end() && (*app)->project().dir().real() != this->project().dir().real()) v.push_back(*app);
         }
 
-    for(auto* app : v) (*app).scmStatus(0);
+    for(auto* app : v) app->scmStatus(0);
     if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr, isMod);
     if(scm){
         KOUT(NON) << "SCM STATUS CHECK ON: " << project().dir().real();

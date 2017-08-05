@@ -118,13 +118,18 @@ void maiken::Application::showHelp(){
     ss.push_back(MKN_DEFS_INC);
     ss.push_back(MKN_DEFS_SRC);
     ss.push_back(MKN_DEFS_TRIM);
+    ss.push_back(MKN_DEFS_TREE);
     ss.push_back("");
     ss.push_back(MKN_DEFS_ARG);
     ss.push_back(MKN_DEFS_ARGS);
     ss.push_back(MKN_DEFS_ADD);
+    ss.push_back(MKN_DEFS_BINC);
+    ss.push_back(MKN_DEFS_BPATH);
     ss.push_back(MKN_DEFS_DIRC);
     ss.push_back(MKN_DEFS_DEPS);
     ss.push_back(MKN_DEFS_EVSA);
+    ss.push_back(MKN_DEFS_FINC);
+    ss.push_back(MKN_DEFS_FPATH);
     ss.push_back(MKN_DEFS_GET);
     ss.push_back(MKN_DEFS_HELP);
     ss.push_back(MKN_DEFS_JARG);
@@ -186,11 +191,11 @@ void maiken::Application::showTree() const {
 }
 
 void maiken::Application::showTreeRecursive(uint8_t i) const {
-    for(const auto& d : deps){
+    for(auto*const d : deps){
         std::stringstream ss;
         for(size_t r = 0; r < i; r++) ss << "+";
-        KOUT(NON) << " " << ss.str() << " " << d.project().root()[STR_NAME].Scalar()
-                  << "[" << (d.p.empty() ? "@" : d.p) << "]";
-        d.showTreeRecursive(++i);
+        KOUT(NON) << " " << ss.str() << " " << d->project().root()[STR_NAME].Scalar()
+                  << "[" << (d->p.empty() ? "@" : d->p) << "]";
+        d->showTreeRecursive((++i)--);
     }
 }
