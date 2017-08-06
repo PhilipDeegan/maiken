@@ -90,7 +90,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
             c = !profile.empty();
             break;
         }
-    } 
+    }
 
     auto depLevel(AppVars::INSTANCE().dependencyLevel());
     for(auto* mod : modDeps) {

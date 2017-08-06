@@ -53,7 +53,7 @@ class Settings : public kul::yaml::File, public Constants{
         void resolveProperties() KTHROW(SettingsException);
 
         static std::unique_ptr<Settings> instance;
-        static void write(const kul::File& f);
+        static void write(const kul::File& f) KTHROW(kul::Exit);
     public:
         Settings(const std::string& s);
 
@@ -66,7 +66,7 @@ class Settings : public kul::yaml::File, public Constants{
         const std::vector<std::string>& remoteRepos()   const { return rrs; }
         const kul::hash::map::S2S&      properties()    const { return ps;}
 
-        static Settings& INSTANCE();
+        static Settings& INSTANCE() KTHROW(kul::Exit);
         static bool SET(const std::string& s);
         static std::string RESOLVE(const std::string& s) KTHROW(SettingsException);
 };

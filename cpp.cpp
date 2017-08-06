@@ -46,11 +46,11 @@ int main(int argc, char* argv[]) {
         KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
     }
     catch(const kul::Exit& e){
-        if(e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e.what();
+        if(e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e;
         ret = e.code();
     }
     catch(const kul::proc::ExitException& e){
-        KERR << e.what();
+        KERR << e;
         ret = e.code();
     }
     catch(const kul::Exception& e){

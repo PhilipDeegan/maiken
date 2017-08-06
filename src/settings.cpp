@@ -91,7 +91,7 @@ maiken::Settings::Settings(const std::string& s) : kul::yaml::File(s){
     resolveProperties();
 }
 
-maiken::Settings& maiken::Settings::INSTANCE(){
+maiken::Settings& maiken::Settings::INSTANCE() KTHROW(kul::Exit) {
     if(!instance.get()){
         const kul::File f("settings.yaml", kul::user::home("maiken"));
         if(!f.dir().is()) f.dir().mk();
@@ -177,43 +177,91 @@ const kul::yaml::Validator maiken::Settings::validator() const{
     });
 }
 
-void maiken::Settings::write(const kul::File& f){
+void maiken::Settings::write(const kul::File& file) KTHROW(kul::Exit) {
 
-    kul::io::Writer w(f);
+    kul::io::Writer w(file);
     w.write("\n", true);
+
+    bool c = kul::env::WHICH("clang") || kul::env::WHICH("clang.exe");
+    bool g = kul::env::WHICH("gcc")   || kul::env::WHICH("gcc.exe");
 
     w.write("#local:", true);
     w.write("# Optionnaly override local repository directory", true);
     w.write("#    repo: <directory>", true);
+    w << kul::os::EOL();
 
-    w.write("# Add include directories to every compilation", true);
-    w.write("#inc: <directory>", true);
-    w.write("# Add library paths when linking every binary", true);
-    w.write("#path:    <directory>\n", true);
+    if(c || g){
+        w.write("# Add include directories to every compilation", true);
+        w.write("#inc: <directory>", true);
+        w.write("# Add library paths when linking every binary", true);
+        w.write("#path:    <directory>\n", true);
+        w << kul::os::EOL();
 
-    w.write("# Modify environement variables for application commands - excludes run", true);
-    w.write("#env:", true);
-    w.write("#  - name: VAR", true);
-    w.write("#    mode: prepend", true);
-    w.write("#    value: value", true);
+        w.write("# Modify environement variables for application commands - excludes run", true);
+        w.write("#env:", true);
+        w.write("#  - name: VAR", true);
+        w.write("#    mode: prepend", true);
+        w.write("#    value: value", true);
+        w << kul::os::EOL();
 
-    w.write("file:", true);
+        w.write("file:", true);
+        w.write("  - type: c", true);
+        w.write("    archiver: ar -cr", true);
+        w << "    compiler: " << (c?"clang":"gcc") << kul::os::EOL();
+        w << "    linker: "   << (c?"clang":"gcc") << kul::os::EOL();
+        w.write("  - type: cpp:cxx:cc", true);
+        w.write("    archiver: ar -cr", true);
+        w << "    compiler: " << (c?"clan":"") << "g++" << kul::os::EOL();
+        w << "    linker: "   << (c?"clan":"") << "g++" << kul::os::EOL();
+        w << kul::os::EOL();
+    }
+
 #ifdef _WIN32
-    w.write("  - type: cpp:cxx:cc:c", true);
-    w.write("    archiver: lib", true);
-    w.write("    compiler: cl", true);
-    w.write("    linker: link", true);
-#else
-    bool c = kul::env::WHICH("clang");
-    w.write("  - type: c", true);
-    w.write("    archiver: ar -cr", true);
-    w << "    compiler: " << (c?"clang":"gcc") << kul::os::EOL();
-    w << "    linker: "   << (c?"clang":"gcc") << kul::os::EOL();
-    w.write("  - type: cpp:cxx:cc", true);
-    w.write("    archiver: ar -cr", true);
-    w << "    compiler: " << (c?"clan":"") << "g++" << kul::os::EOL();
-    w << "    linker: "   << (c?"clan":"") << "g++" << kul::os::EOL();
+
+    if(!c && !g){
+        bool f = 0;
+        auto cl (kul::env::WHERE("cl.exe"));
+        auto inc(kul::env::GET("INCLUDE"));
+        auto lib(kul::env::GET("LIB"));
+
+        if(cl.empty() || inc.empty() || lib.empty()){
+            w.flush().close();
+            file.rm();
+            KEXIT(1, "gcc or clang not found, vcvars not detected") << kul::os::EOL()
+                << "\tRun vcvarsall.bat or view mkn wiki to see how to configure maiken settings.yaml"  << kul::os::EOL()
+                << "\t@ https://github.com/mkn/mkn/wiki";
+        }
+
+        w.write("inc: ", true);
+        for(auto s : kul::String::SPLIT(inc, kul::env::SEP())){
+            kul::String::REPLACE_ALL(s, "\\", "/");
+            kul::String::REPLACE_ALL(s, " ", "\\ ");
+            w << "    " << s << kul::os::EOL();
+        }
+        w << kul::os::EOL();
+
+        w.write("path: ", true);
+        for(auto s : kul::String::SPLIT(lib, kul::env::SEP())){
+            kul::String::REPLACE_ALL(s, "\\", "/");
+            kul::String::REPLACE_ALL(s, " ", "\\ ");
+            w << "    " << s << kul::os::EOL();
+        }
+        w << kul::os::EOL();
+
+        w.write("env:", true);
+        w.write("  - name: PATH", true);
+        w.write("    mode: prepend", true);
+        w << "    value: " << kul::File(cl).dir().real() << kul::os::EOL();
+        w << kul::os::EOL();
+
+        w.write("file:", true);
+        w.write("  - type: cpp:cxx:cc:c", true);
+        w.write("    archiver: lib", true);
+        w.write("    compiler: cl", true);
+        w.write("    linker: link", true);
+    }
 #endif
+    w << kul::os::EOL();
 
     w.write("# Other examples", true);
     w.write("#  - type: cu", true);

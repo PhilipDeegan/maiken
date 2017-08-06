@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void 
+void
 maiken::Application::addCLIArgs(const kul::cli::Args& args){
 
     auto addIncsOrPaths = [&args](Application& a){

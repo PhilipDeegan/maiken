@@ -108,7 +108,7 @@ void maiken::Application::buildDepVec(const std::string* depVal){
     uint16_t i = 0;
     std::unordered_map<uint16_t, std::vector<Application*>> dePs;
     for(Application* ap : deps){
-        Application& a(*ap);        
+        Application& a(*ap);
         a.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), i, include);
         const std::string& name(a.project().root()[STR_NAME].Scalar());
         std::stringstream ss;
@@ -122,7 +122,7 @@ void maiken::Application::buildDepVec(const std::string* depVal){
         for(auto*const ap : dePs[dePs.size() - (1 + i)]){
             const std::string& s(ap->project().dir().real());
             const std::string& p(ap->p);
-            const auto it = std::find_if(t.begin(), t.end(), 
+            const auto it = std::find_if(t.begin(), t.end(),
                 [&s, &p](Application*const a) {
                     return a->project().dir().real() == s && a->p == p;
                 });
@@ -134,7 +134,7 @@ void maiken::Application::buildDepVec(const std::string* depVal){
     for(auto app1 = t.rbegin(); app1 != t.rend(); ++app1) {
         const std::string& s((*app1)->project().dir().real());
         const std::string& p((*app1)->p);
-        const auto it = std::find_if(deps.begin(), deps.end(), 
+        const auto it = std::find_if(deps.begin(), deps.end(),
             [&s, &p](Application*const a) {
                 return a->project().dir().real() == s && a->p == p;
             });
