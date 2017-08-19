@@ -208,28 +208,46 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
                     inst = kul::Dir(inst.real());
                 }
             }
-            if(n[STR_IF_ARG])
-                for(YAML::const_iterator it = n[STR_IF_ARG].begin(); it != n[STR_IF_ARG].end(); ++it){
-                    std::string left(it->first.Scalar());
-                    if(left.find("_") != std::string::npos){
-                        if(left.substr(0, left.find("_")) == KTOSTRING(__KUL_OS__))
-                            left = left.substr(left.find("_") + 1);
-                        else continue;
+
+            auto ifArgOrLnk = [=](const auto& n, const auto& nName, std::string& var, kul::hash::map::S2S& cVal){
+                if(n[nName])
+                    for(YAML::const_iterator it = n[nName].begin(); it != n[nName].end(); ++it){
+                        std::string left(it->first.Scalar());
+                        if(left.find("_") != std::string::npos){
+                            if(left.substr(0, left.find("_")) == KTOSTRING(__KUL_OS__))
+                                left = left.substr(left.find("_") + 1);
+                            else continue;
+                        }
+
+                        std::stringstream ifArg;
+                        for(const auto& s : kul::cli::asArgs(it->second.Scalar()))
+                            ifArg << Properties::RESOLVE(*this, s) << " ";
+
+                        bool isCVal = 0;
+                        for(const auto& s : maiken::Compilers::INSTANCE().keys()){
+                            isCVal = (left == s);
+                            if(isCVal) break;
+                        }
+                        if(isCVal){
+                            cVal[left] = cVal[left] + ifArg.str();
+                            continue;
+                        }
+                        if(lang.empty() && left == STR_BIN) var += ifArg.str();
+                        else
+                        if(main.empty() && left == STR_LIB) var += ifArg.str();
+                        if(m == compiler::Mode::SHAR && left == STR_SHARED)
+                            var += ifArg.str();
+                        else
+                        if(m == compiler::Mode::STAT && left == STR_STATIC)
+                            var += ifArg.str();
+                        else
+                        if(left == KTOSTRING(__KUL_OS__)) var += ifArg.str();
                     }
-                    std::vector<std::string> ifArgs;
-                    for(const auto& s : kul::String::SPLIT(it->second.Scalar(), ' '))
-                        ifArgs.push_back(Properties::RESOLVE(*this, s));
-                    if(lang.empty() && left == STR_BIN) for(const auto& s : ifArgs) arg += s + " ";
-                    else
-                    if(main.empty() && left == STR_LIB) for(const auto& s : ifArgs) arg += s + " ";
-                    if(m == compiler::Mode::SHAR && left == STR_SHARED)
-                        for(const auto& s : ifArgs) arg += s + " ";
-                    else
-                    if(m == compiler::Mode::STAT && left == STR_STATIC)
-                        for(const auto& s : ifArgs) arg += s + " ";
-                    else
-                    if(left == KTOSTRING(__KUL_OS__)) for(const auto& s : ifArgs) arg += s + " ";
-                }
+            };
+
+            ifArgOrLnk(n, STR_IF_ARG, arg, cArg);
+            ifArgOrLnk(n, STR_IF_LNK, lnk, cLnk);
+
             try{
                 if(n[STR_IF_INC])
                     for(YAML::const_iterator it = n[STR_IF_INC].begin(); it != n[STR_IF_INC].end(); ++it)

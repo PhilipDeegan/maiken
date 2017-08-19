@@ -167,6 +167,7 @@ class KUL_PUBLISH Application : public Constants{
         const maiken::Project& proj;
         kul::hash::map::S2T<kul::hash::map::S2S> fs;
         kul::hash::map::S2S includeStamps, itss, ps;
+        kul::hash::map::S2S cArg, cLnk;
         kul::hash::map::S2T<kul::hash::set::String> args;
         kul::hash::map::S2T<uint64_t> stss;
         std::vector<Application*> deps, modDeps;

@@ -38,9 +38,10 @@ class Validator : public maiken::Constants{
         std::vector<std::string> ifOSLefts  { "bsd", "nix", "win"};
         Validator(){
             std::vector<std::string> ifLefts;
-            for(const std::string& is : ifOSLefts) for(const std::string& a : ifArgsLefts) ifLefts.push_back(is + "_" + a);
-            for(const std::string& s : ifLefts)   ifArgsLefts.push_back(s);
-            for(const std::string& s : ifOSLefts) ifArgsLefts.push_back(s);
+            for(const auto& s : maiken::Compilers::INSTANCE().keys()) ifArgsLefts.push_back(s);
+            for(const auto& s : ifOSLefts) for(const std::string& a : ifArgsLefts) ifLefts.push_back(s + "_" + a);
+            for(const auto& s : ifLefts)   ifArgsLefts.push_back(s);
+            for(const auto& s : ifOSLefts) ifArgsLefts.push_back(s);
         }
         static Validator& INSTANCE(){
             static Validator v;
@@ -70,6 +71,7 @@ class Validator : public maiken::Constants{
                     KEXIT(1, "mode tag invalid value, expects none/static/shared\n"+a.project().dir().path());
             }
             if(n[STR_IF_ARG]) IF_VALUEDATER(a, n[STR_IF_ARG], STR_IF_ARG, INSTANCE().ifArgsLefts);
+            if(n[STR_IF_LNK]) IF_VALUEDATER(a, n[STR_IF_LNK], STR_IF_LNK, INSTANCE().ifArgsLefts);
             if(n[STR_IF_INC]) IF_VALUEDATER(a, n[STR_IF_INC], STR_IF_INC, INSTANCE().ifOSLefts);
             if(n[STR_IF_SRC]) IF_VALUEDATER(a, n[STR_IF_SRC], STR_IF_SRC, INSTANCE().ifOSLefts);
             if(n[STR_IF_LIB]) IF_VALUEDATER(a, n[STR_IF_LIB], STR_IF_LIB, INSTANCE().ifOSLefts);
