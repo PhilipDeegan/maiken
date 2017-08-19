@@ -69,6 +69,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define _MKN_VERSION_ master
 #endif /* _MKN_VERSION_ */
 
+#ifndef _KUL_PROC_LOOP_NSLEEP_
+    #define _KUL_PROC_LOOP_NSLEEP_ 10000000
+#endif /* _KUL_PROC_LOOP_NSLEEP_ */
+
 namespace maiken{
 class Constants{
     public:
