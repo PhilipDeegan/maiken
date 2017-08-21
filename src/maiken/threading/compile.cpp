@@ -39,12 +39,14 @@ maiken::ThreadingCompiler::compile(
     const std::string obj(p.second);
     const std::string& fileType = src.substr(src.rfind(".") + 1);
     const std::string& compiler = (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
+    const std::string& base = maiken::Compilers::INSTANCE().base(compiler);
     std::vector<std::string> args;
     if(app.arguments().count(fileType) > 0)
         for(const std::string& o : (*app.arguments().find(fileType)).second)
             for(const auto& s : kul::cli::asArgs(o))
                 args.push_back(s);
     for(const auto& s : kul::cli::asArgs(app.arg)) args.push_back(s);
+    if(app.cArg.count(base)) for(const auto& s : kul::cli::asArgs(app.cArg[base])) args.push_back(s);
     std::string cmd = compiler + " " + AppVars::INSTANCE().args();
     if(AppVars::INSTANCE().jargs().count(fileType) > 0)
         cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;

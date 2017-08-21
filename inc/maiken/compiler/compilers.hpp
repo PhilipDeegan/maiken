@@ -54,6 +54,16 @@ std::unique_ptr<T> make_unique(Args&&... args){
 
 class Compilers{
     private:
+        std::unique_ptr<Compiler> hcc;
+        std::unique_ptr<Compiler> gcc;
+        std::unique_ptr<Compiler> clang;
+        std::unique_ptr<Compiler> intel;
+        std::unique_ptr<Compiler> winc;
+        std::unique_ptr<Compiler> wincs;
+
+        kul::hash::map::S2T<Compiler*> cs, masks;
+
+    private:
         Compilers(){
             clang   = make_unique<cpp::ClangCompiler>();
             gcc     = make_unique<cpp::GccCompiler>();
@@ -74,21 +84,12 @@ class Compilers{
             cs.insert(std::pair<std::string, Compiler*>("g++"       , gcc.get()));
 
             cs.insert(std::pair<std::string, Compiler*>("hcc"       , hcc.get()));
-            cs.insert(std::pair<std::string, Compiler*>("h++"       , hcc.get()));
 
             cs.insert(std::pair<std::string, Compiler*>("icc"       , intel.get()));
             cs.insert(std::pair<std::string, Compiler*>("icpc"      , intel.get()));
 
             cs.insert(std::pair<std::string, Compiler*>("nvcc"      , gcc.get()));
         }
-        std::unique_ptr<Compiler> hcc;
-        std::unique_ptr<Compiler> gcc;
-        std::unique_ptr<Compiler> clang;
-        std::unique_ptr<Compiler> intel;
-        std::unique_ptr<Compiler> winc;
-        std::unique_ptr<Compiler> wincs;
-
-        kul::hash::map::S2T<Compiler*> cs, masks;
 
         const std::string key(std::string comp, const kul::hash::map::S2T<Compiler*>& map){
             kul::String::REPLACE_ALL(comp, ".exe", "");
@@ -127,6 +128,12 @@ class Compilers{
                 return cs[key(comp, cs)];
             }catch(const CompilerNotFoundException& e){}
             return masks[key(comp, masks)];
+        }
+        std::string base(const std::string& comp){
+            try{
+                return key(comp, cs);
+            }catch(const CompilerNotFoundException& e){}
+            return key(comp, masks);
         }
 };
 

@@ -184,6 +184,7 @@ class Constants{
         static constexpr const char* STR_IF_INC         = "if_inc";
         static constexpr const char* STR_IF_SRC         = "if_src";
         static constexpr const char* STR_IF_LIB         = "if_lib";
+        static constexpr const char* STR_IF_LNK         = "if_link";
 };
 }
 #endif /* _MAIKEN_DEFS_HPP_ */

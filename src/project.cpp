@@ -67,10 +67,11 @@ const kul::yaml::Validator maiken::Project::validator() const{
         NodeValidator("value", 1)
     }, 0, NodeType::LIST);
 
-    NodeValidator if_arg("if_arg", { NodeValidator("*") }, 0, NodeType::MAP);
-    NodeValidator if_inc("if_inc", { NodeValidator("*") }, 0, NodeType::MAP);
-    NodeValidator if_lib("if_lib", { NodeValidator("*") }, 0, NodeType::MAP);
-    NodeValidator if_src("if_src", { NodeValidator("*") }, 0, NodeType::MAP);
+    NodeValidator if_arg("if_arg",  { NodeValidator("*") }, 0, NodeType::MAP);
+    NodeValidator if_inc("if_inc",  { NodeValidator("*") }, 0, NodeType::MAP);
+    NodeValidator if_lib("if_lib",  { NodeValidator("*") }, 0, NodeType::MAP);
+    NodeValidator if_src("if_src",  { NodeValidator("*") }, 0, NodeType::MAP);
+    NodeValidator if_lnk("if_link", { NodeValidator("*") }, 0, NodeType::MAP);
 
     return Validator({
         NodeValidator("name", 1),
@@ -101,6 +102,7 @@ const kul::yaml::Validator maiken::Project::validator() const{
         if_inc,
         if_lib,
         if_src,
+        if_lnk,
         NodeValidator("profile", {
             NodeValidator("name", 1),
             NodeValidator("parent"),
@@ -125,7 +127,8 @@ const kul::yaml::Validator maiken::Project::validator() const{
             if_arg,
             if_inc,
             if_lib,
-            if_src
+            if_src,
+            if_lnk
         }, 0, NodeType::LIST)});
 }
 

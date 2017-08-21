@@ -117,7 +117,7 @@ maiken::Application::compile(kul::hash::set::String& objects) KTHROW(kul::Except
             }
 
             ThreadingCompiler tc(*this);
-            kul::ConcurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1);
+            kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
             auto lambda = [&](const std::pair<std::string, std::string>& pair){
                 if(ctp.exception()) ctp.interrupt();
                 const CompilerProcessCapture cpc = tc.compile(pair);
@@ -179,8 +179,12 @@ maiken::Application::buildExecutable(const kul::hash::set::String& objects){
             std::string bin(AppVars::INSTANCE().dryRun() ? kul::File(outD.join(n)).esc() : kul::File(outD.join(n)).escm());
             std::vector<std::string> obV;
             for(const auto& o : objects) obV.emplace_back(o);
+            const std::string& base(
+                Compilers::INSTANCE().base((*(*files().find(fileType)).second.find(STR_COMPILER)).second)
+            );
+            if(cLnk.count(base)) linkEnd += " " + cLnk[base];
             const CompilerProcessCapture& cpc =
-                Compilers::INSTANCE().get((*(*files().find(fileType)).second.find(STR_COMPILER)).second)
+                Compilers::INSTANCE().get(base)
                     ->buildExecutable(linker, linkEnd, obV,
                         libraries(), libraryPaths(), bin, m, AppVars::INSTANCE().dryRun());
             if(AppVars::INSTANCE().dryRun()) KOUT(NON) << cpc.cmd();
@@ -215,8 +219,12 @@ maiken::Application::buildLibrary(const kul::hash::set::String& objects){
         lib = AppVars::INSTANCE().dryRun() ? kul::File(lib, outD).esc() : kul::File(lib, outD).escm();
         std::vector<std::string> obV;
         for(const auto& o : objects) obV.emplace_back(o);
+        const std::string& base(
+            Compilers::INSTANCE().base((*(*files().find(lang)).second.find(STR_COMPILER)).second)
+        );
+        if(cLnk.count(base)) linkEnd += " " + cLnk[base];
         const CompilerProcessCapture& cpc =
-            Compilers::INSTANCE().get((*(*files().find(lang)).second.find(STR_COMPILER)).second)
+            Compilers::INSTANCE().get(base)
                 ->buildLibrary(linker, linkEnd, obV,
                     libraries(), libraryPaths(), lib, m, AppVars::INSTANCE().dryRun());
         if(AppVars::INSTANCE().dryRun()) KOUT(NON) << cpc.cmd();
