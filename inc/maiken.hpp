@@ -31,6 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_APP_HPP_
 #define _MAIKEN_APP_HPP_
 
+#include "maiken/defs.hpp"
+
 #include "kul/os.hpp"
 #include "kul/cli.hpp"
 #include "kul/log.hpp"
@@ -38,7 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/scm/man.hpp"
 #include "kul/threads.hpp"
 
-#include "maiken/defs.hpp"
 #include "maiken/project.hpp"
 #include "maiken/settings.hpp"
 #include "maiken/compiler.hpp"
