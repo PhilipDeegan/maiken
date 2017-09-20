@@ -1,0 +1,8 @@
+os:
+  - osx
+  
+compiler:
+  - clang
+
+script:
+  - make bsd CXX=clang++
