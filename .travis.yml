@@ -8,4 +8,4 @@ compiler:
 
 script:
   - make bsd CXX=clang++
-  - ./mkn build -dtSa "-O2" -l "-pthread -ldl"
+  - ./mkn build -dtSa "-O2 -std=c++14" -l "-pthread -ldl"
