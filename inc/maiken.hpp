@@ -56,7 +56,7 @@ class Exception : public kul::Exception{
 
 class AppVars : public Constants{
     private:
-        bool d = 0, dr = 0, f = 0, s = 0, sh = 0, st = 0, t = 0, u = 0;
+        bool dr = 0, f = 0, s = 0, sh = 0, st = 0, u = 0;
         uint16_t dl = 0, ts = 1;
         std::string aa, al, la, ra;
         const std::string* dep;

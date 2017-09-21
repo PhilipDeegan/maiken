@@ -43,7 +43,7 @@ class Exception : public kul::Exception{
 class WINCompiler : public Compiler{
     public:
         WINCompiler(const int& v = 0) : Compiler(v){}
-        bool sourceIsBin()  const{ return true; }
+        bool sourceIsBin()  const override { return true; }
 
         CompilerProcessCapture buildExecutable(
             const std::string& linker, 

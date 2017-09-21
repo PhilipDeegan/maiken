@@ -51,7 +51,7 @@ class CCompiler : public Compiler{
         virtual const std::string cxx() const = 0;
         virtual const std::string sharedLib(const std::string& lib) const = 0;
         virtual const std::string staticLib(const std::string& lib) const = 0;
-        bool sourceIsBin() const{ return false; }
+        bool sourceIsBin() const override { return false; }
 
         const std::string oType(const std::vector<std::string>& objs) const {
             size_t i = 0;
