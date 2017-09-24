@@ -1,4 +1,4 @@
-[![Build Status](https://semaphoreci.com/api/v1/dekken/maiken/branches/master/badge.svg)](https://semaphoreci.com/dekken/maiken)
+[![Travis](https://travis-ci.org/Dekken/maiken.svg?branch=master)](https://travis-ci.org/Dekken/maiken)  [![Semaphore](https://semaphoreci.com/api/v1/dekken/maiken/branches/master/badge.svg)](https://semaphoreci.com/dekken/maiken) 
 
 # maiken
 
