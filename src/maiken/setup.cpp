@@ -95,7 +95,6 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     auto depLevel(AppVars::INSTANCE().dependencyLevel());
     for(auto* mod : modDeps) {
         mod->ig = 0;
-        KLOG(INF) << "wit";
         mod->buildDepVec(AppVars::INSTANCE().dependencyString());
     }
     AppVars::INSTANCE().dependencyLevel(depLevel);

@@ -222,7 +222,6 @@ class KUL_PUBLISH Application : public Constants{
         kul::Dir resolveDepOrModDirectory(const YAML::Node& d, bool module);
         void popDepOrMod(const YAML::Node& n, std::vector<Application*>& vec, const std::string& s, bool module) KTHROW(kul::Exception);
 
-        kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap() const;
         kul::hash::set::String inactiveMains() const;
 
         bool incSrc(const kul::File& f) const;
@@ -265,6 +264,7 @@ class KUL_PUBLISH Application : public Constants{
             std::string n = project().root()[STR_NAME].Scalar();
             return out.empty() ? inst ? p.empty() ? n : n + "_" + p : n : out;
         }
+        kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap() const;
 
         static Application& CREATE(int16_t argc, char *argv[]) KTHROW(kul::Exception);
 };
