@@ -33,323 +33,458 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/defs.hpp"
 
-#include "kul/os.hpp"
 #include "kul/cli.hpp"
 #include "kul/log.hpp"
+#include "kul/os.hpp"
 #include "kul/proc.hpp"
 #include "kul/scm/man.hpp"
 #include "kul/threads.hpp"
 
-#include "maiken/project.hpp"
-#include "maiken/settings.hpp"
 #include "maiken/compiler.hpp"
 #include "maiken/compiler/compilers.hpp"
+#include "maiken/project.hpp"
+#include "maiken/settings.hpp"
 
-int main(int argc, char* argv[]);
+int
+main(int argc, char* argv[]);
 
-namespace maiken{
+namespace maiken {
 
-class Exception : public kul::Exception{
-    public:
-        Exception(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
+class Exception : public kul::Exception
+{
+public:
+  Exception(const char* f, const uint16_t& l, const std::string& s)
+    : kul::Exception(f, l, s)
+  {}
 };
 
-class AppVars : public Constants{
-    private:
-        bool dr = 0, f = 0, s = 0, sh = 0, st = 0, u = 0;
-        uint16_t dl = 0, ts = 1;
-        std::string aa, al, la, ra;
-        const std::string* dep;
-        kul::hash::set::String cmds, modPhases;
-        kul::hash::map::S2S evs, jas, pks;
-        AppVars(){
-            pks["OS"]   = KTOSTRING(__KUL_OS__);
-            pks["HOME"] = kul::user::home().path();
-            pks["MKN_HOME"] = kul::user::home(STR_MAIKEN).path();
-            pks["DATETIME"] = kul::DateTime::NOW();
-            pks["TIMESTAMP"] = std::time(NULL);
+class AppVars : public Constants
+{
+private:
+  bool dr = 0, f = 0, s = 0, sh = 0, st = 0, u = 0;
+  uint16_t dl = 0, op = 0, ts = 1;
+  std::string aa, al, la, ra, wi;
+  const std::string* dep;
+  kul::hash::set::String cmds, modPhases;
+  kul::hash::map::S2S evs, jas, pks;
+  AppVars()
+  {
+    pks["OS"] = KTOSTRING(__KUL_OS__);
+    pks["HOME"] = kul::user::home().path();
+    pks["MKN_HOME"] = kul::user::home(STR_MAIKEN).path();
+    pks["DATETIME"] = kul::DateTime::NOW();
+    pks["TIMESTAMP"] = std::time(NULL);
 
-            if(Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_REPO])
-                pks["MKN_REPO"] = Settings::INSTANCE().root()[STR_LOCAL][STR_REPO].Scalar();
-            else
-                pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
+    if (Settings::INSTANCE().root()[STR_LOCAL] &&
+        Settings::INSTANCE().root()[STR_LOCAL][STR_REPO])
+      pks["MKN_REPO"] =
+        Settings::INSTANCE().root()[STR_LOCAL][STR_REPO].Scalar();
+    else
+      pks["MKN_REPO"] =
+        kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
 
-            if(Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO])
-                pks["MKN_MOD_REPO"] = Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar();
-            else
-                pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
+    if (Settings::INSTANCE().root()[STR_LOCAL] &&
+        Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO])
+      pks["MKN_MOD_REPO"] =
+        Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar();
+    else
+      pks["MKN_MOD_REPO"] =
+        kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 
-            if(Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_BIN])
-                pks["MKN_BIN"] = Settings::INSTANCE().root()[STR_LOCAL][STR_BIN].Scalar();
-            if(Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_LIB])
-                pks["MKN_LIB"] = Settings::INSTANCE().root()[STR_LOCAL][STR_LIB].Scalar();
+    if (Settings::INSTANCE().root()[STR_LOCAL] &&
+        Settings::INSTANCE().root()[STR_LOCAL][STR_BIN])
+      pks["MKN_BIN"] = Settings::INSTANCE().root()[STR_LOCAL][STR_BIN].Scalar();
+    if (Settings::INSTANCE().root()[STR_LOCAL] &&
+        Settings::INSTANCE().root()[STR_LOCAL][STR_LIB])
+      pks["MKN_LIB"] = Settings::INSTANCE().root()[STR_LOCAL][STR_LIB].Scalar();
 
-            evs["MKN_OBJ"] = "o";
-            std::string obj = kul::env::GET("MKN_OBJ");
-            if(!obj.empty()) evs["MKN_OBJ"] = obj;
-        }
-    public:
-        const std::string& args() const  { return aa;}
-        void args(const std::string& aa) { this->aa = aa;}
+    evs["MKN_OBJ"] = "o";
+    std::string obj = kul::env::GET("MKN_OBJ");
+    if (!obj.empty())
+      evs["MKN_OBJ"] = obj;
+  }
 
-        const std::string& runArgs() const  { return ra;}
-        void runArgs(const std::string& ra) { this->ra = ra;}
+public:
+  const std::string& args() const { return aa; }
+  void args(const std::string& aa) { this->aa = aa; }
 
-        const kul::hash::map::S2S& jargs() const { return jas;}
-        void jargs(const std::string& a, const std::string& b) { jas[a] = b; }
+  const std::string& runArgs() const { return ra; }
+  void runArgs(const std::string& ra) { this->ra = ra; }
 
-        const std::string& linker() const  { return la;}
-        void linker(const std::string& la) { this->la = la;}
+  const kul::hash::map::S2S& jargs() const { return jas; }
+  void jargs(const std::string& a, const std::string& b) { jas[a] = b; }
 
-        const std::string& allinker() const  { return al;}
-        void allinker(const std::string& al) { this->al = al;}
+  const std::string& linker() const { return la; }
+  void linker(const std::string& la) { this->la = la; }
 
-        const bool& dryRun() const { return this->dr;}
-        void dryRun(const bool& dr) { this->dr = dr;}
+  const std::string& allinker() const { return al; }
+  void allinker(const std::string& al) { this->al = al; }
 
-        const bool& update() const { return this->u;}
-        void update(const bool& u) { this->u = u;}
+  const bool& dryRun() const { return this->dr; }
+  void dryRun(const bool& dr) { this->dr = dr; }
 
-        const bool& fupdate() const { return this->f;}
-        void fupdate(const bool& f) { this->f = f;}
+  const bool& update() const { return this->u; }
+  void update(const bool& u) { this->u = u; }
 
-        const bool& show() const { return this->s;}
-        void show(const bool& s){ this->s = s;}
+  const bool& fupdate() const { return this->f; }
+  void fupdate(const bool& f) { this->f = f; }
 
-        const bool& shar() const { return this->sh;}
-        void shar(const bool& sh){ this->sh = sh;}
+  const bool& show() const { return this->s; }
+  void show(const bool& s) { this->s = s; }
 
-        const bool& stat() const  { return this->st;}
-        void stat(const bool& st) { this->st = st;}
+  const bool& shar() const { return this->sh; }
+  void shar(const bool& sh) { this->sh = sh; }
 
-        const std::string* dependencyString()   const { return dep;}
-        void dependencyString(const std::string* dep) { this->dep = dep;}
+  const bool& stat() const { return this->st; }
+  void stat(const bool& st) { this->st = st; }
 
-        const uint16_t& dependencyLevel()  const { return dl;}
-        void dependencyLevel(const uint16_t& dl) { this->dl = dl;}
+  const std::string* dependencyString() const { return dep; }
+  void dependencyString(const std::string* dep) { this->dep = dep; }
 
-        const uint16_t& threads() const { return ts;}
-        void threads(const uint16_t& t) { this->ts = t;}
+  const uint16_t& optimise() const { return op; }
+  void optimise(const uint16_t& op) { this->op = op; }
 
-        const kul::hash::map::S2S& properkeys() const { return pks;}
-        void properkeys(const std::string& k, const std::string& v) { pks[k] = v;}
+  const uint16_t& dependencyLevel() const { return dl; }
+  void dependencyLevel(const uint16_t& dl) { this->dl = dl; }
 
-        const kul::hash::map::S2S& envVars() const { return evs;}
-        void envVars(const std::string& k, const std::string& v)  { evs[k] = v;}
+  const uint16_t& threads() const { return ts; }
+  void threads(const uint16_t& t) { this->ts = t; }
 
-        void command(const std::string& s)             { cmds.insert(s); }
-        const kul::hash::set::String& commands() const { return cmds; }
+  const kul::hash::map::S2S& properkeys() const { return pks; }
+  void properkeys(const std::string& k, const std::string& v) { pks[k] = v; }
 
-        void modulePhase(const std::string& s)             { modPhases.insert(s); }
-        const kul::hash::set::String& modulePhases() const { return modPhases; }
+  const kul::hash::map::S2S& envVars() const { return evs; }
+  void envVars(const std::string& k, const std::string& v) { evs[k] = v; }
 
-        static AppVars& INSTANCE(){
-            static AppVars instance;
-            return instance;
-        }
+  void command(const std::string& s) { cmds.insert(s); }
+  const kul::hash::set::String& commands() const { return cmds; }
+
+  void modulePhase(const std::string& s) { modPhases.insert(s); }
+  const kul::hash::set::String& modulePhases() const { return modPhases; }
+
+  const std::string& with() const { return wi; }
+  void with(const std::string& wi) { this->wi = wi; }
+
+  static AppVars& INSTANCE()
+  {
+    static AppVars instance;
+    return instance;
+  }
 };
 
 class Module;
 class ModuleLoader;
 class ThreadingCompiler;
 class Applications;
-class KUL_PUBLISH Application : public Constants{
-    friend class Applications;
-    friend class ThreadingCompiler;
-    protected:
-        bool ig = 1, isMod = 0;
-        const Application* par = nullptr;
-        Application* sup = nullptr;
-        compiler::Mode m;
-        std::string arg, main, lang, lnk, out, scr, scv;
-        const std::string p;
-        kul::Dir bd, inst;
-        YAML::Node modCArg, modLArg, modPArg;
-        const maiken::Project& proj;
-        kul::hash::map::S2T<kul::hash::map::S2S> fs;
-        kul::hash::map::S2S includeStamps, itss, ps;
-        kul::hash::map::S2S cArg, cLnk;
-        kul::hash::map::S2T<kul::hash::set::String> args;
-        kul::hash::map::S2T<uint64_t> stss;
-        std::vector<Application*> deps, modDeps;
-        std::vector<std::shared_ptr<ModuleLoader>> mods;
-        std::vector<kul::cli::EnvVar> evs;
-        std::vector<std::string> libs, paths;
-        std::vector<std::pair<std::string, bool> > incs, srcs;
-        const kul::SCM* scm = 0;
+class KUL_PUBLISH Application : public Constants
+{
+  friend class Applications;
+  friend class ThreadingCompiler;
 
-        CompilerProcessCapture buildExecutable(const kul::hash::set::String& objects);
-        CompilerProcessCapture buildLibrary(const kul::hash::set::String& objects);
-        void checkErrors(const CompilerProcessCapture& cpc) KTHROW(kul::Exception);
+protected:
+  bool ig = 1, isMod = 0, ro = 0;
+  const Application* par = nullptr;
+  Application* sup = nullptr;
+  compiler::Mode m;
+  std::string arg, main, lang, lnk, out, scr, scv;
+  const std::string p;
+  kul::Dir bd, inst;
+  YAML::Node modCArg, modLArg, modPArg;
+  const maiken::Project& proj;
+  kul::hash::map::S2T<kul::hash::map::S2S> fs;
+  kul::hash::map::S2S includeStamps, itss, ps;
+  kul::hash::map::S2S cArg, cLnk;
+  kul::hash::map::S2T<kul::hash::set::String> args;
+  kul::hash::map::S2T<uint64_t> stss;
+  std::vector<Application*> deps, modDeps;
+  std::vector<std::shared_ptr<ModuleLoader>> mods;
+  std::vector<kul::cli::EnvVar> evs;
+  std::vector<std::string> libs, paths;
+  std::vector<std::pair<std::string, bool>> incs, srcs;
+  const kul::SCM* scm = 0;
 
-        void populateMaps(const YAML::Node& n) KTHROW(kul::Exception);
+  CompilerProcessCapture buildExecutable(const kul::hash::set::String& objects);
+  CompilerProcessCapture buildLibrary(const kul::hash::set::String& objects);
+  void checkErrors(const CompilerProcessCapture& cpc) KTHROW(kul::Exception);
 
-        void preSetupValidation() KTHROW(Exception);
-        void postSetupValidation() KTHROW(Exception);
-        void resolveProperties() KTHROW(Exception);
-        void resolveLang() KTHROW(Exception);
+  void populateMaps(const YAML::Node& n) KTHROW(kul::Exception);
 
-        void compile(kul::hash::set::String& objects) KTHROW(kul::Exception);
-        void build() KTHROW(kul::Exception);
-        void pack()  KTHROW(kul::Exception);
-        void findObjects(kul::hash::set::String& objects) const;
-        void link(const kul::hash::set::String& objects) KTHROW(kul::Exception);
-        void run(bool dbg);
-        void trim();
-        void trim(const kul::File& f);
+  void preSetupValidation() KTHROW(Exception);
+  void postSetupValidation() KTHROW(Exception);
+  void resolveProperties() KTHROW(Exception);
+  void resolveLang() KTHROW(Exception);
+  void parseDepedencyString(std::string s, kul::hash::set::String& include);
 
-        void scmStatus(const bool& deps = false) KTHROW(kul::scm::Exception);
-        void scmUpdate(const bool& f) KTHROW(kul::scm::Exception);
-        void scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo) KTHROW(kul::scm::Exception);
+  void compile(kul::hash::set::String& objects) KTHROW(kul::Exception);
+  void build() KTHROW(kul::Exception);
+  void pack() KTHROW(kul::Exception);
+  void findObjects(kul::hash::set::String& objects) const;
+  void link(const kul::hash::set::String& objects) KTHROW(kul::Exception);
+  void run(bool dbg);
+  void trim();
+  void trim(const kul::File& f);
 
-        void setup() KTHROW(kul::Exception);
-        void setSuper();
-        void showConfig(bool force = 0);
-        void showTree() const;
-        void showTreeRecursive(uint8_t i) const;
-        void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const KTHROW(kul::Exception);
-        void showProfiles();
+  void scmStatus(const bool& deps = false) KTHROW(kul::scm::Exception);
+  void scmUpdate(const bool& f) KTHROW(kul::scm::Exception);
+  void scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo)
+    KTHROW(kul::scm::Exception);
 
-        void writeTimeStamps(kul::hash::set::String& objects, std::vector<kul::File>& cacheFiles);
-        void loadTimeStamps() KTHROW(kul::StringException);
+  void setup() KTHROW(kul::Exception);
+  void setSuper();
+  void showConfig(bool force = 0);
+  void showTree() const;
+  void showTreeRecursive(uint8_t i) const;
+  void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps)
+    const KTHROW(kul::Exception);
+  void showProfiles();
 
-        void buildDepVec(const std::string* depVal);
-        void buildDepVecRec(std::unordered_map<uint16_t, std::vector<Application*>>& dePs, int16_t ig, int16_t i, const kul::hash::set::String& inc);
+  void writeTimeStamps(kul::hash::set::String& objects,
+                       std::vector<kul::File>& cacheFiles);
+  void loadTimeStamps() KTHROW(kul::StringException);
 
-        void populateMapsFromDependencies() KTHROW(kul::Exception);
+  void buildDepVec(const std::string* depVal);
+  void buildDepVecRec(
+    std::unordered_map<uint16_t, std::vector<Application*>>& dePs,
+    int16_t ig,
+    int16_t i,
+    const kul::hash::set::String& inc);
 
-        void loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod, bool module) KTHROW(kul::Exception);
-        kul::Dir resolveDepOrModDirectory(const YAML::Node& d, bool module);
-        void popDepOrMod(const YAML::Node& n, std::vector<Application*>& vec, const std::string& s, bool module) KTHROW(kul::Exception);
+  void populateMapsFromDependencies() KTHROW(kul::Exception);
 
-        kul::hash::set::String inactiveMains() const;
+  void loadDepOrMod(const YAML::Node& node,
+                    const kul::Dir& depOrMod,
+                    bool module) KTHROW(kul::Exception);
+  kul::Dir resolveDepOrModDirectory(const YAML::Node& d, bool module);
+  void popDepOrMod(const YAML::Node& n,
+                   std::vector<Application*>& vec,
+                   const std::string& s,
+                   bool module,
+                   bool with = 0) KTHROW(kul::Exception);
 
-        bool incSrc(const kul::File& f) const;
-        void addCLIArgs(const kul::cli::Args& args);
-        void addSourceLine (const std::string& o) KTHROW(kul::Exception);
-        void addIncludeLine(const std::string& o) KTHROW(kul::Exception);
+  kul::hash::set::String inactiveMains() const;
 
-        void              modCompile(const YAML::Node& modArg){ modCArg = modArg; }
-        const YAML::Node& modCompile()                        { return modCArg; }
-        void              modLink   (const YAML::Node& modArg){ modLArg = modArg; }
-        const YAML::Node& modLink()                           { return modLArg; }
-        void              modPack   (const YAML::Node& modArg){ modPArg = modArg; }
-        const YAML::Node& modPack()                           { return modPArg; }
+  bool incSrc(const kul::File& f) const;
+  void addCLIArgs(const kul::cli::Args& args);
+  void addSourceLine(const std::string& o) KTHROW(kul::Exception);
+  void addIncludeLine(const std::string& o) KTHROW(kul::Exception);
 
-        static void showHelp();
-    public:
-        Application(const maiken::Project& proj, const std::string& profile = "");// : m(Mode::NONE), p(profile), proj(proj){}
-        Application(const Application& a) = delete;
-        Application(const Application&& a) = delete;
-        Application& operator=(const Application& a) = delete;
-        ~Application();
+  void modCompile(const YAML::Node& modArg) { modCArg = modArg; }
+  const YAML::Node& modCompile() { return modCArg; }
+  void modLink(const YAML::Node& modArg) { modLArg = modArg; }
+  const YAML::Node& modLink() { return modLArg; }
+  void modPack(const YAML::Node& modArg) { modPArg = modArg; }
+  const YAML::Node& modPack() { return modPArg; }
 
-        virtual void                                       process()   KTHROW(kul::Exception);
-        const kul::Dir&                                    buildDir()            const { return bd; }
-        const std::string&                                 profile()             const { return p; }
-        const maiken::Project&                             project()             const { return proj;}
-        const std::vector<Application*>&                   dependencies()        const { return deps; }
-        const std::vector<Application*>&                   moduleDependencies()  const { return modDeps; }
-        const std::vector<std::shared_ptr<ModuleLoader>>&  modules()             const { return mods; }
-        const std::vector<kul::cli::EnvVar>&               envVars()             const { return evs; }
-        const kul::hash::map::S2T<kul::hash::map::S2S>&    files()               const { return fs; }
-        const std::vector<std::string>&                    libraries()           const { return libs;}
-        const std::vector<std::pair<std::string, bool> >&  sources()             const { return srcs;}
-        const std::vector<std::pair<std::string, bool> >&  includes()            const { return incs;}
-        const std::vector<std::string>&                    libraryPaths()        const { return paths;}
-        const kul::hash::map::S2S&                         properties()          const { return ps;}
-        const kul::hash::map::S2T<kul::hash::set::String>& arguments()           const { return args; }
+  static void showHelp();
 
-        std::string                                        baseLibFilename()     const {
-            std::string n = project().root()[STR_NAME].Scalar();
-            return out.empty() ? inst ? p.empty() ? n : n + "_" + p : n : out;
-        }
-        kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String> > sourceMap() const;
+public:
+  Application(const maiken::Project& proj,
+              const std::string& profile =
+                ""); // : m(Mode::NONE), p(profile), proj(proj){}
+  Application(const Application& a) = delete;
+  Application(const Application&& a) = delete;
+  Application& operator=(const Application& a) = delete;
+  ~Application();
 
-        static Application& CREATE(int16_t argc, char *argv[]) KTHROW(kul::Exception);
+  virtual void process() KTHROW(kul::Exception);
+  const kul::Dir& buildDir() const { return bd; }
+  const std::string& profile() const { return p; }
+  const maiken::Project& project() const { return proj; }
+  const std::vector<Application*>& dependencies() const { return deps; }
+  const std::vector<Application*>& moduleDependencies() const
+  {
+    return modDeps;
+  }
+  const std::vector<std::shared_ptr<ModuleLoader>>& modules() const
+  {
+    return mods;
+  }
+  const std::vector<kul::cli::EnvVar>& envVars() const { return evs; }
+  const kul::hash::map::S2T<kul::hash::map::S2S>& files() const { return fs; }
+  const std::vector<std::string>& libraries() const { return libs; }
+  const std::vector<std::pair<std::string, bool>>& sources() const
+  {
+    return srcs;
+  }
+  const std::vector<std::pair<std::string, bool>>& includes() const
+  {
+    return incs;
+  }
+  const std::vector<std::string>& libraryPaths() const { return paths; }
+  const kul::hash::map::S2S& properties() const { return ps; }
+  const kul::hash::map::S2T<kul::hash::set::String>& arguments() const
+  {
+    return args;
+  }
+
+  std::string baseLibFilename() const
+  {
+    std::string n = project().root()[STR_NAME].Scalar();
+    return out.empty() ? inst ? p.empty() ? n : n + "_" + p : n : out;
+  }
+  kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> sourceMap()
+    const;
+
+  static std::vector<Application*> CREATE(int16_t argc, char* argv[])
+    KTHROW(kul::Exception);
 };
 
-class Applications{
-    friend int ::main(int argc, char* argv[]);
-    private:
-        kul::hash::map::S2T<kul::hash::map::S2T<Application*>> m_apps;
-        std::vector<std::unique_ptr<Application>> m_appPs;
-        Applications(){}
-        void clear(){
-            m_apps.clear();
-            m_appPs.clear();
+class Applications : public Constants
+{
+  friend int ::main(int argc, char* argv[]);
+
+private:
+  kul::hash::map::S2T<kul::hash::map::S2T<Application*>> m_apps;
+  std::vector<std::unique_ptr<Application>> m_appPs;
+  Applications() {}
+  void clear()
+  {
+    m_apps.clear();
+    m_appPs.clear();
+  }
+
+public:
+  static Applications& INSTANCE()
+  {
+    static Applications a;
+    return a;
+  }
+  Application* getOrCreate(const maiken::Project& proj,
+                           const std::string& _profile = "",
+                           bool setup = 1) KTHROW(kul::Exception)
+  {
+    std::string pDir(proj.dir().real());
+    std::string profile = _profile.empty() ? "@" : _profile;
+    if (!m_apps.count(pDir) || !m_apps[pDir].count(profile)) {
+      auto app = std::make_unique<Application>(proj, _profile);
+      auto pp = app.get();
+      m_appPs.push_back(std::move(app));
+      m_apps[pDir][profile] = pp;
+      if (setup) {
+        const std::string& cwd(kul::env::CWD());
+        kul::env::CWD(proj.dir());
+        pp->setup();
+        kul::env::CWD(cwd);
+      }
+    }
+    return m_apps[pDir][profile];
+  }
+  Application* getOrCreateRoot(const maiken::Project& proj,
+                               const std::string& _profile = "",
+                               bool setup = 1) KTHROW(kul::Exception)
+  {
+    std::string pDir(proj.dir().real());
+    std::string profile = _profile.empty() ? "@" : _profile;
+    if (!m_apps.count(pDir) || !m_apps[pDir].count(profile)) {
+      auto app = std::make_unique<Application>(proj, _profile);
+      auto pp = app.get();
+      pp->ro = 1;
+      m_appPs.push_back(std::move(app));
+      m_apps[pDir][profile] = pp;
+      if (setup) {
+        const std::string& cwd(kul::env::CWD());
+        kul::env::CWD(proj.dir());
+        pp->setup();
+        kul::env::CWD(cwd);
+      }
+    }
+    return m_apps[pDir][profile];
+  }
+  Application* getOrNullptr(const std::string& project)
+  {
+    uint8_t count = 0;
+    Application* app = nullptr;
+    for (const auto p1 : m_apps)
+      for (const auto p2 : p1.second) {
+        if (p2.second->project().root()[STR_NAME].Scalar() == project) {
+          count++;
+          app = p2.second;
         }
-    public:
-        static Applications& INSTANCE(){
-            static Applications a;
-            return a;
-        }
-        Application* getOrCreate(const maiken::Project& proj, const std::string& _profile = "", bool setup = 1) KTHROW(kul::Exception) {
-            std::string pDir(proj.dir().real());
-            std::string profile = _profile.empty() ? "@" : _profile;
-            if(!m_apps.count(pDir) || !m_apps[pDir].count(profile)){
-                auto app = std::make_unique<Application>(proj, _profile);
-                auto pp = app.get();
-                m_appPs.push_back(std::move(app));
-                m_apps[pDir][profile] = pp;
-                if(setup){
-                    const std::string& cwd(kul::env::CWD());
-                    kul::env::CWD(proj.dir());
-                    pp->setup();
-                    kul::env::CWD(cwd);
-                }
-            }
-            return m_apps[pDir][profile];
-        }
+      }
+    if (count > 1) {
+      KEXIT(1, "Cannot deduce project version as")
+        << " there are multiple versions in the dependency tree";
+    }
+    return app;
+  }
 };
 
-class ThreadingCompiler : public Constants{
-    private:
-        maiken::Application& app;
-        std::vector<std::string> incs;
-    public:
-        ThreadingCompiler(maiken::Application& app) : app(app) {
-            for(const auto& s : app.includes()){
-                kul::Dir d(s.first);
-                const std::string& m(AppVars::INSTANCE().dryRun() ? d.esc() : d.escm());
-                if(!m.empty()) incs.push_back(m);
-                else           incs.push_back(".");
-            }
-        }
-        CompilerProcessCapture compile(const std::pair<std::string, std::string>& pair) const KTHROW(kul::Exception);
+class ThreadingCompiler : public Constants
+{
+private:
+  maiken::Application& app;
+  std::vector<std::string> incs;
+
+public:
+  ThreadingCompiler(maiken::Application& app)
+    : app(app)
+  {
+    for (const auto& s : app.includes()) {
+      kul::Dir d(s.first);
+      const std::string& m(AppVars::INSTANCE().dryRun() ? d.esc() : d.escm());
+      if (!m.empty())
+        incs.push_back(m);
+      else
+        incs.push_back(".");
+    }
+  }
+  CompilerProcessCapture compile(
+    const std::pair<std::string, std::string>& pair) const
+    KTHROW(kul::Exception);
 };
 
-class SCMGetter{
-    private:
-        kul::hash::map::S2S valids;
-        static bool IS_SOLID(const std::string& r){
-            return r.find("://") != std::string::npos || r.find("@") != std::string::npos;
-        }
-        static SCMGetter& INSTANCE(){
-            static SCMGetter s;
-            return s;
-        }
-        static const kul::SCM* GET_SCM(const kul::Dir& d, const std::string& r, bool module);
-    public:
-        static const std::string REPO(const kul::Dir& d, const std::string& r, bool module){
-            if(INSTANCE().valids.count(d.path())) return (*INSTANCE().valids.find(d.path())).second;
-            if(IS_SOLID(r)) INSTANCE().valids.insert(d.path(), r);
-            else            GET_SCM(d, r, module);
-            if(INSTANCE().valids.count(d.path())) return (*INSTANCE().valids.find(d.path())).second;
-            KEXCEPT(Exception, "SCM not discovered for project: "+d.path());
-        }
-        static bool HAS(const kul::Dir& d){
-            return (kul::Dir(d.join(".git")) || kul::Dir(d.join(".svn")));
-        }
-        static const kul::SCM* GET(const kul::Dir& d, const std::string& r, bool module){
-            if(IS_SOLID(r)) INSTANCE().valids.insert(d.path(), r);
-            if(kul::Dir(d.join(".git"))) return &kul::scm::Manager::INSTANCE().get("git");
-            if(kul::Dir(d.join(".svn"))) return &kul::scm::Manager::INSTANCE().get("svn");
-            return r.size() ? GET_SCM(d, r, module) : 0;
-        }
+class SCMGetter
+{
+private:
+  kul::hash::map::S2S valids;
+  static bool IS_SOLID(const std::string& r)
+  {
+    return r.find("://") != std::string::npos ||
+           r.find("@") != std::string::npos;
+  }
+  static SCMGetter& INSTANCE()
+  {
+    static SCMGetter s;
+    return s;
+  }
+  static const kul::SCM* GET_SCM(const kul::Dir& d,
+                                 const std::string& r,
+                                 bool module);
+
+public:
+  static const std::string REPO(const kul::Dir& d,
+                                const std::string& r,
+                                bool module)
+  {
+    if (INSTANCE().valids.count(d.path()))
+      return (*INSTANCE().valids.find(d.path())).second;
+    if (IS_SOLID(r))
+      INSTANCE().valids.insert(d.path(), r);
+    else
+      GET_SCM(d, r, module);
+    if (INSTANCE().valids.count(d.path()))
+      return (*INSTANCE().valids.find(d.path())).second;
+    KEXCEPT(Exception, "SCM not discovered for project: " + d.path());
+  }
+  static bool HAS(const kul::Dir& d)
+  {
+    return (kul::Dir(d.join(".git")) || kul::Dir(d.join(".svn")));
+  }
+  static const kul::SCM* GET(const kul::Dir& d,
+                             const std::string& r,
+                             bool module)
+  {
+    if (IS_SOLID(r))
+      INSTANCE().valids.insert(d.path(), r);
+    if (kul::Dir(d.join(".git")))
+      return &kul::scm::Manager::INSTANCE().get("git");
+    if (kul::Dir(d.join(".svn")))
+      return &kul::scm::Manager::INSTANCE().get("svn");
+    return r.size() ? GET_SCM(d, r, module) : 0;
+  }
 };
 
-}
+} // namespace maiken
 #endif /* _MAIKEN_APP_HPP_ */
 
 #include <maiken/module.hpp>

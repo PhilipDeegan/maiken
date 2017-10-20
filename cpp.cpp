@@ -33,34 +33,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 int main(int argc, char* argv[]) {
-    kul::Signal sig;
-    sig.intr([=](int16_t){
-        KERR << "Interrupted";
-        exit(2);
-    });
-    uint8_t ret = 0;
-    const int64_t s = kul::Now::MILLIS();
-    try{
-        maiken::Application::CREATE(argc, argv).process();
-        KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
-        KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
-    }
-    catch(const kul::Exit& e){
-        if(e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e;
-        ret = e.code();
-    }
-    catch(const kul::proc::ExitException& e){
-        KERR << e;
-        ret = e.code();
-    }
-    catch(const kul::Exception& e){
-        KERR << e.stack();
-        ret = 2;
-    }
-    catch(const std::exception& e){
-        KERR << e.what();
-        ret = 3;
-    }
-    maiken::Applications::INSTANCE().clear();
-    return ret;
+  kul::Signal sig;
+  sig.intr([=](int16_t) {
+    KERR << "Interrupted";
+    exit(2);
+  });
+  uint8_t ret = 0;
+  const int64_t s = kul::Now::MILLIS();
+  try {
+    for (auto app : maiken::Application::CREATE(argc, argv)) app->process();
+    KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
+    KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
+  } catch (const kul::Exit& e) {
+    if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e;
+    ret = e.code();
+  } catch (const kul::proc::ExitException& e) {
+    KERR << e;
+    ret = e.code();
+  } catch (const kul::Exception& e) {
+    KERR << e.stack();
+    ret = 2;
+  } catch (const std::exception& e) {
+    KERR << e.what();
+    ret = 3;
+  }
+  maiken::Applications::INSTANCE().clear();
+  return ret;
 }

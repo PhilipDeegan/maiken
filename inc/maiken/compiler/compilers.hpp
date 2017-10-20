@@ -34,108 +34,137 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/compiler/cpp.hpp"
 #include "maiken/compiler/csharp.hpp"
 
-namespace maiken{ 
-namespace compiler{
-class Exception : public kul::Exception{
-    public:
-        Exception(const char*f, const int l, std::string s) : kul::Exception(f, l, s){}
+namespace maiken {
+namespace compiler {
+class Exception : public kul::Exception
+{
+public:
+  Exception(const char* f, const int l, std::string s)
+    : kul::Exception(f, l, s)
+  {}
 };
-}
+} // namespace compiler
 
-class CompilerNotFoundException : public kul::Exception{
-    public:
-        CompilerNotFoundException(const char*f, const int l, std::string s) : kul::Exception(f, l, s){}
-};
-
-template<typename T, typename... Args> 
-std::unique_ptr<T> make_unique(Args&&... args){
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-
-class Compilers{
-    private:
-        std::unique_ptr<Compiler> hcc;
-        std::unique_ptr<Compiler> gcc;
-        std::unique_ptr<Compiler> clang;
-        std::unique_ptr<Compiler> intel;
-        std::unique_ptr<Compiler> winc;
-        std::unique_ptr<Compiler> wincs;
-
-        kul::hash::map::S2T<Compiler*> cs, masks;
-
-    private:
-        Compilers(){
-            clang   = make_unique<cpp::ClangCompiler>();
-            gcc     = make_unique<cpp::GccCompiler>();
-            hcc     = make_unique<cpp::HccCompiler>();
-
-            intel   = make_unique<cpp::IntelCompiler>();
-            winc    = make_unique<cpp::WINCompiler>();
-
-            wincs   = make_unique<csharp::WINCompiler>();
-
-            cs.insert(std::pair<std::string, Compiler*>("cl"        , winc.get()));
-            cs.insert(std::pair<std::string, Compiler*>("csc"       , wincs.get()));
-
-            cs.insert(std::pair<std::string, Compiler*>("clang"     , clang.get()));
-            cs.insert(std::pair<std::string, Compiler*>("clang++"   , clang.get()));
-
-            cs.insert(std::pair<std::string, Compiler*>("gcc"       , gcc.get()));
-            cs.insert(std::pair<std::string, Compiler*>("g++"       , gcc.get()));
-
-            cs.insert(std::pair<std::string, Compiler*>("hcc"       , hcc.get()));
-
-            cs.insert(std::pair<std::string, Compiler*>("icc"       , intel.get()));
-            cs.insert(std::pair<std::string, Compiler*>("icpc"      , intel.get()));
-
-            cs.insert(std::pair<std::string, Compiler*>("nvcc"      , gcc.get()));
-        }
-
-        const std::string key(std::string comp, const kul::hash::map::S2T<Compiler*>& map){
-            kul::String::REPLACE_ALL(comp, ".exe", "");
-            if(map.count(comp) > 0) return comp;
-            if(comp.find(" ") != std::string::npos)
-                for(const std::string& s :kul::String::SPLIT(comp, ' ')){
-                    if(map.count(s) > 0) return s;
-                    if(std::string(kul::Dir(s).locl()).find(kul::Dir::SEP()) != std::string::npos)
-                        if(map.count(s.substr(s.rfind(kul::Dir::SEP()) + 1)))
-                            return s.substr(s.rfind(kul::Dir::SEP()) + 1);
-                }
-            if(std::string(kul::Dir(comp).locl()).find(kul::Dir::SEP()) != std::string::npos){
-                comp = comp.substr(comp.rfind(kul::Dir::SEP()) + 1);
-                if(map.count(comp)) return comp;
-            }
-
-            KEXCEPT(CompilerNotFoundException, "Compiler for " + comp + " is not implemented");
-        }
-    public:
-        static Compilers& INSTANCE(){ 
-            static Compilers instance;
-            return instance;
-        }
-        const std::vector<std::string> keys(){
-            std::vector<std::string> ks;
-            for(const auto& p : cs) ks.push_back(p.first);
-            return ks;
-        }
-        void addMask(const std::string& m, const std::string& c) KTHROW(CompilerNotFoundException){
-            const std::string k(key(c, cs));
-            if(cs.count(m)) KEXCEPT(compiler::Exception, "Mask cannot replace compiler");
-            masks[m] = cs[k];
-        }
-        const Compiler* get(const std::string& comp) KTHROW(CompilerNotFoundException){
-            try{
-                return cs[key(comp, cs)];
-            }catch(const CompilerNotFoundException& e){}
-            return masks[key(comp, masks)];
-        }
-        std::string base(const std::string& comp){
-            try{
-                return key(comp, cs);
-            }catch(const CompilerNotFoundException& e){}
-            return key(comp, masks);
-        }
+class CompilerNotFoundException : public kul::Exception
+{
+public:
+  CompilerNotFoundException(const char* f, const int l, std::string s)
+    : kul::Exception(f, l, s)
+  {}
 };
 
+template<typename T, typename... Args>
+std::unique_ptr<T>
+make_unique(Args&&... args)
+{
+  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
+
+class Compilers
+{
+private:
+  std::unique_ptr<Compiler> hcc;
+  std::unique_ptr<Compiler> gcc;
+  std::unique_ptr<Compiler> clang;
+  std::unique_ptr<Compiler> intel;
+  std::unique_ptr<Compiler> winc;
+  std::unique_ptr<Compiler> wincs;
+
+  kul::hash::map::S2T<Compiler*> cs, masks;
+
+private:
+  Compilers()
+  {
+    clang = make_unique<cpp::ClangCompiler>();
+    gcc = make_unique<cpp::GccCompiler>();
+    hcc = make_unique<cpp::HccCompiler>();
+
+    intel = make_unique<cpp::IntelCompiler>();
+    winc = make_unique<cpp::WINCompiler>();
+
+    wincs = make_unique<csharp::WINCompiler>();
+
+    cs.insert(std::pair<std::string, Compiler*>("cl", winc.get()));
+    cs.insert(std::pair<std::string, Compiler*>("csc", wincs.get()));
+
+    cs.insert(std::pair<std::string, Compiler*>("clang", clang.get()));
+    cs.insert(std::pair<std::string, Compiler*>("clang++", clang.get()));
+
+    cs.insert(std::pair<std::string, Compiler*>("gcc", gcc.get()));
+    cs.insert(std::pair<std::string, Compiler*>("g++", gcc.get()));
+
+    cs.insert(std::pair<std::string, Compiler*>("hcc", hcc.get()));
+
+    cs.insert(std::pair<std::string, Compiler*>("icc", intel.get()));
+    cs.insert(std::pair<std::string, Compiler*>("icpc", intel.get()));
+
+    cs.insert(std::pair<std::string, Compiler*>("nvcc", gcc.get()));
+  }
+
+  const std::string key(std::string comp,
+                        const kul::hash::map::S2T<Compiler*>& map)
+  {
+    kul::String::REPLACE_ALL(comp, ".exe", "");
+    if (map.count(comp) > 0)
+      return comp;
+    if (comp.find(" ") != std::string::npos)
+      for (const std::string& s : kul::String::SPLIT(comp, ' ')) {
+        if (map.count(s) > 0)
+          return s;
+        if (std::string(kul::Dir(s).locl()).find(kul::Dir::SEP()) !=
+            std::string::npos)
+          if (map.count(s.substr(s.rfind(kul::Dir::SEP()) + 1)))
+            return s.substr(s.rfind(kul::Dir::SEP()) + 1);
+      }
+    if (std::string(kul::Dir(comp).locl()).find(kul::Dir::SEP()) !=
+        std::string::npos) {
+      comp = comp.substr(comp.rfind(kul::Dir::SEP()) + 1);
+      if (map.count(comp))
+        return comp;
+    }
+
+    KEXCEPT(CompilerNotFoundException,
+            "Compiler for " + comp + " is not implemented");
+  }
+
+public:
+  static Compilers& INSTANCE()
+  {
+    static Compilers instance;
+    return instance;
+  }
+  const std::vector<std::string> keys()
+  {
+    std::vector<std::string> ks;
+    for (const auto& p : cs)
+      ks.push_back(p.first);
+    return ks;
+  }
+  void addMask(const std::string& m, const std::string& c)
+    KTHROW(CompilerNotFoundException)
+  {
+    const std::string k(key(c, cs));
+    if (cs.count(m))
+      KEXCEPT(compiler::Exception, "Mask cannot replace compiler");
+    masks[m] = cs[k];
+  }
+  const Compiler* get(const std::string& comp) KTHROW(CompilerNotFoundException)
+  {
+    try {
+      return cs[key(comp, cs)];
+    } catch (const CompilerNotFoundException& e) {
+    }
+    return masks[key(comp, masks)];
+  }
+  std::string base(const std::string& comp)
+  {
+    try {
+      return key(comp, cs);
+    } catch (const CompilerNotFoundException& e) {
+    }
+    return key(comp, masks);
+  }
+};
+
+} // namespace maiken
 #endif /* _MAIKEN_CODE_COMPILERS_HPP_ */

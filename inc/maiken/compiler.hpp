@@ -31,78 +31,107 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_COMPILER_HPP_
 #define _MAIKEN_COMPILER_HPP_
 
-#include "kul/os.hpp"
 #include "kul/cli.hpp"
-#include "kul/map.hpp"
-#include "kul/proc.hpp"
 #include "kul/except.hpp"
+#include "kul/map.hpp"
+#include "kul/os.hpp"
+#include "kul/proc.hpp"
 #include "kul/string.hpp"
 
-namespace maiken{ 
-namespace compiler{
-enum Mode { NONE = 0, STAT, SHAR};
+namespace maiken {
+namespace compiler {
+enum Mode
+{
+  NONE = 0,
+  STAT,
+  SHAR
+};
 }
 
 class Compiler;
-class CompilerProcessCapture : public kul::ProcessCapture{
-    private:
-        std::exception_ptr ep;
-        std::string c, f;
-    public:
-        CompilerProcessCapture() : ep(){}
-        CompilerProcessCapture(kul::AProcess& p) : kul::ProcessCapture(p), ep(){}
-        CompilerProcessCapture(const CompilerProcessCapture& cp) : kul::ProcessCapture(cp), ep(cp.ep), c(cp.c), f(cp.f){}
+class CompilerProcessCapture : public kul::ProcessCapture
+{
+private:
+  std::exception_ptr ep;
+  std::string c, f;
 
-        void exception(const std::exception_ptr& e) { ep = e; }
-        const std::exception_ptr& exception() const { return ep; }
+public:
+  CompilerProcessCapture()
+    : ep()
+  {}
+  CompilerProcessCapture(kul::AProcess& p)
+    : kul::ProcessCapture(p)
+    , ep()
+  {}
+  CompilerProcessCapture(const CompilerProcessCapture& cp)
+    : kul::ProcessCapture(cp)
+    , ep(cp.ep)
+    , c(cp.c)
+    , f(cp.f)
+  {}
 
-        void cmd(const std::string& cm) { this->c = cm; }
-        const std::string& cmd() const  { return c; }
+  void exception(const std::exception_ptr& e) { ep = e; }
+  const std::exception_ptr& exception() const { return ep; }
 
-        void file(const std::string& f) { this->f = f; }
-        const std::string& file() const  { return f; }
+  void cmd(const std::string& cm) { this->c = cm; }
+  const std::string& cmd() const { return c; }
+
+  void file(const std::string& f) { this->f = f; }
+  const std::string& file() const { return f; }
 };
 
-class Compiler{ 
-    protected:
-        Compiler(const int& v) : version(v){}
-        const int version;
-    public:
-        virtual ~Compiler(){}       
-        virtual bool sourceIsBin()      const = 0;
-        virtual CompilerProcessCapture buildExecutable(
-            const std::string& linker,
-            const std::string& linkerEnd,
-            const std::vector<std::string>& objects,
-            const std::vector<std::string>& libs,
-            const std::vector<std::string>& libPaths,
-            const std::string& out, 
-            const compiler::Mode& mode,
-            bool dryRun = false)           const KTHROW(kul::Exception) = 0;
-        virtual CompilerProcessCapture buildLibrary(
-            const std::string& linker, 
-            const std::string& linkerEnd,
-            const std::vector<std::string>& objects,
-            const std::vector<std::string>& libs,
-            const std::vector<std::string>& libPaths,
-            const kul::File& out, 
-            const compiler::Mode& mode,
-            bool dryRun = false)           const KTHROW(kul::Exception) = 0;
-        virtual CompilerProcessCapture compileSource  (
-            const std::string& compiler,
-            const std::vector<std::string>& args,       
-            const std::vector<std::string>& incs, 
-            const std::string& in, 
-            const std::string& out, 
-            const compiler::Mode& mode,
-            bool dryRun = false)   const KTHROW(kul::Exception) = 0;
-        virtual void preCompileHeader(
-            const std::vector<std::string>& incs, 
-            const std::vector<std::string>& args, 
-            const std::string& in, 
-            const std::string& out,
-            bool dryRun = false)     const KTHROW(kul::Exception) = 0;
+class Compiler
+{
+protected:
+  Compiler(const int& v)
+    : version(v)
+  {}
+  const int version;
+  std::unordered_map<uint8_t, std::string> optimise;
+
+public:
+  virtual ~Compiler() {}
+  virtual bool sourceIsBin() const = 0;
+  virtual CompilerProcessCapture buildExecutable(
+    const std::string& linker,
+    const std::string& linkerEnd,
+    const std::vector<std::string>& objects,
+    const std::vector<std::string>& libs,
+    const std::vector<std::string>& libPaths,
+    const std::string& out,
+    const compiler::Mode& mode,
+    bool dryRun = false) const KTHROW(kul::Exception) = 0;
+  virtual CompilerProcessCapture buildLibrary(
+    const std::string& linker,
+    const std::string& linkerEnd,
+    const std::vector<std::string>& objects,
+    const std::vector<std::string>& libs,
+    const std::vector<std::string>& libPaths,
+    const kul::File& out,
+    const compiler::Mode& mode,
+    bool dryRun = false) const KTHROW(kul::Exception) = 0;
+  virtual CompilerProcessCapture compileSource(
+    const std::string& compiler,
+    const std::vector<std::string>& args,
+    const std::vector<std::string>& incs,
+    const std::string& in,
+    const std::string& out,
+    const compiler::Mode& mode,
+    bool dryRun = false) const KTHROW(kul::Exception) = 0;
+  virtual void preCompileHeader(const std::vector<std::string>& incs,
+                                const std::vector<std::string>& args,
+                                const std::string& in,
+                                const std::string& out,
+                                bool dryRun = false) const
+    KTHROW(kul::Exception) = 0;
+
+  std::string optimization(const uint8_t& key) const
+  {
+    if (optimise.count(key))
+      return (*optimise.find(key)).second;
+    return "";
+  }
 };
 
-}
+} // namespace maiken
 #endif /* _MAIKEN_COMPILER_HPP_ */

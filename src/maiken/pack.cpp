@@ -28,69 +28,82 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
 #include "kul/string.hpp"
+#include "maiken.hpp"
 
-class LibFinder{
-    public:
-        static bool findAdd(const std::string& l, const kul::Dir& i, const kul::Dir& o){
-            bool found = 0;
-            for(const auto& f : i.files(0)){
-                const auto& fn(f.name());
-                if(fn.find(".") == std::string::npos) continue;
-#ifdef  _WIN32
-                if(fn.substr(0, fn.rfind(".")) == l){
+class LibFinder
+{
+public:
+  static bool findAdd(const std::string& l,
+                      const kul::Dir& i,
+                      const kul::Dir& o)
+  {
+    bool found = 0;
+    for (const auto& f : i.files(0)) {
+      const auto& fn(f.name());
+      if (fn.find(".") == std::string::npos)
+        continue;
+#ifdef _WIN32
+      if (fn.substr(0, fn.rfind(".")) == l) {
 #else
-                if(fn.size() > (3 + l.size()) && fn.substr(0, 3) == "lib"
-                    && kul::String::NO_CASE_CMP(fn.substr(3, l.size()), l)){
-
-                    auto bits(kul::String::SPLIT(fn.substr(3 + l.size()), '.'));
-#ifdef  __APPLE__
-                    if(bits[bits.size() - 1] != "dyn"
+      if (fn.size() > (3 + l.size()) && fn.substr(0, 3) == "lib" &&
+          kul::String::NO_CASE_CMP(fn.substr(3, l.size()), l)) {
+        auto bits(kul::String::SPLIT(fn.substr(3 + l.size()), '.'));
+#ifdef __APPLE__
+        if (bits[bits.size() - 1] != "dyn"
 #else
-                    if(!(bits[0] == "so" || bits[bits.size() - 1] == "so")
-#endif//__APPLE__
-                        && bits[bits.size() - 1] != "a") continue;
+        if (!(bits[0] == "so" || bits[bits.size() - 1] == "so")
+#endif //__APPLE__
+            && bits[bits.size() - 1] != "a")
+          continue;
 
-#endif//_WIN32
-                    f.cp(o);
-                    found = 1;
-                }
-            }
-            return found;
-        }
+#endif //_WIN32
+        f.cp(o);
+        found = 1;
+      }
+    }
+    return found;
+  }
 };
 
-void maiken::Application::pack() KTHROW(kul::Exception){
+void
+maiken::Application::pack() KTHROW(kul::Exception)
+{
+  kul::Dir pk(buildDir().join("pack"));
+  if (!pk && !pk.mk())
+    KEXIT(1, "Cannot create: " + pk.path());
 
-    kul::Dir pk(buildDir().join("pack"));
-    if(!pk && !pk.mk()) KEXIT(1, "Cannot create: " + pk.path());
+  kul::Dir bin(pk.join("bin"), main.size());
+  kul::Dir lib(pk.join("lib"));
 
-    kul::Dir bin(pk.join("bin"), main.size());
-    kul::Dir lib(pk.join("lib"));
+  if (!main.empty() || !srcs.empty()) {
+    const auto v((inst ? inst : buildDir()).files(0));
+    if (v.empty())
+      KEXIT(1, "Current project lib/bin not found during pack");
+    for (const auto& f : v)
+      f.cp(main.size() ? bin : lib);
+  }
 
-    if(!main.empty() || !srcs.empty()){
-        const auto v((inst ? inst : buildDir()).files(0));
-        if(v.empty()) KEXIT(1, "Current project lib/bin not found during pack");
-        for(const auto& f : v) f.cp(main.size() ? bin : lib);
+  for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
+    if (!(*app)->srcs.empty()) {
+      auto& a = **app;
+      kul::Dir outD(a.inst ? a.inst.real() : a.buildDir());
+      std::string n = a.project().root()[STR_NAME].Scalar();
+      if (!LibFinder::findAdd(a.baseLibFilename(), outD, lib))
+        KEXIT(1, "Depedency Project lib not found, try building: ")
+          << a.buildDir().real();
     }
-
-    for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
-        if(!(*app)->srcs.empty()){
-            auto& a = **app;
-            kul::Dir outD(a.inst ? a.inst.real() : a.buildDir());
-            std::string n = a.project().root()[STR_NAME].Scalar();
-            if(!LibFinder::findAdd(a.baseLibFilename(), outD, lib))
-                KEXIT(1, "Depedency Project lib not found, try building: ") << a.buildDir().real();
-        }
-    for(const auto& l : libs){
-        bool found = 0;
-        for(const auto& p : paths){
-            kul::Dir path(p);
-            if(!path) KEXIT(1, "Path does not exist: ") << pk.path();
-            found = LibFinder::findAdd(l, path, lib);
-            if(found) break;
-        }
-        if(!found) KOUT(NON) << "WARNING - Library not found during pack: " << l;
+  for (const auto& l : libs) {
+    bool found = 0;
+    for (const auto& p : paths) {
+      kul::Dir path(p);
+      if (!path)
+        KEXIT(1, "Path does not exist: ") << pk.path();
+      found = LibFinder::findAdd(l, path, lib);
+      if (found)
+        break;
     }
+    if (!found)
+      KOUT(NON) << "WARNING - Library not found during pack: " << l;
+  }
 }

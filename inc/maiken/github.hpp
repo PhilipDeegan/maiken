@@ -28,36 +28,38 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
+#ifndef _MAIKEN_GITHUB_HPP_
+#define _MAIKEN_GITHUB_HPP_
 
-maiken::CompilerProcessCapture
-maiken::ThreadingCompiler::compile(
-  const std::pair<std::string, std::string>& p) const KTHROW(kul::Exception)
+#include "maiken.hpp"
+#ifdef _MKN_WITH_MKN_RAM_
+#include "kul/https.hpp"
+#include "kul/yaml.hpp"
+
+namespace maiken {
+
+class Github
 {
-  const std::string src(p.first);
-  const std::string obj(p.second);
-  const std::string& fileType = src.substr(src.rfind(".") + 1);
-  const std::string& compiler =
-    (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
-  const std::string& base = maiken::Compilers::INSTANCE().base(compiler);
-  std::vector<std::string> args;
-  if (app.arguments().count(fileType) > 0)
-    for (const std::string& o : (*app.arguments().find(fileType)).second)
-      for (const auto& s : kul::cli::asArgs(o))
-        args.push_back(s);
-  for (const auto& s : kul::cli::asArgs(app.arg))
-    args.push_back(s);
-  if (app.cArg.count(base))
-    for (const auto& s : kul::cli::asArgs(app.cArg[base]))
-      args.push_back(s);
-  std::string cmd = compiler + " " + AppVars::INSTANCE().args();
-  if (AppVars::INSTANCE().jargs().count(fileType) > 0)
-    cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;
-  // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
-  auto comp = Compilers::INSTANCE().get(compiler);
-  for (const auto& s :
-       kul::cli::asArgs(comp->optimization(AppVars::INSTANCE().optimise())))
-    args.push_back(s);
-  return comp->compileSource(
-    cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
-}
+private:
+  static bool IS_SOLID(const std::string& r)
+  {
+    return r.find("://") != std::string::npos ||
+           r.find("@") != std::string::npos;
+  }
+
+public:
+  static bool GET_DEFAULT_BRANCH(const std::string& owner,
+                                 const std::string& repo,
+                                 std::string& branch);
+  static bool GET_LATEST_RELEASE(const std::string& owner,
+                                 const std::string& repo,
+                                 std::string& branch);
+  static bool GET_LATEST_TAG(const std::string& owner,
+                             const std::string& repo,
+                             std::string& branch);
+  static bool GET_LATEST(const std::string& repo, std::string& branch);
+};
+} // namespace maiken
+
+#endif //_MKN_WITH_MKN_RAM_
+#endif /* _MAIKEN_GITHUB_HPP_ */

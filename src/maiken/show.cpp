@@ -30,172 +30,212 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::showConfig(bool force){
-    if(AppVars::INSTANCE().show() || AppVars::INSTANCE().dryRun()) return;
-    if(kul::LogMan::INSTANCE().inf() || force){
-        std::string repo = (*AppVars::INSTANCE().properkeys().find("MKN_REPO")).second;
-        using namespace kul::cli;
-        KOUT(NON) << "+++++++++ BUILD INFO ++++++++";
-        KOUT(NON) << "REPO    : " << repo;
-        KOUT(NON) << "THREADS : " << AppVars::INSTANCE().threads() << "\n";
-        KOUT(NON) << "BINARIES";
-        std::string path = kul::env::GET("PATH");
-        for(const YAML::Node& c : Settings::INSTANCE().root()[STR_ENV]){
-            if(c[STR_NAME].Scalar() != "PATH") continue;
-            EnvVarMode mode = EnvVarMode::PREP;
-            if(c[STR_MODE]){
-                if      (c[STR_MODE].Scalar().compare(STR_APPEND)   == 0) mode = EnvVarMode::APPE;
-                else if (c[STR_MODE].Scalar().compare(STR_PREPEND)  == 0) mode = EnvVarMode::PREP;
-                else if (c[STR_MODE].Scalar().compare(STR_REPLACE)  == 0) mode = EnvVarMode::REPL;
-                else KEXIT(1, "Unhandled EnvVar mode: " + c[STR_MODE].Scalar());
-            }
-            path = EnvVar(c[STR_NAME].Scalar(), c[STR_VALUE].Scalar(), mode).toString();
+void
+maiken::Application::showConfig(bool force)
+{
+  if (AppVars::INSTANCE().show() || AppVars::INSTANCE().dryRun())
+    return;
+  if (kul::LogMan::INSTANCE().inf() || force) {
+    std::string repo =
+      (*AppVars::INSTANCE().properkeys().find("MKN_REPO")).second;
+    using namespace kul::cli;
+    KOUT(NON) << "+++++++++ BUILD INFO ++++++++";
+    KOUT(NON) << "REPO    : " << repo;
+    KOUT(NON) << "THREADS : " << AppVars::INSTANCE().threads() << "\n";
+    KOUT(NON) << "BINARIES";
+    std::string path = kul::env::GET("PATH");
+    for (const YAML::Node& c : Settings::INSTANCE().root()[STR_ENV]) {
+      if (c[STR_NAME].Scalar() != "PATH")
+        continue;
+      EnvVarMode mode = EnvVarMode::PREP;
+      if (c[STR_MODE]) {
+        if (c[STR_MODE].Scalar().compare(STR_APPEND) == 0)
+          mode = EnvVarMode::APPE;
+        else if (c[STR_MODE].Scalar().compare(STR_PREPEND) == 0)
+          mode = EnvVarMode::PREP;
+        else if (c[STR_MODE].Scalar().compare(STR_REPLACE) == 0)
+          mode = EnvVarMode::REPL;
+        else
+          KEXIT(1, "Unhandled EnvVar mode: " + c[STR_MODE].Scalar());
+      }
+      path =
+        EnvVar(c[STR_NAME].Scalar(), c[STR_VALUE].Scalar(), mode).toString();
+      break;
+    }
+    {
+      auto it(
+        std::find_if(evs.begin(), evs.end(), [](const kul::cli::EnvVar& ev) {
+          return strcmp(ev.name(), "PATH") == 0;
+        }));
+      if (it != evs.end())
+        path = (*it).toString();
+    }
+    for (const auto& c : Settings::INSTANCE().root()[STR_FILE]) {
+      bool a = 0, g = 0, l = 0;
+      KOUT(NON) << "TYPE    : " << c[STR_TYPE].Scalar();
+      std::vector<std::string> ps;
+      kul::String::SPLIT(path, kul::env::SEP(), ps);
+      for (const auto& d : ps) {
+        if (a && g && l)
+          break;
+        kul::Dir dir(d);
+        if (!dir)
+          continue;
+        for (const auto& f : dir.files()) {
+          std::string b = (f.name().size() > 3 &&
+                           f.name().substr(f.name().size() - 4) == ".exe")
+                            ? f.name().substr(0, f.name().size() - 4)
+                            : f.name();
+          if (!a && c[STR_ARCHIVER] &&
+              b == kul::String::SPLIT(c[STR_ARCHIVER].Scalar(), " ")[0]) {
+            KOUT(NON) << "ARCHIVER: " << f.full();
+            a = 1;
             break;
+          }
         }
-        {
-            auto it(std::find_if(evs.begin(), evs.end(), [](const kul::cli::EnvVar& ev) { return strcmp(ev.name(), "PATH") == 0;}));
-            if(it != evs.end()) path = (*it).toString();
+        for (const auto& f : dir.files()) {
+          std::string b = (f.name().size() > 3 &&
+                           f.name().substr(f.name().size() - 4) == ".exe")
+                            ? f.name().substr(0, f.name().size() - 4)
+                            : f.name();
+          if (!g && c[STR_COMPILER])
+            for (const auto& k : Compilers::INSTANCE().keys())
+              if (b == k) {
+                KOUT(NON) << "COMPILER: " << f.full();
+                g = 1;
+                break;
+              }
         }
-        for(const auto& c : Settings::INSTANCE().root()[STR_FILE]){
-            bool a = 0, g = 0, l = 0;
-            KOUT(NON) << "TYPE    : " << c[STR_TYPE].Scalar();
-            std::vector<std::string> ps;
-            kul::String::SPLIT(path, kul::env::SEP(), ps);
-            for(const auto& d : ps){
-                if(a && g && l) break;
-                kul::Dir dir(d);
-                if(!dir) continue;
-                for(const auto& f : dir.files()){
-                    std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ?
-                        f.name().substr(0, f.name().size() - 4) : f.name();
-                    if(!a && c[STR_ARCHIVER] && b == kul::String::SPLIT(c[STR_ARCHIVER].Scalar(), " ")[0]){
-                        KOUT(NON) << "ARCHIVER: " << f.full();
-                        a = 1;
-                        break;
-                    }
-                }
-                for(const auto& f : dir.files()){
-                    std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ?
-                        f.name().substr(0, f.name().size() - 4) : f.name();
-                    if(!g && c[STR_COMPILER])
-                        for(const auto& k : Compilers::INSTANCE().keys())
-                            if(b == k) {
-                                KOUT(NON) << "COMPILER: " << f.full();
-                                g = 1;
-                                break;
-                            }
-                }
-                for(const auto& f : dir.files()){
-                    std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe") ?
-                        f.name().substr(0, f.name().size() - 4) : f.name();
-                    if(!l && c[STR_LINKER] && b == kul::String::SPLIT(c[STR_LINKER].Scalar(), " ")[0]){
-                        KOUT(NON) << "LINKER  : " << f.full();
-                        l = 1;
-                        break;
-                    }
-                }
-            }
+        for (const auto& f : dir.files()) {
+          std::string b = (f.name().size() > 3 &&
+                           f.name().substr(f.name().size() - 4) == ".exe")
+                            ? f.name().substr(0, f.name().size() - 4)
+                            : f.name();
+          if (!l && c[STR_LINKER] &&
+              b == kul::String::SPLIT(c[STR_LINKER].Scalar(), " ")[0]) {
+            KOUT(NON) << "LINKER  : " << f.full();
+            l = 1;
+            break;
+          }
         }
-        KOUT(NON) << "+++++++++++++++++++++++++++++";
+      }
     }
-    AppVars::INSTANCE().show(1);
-}
-
-void maiken::Application::showHelp(){
-    std::vector<std::string> ss;
-    ss.push_back(MKN_DEFS_CMD);
-    ss.push_back(MKN_DEFS_BUILD);
-    ss.push_back(MKN_DEFS_BUILD_ALL);
-    ss.push_back(MKN_DEFS_BUILD_MOD);
-    ss.push_back(MKN_DEFS_CLEAN);
-    ss.push_back(MKN_DEFS_COMP);
-    ss.push_back(MKN_DEFS_DBG);
-    ss.push_back(MKN_DEFS_INIT);
-    ss.push_back(MKN_DEFS_LINK);
-    ss.push_back(MKN_DEFS_PACK);
-    ss.push_back(MKN_DEFS_PROFS);
-    ss.push_back(MKN_DEFS_RUN);
-    ss.push_back(MKN_DEFS_INC);
-    ss.push_back(MKN_DEFS_SRC);
-    ss.push_back(MKN_DEFS_TRIM);
-    ss.push_back(MKN_DEFS_TREE);
-    ss.push_back("");
-    ss.push_back(MKN_DEFS_ARG);
-    ss.push_back(MKN_DEFS_ARGS);
-    ss.push_back(MKN_DEFS_ADD);
-    ss.push_back(MKN_DEFS_BINC);
-    ss.push_back(MKN_DEFS_BPATH);
-    ss.push_back(MKN_DEFS_DIRC);
-    ss.push_back(MKN_DEFS_DEPS);
-    ss.push_back(MKN_DEFS_EVSA);
-    ss.push_back(MKN_DEFS_FINC);
-    ss.push_back(MKN_DEFS_FPATH);
-    ss.push_back(MKN_DEFS_GET);
-    ss.push_back(MKN_DEFS_HELP);
-    ss.push_back(MKN_DEFS_JARG);
-    ss.push_back(MKN_DEFS_OUT);
-    ss.push_back(MKN_DEFS_MOD);
-    ss.push_back(MKN_DEFS_MAIN);
-    ss.push_back(MKN_DEFS_STATIC);
-    ss.push_back(MKN_DEFS_LINKER);
-    ss.push_back(MKN_DEFS_ALINKR);
-    ss.push_back(MKN_DEFS_PROF);
-    ss.push_back(MKN_DEFS_PROP);
-    ss.push_back(MKN_DEFS_RUN_ARGS);
-    ss.push_back(MKN_DEFS_DRYR);
-    ss.push_back(MKN_DEFS_STAT);
-    ss.push_back(MKN_DEFS_SHARED);
-    ss.push_back(MKN_DEFS_THREDS);
-    ss.push_back(MKN_DEFS_UPDATE);
-    ss.push_back(MKN_DEFS_FUPDATE);
-    ss.push_back(MKN_DEFS_VERSON);
-    ss.push_back(MKN_DEFS_SETTNGS);
-    ss.push_back("");
-    ss.push_back(MKN_DEFS_EXMPL);
-    ss.push_back(MKN_DEFS_EXMPL1);
-    ss.push_back(MKN_DEFS_EXMPL2);
-    ss.push_back(MKN_DEFS_EXMPL3);
-    ss.push_back(MKN_DEFS_EXMPL4);
-    ss.push_back("");
-    for(const auto& s : ss) KOUT(NON) << s;
-}
-
-void maiken::Application::showProfiles(){
-    std::vector<std::string> ss;
-    uint b = 0, o = 0;
-    for(const auto& n : this->project().root()[STR_PROFILE]){
-        b = n[STR_NAME].Scalar().size() > b ? n[STR_NAME].Scalar().size() : b;
-        o = n["os"] ? n["os"].Scalar().size() > o ? n["os"].Scalar().size() : o : o;
-    }
-    for(const auto& n : this->project().root()[STR_PROFILE]){
-        std::string s(n[STR_NAME].Scalar());
-        kul::String::PAD(s, b);
-        std::string os(n["os"] ? "("+n["os"].Scalar()+")" : "");
-        if(!os.empty()) kul::String::PAD(os, o);
-        std::stringstream s1;
-        s1 << "\t" << s << os;
-        if(n[STR_PARENT]) s1 << "\t" << MKN_PARENT << ": " << Properties::RESOLVE(*this, n[STR_PARENT].Scalar());
-        ss.push_back(s1.str());
-    }
-    KOUT(NON) << MKN_PROFILE;
-    for(const auto& s : ss) KOUT(NON) << s;
-}
-
-void maiken::Application::showTree() const {
-    KOUT(NON) << "++++++++ PROJECT TREE +++++++";
-    KOUT(NON) << " " << this->project().root()[STR_NAME].Scalar() << "["
-              << (this->p.empty() ? "@" : this->p) << "]";
-    showTreeRecursive(1);
     KOUT(NON) << "+++++++++++++++++++++++++++++";
-
+  }
+  AppVars::INSTANCE().show(1);
 }
 
-void maiken::Application::showTreeRecursive(uint8_t i) const {
-    for(auto*const d : deps){
-        std::stringstream ss;
-        for(size_t r = 0; r < i; r++) ss << "+";
-        KOUT(NON) << " " << ss.str() << " " << d->project().root()[STR_NAME].Scalar()
-                  << "[" << (d->p.empty() ? "@" : d->p) << "]";
-        d->showTreeRecursive((++i)--);
-    }
+void
+maiken::Application::showHelp()
+{
+  std::vector<std::string> ss;
+  ss.push_back(MKN_DEFS_CMD);
+  ss.push_back(MKN_DEFS_BUILD);
+  ss.push_back(MKN_DEFS_BUILD_ALL);
+  ss.push_back(MKN_DEFS_BUILD_MOD);
+  ss.push_back(MKN_DEFS_CLEAN);
+  ss.push_back(MKN_DEFS_COMP);
+  ss.push_back(MKN_DEFS_DBG);
+  ss.push_back(MKN_DEFS_INIT);
+  ss.push_back(MKN_DEFS_LINK);
+  ss.push_back(MKN_DEFS_PACK);
+  ss.push_back(MKN_DEFS_PROFS);
+  ss.push_back(MKN_DEFS_RUN);
+  ss.push_back(MKN_DEFS_INC);
+  ss.push_back(MKN_DEFS_SRC);
+  ss.push_back(MKN_DEFS_TRIM);
+  ss.push_back(MKN_DEFS_TREE);
+  ss.push_back("");
+  ss.push_back(MKN_DEFS_ARG);
+  ss.push_back(MKN_DEFS_ARGS);
+  ss.push_back(MKN_DEFS_ADD);
+  ss.push_back(MKN_DEFS_BINC);
+  ss.push_back(MKN_DEFS_BPATH);
+  ss.push_back(MKN_DEFS_DIRC);
+  ss.push_back(MKN_DEFS_DEPS);
+  ss.push_back(MKN_DEFS_EVSA);
+  ss.push_back(MKN_DEFS_FINC);
+  ss.push_back(MKN_DEFS_FPATH);
+  ss.push_back(MKN_DEFS_GET);
+  ss.push_back(MKN_DEFS_HELP);
+  ss.push_back(MKN_DEFS_JARG);
+  ss.push_back(MKN_DEFS_OUT);
+  ss.push_back(MKN_DEFS_MOD);
+  ss.push_back(MKN_DEFS_MAIN);
+  ss.push_back(MKN_DEFS_STATIC);
+  ss.push_back(MKN_DEFS_LINKER);
+  ss.push_back(MKN_DEFS_ALINKR);
+  ss.push_back(MKN_DEFS_OPTIM);
+  ss.push_back(MKN_DEFS_PROF);
+  ss.push_back(MKN_DEFS_PROP);
+  ss.push_back(MKN_DEFS_RUN_ARGS);
+  ss.push_back(MKN_DEFS_DRYR);
+  ss.push_back(MKN_DEFS_STAT);
+  ss.push_back(MKN_DEFS_SHARED);
+  ss.push_back(MKN_DEFS_THREDS);
+  ss.push_back(MKN_DEFS_UPDATE);
+  ss.push_back(MKN_DEFS_FUPDATE);
+  ss.push_back(MKN_DEFS_VERSON);
+  ss.push_back(MKN_DEFS_SETTNGS);
+  ss.push_back(MKN_DEFS_WITH);
+  ss.push_back("");
+  ss.push_back(MKN_DEFS_EXMPL);
+  ss.push_back(MKN_DEFS_EXMPL1);
+  ss.push_back(MKN_DEFS_EXMPL2);
+  ss.push_back(MKN_DEFS_EXMPL3);
+  ss.push_back(MKN_DEFS_EXMPL4);
+  ss.push_back("");
+  for (const auto& s : ss)
+    KOUT(NON) << s;
+}
+
+void
+maiken::Application::showProfiles()
+{
+  std::vector<std::string> ss;
+  uint b = 0, o = 0;
+  for (const auto& n : this->project().root()[STR_PROFILE]) {
+    b = n[STR_NAME].Scalar().size() > b ? n[STR_NAME].Scalar().size() : b;
+    o = n["os"] ? n["os"].Scalar().size() > o ? n["os"].Scalar().size() : o : o;
+  }
+  for (const auto& n : this->project().root()[STR_PROFILE]) {
+    std::string s(n[STR_NAME].Scalar());
+    kul::String::PAD(s, b);
+    std::string os(n["os"] ? "(" + n["os"].Scalar() + ")" : "");
+    if (!os.empty())
+      kul::String::PAD(os, o);
+    std::stringstream s1;
+    s1 << "\t" << s << os;
+    if (n[STR_PARENT])
+      s1 << "\t" << MKN_PARENT << ": "
+         << Properties::RESOLVE(*this, n[STR_PARENT].Scalar());
+    ss.push_back(s1.str());
+  }
+  KOUT(NON) << MKN_PROFILE;
+  for (const auto& s : ss)
+    KOUT(NON) << s;
+}
+
+void
+maiken::Application::showTree() const
+{
+  KOUT(NON) << "++++++++ PROJECT TREE +++++++";
+  KOUT(NON) << " " << this->project().root()[STR_NAME].Scalar() << "["
+            << (this->p.empty() ? "@" : this->p) << "]";
+  showTreeRecursive(1);
+  KOUT(NON) << "+++++++++++++++++++++++++++++";
+}
+
+void
+maiken::Application::showTreeRecursive(uint8_t i) const
+{
+  for (auto* const d : deps) {
+    std::stringstream ss;
+    for (size_t r = 0; r < i; r++)
+      ss << "+";
+    KOUT(NON) << " " << ss.str() << " "
+              << d->project().root()[STR_NAME].Scalar() << "["
+              << (d->p.empty() ? "@" : d->p) << "]";
+    d->showTreeRecursive((++i)--);
+  }
 }

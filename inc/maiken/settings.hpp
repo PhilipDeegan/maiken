@@ -31,45 +31,50 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_SETTINGS_HPP_
 #define _MAIKEN_SETTINGS_HPP_
 
-#include "kul/os.hpp"
 #include "kul/log.hpp"
+#include "kul/os.hpp"
 #include "kul/yaml.hpp"
 
 #include "maiken/defs.hpp"
 
-namespace maiken{
+namespace maiken {
 
-class SettingsException : public kul::Exception{
-    public:
-        SettingsException(const char*f, const uint16_t& l, const std::string& s) : kul::Exception(f, l, s){}
+class SettingsException : public kul::Exception
+{
+public:
+  SettingsException(const char* f, const uint16_t& l, const std::string& s)
+    : kul::Exception(f, l, s)
+  {}
 };
 
-class Settings : public kul::yaml::File, public Constants{
-    private:
-        std::vector<std::string> rrs, rms;
-        std::unique_ptr<Settings> sup;
-        kul::hash::map::S2S ps;
+class Settings
+  : public kul::yaml::File
+  , public Constants
+{
+private:
+  std::vector<std::string> rrs, rms;
+  std::unique_ptr<Settings> sup;
+  kul::hash::map::S2S ps;
 
-        void resolveProperties() KTHROW(SettingsException);
+  void resolveProperties() KTHROW(SettingsException);
 
-        static std::unique_ptr<Settings> instance;
-        static void write(const kul::File& f) KTHROW(kul::Exit);
-    public:
-        Settings(const std::string& s);
+  static std::unique_ptr<Settings> instance;
+  static void write(const kul::File& f) KTHROW(kul::Exit);
 
-        const Settings* super() const{
-            return sup.get();
-        }
+public:
+  Settings(const std::string& s);
 
-        const kul::yaml::Validator validator() const;
-        const std::vector<std::string>& remoteModules() const { return rms; }
-        const std::vector<std::string>& remoteRepos()   const { return rrs; }
-        const kul::hash::map::S2S&      properties()    const { return ps;}
+  const Settings* super() const { return sup.get(); }
 
-        static Settings& INSTANCE() KTHROW(kul::Exit);
-        static bool SET(const std::string& s);
-        static std::string RESOLVE(const std::string& s) KTHROW(SettingsException);
+  const kul::yaml::Validator validator() const;
+  const std::vector<std::string>& remoteModules() const { return rms; }
+  const std::vector<std::string>& remoteRepos() const { return rrs; }
+  const kul::hash::map::S2S& properties() const { return ps; }
+
+  static Settings& INSTANCE() KTHROW(kul::Exit);
+  static bool SET(const std::string& s);
+  static std::string RESOLVE(const std::string& s) KTHROW(SettingsException);
 };
 
-}
+} // namespace maiken
 #endif /* _MAIKEN_SETTINGS_HPP_ */

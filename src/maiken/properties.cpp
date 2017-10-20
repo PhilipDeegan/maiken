@@ -30,74 +30,94 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::resolveProperties() KTHROW(maiken::Exception) {
-    ps.setDeletedKey("--DELETED--");
-    for(YAML::const_iterator it=project().root()[STR_PROPERTY].begin();it!=project().root()[STR_PROPERTY].end(); ++it)
-        ps[it->first.as<std::string>()] = it->second.as<std::string>();
-    for(YAML::const_iterator it=project().root()[STR_PROPERTY].begin();it!=project().root()[STR_PROPERTY].end(); ++it) {
-        std::string s = Properties::RESOLVE(*this, it->second.as<std::string>());
-        if(ps.count(it->first.as<std::string>())) ps.erase(it->first.as<std::string>());
-        ps[it->first.as<std::string>()] = s;
-    }
+void
+maiken::Application::resolveProperties() KTHROW(maiken::Exception)
+{
+  ps.setDeletedKey("--DELETED--");
+  for (YAML::const_iterator it = project().root()[STR_PROPERTY].begin();
+       it != project().root()[STR_PROPERTY].end();
+       ++it)
+    ps[it->first.as<std::string>()] = it->second.as<std::string>();
+  for (YAML::const_iterator it = project().root()[STR_PROPERTY].begin();
+       it != project().root()[STR_PROPERTY].end();
+       ++it) {
+    std::string s = Properties::RESOLVE(*this, it->second.as<std::string>());
+    if (ps.count(it->first.as<std::string>()))
+      ps.erase(it->first.as<std::string>());
+    ps[it->first.as<std::string>()] = s;
+  }
 }
 
-std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(const kul::hash::map::S2S& ps, const std::string& s) KTHROW(kul::Exception) {
-    std::string r = s;
-    int lb  = s.find("${");
-    int clb = s.find("\\${");
-    int rb  = s.find("}");
-    int crb = s.find("\\}");
-    while((lb - clb + 1) == 0){
-        lb  = r.substr(clb + 3).find("${");
-        clb = r.substr(clb + 3).find("\\${");
-    }
-    while((rb - crb + 1) == 0){
-        rb  = r.substr(crb + 2).find("}");
-        crb = r.substr(crb + 2).find("\\}");
-    }
-    if(lb != -1 && clb == -1 && rb != -1 && crb == -1)
-        return std::make_shared<std::tuple<std::string, int, int>>(r.substr(lb + 2, rb - 2 - lb), lb, rb);
-    return std::shared_ptr<std::tuple<std::string, int, int>>(0);
+std::shared_ptr<std::tuple<std::string, int, int>>
+maiken::Properties::KEY(const kul::hash::map::S2S& ps, const std::string& s)
+  KTHROW(kul::Exception)
+{
+  std::string r = s;
+  int lb = s.find("${");
+  int clb = s.find("\\${");
+  int rb = s.find("}");
+  int crb = s.find("\\}");
+  while ((lb - clb + 1) == 0) {
+    lb = r.substr(clb + 3).find("${");
+    clb = r.substr(clb + 3).find("\\${");
+  }
+  while ((rb - crb + 1) == 0) {
+    rb = r.substr(crb + 2).find("}");
+    crb = r.substr(crb + 2).find("\\}");
+  }
+  if (lb != -1 && clb == -1 && rb != -1 && crb == -1)
+    return std::make_shared<std::tuple<std::string, int, int>>(
+      r.substr(lb + 2, rb - 2 - lb), lb, rb);
+  return std::shared_ptr<std::tuple<std::string, int, int>>(0);
 }
 
-std::string maiken::Properties::RESOLVE(const Application& app, const std::string& s) KTHROW(kul::Exception) {
-    std::string r = s;
-    std::shared_ptr<std::tuple<std::string, int, int>> t = KEY(app.properties(), s);
-    if(t){
-        std::string k  = std::get<0>(*t);
-        const int&  lb = std::get<1>(*t);
-        const int&  rb = std::get<2>(*t);
+std::string
+maiken::Properties::RESOLVE(const Application& app, const std::string& s)
+  KTHROW(kul::Exception)
+{
+  std::string r = s;
+  std::shared_ptr<std::tuple<std::string, int, int>> t =
+    KEY(app.properties(), s);
+  if (t) {
+    std::string k = std::get<0>(*t);
+    const int& lb = std::get<1>(*t);
+    const int& rb = std::get<2>(*t);
 
-        if(AppVars::INSTANCE().properkeys().count(k))
-            k = (*AppVars::INSTANCE().properkeys().find(k)).second;
-        else
-        if(app.properties().count(k) == 0){
-            if(app.project().root()[k] && app.project().root()[k].Type() == 2)
-                k = app.project().root()[k].Scalar();
-            else KEXIT(1, "Property : '" + k + "' has not been defined");
-        }else k = (*app.properties().find(k)).second;
-        r = Properties::RESOLVE(app, r.substr(0, lb) + k + r.substr(rb + 1));
-    }
-    kul::String::TRIM(r);
-    return r;
+    if (AppVars::INSTANCE().properkeys().count(k))
+      k = (*AppVars::INSTANCE().properkeys().find(k)).second;
+    else if (app.properties().count(k) == 0) {
+      if (app.project().root()[k] && app.project().root()[k].Type() == 2)
+        k = app.project().root()[k].Scalar();
+      else
+        KEXIT(1, "Property : '" + k + "' has not been defined");
+    } else
+      k = (*app.properties().find(k)).second;
+    r = Properties::RESOLVE(app, r.substr(0, lb) + k + r.substr(rb + 1));
+  }
+  kul::String::TRIM(r);
+  return r;
 }
 
-std::string maiken::Properties::RESOLVE(const Settings& set, const std::string& s) KTHROW(kul::Exception) {
-    std::string r = s;
-    std::shared_ptr<std::tuple<std::string, int, int>> t = KEY(set.properties(), s);
-    if(t){
-        std::string k  = std::get<0>(*t);
-        const int&  lb = std::get<1>(*t);
-        const int&  rb = std::get<2>(*t);
+std::string
+maiken::Properties::RESOLVE(const Settings& set, const std::string& s)
+  KTHROW(kul::Exception)
+{
+  std::string r = s;
+  std::shared_ptr<std::tuple<std::string, int, int>> t =
+    KEY(set.properties(), s);
+  if (t) {
+    std::string k = std::get<0>(*t);
+    const int& lb = std::get<1>(*t);
+    const int& rb = std::get<2>(*t);
 
-        if(AppVars::INSTANCE().properkeys().count(k))
-            k = (*AppVars::INSTANCE().properkeys().find(k)).second;
-        else
-        if(set.properties().count(k) > 0)
-            k = (*set.properties().find(k)).second;
-        else KEXIT(1, "Property : '" + k + "' has not been defined");
-        r = Properties::RESOLVE(set, r.substr(0, lb) + k + r.substr(rb + 1));
-    }
-    kul::String::TRIM(r);
-    return r;
+    if (AppVars::INSTANCE().properkeys().count(k))
+      k = (*AppVars::INSTANCE().properkeys().find(k)).second;
+    else if (set.properties().count(k) > 0)
+      k = (*set.properties().find(k)).second;
+    else
+      KEXIT(1, "Property : '" + k + "' has not been defined");
+    r = Properties::RESOLVE(set, r.substr(0, lb) + k + r.substr(rb + 1));
+  }
+  kul::String::TRIM(r);
+  return r;
 }

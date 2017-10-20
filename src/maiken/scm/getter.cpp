@@ -30,47 +30,59 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-const kul::SCM* maiken::SCMGetter::GET_SCM(const kul::Dir& d, const std::string& r, bool module){
-    std::vector<std::string> repos;
-    if(IS_SOLID(r)) repos.push_back(r);
-    else
-        if(module)
-            for(const std::string& s : Settings::INSTANCE().remoteModules()) repos.push_back(s + r);
-        else
-            for(const std::string& s : Settings::INSTANCE().remoteRepos()) repos.push_back(s + r);
+const kul::SCM*
+maiken::SCMGetter::GET_SCM(const kul::Dir& d, const std::string& r, bool module)
+{
+  std::vector<std::string> repos;
+  if (IS_SOLID(r))
+    repos.push_back(r);
+  else if (module)
+    for (const std::string& s : Settings::INSTANCE().remoteModules())
+      repos.push_back(s + r);
+  else
+    for (const std::string& s : Settings::INSTANCE().remoteRepos())
+      repos.push_back(s + r);
 #ifndef _MKN_DISABLE_SCM_
-    for(const auto& repo : repos){
+  for (const auto& repo : repos) {
 #ifndef _MKN_DISABLE_GIT_
-        try{
-            kul::Process g("git");
-            kul::ProcessCapture gp(g);
-            std::string r1(repo);
-            if(repo.find("http") != std::string::npos && repo.find("@") == std::string::npos)
-                r1 = repo.substr(0, repo.find("//") + 2) + "u:p@" + repo.substr(repo.find("//") + 2);
-            g.arg("ls-remote").arg(r1).start();
-            if(!gp.errs().size()) {
-                INSTANCE().valids.insert(d.path(), repo);
-                return &kul::scm::Manager::INSTANCE().get("git");
-            }
-        }catch(const kul::proc::ExitException& e){}
-#endif//_MKN_DISABLE_GIT_
-// SVN NOT YET SUPPORTED
-// #ifndef _MKN_DISABLE_SVN_
-//                 try{
-//                    kul::Process s("svn");
-//                    kul::ProcessCapture sp(s);
-//                    s.arg("ls").arg(repo).start();
-//                    if(!sp.errs().size()) {
-//                        INSTANCE().valids.insert(d.path(), repo);
-//                        return &kul::scm::Manager::INSTANCE().get("svn");
-//                    }
-//                 }catch(const kul::proc::ExitException& e){}
-// #endif//_MKN_DISABLE_SVN_
+    try {
+      kul::Process g("git");
+      kul::ProcessCapture gp(g);
+      std::string r1(repo);
+      if (repo.find("http") != std::string::npos &&
+          repo.find("@") == std::string::npos)
+        r1 = repo.substr(0, repo.find("//") + 2) + "u:p@" +
+             repo.substr(repo.find("//") + 2);
+      g.arg("ls-remote").arg(r1).start();
+      if (!gp.errs().size()) {
+        INSTANCE().valids.insert(d.path(), repo);
+        return &kul::scm::Manager::INSTANCE().get("git");
+      }
+    } catch (const kul::proc::ExitException& e) {
     }
+#endif //_MKN_DISABLE_GIT_
+       // SVN NOT YET SUPPORTED
+       // #ifndef _MKN_DISABLE_SVN_
+       //                 try{
+       //                    kul::Process s("svn");
+       //                    kul::ProcessCapture sp(s);
+       //                    s.arg("ls").arg(repo).start();
+       //                    if(!sp.errs().size()) {
+       //                        INSTANCE().valids.insert(d.path(), repo);
+    //                        return &kul::scm::Manager::INSTANCE().get("svn");
+    //                    }
+    //                 }catch(const kul::proc::ExitException& e){}
+    // #endif//_MKN_DISABLE_SVN_
+  }
 #else
-    KEXIT(1, "SCM disabled, cannot resolve dependency, check local paths and configurations");
-#endif//_MKN_DISABLE_SCM_
-    std::stringstream ss;
-    for(const auto& s : repos) ss << s << "\n";
-    KEXIT(1, "SCM not found or not supported type(git/svn) for repo(s)\n"+ss.str()+"project:"+d.path());
+  KEXIT(1,
+        "SCM disabled, cannot resolve dependency, check local paths and "
+        "configurations");
+#endif //_MKN_DISABLE_SCM_
+  std::stringstream ss;
+  for (const auto& s : repos)
+    ss << s << "\n";
+  KEXIT(1,
+        "SCM not found or not supported type(git/svn) for repo(s)\n" +
+          ss.str() + "project:" + d.path());
 }

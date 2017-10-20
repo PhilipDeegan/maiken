@@ -410,6 +410,13 @@ Also, if non numeric, special characters include
     "+", ignores current project. If only value builds all but current project.
 
 
+4.9 With dependency build rules
+
+CSV with the value equating to either the current profile yaml root node "name" to includel local profiles
+ OR - full project names as if dependencies i.e. mkn.kul / org.boost
+Project profiles may be specified with square brackets, e.g. "-w project1[profile1,profile2],project2[profile1]"
+
+
 Example mkn.yaml
 
 --------------
@@ -456,6 +463,7 @@ Available arguments:
     -m --mod [$p]         - Activate modules, no argument all implies all phases, otherwise $p = CSV of phases to activate
     -M --main $f          - Set main file as $f, overrides yaml main tag
     -o --out $f           - Set output binary/lib name to be $f, overrides yaml out tag
+    -O --optimize [0-9]   - Add compiler specific flags to compile - 0 = off / 9 = full - default 9
     -L --all-linker $t    - Adds $t to linking of all projects
     -p --profile $p       - Activate profile p
     -P --property $p      - CSV key=value properties override format -P "k1=v1,k2=v2" , backslash escaps , and =
@@ -469,6 +477,7 @@ Available arguments:
     -x --settings $f      - Sets settings.yaml in use to $f. Directory missing, $(4.3.1) attempted
     -K --static           - Links projects without mode as static
     -S --shared           - Links projects without mode as shared
+    -w --with             - Add profile or dependency on the command line see 4.9
 
 
 5.1.3 Examples

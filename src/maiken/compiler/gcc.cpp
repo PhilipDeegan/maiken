@@ -32,152 +32,172 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 maiken::CompilerProcessCapture
 maiken::cpp::GccCompiler::buildExecutable(
-        const std::string& linker,
-        const std::string& linkerEnd,
-        const std::vector<std::string>& objects,
-        const std::vector<std::string>& libs,
-        const std::vector<std::string>& libPaths,
-        const std::string& out,
-        const maiken::compiler::Mode& mode,
-        bool dryRun) const KTHROW(kul::Exception) {
+  const std::string& linker,
+  const std::string& linkerEnd,
+  const std::vector<std::string>& objects,
+  const std::vector<std::string>& libs,
+  const std::vector<std::string>& libPaths,
+  const std::string& out,
+  const maiken::compiler::Mode& mode,
+  bool dryRun) const KTHROW(kul::Exception)
+{
+  kul::hash::set::String dirs;
+  for (const auto& o : objects)
+    dirs.insert(kul::File(o).dir().real());
 
-    kul::hash::set::String dirs;
-    for(const auto& o : objects) dirs.insert(kul::File(o).dir().real());
+  std::string cmd = linker;
+  std::vector<std::string> bits;
+  if (linker.find(" ") != std::string::npos) {
+    bits = kul::cli::asArgs(linker);
+    cmd = bits[0];
+  }
+  kul::Process p(cmd);
+  for (unsigned int i = 1; i < bits.size(); i++)
+    p.arg(bits[i]);
+  for (const std::string& path : libPaths)
+    p.arg("-L" + path);
+  if (mode == compiler::Mode::STAT)
+    p.arg("-static");
+  p.arg("-o").arg(out);
+  for (const std::string& d : dirs)
+    p.arg(kul::File(oStar(objects), d).escm());
+  for (const std::string& lib : libs)
+    p.arg("-l" + lib);
+  for (const std::string& s : kul::cli::asArgs(linkerEnd))
+    p.arg(s);
 
-    std::string cmd = linker;
-    std::vector<std::string> bits;
-    if(linker.find(" ") != std::string::npos){
-        bits = kul::cli::asArgs(linker);
-        cmd = bits[0];
-    }
-    kul::Process p(cmd);
-    for(unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
-    for(const std::string& path : libPaths) p.arg("-L" + path);
-    if(mode == compiler::Mode::STAT) p.arg("-static");
-    p.arg("-o").arg(out);
-    for(const std::string& d : dirs) p.arg(kul::File(oStar(objects), d).escm());
-    for(const std::string& lib : libs)  p.arg("-l" + lib);
-    for(const std::string& s: kul::cli::asArgs(linkerEnd)) p.arg(s);
-
-    CompilerProcessCapture pc;
-    try{
-        if(!dryRun) p.start();
-    }catch(const kul::proc::Exception& e){
-        pc.exception(std::current_exception());
-    }
-    pc.file(out);
-    pc.cmd(p.toString());
-    return pc;
+  CompilerProcessCapture pc;
+  try {
+    if (!dryRun)
+      p.start();
+  } catch (const kul::proc::Exception& e) {
+    pc.exception(std::current_exception());
+  }
+  pc.file(out);
+  pc.cmd(p.toString());
+  return pc;
 }
 
 maiken::CompilerProcessCapture
-maiken::cpp::GccCompiler::buildLibrary(
-        const std::string& linker,
-        const std::string& linkerEnd,
-        const std::vector<std::string>& objects,
-        const std::vector<std::string>& libs,
-        const std::vector<std::string>& libPaths,
-        const kul::File& out,
-        const maiken::compiler::Mode& mode,
-        bool dryRun) const KTHROW(kul::Exception) {
+maiken::cpp::GccCompiler::buildLibrary(const std::string& linker,
+                                       const std::string& linkerEnd,
+                                       const std::vector<std::string>& objects,
+                                       const std::vector<std::string>& libs,
+                                       const std::vector<std::string>& libPaths,
+                                       const kul::File& out,
+                                       const maiken::compiler::Mode& mode,
+                                       bool dryRun) const KTHROW(kul::Exception)
+{
+  kul::hash::set::String dirs;
+  for (const auto& o : objects)
+    dirs.insert(kul::File(o).dir().real());
 
-    kul::hash::set::String dirs;
-    for(const auto& o : objects) dirs.insert(kul::File(o).dir().real());
-
-    std::string lib = out.dir().join(sharedLib(out.name()));
-    if(mode == compiler::Mode::STAT) lib = out.dir().join(staticLib(out.name()));
-    lib = kul::File(lib).esc();
-    std::string cmd = linker;
-    std::vector<std::string> bits;
-    if(linker.find(" ") != std::string::npos){
-        bits = kul::cli::asArgs(linker);
-        cmd = bits[0];
+  std::string lib = out.dir().join(sharedLib(out.name()));
+  if (mode == compiler::Mode::STAT)
+    lib = out.dir().join(staticLib(out.name()));
+  lib = kul::File(lib).esc();
+  std::string cmd = linker;
+  std::vector<std::string> bits;
+  if (linker.find(" ") != std::string::npos) {
+    bits = kul::cli::asArgs(linker);
+    cmd = bits[0];
+  }
+  kul::Process p(cmd);
+  for (unsigned int i = 1; i < bits.size(); i++)
+    p.arg(bits[i]);
+  if (mode == compiler::Mode::SHAR)
+    p.arg("-shared").arg("-o");
+  p.arg(lib);
+  for (const std::string& d : dirs)
+    p.arg(kul::File(oStar(objects), d).escm());
+  {
+    auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
+    if ((ll.size() ? kul::String::BOOL(ll) : 0)) {
+      for (const std::string& path : libPaths)
+        p.arg("-L" + path);
+      for (const std::string& lib : libs)
+        p.arg("-l" + lib);
     }
-    kul::Process p(cmd);
-    for(unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
-    if(mode == compiler::Mode::SHAR) p.arg("-shared").arg("-o");
-    p.arg(lib);
-    for(const std::string& d : dirs) p.arg(kul::File(oStar(objects), d).escm());
-    {
-        auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
-        if((ll.size() ? kul::String::BOOL(ll) : 0)){
-            for(const std::string& path : libPaths) p.arg("-L" + path);
-            for(const std::string& lib : libs)  p.arg("-l" + lib);
-        }
-    }
-    for(const std::string& s: kul::cli::asArgs(linkerEnd)) p.arg(s);
-    CompilerProcessCapture pc;
-    try{
-        if(!dryRun) p.start();
-    }catch(const kul::proc::Exception& e){
-        pc.exception(std::current_exception());
-    }
-    pc.file(lib);
-    pc.cmd(p.toString());
-    return pc;
+  }
+  for (const std::string& s : kul::cli::asArgs(linkerEnd))
+    p.arg(s);
+  CompilerProcessCapture pc;
+  try {
+    if (!dryRun)
+      p.start();
+  } catch (const kul::proc::Exception& e) {
+    pc.exception(std::current_exception());
+  }
+  pc.file(lib);
+  pc.cmd(p.toString());
+  return pc;
 }
 
 maiken::CompilerProcessCapture
-maiken::cpp::GccCompiler::compileSource(
-        const std::string& compiler,
-        const std::vector<std::string>& args,
-        const std::vector<std::string>& incs,
-        const std::string& in,
-        const std::string& out,
-        const maiken::compiler::Mode& mode,
-        bool dryRun) const KTHROW(kul::Exception){
-
-    std::string cmd = compiler;
-    std::vector<std::string> bits;
-    if(compiler.find(" ") != std::string::npos){
-        bits = kul::cli::asArgs(compiler);
-        cmd = bits[0];
-    }
-    kul::Process p(cmd);
-    for(unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
-    for(const std::string& s : incs) p.arg("-I"+s);
-    for(const std::string& s : args) p.arg(s);
-    p.arg("-o").arg(out).arg("-c").arg(in);
-    CompilerProcessCapture pc;
-    if(!kul::LogMan::INSTANCE().inf()) pc.setProcess(p);
-    try{
-        if(!dryRun) p.start();
-    }catch(const kul::proc::Exception& e){
-        pc.exception(std::current_exception());
-    }
-    pc.file(out);
-    pc.cmd(p.toString());
-    return pc;
+maiken::cpp::GccCompiler::compileSource(const std::string& compiler,
+                                        const std::vector<std::string>& args,
+                                        const std::vector<std::string>& incs,
+                                        const std::string& in,
+                                        const std::string& out,
+                                        const maiken::compiler::Mode& mode,
+                                        bool dryRun) const
+  KTHROW(kul::Exception)
+{
+  std::string cmd = compiler;
+  std::vector<std::string> bits;
+  if (compiler.find(" ") != std::string::npos) {
+    bits = kul::cli::asArgs(compiler);
+    cmd = bits[0];
+  }
+  kul::Process p(cmd);
+  for (unsigned int i = 1; i < bits.size(); i++)
+    p.arg(bits[i]);
+  for (const std::string& s : incs)
+    p.arg("-I" + s);
+  for (const std::string& s : args)
+    p.arg(s);
+  p.arg("-o").arg(out).arg("-c").arg(in);
+  CompilerProcessCapture pc;
+  if (!kul::LogMan::INSTANCE().inf())
+    pc.setProcess(p);
+  try {
+    if (!dryRun)
+      p.start();
+  } catch (const kul::proc::Exception& e) {
+    pc.exception(std::current_exception());
+  }
+  pc.file(out);
+  pc.cmd(p.toString());
+  return pc;
 }
 
 void
-maiken::cpp::GccCompiler::preCompileHeader(
-        const std::vector<std::string>& incs,
-        const std::vector<std::string>& args,
-        const std::string& in,
-        const std::string& out,
-        bool dryRun) const KTHROW(kul::Exception) {
+maiken::cpp::GccCompiler::preCompileHeader(const std::vector<std::string>& incs,
+                                           const std::vector<std::string>& args,
+                                           const std::string& in,
+                                           const std::string& out,
+                                           bool dryRun) const
+  KTHROW(kul::Exception)
+{
+  if (in.rfind(".") == std::string::npos)
+    KEXCEPT(Exception, "Unknown header type");
 
-    if(in.rfind(".") == std::string::npos)
-        KEXCEPT(Exception, "Unknown header type");
+  std::string cmd; // = compiler + " -x";
+  std::string h = in.substr(in.rfind(".") + 1);
 
-    std::string cmd;// = compiler + " -x";
-    std::string h = in.substr(in.rfind(".") + 1);
+  if (h.compare("h") == 0)
+    cmd = cc() + " -x c-header ";
+  else if (h.compare("hpp") == 0)
+    cmd = cxx() + " -x c++-header ";
+  else
+    KEXCEPT(Exception, "Failed to pre-compile header - uknown file type: " + h);
+  cmd += in + " ";
+  for (const std::string& s : args)
+    cmd += s + " ";
+  for (const std::string& s : incs)
+    cmd += "-I" + s + " ";
 
-    if(h.compare("h") == 0)
-        cmd = cc() + " -x c-header ";
-    else
-    if(h.compare("hpp") == 0)
-        cmd = cxx() + " -x c++-header ";
-    else
-        KEXCEPT(Exception, "Failed to pre-compile header - uknown file type: " + h);
-    cmd += in + " ";
-    for(const std::string& s : args)
-        cmd += s + " ";
-    for(const std::string& s : incs)
-        cmd += "-I" + s + " ";
-
-    cmd += " -o " + out;
-    if(kul::os::exec(cmd) != 0)
-        KEXCEPT(Exception, "Failed to pre-compile header");
+  cmd += " -o " + out;
+  if (kul::os::exec(cmd) != 0)
+    KEXCEPT(Exception, "Failed to pre-compile header");
 }

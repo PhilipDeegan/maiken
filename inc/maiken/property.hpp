@@ -28,17 +28,23 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef  _MAIKEN_PROPERTY_HPP_
-#define  _MAIKEN_PROPERTY_HPP_
+#ifndef _MAIKEN_PROPERTY_HPP_
+#define _MAIKEN_PROPERTY_HPP_
 
-namespace maiken{
-class Properties : public Constants {
-    private:
-        static std::shared_ptr<std::tuple<std::string, int, int>> KEY(const kul::hash::map::S2S& ps, const std::string& s) KTHROW(kul::Exception);
-    public:
-        static std::string RESOLVE(const Application& app, const std::string& s) KTHROW(kul::Exception);
-        static std::string RESOLVE(const Settings& app, const std::string& s) KTHROW(kul::Exception);
+namespace maiken {
+class Properties : public Constants
+{
+private:
+  static std::shared_ptr<std::tuple<std::string, int, int>> KEY(
+    const kul::hash::map::S2S& ps,
+    const std::string& s) KTHROW(kul::Exception);
+
+public:
+  static std::string RESOLVE(const Application& app, const std::string& s)
+    KTHROW(kul::Exception);
+  static std::string RESOLVE(const Settings& app, const std::string& s)
+    KTHROW(kul::Exception);
 };
 
-}
-#endif//_MAIKEN_PROPERTY_HPP_
+} // namespace maiken
+#endif //_MAIKEN_PROPERTY_HPP_

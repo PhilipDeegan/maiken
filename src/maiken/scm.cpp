@@ -30,73 +30,106 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-class UpdateTracker{
-    private:
-        kul::hash::set::String paths;
-    public:
-        bool has(const std::string& path){ return paths.count(path); }
-        void add(const std::string& path){ paths.insert(path); }
-        static UpdateTracker& INSTANCE(){
-            static UpdateTracker i;
-            return i;
-        }
+class UpdateTracker
+{
+private:
+  kul::hash::set::String paths;
+
+public:
+  bool has(const std::string& path) { return paths.count(path); }
+  void add(const std::string& path) { paths.insert(path); }
+  static UpdateTracker& INSTANCE()
+  {
+    static UpdateTracker i;
+    return i;
+  }
 };
 
-void maiken::Application::scmStatus(const bool& deps) KTHROW(kul::scm::Exception){
-    std::vector<Application*> v;
-    if(deps)
-        for(auto app = this->deps.rbegin(); app != this->deps.rend(); ++app){
-            const std::string& s((*app)->project().dir().real());
-            auto it = std::find_if(v.begin(), v.end(), [&s](const Application* a) {return a->project().dir().real() == s;});
-            if (it == v.end() && (*app)->project().dir().real() != this->project().dir().real()) v.push_back(*app);
-        }
-
-    for(auto* app : v) app->scmStatus(0);
-    if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr, isMod);
-    if(scm){
-        KOUT(NON) << "SCM STATUS CHECK ON: " << project().dir().real();
-        const std::string& r(this->project().dir().real());
-        scm->status(r);
+void
+maiken::Application::scmStatus(const bool& deps) KTHROW(kul::scm::Exception)
+{
+  std::vector<Application*> v;
+  if (deps)
+    for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) {
+      const std::string& s((*app)->project().dir().real());
+      auto it = std::find_if(v.begin(), v.end(), [&s](const Application* a) {
+        return a->project().dir().real() == s;
+      });
+      if (it == v.end() &&
+          (*app)->project().dir().real() != this->project().dir().real())
+        v.push_back(*app);
     }
+
+  for (auto* app : v)
+    app->scmStatus(0);
+  if (!scm && SCMGetter::HAS(this->project().dir()))
+    scm = SCMGetter::GET(this->project().dir(), this->scr, isMod);
+  if (scm) {
+    KOUT(NON) << "SCM STATUS CHECK ON: " << project().dir().real();
+    const std::string& r(this->project().dir().real());
+    scm->status(r);
+  }
 }
 
-void maiken::Application::scmUpdate(const bool& f) KTHROW(kul::scm::Exception){
-    uint i = 0;
-    const Application* p = this;
-    while((p = p->par)) i++;
-    if(i > AppVars::INSTANCE().dependencyLevel()) return;
-    if(!scm && SCMGetter::HAS(this->project().dir())) scm = SCMGetter::GET(this->project().dir(), this->scr, isMod);
-    if(scm && !UpdateTracker::INSTANCE().has(this->project().dir().real())){
-        if(!f) KOUT(NON) << "WARNING: ATTEMPTING SCM UPDATE, USER INTERACTION MAY BE REQUIRED!";
+void
+maiken::Application::scmUpdate(const bool& f) KTHROW(kul::scm::Exception)
+{
+  uint i = 0;
+  const Application* p = this;
+  while ((p = p->par))
+    i++;
+  if (i > AppVars::INSTANCE().dependencyLevel())
+    return;
+  if (!scm && SCMGetter::HAS(this->project().dir()))
+    scm = SCMGetter::GET(this->project().dir(), this->scr, isMod);
+  if (scm && !UpdateTracker::INSTANCE().has(this->project().dir().real())) {
+    if (!f)
+      KOUT(NON) << "WARNING: ATTEMPTING SCM UPDATE, USER INTERACTION MAY BE "
+                   "REQUIRED!";
 
-        const std::string& tscr(
-            !this->scr.empty() ? this->scr
-                : this->project().root()[STR_SCM] ? Properties::RESOLVE(*this, this->project().root()[STR_SCM].Scalar())
-                : this->project().root()[STR_NAME].Scalar());
+    const std::string& tscr(
+      !this->scr.empty()
+        ? this->scr
+        : this->project().root()[STR_SCM]
+            ? Properties::RESOLVE(*this,
+                                  this->project().root()[STR_SCM].Scalar())
+            : this->project().root()[STR_NAME].Scalar());
 
-        scmUpdate(f, scm, SCMGetter::REPO(this->project().dir(), tscr, isMod));
-        UpdateTracker::INSTANCE().add(this->project().dir().real());
-    }
+    scmUpdate(f, scm, SCMGetter::REPO(this->project().dir(), tscr, isMod));
+    UpdateTracker::INSTANCE().add(this->project().dir().real());
+  }
 }
 
-void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm, const std::string& url) KTHROW(kul::scm::Exception){
-    const std::string& ver(!this->scv.empty() ? this->scv
-        : this->project().root()[STR_VERSION] ? this->project().root()[STR_VERSION].Scalar() : "");
-    bool c = true;
-    if(!f){
-        KOUT(NON) << "CHECKING: " << this->project().dir().real() << " FROM " << url;
-        const std::string& lV(scm->localVersion(this->project().dir().real(), ver));
-        const std::string& rV(url.size() ? scm->remoteVersion(url, ver) : "");
-        c = lV != rV;
-        std::stringstream ss;
-        ss << "UPDATE FROM " << url << " VERSION: " << rV << " (Yes/No/1/0)";
-        if(!c) KOUT(NON) << "CURRENT VERSION MATCHES REMOTE VERSION: SKIPPING";
-        else c = kul::String::BOOL(kul::cli::receive(ss.str()));
-    }
-    if(f || c){
-        std::stringstream ss;
-        if(url.size()) ss << " FROM " << url;
-        KOUT(NON) << "UPDATING: " << this->project().dir().real() << ss.str();
-        scm->up(this->project().dir().real(), url, ver);
-    }
+void
+maiken::Application::scmUpdate(const bool& f,
+                               const kul::SCM* scm,
+                               const std::string& url)
+  KTHROW(kul::scm::Exception)
+{
+  const std::string& ver(!this->scv.empty()
+                           ? this->scv
+                           : this->project().root()[STR_VERSION]
+                               ? this->project().root()[STR_VERSION].Scalar()
+                               : "");
+  bool c = true;
+  if (!f) {
+    KOUT(NON) << "CHECKING: " << this->project().dir().real() << " FROM "
+              << url;
+    const std::string& lV(scm->localVersion(this->project().dir().real(), ver));
+    const std::string& rV(url.size() ? scm->remoteVersion(url, ver) : "");
+    c = lV != rV;
+    std::stringstream ss;
+    ss << "UPDATE FROM " << url << " VERSION: " << rV << " (Yes/No/1/0)";
+    if (!c)
+      KOUT(NON) << "CURRENT VERSION MATCHES REMOTE VERSION: SKIPPING";
+    else
+      c = kul::String::BOOL(kul::cli::receive(ss.str()));
+  }
+  if (f || c) {
+    std::stringstream ss;
+    if (url.size())
+      ss << " FROM " << url;
+    KOUT(NON) << "UPDATING: " << this->project().dir().real() << ss.str();
+    scm->up(this->project().dir().real(), url, ver);
+  }
 }

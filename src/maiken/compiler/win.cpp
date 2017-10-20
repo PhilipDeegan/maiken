@@ -33,122 +33,141 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 maiken::CompilerProcessCapture
 maiken::cpp::WINCompiler::buildExecutable(
-        const std::string& linker,
-        const std::string& linkerEnd,
-        const std::vector<std::string>& objects,
-        const std::vector<std::string>& libs,
-        const std::vector<std::string>& libPaths,
-        const std::string& out,
-        const maiken::compiler::Mode& mode,
-        bool dryRun) const KTHROW(kul::Exception){
+  const std::string& linker,
+  const std::string& linkerEnd,
+  const std::vector<std::string>& objects,
+  const std::vector<std::string>& libs,
+  const std::vector<std::string>& libPaths,
+  const std::string& out,
+  const maiken::compiler::Mode& mode,
+  bool dryRun) const KTHROW(kul::Exception)
+{
+  std::string exe = out + ".exe";
 
-    std::string exe = out + ".exe";
+  kul::hash::set::String dirs;
+  for (const auto& o : objects)
+    dirs.insert(kul::File(o).dir().real());
 
-    kul::hash::set::String dirs;
-    for(const auto& o : objects) dirs.insert(kul::File(o).dir().real());
+  std::string cmd = linker;
+  std::vector<std::string> bits;
+  if (linker.find(" ") != std::string::npos) {
+    bits = kul::cli::asArgs(linker);
+    cmd = bits[0];
+  }
+  kul::Process p(cmd);
+  for (unsigned int i = 1; i < bits.size(); i++)
+    p.arg(bits[i]);
+  p.arg("-OUT:\"" + exe + "\"").arg("-nologo");
+  for (const std::string& path : libPaths)
+    p.arg("-LIBPATH:\"" + path + "\"");
+  for (const std::string& d : dirs)
+    p.arg(kul::File(oStar(objects), d).escm());
+  for (const std::string& lib : libs)
+    p.arg(staticLib(lib));
+  for (const std::string& s : kul::cli::asArgs(linkerEnd))
+    p.arg(s);
 
-    std::string cmd = linker;
-    std::vector<std::string> bits;
-    if(linker.find(" ") != std::string::npos){
-        bits = kul::cli::asArgs(linker);
-        cmd = bits[0];
-    }
-    kul::Process p(cmd);
-    for(unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
-    p.arg("-OUT:\"" + exe + "\"").arg("-nologo");
-    for(const std::string& path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
-    for(const std::string& d : dirs) p.arg(kul::File(oStar(objects), d).escm());
-    for(const std::string& lib : libs) p.arg(staticLib(lib));
-    for(const std::string& s: kul::cli::asArgs(linkerEnd)) p.arg(s);
-
-    CompilerProcessCapture pc;
-    try{
-        if(!dryRun) p.start();
-    }catch(const kul::proc::Exception& e){
-        pc.exception(std::current_exception());
-    }
-    pc.file(exe);
-    pc.cmd(p.toString());
-    return pc;
+  CompilerProcessCapture pc;
+  try {
+    if (!dryRun)
+      p.start();
+  } catch (const kul::proc::Exception& e) {
+    pc.exception(std::current_exception());
+  }
+  pc.file(exe);
+  pc.cmd(p.toString());
+  return pc;
 }
 
 maiken::CompilerProcessCapture
-maiken::cpp::WINCompiler::buildLibrary(
-        const std::string& linker,
-        const std::string& linkerEnd,
-        const std::vector<std::string>& objects,
-        const std::vector<std::string>& libs,
-        const std::vector<std::string>& libPaths,
-        const kul::File& out,
-        const maiken::compiler::Mode& mode,
-        bool dryRun) const KTHROW(kul::Exception) {
+maiken::cpp::WINCompiler::buildLibrary(const std::string& linker,
+                                       const std::string& linkerEnd,
+                                       const std::vector<std::string>& objects,
+                                       const std::vector<std::string>& libs,
+                                       const std::vector<std::string>& libPaths,
+                                       const kul::File& out,
+                                       const maiken::compiler::Mode& mode,
+                                       bool dryRun) const KTHROW(kul::Exception)
+{
+  kul::hash::set::String dirs;
+  for (const auto& o : objects)
+    dirs.insert(kul::File(o).dir().real());
 
-    kul::hash::set::String dirs;
-    for(const auto& o : objects) dirs.insert(kul::File(o).dir().real());
-
-    std::string lib = out.dir().join(sharedLib(out.name()));
-    std::string imp = out.dir().join(staticLib(out.name()));
-    if(mode == compiler::Mode::STAT) lib = out.dir().join(staticLib(out.name()));
-    std::string cmd = linker;
-    std::vector<std::string> bits;
-    if(linker.find(" ") != std::string::npos){
-        bits = kul::cli::asArgs(linker);
-        cmd = bits[0];
-    }
-    kul::Process p(cmd);
-    for(unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
-    p.arg("-nologo");
-    if(mode == compiler::Mode::STAT)
-        p.arg("-LTCG");
-    p.arg("-OUT:\"" + lib + "\"");
-    if(mode == compiler::Mode::SHAR){
-        p.arg("-IMPLIB:\"" + imp + "\"").arg("-DLL");
-        for(const std::string& path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
-        for(const std::string& lib : libs) p.arg(staticLib(lib));
-    }
-    for(const std::string& d : dirs) p.arg(kul::File(oStar(objects), d).escm());
-    for(const std::string& s: kul::cli::asArgs(linkerEnd)) p.arg(s);
-    CompilerProcessCapture pc;
-    try{
-        if(!dryRun) p.start();
-    }catch(const kul::proc::Exception& e){
-        pc.exception(std::current_exception());
-    }
-    pc.file(lib);
-    pc.cmd(p.toString());
-    return pc;
+  std::string lib = out.dir().join(sharedLib(out.name()));
+  std::string imp = out.dir().join(staticLib(out.name()));
+  if (mode == compiler::Mode::STAT)
+    lib = out.dir().join(staticLib(out.name()));
+  std::string cmd = linker;
+  std::vector<std::string> bits;
+  if (linker.find(" ") != std::string::npos) {
+    bits = kul::cli::asArgs(linker);
+    cmd = bits[0];
+  }
+  kul::Process p(cmd);
+  for (unsigned int i = 1; i < bits.size(); i++)
+    p.arg(bits[i]);
+  p.arg("-nologo");
+  if (mode == compiler::Mode::STAT)
+    p.arg("-LTCG");
+  p.arg("-OUT:\"" + lib + "\"");
+  if (mode == compiler::Mode::SHAR) {
+    p.arg("-IMPLIB:\"" + imp + "\"").arg("-DLL");
+    for (const std::string& path : libPaths)
+      p.arg("-LIBPATH:\"" + path + "\"");
+    for (const std::string& lib : libs)
+      p.arg(staticLib(lib));
+  }
+  for (const std::string& d : dirs)
+    p.arg(kul::File(oStar(objects), d).escm());
+  for (const std::string& s : kul::cli::asArgs(linkerEnd))
+    p.arg(s);
+  CompilerProcessCapture pc;
+  try {
+    if (!dryRun)
+      p.start();
+  } catch (const kul::proc::Exception& e) {
+    pc.exception(std::current_exception());
+  }
+  pc.file(lib);
+  pc.cmd(p.toString());
+  return pc;
 }
 
 maiken::CompilerProcessCapture
-maiken::cpp::WINCompiler::compileSource(
-        const std::string& compiler,
-        const std::vector<std::string>& args,
-        const std::vector<std::string>& incs,
-        const std::string& in,
-        const std::string& out,
-        const maiken::compiler::Mode& mode,
-        bool dryRun) const KTHROW(kul::Exception){
-
-    std::string cmd = compiler;
-    std::vector<std::string> bits;
-    if(compiler.find(" ") != std::string::npos){
-        bits = kul::cli::asArgs(compiler);
-        cmd = bits[0];
-    }
-    kul::Process p(cmd);
-    for(unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
-    p.arg("-nologo");
-    for(const std::string& s : incs)    p.arg("-I\"" + s + "\"");
-    for(const std::string& s : args)    p.arg(s);
-    p.arg("-c").arg("-Fo\"" + out + "\"").arg("\"" + in + "\"");
-    CompilerProcessCapture pc;
-    if(!kul::LogMan::INSTANCE().inf()) pc.setProcess(p);
-    try{
-        if(!dryRun) p.start();
-    }catch(const kul::Exception& e){
-        pc.exception(std::current_exception());
-    }
-    pc.file(out);
-    pc.cmd(p.toString());
-    return pc;
+maiken::cpp::WINCompiler::compileSource(const std::string& compiler,
+                                        const std::vector<std::string>& args,
+                                        const std::vector<std::string>& incs,
+                                        const std::string& in,
+                                        const std::string& out,
+                                        const maiken::compiler::Mode& mode,
+                                        bool dryRun) const
+  KTHROW(kul::Exception)
+{
+  std::string cmd = compiler;
+  std::vector<std::string> bits;
+  if (compiler.find(" ") != std::string::npos) {
+    bits = kul::cli::asArgs(compiler);
+    cmd = bits[0];
+  }
+  kul::Process p(cmd);
+  for (unsigned int i = 1; i < bits.size(); i++)
+    p.arg(bits[i]);
+  p.arg("-nologo");
+  for (const std::string& s : incs)
+    p.arg("-I\"" + s + "\"");
+  for (const std::string& s : args)
+    p.arg(s);
+  p.arg("-c").arg("-Fo\"" + out + "\"").arg("\"" + in + "\"");
+  CompilerProcessCapture pc;
+  if (!kul::LogMan::INSTANCE().inf())
+    pc.setProcess(p);
+  try {
+    if (!dryRun)
+      p.start();
+  } catch (const kul::Exception& e) {
+    pc.exception(std::current_exception());
+  }
+  pc.file(out);
+  pc.cmd(p.toString());
+  return pc;
 }
