@@ -132,13 +132,14 @@ maiken::Application::setup() KTHROW(kul::Exception)
         }
       }
       YAML::Node node;
-      node[STR_NAME] = project;
       if (project == this->project().root()[STR_NAME].Scalar()) {
         node[STR_LOCAL] = ".";
       } else if (project.find("@") != std::string::npos) {
-        version = project.substr(project.find("@"));
+        version = project.substr(project.find("@") + 1);
         project = project.substr(0, project.find("@"));
       }
+      node[STR_NAME] = project;
+
       if (!version.empty())
         node[STR_VERSION] = version;
       if (!profiles.empty())
