@@ -53,9 +53,18 @@ maiken::Application::loadDepOrMod(const YAML::Node& node,
   const std::string& v(
     node[STR_VERSION] ? Properties::RESOLVE(*this, node[STR_VERSION].Scalar())
                       : "");
-  KOUT(NON) << SCMGetter::GET(depOrMod, tscr, module)
-                 ->co(
-                   depOrMod.path(), SCMGetter::REPO(depOrMod, tscr, module), v);
+  try{
+
+    KOUT(NON) << SCMGetter::GET(depOrMod, tscr, module)
+                   ->co(
+                     depOrMod.path(), SCMGetter::REPO(depOrMod, tscr, module), v);
+  }catch(const kul::scm::Exception& e){
+    if(node[STR_NAME]){
+      kul::File version(".mkn/dep/ver/"+node[STR_NAME].Scalar());
+      if(version) version.rm();
+    }
+    std::rethrow_exception(std::current_exception());
+  }
   kul::env::CWD(depOrMod);
 
   if (_MKN_REMOTE_EXEC_) {
@@ -168,9 +177,7 @@ maiken::Application::popDepOrMod(const YAML::Node& n,
     const maiken::Project& c(
       *maiken::Projects::INSTANCE().getOrCreate(projectDir));
 
-    KLOG(INF) << vec.size();
     if (depOrMod[STR_PROFILE]) {
-      KLOG(INF) << vec.size();
       for (auto p : kul::String::SPLIT(
              Properties::RESOLVE(*this, depOrMod[STR_PROFILE].Scalar()), ' ')) {
         if (p.empty())
@@ -203,7 +210,6 @@ maiken::Application::popDepOrMod(const YAML::Node& n,
       vec.push_back(app);
       apps.push_back(std::make_pair(app->project().dir().path(), app->p));
     }
-    KLOG(INF) << vec.size();
   };
 
   for (const auto& depOrMod : n[s])

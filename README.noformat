@@ -416,6 +416,46 @@ CSV with the value equating to either the current profile yaml root node "name" 
  OR - full project names as if dependencies i.e. mkn.kul / org.boost
 Project profiles may be specified with square brackets, e.g. "-w project1[profile1,profile2],project2[profile1]"
 
+If an included dependency is not from the current project, in most cases (refine) a define is added to the compilation of the current project
+in the form of "-D_MKN_WITH_${PROJ.ECT}_" where a project name is turned uppercase and the dot is changed to an underscore
+
+example with g++ and "-w mkn.ram" will result in a compilation command like:
+
+    g++ -D_MKN_WITH_MKN_RAM_ -c file.obj -o file.cpp
+
+A concrete git URL can be specified with a string between () brackets - if these are missing the project string is
+ attemted to be used as the URL.
+
+Further options can be used to specify the version and the location
+
+    & - location
+    # - version
+
+such that the following commands are valid
+
+    -w mkn.ram#master&directory(https://github.com/mkn/mkn.ram)[https]
+    -w mkn.ram(https://github.com/mkn/mkn.ram)[https]
+    -w https://github.com/mkn/mkn.ram[https]
+    -w [profile]
+
+will use the master version of the project "mkn.ram" and put it in the subdirectory of the current project "directoy"
+
+4.10 Github integration
+
+When maiken is compiled with "-w mkn.ram[https]" features are activated when attempting to resolve dependencies when they 
+ do not have versions specified. The formula to deduce the branch/tag are as follows:
+
+    if there are any releases, the most recent release is used, 
+    or
+    if there is some tags, the most recent tag is used
+    or
+    the default branch is queried and used
+    finally
+    master is used
+
+    HTTPS queries are performed to the github API top resolve these, so the remote repo URL must contain the string "github.com" in order for this to work.
+     Which by default it does
+
 
 Example mkn.yaml
 

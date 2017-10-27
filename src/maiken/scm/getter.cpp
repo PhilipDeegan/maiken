@@ -53,12 +53,22 @@ maiken::SCMGetter::GET_SCM(const kul::Dir& d, const std::string& r, bool module)
           repo.find("@") == std::string::npos)
         r1 = repo.substr(0, repo.find("//") + 2) + "u:p@" +
              repo.substr(repo.find("//") + 2);
-      g.arg("ls-remote").arg(r1).start();
-      if (!gp.errs().size()) {
+      g.arg("ls-remote").arg(r1);
+      g.start();
+      auto errs(gp.errs());
+      kul::String::TRIM(errs);
+      auto lines(kul::String::LINES(errs));
+      if(errs.empty()) lines.clear();
+      bool allwarn = true;
+      for(const auto& line : lines) if(line.find("warning") == std::string::npos) allwarn = false;
+      if (lines.empty() || (lines.size() && allwarn)) {
         INSTANCE().valids.insert(d.path(), repo);
         return &kul::scm::Manager::INSTANCE().get("git");
       }
+      KLOG(DBG) << gp.outs();
+      KLOG(DBG) << gp.errs();
     } catch (const kul::proc::ExitException& e) {
+      KLOG(ERR) << e.stack();
     }
 #endif //_MKN_DISABLE_GIT_
        // SVN NOT YET SUPPORTED
@@ -80,9 +90,8 @@ maiken::SCMGetter::GET_SCM(const kul::Dir& d, const std::string& r, bool module)
         "configurations");
 #endif //_MKN_DISABLE_SCM_
   std::stringstream ss;
-  for (const auto& s : repos)
-    ss << s << "\n";
+  for (const auto& s : repos) ss << s << "\n";
   KEXIT(1,
-        "SCM not found or not supported type(git/svn) for repo(s)\n" +
-          ss.str() + "project:" + d.path());
+        "SCM not found or not supported type(git/svn) for repo(s)\n\t" +
+          ss.str() + "\tproject: " + d.path());
 }

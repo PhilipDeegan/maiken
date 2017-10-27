@@ -112,50 +112,7 @@ maiken::Application::setup() KTHROW(kul::Exception)
 #endif
 
   std::vector<YAML::Node> with_nodes;
-  if (this->ro && AppVars::INSTANCE().with().size()) {
-    kul::hash::set::String withs;
-    KLOG(INF) << AppVars::INSTANCE().with();
-    try {
-      parseDepedencyString(AppVars::INSTANCE().with(), withs);
-    } catch (const kul::Exception& e) {
-      KEXIT(1, MKN_ERR_INVALID_WIT_CLI);
-    }
-    for (const auto& with : withs) {
-      auto bits(kul::String::SPLIT(with, "/"));
-      std::string project = bits[bits.size() - 1], profiles, version;
-      {
-        auto brak = with.find("[");
-        if (brak != std::string::npos) {
-          project = with.substr(0, brak);
-          profiles = with.substr(brak + 1, with.size() - brak - 2);
-          kul::String::REPLACE_ALL(profiles, ",", " ");
-        }
-      }
-      YAML::Node node;
-      if (project == this->project().root()[STR_NAME].Scalar()) {
-        node[STR_LOCAL] = ".";
-      } else if (project.find("@") != std::string::npos) {
-        version = project.substr(project.find("@") + 1);
-        project = project.substr(0, project.find("@"));
-      }
-      node[STR_NAME] = project;
-
-      if (!version.empty())
-        node[STR_VERSION] = version;
-      if (!profiles.empty())
-        node[STR_PROFILE] = profiles;
-      with_nodes.push_back(node);
-      if (!project.empty()) {
-        std::stringstream with_define;
-        kul::String::REPLACE_ALL(project, ".", "_");
-        std::transform(
-          project.begin(), project.end(), project.begin(), ::toupper);
-        with_define << " -D_MKN_WITH_" << project << "_ ";
-        arg += with_define.str();
-        getIfMissing(node, 0);
-      }
-    }
-  }
+  withArgs(with_nodes, getIfMissing);
   YAML::Node with_node;
   with_node[STR_DEP] = with_nodes;
   popDepOrMod(with_node, deps, STR_DEP, 0, 1);

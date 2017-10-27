@@ -265,6 +265,7 @@ protected:
 
   bool incSrc(const kul::File& f) const;
   void addCLIArgs(const kul::cli::Args& args);
+  void withArgs(std::vector<YAML::Node>& with_nodes, std::function<void(const YAML::Node& n, const bool mod)> getIfMissing);
   void addSourceLine(const std::string& o) KTHROW(kul::Exception);
   void addIncludeLine(const std::string& o) KTHROW(kul::Exception);
 

@@ -67,7 +67,7 @@ maiken::Settings::Settings(const std::string& s)
     for (const auto& s :
          kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
       rrs.push_back(s);
-  else {
+  {
     const std::string& rr = _MKN_REMOTE_REPO_;
     for (const auto& s : kul::String::SPLIT(rr, ' '))
       rrs.push_back(s);
@@ -77,7 +77,7 @@ maiken::Settings::Settings(const std::string& s)
     for (const auto& s :
          kul::String::SPLIT(root()[STR_REMOTE][STR_MOD_REPO].Scalar(), ' '))
       rms.push_back(s);
-  else {
+  {
     const std::string& rr = _MKN_REMOTE_MOD_;
     for (const auto& s : kul::String::SPLIT(rr, ' '))
       rms.push_back(s);
