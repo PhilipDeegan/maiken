@@ -222,6 +222,8 @@ maiken::Application::CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception)
        const std::string& t,
        const std::function<void(const std::string&, const std::string&)>& f) {
       for (const auto& p : kul::String::ESC_SPLIT(s, ',')) {
+        if(p.find("=") == std::string::npos)
+          KEXIT(1, t + " override invalid, = missing");
         std::vector<std::string> ps = kul::String::ESC_SPLIT(p, '=');
         if (ps.size() > 2)
           KEXIT(1, t + " override invalid, escape extra \"=\"");
