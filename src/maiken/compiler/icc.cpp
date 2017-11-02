@@ -28,15 +28,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_LANG_ERR_HPP_
-#define _MAIKEN_LANG_ERR_HPP_
+#include "maiken/compiler/cpp.hpp"
 
-#define MKN_ERR_SQRBRKT_MISMATCH_DEP_CLI                                       \
-  "Square bracket [] mismatch in dependency arguments"
-#define MKN_ERR_INVALID_DEP_CLI "Invalid -d argument provided"
-#define MKN_ERR_INVALID_WIT_CLI "Invalid -w argument provided"
-#define MKN_ERR_INVALID_WITHOUT_CLI "Invalid -t argument provided"
-
+maiken::cpp::IntelCompiler::IntelCompiler(const int& v) : GccCompiler(v)
+{
   
-
-#endif /* _MAIKEN_DEFS_LANG_HPP_ */
+}

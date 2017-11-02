@@ -137,10 +137,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   "   -K/--static            | Links projects without mode as static"
 #define MKN_DEFS_SHARED                                                        \
   "   -S/--shared            | Links projects without mode as shared"
+#define MKN_DEFS_DEBUG                                                         \
+  "   -g/--debug [0-9]       | Add compiler/linker flags to debug"
 #define MKN_DEFS_OPTIM                                                         \
-  "   -O/--optimize [0-9]    | Add compiler specific flags to optimize"
+  "   -O/--optimize [0-9]    | Add compiler/linker flags to optimize"
+#define MKN_DEFS_WARN                                                          \
+  "   -W/--warn [0-9]        | Add compiler flags for warnings"
 #define MKN_DEFS_WITH                                                          \
   "   -w/--with $CSV         | Add profile or dependency from command line"
+#define MKN_DEFS_WITHOUT                                                       \
+  "   -T/--without $CSV      | Remove dependencies from build"
 
 #define MKN_DEFS_EXMPL "Examples:"
 #define MKN_DEFS_EXMPL1                                                        \

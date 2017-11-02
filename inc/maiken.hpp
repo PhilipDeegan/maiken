@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/compiler/compilers.hpp"
 #include "maiken/project.hpp"
 #include "maiken/settings.hpp"
+#include "maiken/global.hpp"
 
 int
 main(int argc, char* argv[]);
@@ -56,120 +57,6 @@ public:
   Exception(const char* f, const uint16_t& l, const std::string& s)
     : kul::Exception(f, l, s)
   {}
-};
-
-class AppVars : public Constants
-{
-private:
-  bool dr = 0, f = 0, s = 0, sh = 0, st = 0, u = 0;
-  uint16_t dl = 0, op = 0, ts = 1;
-  std::string aa, al, la, ra, wi;
-  const std::string* dep;
-  kul::hash::set::String cmds, modPhases;
-  kul::hash::map::S2S evs, jas, pks;
-  AppVars()
-  {
-    pks["OS"] = KTOSTRING(__KUL_OS__);
-    pks["HOME"] = kul::user::home().path();
-    pks["MKN_HOME"] = kul::user::home(STR_MAIKEN).path();
-    pks["DATETIME"] = kul::DateTime::NOW();
-    pks["TIMESTAMP"] = std::time(NULL);
-
-    if (Settings::INSTANCE().root()[STR_LOCAL] &&
-        Settings::INSTANCE().root()[STR_LOCAL][STR_REPO])
-      pks["MKN_REPO"] =
-        Settings::INSTANCE().root()[STR_LOCAL][STR_REPO].Scalar();
-    else
-      pks["MKN_REPO"] =
-        kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
-
-    if (Settings::INSTANCE().root()[STR_LOCAL] &&
-        Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO])
-      pks["MKN_MOD_REPO"] =
-        Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar();
-    else
-      pks["MKN_MOD_REPO"] =
-        kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
-
-    if (Settings::INSTANCE().root()[STR_LOCAL] &&
-        Settings::INSTANCE().root()[STR_LOCAL][STR_BIN])
-      pks["MKN_BIN"] = Settings::INSTANCE().root()[STR_LOCAL][STR_BIN].Scalar();
-    if (Settings::INSTANCE().root()[STR_LOCAL] &&
-        Settings::INSTANCE().root()[STR_LOCAL][STR_LIB])
-      pks["MKN_LIB"] = Settings::INSTANCE().root()[STR_LOCAL][STR_LIB].Scalar();
-
-    evs["MKN_OBJ"] = "o";
-    std::string obj = kul::env::GET("MKN_OBJ");
-    if (!obj.empty())
-      evs["MKN_OBJ"] = obj;
-  }
-
-public:
-  const std::string& args() const { return aa; }
-  void args(const std::string& aa) { this->aa = aa; }
-
-  const std::string& runArgs() const { return ra; }
-  void runArgs(const std::string& ra) { this->ra = ra; }
-
-  const kul::hash::map::S2S& jargs() const { return jas; }
-  void jargs(const std::string& a, const std::string& b) { jas[a] = b; }
-
-  const std::string& linker() const { return la; }
-  void linker(const std::string& la) { this->la = la; }
-
-  const std::string& allinker() const { return al; }
-  void allinker(const std::string& al) { this->al = al; }
-
-  const bool& dryRun() const { return this->dr; }
-  void dryRun(const bool& dr) { this->dr = dr; }
-
-  const bool& update() const { return this->u; }
-  void update(const bool& u) { this->u = u; }
-
-  const bool& fupdate() const { return this->f; }
-  void fupdate(const bool& f) { this->f = f; }
-
-  const bool& show() const { return this->s; }
-  void show(const bool& s) { this->s = s; }
-
-  const bool& shar() const { return this->sh; }
-  void shar(const bool& sh) { this->sh = sh; }
-
-  const bool& stat() const { return this->st; }
-  void stat(const bool& st) { this->st = st; }
-
-  const std::string* dependencyString() const { return dep; }
-  void dependencyString(const std::string* dep) { this->dep = dep; }
-
-  const uint16_t& optimise() const { return op; }
-  void optimise(const uint16_t& op) { this->op = op; }
-
-  const uint16_t& dependencyLevel() const { return dl; }
-  void dependencyLevel(const uint16_t& dl) { this->dl = dl; }
-
-  const uint16_t& threads() const { return ts; }
-  void threads(const uint16_t& t) { this->ts = t; }
-
-  const kul::hash::map::S2S& properkeys() const { return pks; }
-  void properkeys(const std::string& k, const std::string& v) { pks[k] = v; }
-
-  const kul::hash::map::S2S& envVars() const { return evs; }
-  void envVars(const std::string& k, const std::string& v) { evs[k] = v; }
-
-  void command(const std::string& s) { cmds.insert(s); }
-  const kul::hash::set::String& commands() const { return cmds; }
-
-  void modulePhase(const std::string& s) { modPhases.insert(s); }
-  const kul::hash::set::String& modulePhases() const { return modPhases; }
-
-  const std::string& with() const { return wi; }
-  void with(const std::string& wi) { this->wi = wi; }
-
-  static AppVars& INSTANCE()
-  {
-    static AppVars instance;
-    return instance;
-  }
 };
 
 class Module;
@@ -213,7 +100,7 @@ protected:
   void postSetupValidation() KTHROW(Exception);
   void resolveProperties() KTHROW(Exception);
   void resolveLang() KTHROW(Exception);
-  void parseDepedencyString(std::string s, kul::hash::set::String& include);
+  static void parseDependencyString(std::string s, kul::hash::set::String& include);
 
   void compile(kul::hash::set::String& objects) KTHROW(kul::Exception);
   void build() KTHROW(kul::Exception);

@@ -54,10 +54,14 @@ maiken::ThreadingCompiler::compile(
   if (AppVars::INSTANCE().jargs().count(fileType) > 0)
     cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;
   // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
+  auto compilerFlags = [&args](const std::string&& as){
+    for (const auto& s : kul::cli::asArgs(as))
+      args.push_back(s);
+  };
   auto comp = Compilers::INSTANCE().get(compiler);
-  for (const auto& s :
-       kul::cli::asArgs(comp->optimization(AppVars::INSTANCE().optimise())))
-    args.push_back(s);
+  compilerFlags(comp->compilerDebug(AppVars::INSTANCE().debug()));
+  compilerFlags(comp->compilerOptimization(AppVars::INSTANCE().optimise()));
+  compilerFlags(comp->compilerWarning(AppVars::INSTANCE().warn()));
   return comp->compileSource(
     cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
 }

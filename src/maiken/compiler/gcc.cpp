@@ -30,6 +30,53 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/compiler/cpp.hpp"
 
+maiken::cpp::GccCompiler::GccCompiler(const int& v) : CCompiler(v)
+{
+  m_optimise_c.insert({
+    { 0, "" }   , { 1, "-O1" }, { 2, "-O2" },
+    { 3, "-O3" }, { 4, "-O3 -funroll-loops" },
+    { 5, "-O3 -funroll-loops" }, { 6, "-O3 -funroll-loops" },
+    { 7, "-O3 -funroll-loops" }, { 8, "-O3 -funroll-loops" },
+    { 9, "-O3 -funroll-loops -march=native -mtune=native" }
+  });
+  m_debug_c.insert({
+    { 0, "-DNDEBUG" }, { 1, "-g1" }, { 2, "-g2" }, 
+    { 3, "-g3" }, { 4, "-g3" }, { 5, "-g3" }, 
+    { 6, "-g3" }, { 7, "-g3" }, { 8, "-g3" },
+    { 9, "-g3 -pg" } 
+  });
+  m_optimise_l_bin.insert({
+    { 0, "" }, { 1, "" }, { 2, "" }, 
+    { 3, "" }, { 4, "" }, { 5, "" }, 
+    { 6, "" }, { 7, "" }, { 8, "" }, 
+    { 9, "" }
+  });
+  m_optimise_l_bin.insert({
+    { 0, "" }, { 1, "" }, { 2, "" }, 
+    { 3, "" }, { 4, "" }, { 5, "" }, 
+    { 6, "" }, { 7, "" }, { 8, "" },
+    { 9, "" }
+  });
+  m_debug_l_bin.insert({
+    { 0, "" }, { 1, "" }, { 2, "" }, 
+    { 3, "" }, { 4, "" }, { 5, "" }, 
+    { 6, "" }, { 7, "" }, { 8, "" },
+    { 9, "" }
+  });
+  m_debug_l_lib.insert({
+    { 0, "" }, { 1, "" }, { 2, "" }, 
+    { 3, "" }, { 4, "" }, { 5, "" }, 
+    { 6, "" }, { 7, "" }, { 8, "" },
+    { 9, "" }
+  });
+  m_warn_c.insert({ 
+    { 0, "-w" }   , { 1, "-Wall" }, { 2, "-Wall" }, 
+    { 3, "-Wall" }, { 4, "-Wall" }, { 5, "-Wall" }, 
+    { 6, "-Wall" }, { 7, "-Wall" }, 
+    { 8, "-Wall -Wextra" }, { 9, "-Wall -Wextra -Werror" } 
+  });
+}
+
 maiken::CompilerProcessCapture
 maiken::cpp::GccCompiler::buildExecutable(
   const std::string& linker,

@@ -54,10 +54,10 @@ maiken::Application::CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception)
                          Arg('B', STR_BPATH, ArgType::STRING),
                          Arg('C', STR_DIR, ArgType::STRING),
                          Arg('d', STR_DEP, ArgType::MAYBE),
-                         Arg('D', STR_DEBUG),
                          Arg('E', STR_ENV, ArgType::STRING),
                          Arg('f', STR_FINC, ArgType::STRING),
                          Arg('F', STR_FPATH, ArgType::STRING),
+                         Arg('g', STR_DEBUG, ArgType::MAYBE),
                          Arg('G', STR_GET, ArgType::STRING),
                          Arg('h', STR_HELP),
                          Arg('j', STR_JARG, ArgType::STRING),
@@ -69,7 +69,7 @@ maiken::Application::CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception)
 #endif //_MKN_DISABLE_MODULES_
                          Arg('M', STR_MAIN, ArgType::MAYBE),
                          Arg('o', STR_OUT, ArgType::STRING),
-                         Arg('O', STR_OPT, ArgType::STRING),
+                         Arg('O', STR_OPT, ArgType::MAYBE),
                          Arg('p', STR_PROFILE, ArgType::STRING),
                          Arg('P', STR_PROPERTY, ArgType::STRING),
                          Arg('r', STR_RUN_ARG, ArgType::STRING),
@@ -77,10 +77,12 @@ maiken::Application::CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception)
                          Arg('s', STR_SCM_STATUS),
                          Arg('S', STR_SHARED),
                          Arg('t', STR_THREADS, ArgType::MAYBE),
+                         Arg('T', STR_WITHOUT, ArgType::STRING),
                          Arg('u', STR_SCM_UPDATE),
                          Arg('U', STR_SCM_FUPDATE),
                          Arg('v', STR_VERSION),
                          Arg('w', STR_WITH, ArgType::STRING),
+                         Arg('W', STR_WARN, ArgType::MAYBE),
                          Arg('x', STR_SETTINGS, ArgType::STRING) };
   std::vector<Cmd> cmdV{
     Cmd(STR_INIT),  Cmd(STR_INC),       Cmd(STR_SRC),
@@ -204,54 +206,86 @@ maiken::Application::CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception)
   if (args.has(STR_DEP))
     AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
 
-  if (args.has(STR_OPT))
-    try {
-      if (args.get(STR_OPT).size()) {
-        AppVars::INSTANCE().optimise(kul::String::UINT16(args.get(STR_OPT)));
-        if (AppVars::INSTANCE().optimise() > 9)
+  {
+    auto getSet = [args](
+      const std::string& a, 
+      const std::string& e, 
+      const uint16_t& default_value,
+      const std::function<void(const uint16_t&)>& func){
+      if (args.has(a))
+        try {
+          if (args.get(a).size()) {
+            auto val(kul::String::UINT16(args.get(a)));
+            if (val > 9)
+              KEXIT(1, e) << " argument is invalid";
+            func(val);
+          } else
+            func(default_value);
+        } catch (const kul::StringException& e) {
           KEXIT(1, "-O argument is invalid");
-      } else
-        AppVars::INSTANCE().optimise(9);
-    } catch (const kul::StringException& e) {
-      KEXIT(1, "-O argument is invalid");
-    } catch (const kul::Exception& e) {
-      KEXIT(1, e.stack());
-    }
-  auto splitArgs =
-    [](const std::string& s,
-       const std::string& t,
-       const std::function<void(const std::string&, const std::string&)>& f) {
-      for (const auto& p : kul::String::ESC_SPLIT(s, ',')) {
-        if(p.find("=") == std::string::npos)
-          KEXIT(1, t + " override invalid, = missing");
-        std::vector<std::string> ps = kul::String::ESC_SPLIT(p, '=');
-        if (ps.size() > 2)
-          KEXIT(1, t + " override invalid, escape extra \"=\"");
-        f(ps[0], ps[1]);
-      }
+        } catch (const kul::Exception& e) {
+          KEXIT(1, e.stack());
+        }
     };
 
-  if (args.has(STR_PROPERTY))
-    splitArgs(
-      args.get(STR_PROPERTY),
-      "property",
-      std::bind((void (AppVars::*)(const std::string&, const std::string&)) &
-                  AppVars::properkeys,
-                std::ref(AppVars::INSTANCE()),
-                std::placeholders::_1,
-                std::placeholders::_2));
-  if (args.has(STR_ENV))
-    splitArgs(
-      args.get(STR_ENV),
-      "environment",
-      std::bind((void (AppVars::*)(const std::string&, const std::string&)) &
-                  AppVars::envVars,
-                std::ref(AppVars::INSTANCE()),
-                std::placeholders::_1,
-                std::placeholders::_2));
+    getSet(STR_DEBUG, "-g", 9, std::bind((void (AppVars::*)(const uint16_t&)) 
+      &AppVars::debug, std::ref(AppVars::INSTANCE()),
+                  std::placeholders::_1));
+    getSet(STR_OPT, "-O", 9, std::bind((void (AppVars::*)(const uint16_t&)) 
+      &AppVars::optimise, std::ref(AppVars::INSTANCE()),
+                  std::placeholders::_1));
+    getSet(STR_WARN, "-W", 8, std::bind((void (AppVars::*)(const uint16_t&)) 
+      &AppVars::warn, std::ref(AppVars::INSTANCE()),
+                  std::placeholders::_1));  
+  }
+  {
+    auto splitArgs =
+      [](const std::string& s,
+         const std::string& t,
+         const std::function<void(const std::string&, const std::string&)>& f) {
+        for (const auto& p : kul::String::ESC_SPLIT(s, ',')) {
+          if(p.find("=") == std::string::npos)
+            KEXIT(1, t + " override invalid, = missing");
+          std::vector<std::string> ps = kul::String::ESC_SPLIT(p, '=');
+          if (ps.size() > 2)
+            KEXIT(1, t + " override invalid, escape extra \"=\"");
+          f(ps[0], ps[1]);
+        }
+      };
+
+    if (args.has(STR_PROPERTY))
+      splitArgs(
+        args.get(STR_PROPERTY),
+        "property",
+        std::bind((void (AppVars::*)(const std::string&, const std::string&)) &
+                    AppVars::properkeys,
+                  std::ref(AppVars::INSTANCE()),
+                  std::placeholders::_1,
+                  std::placeholders::_2));
+    if (args.has(STR_ENV))
+      splitArgs(
+        args.get(STR_ENV),
+        "environment",
+        std::bind((void (AppVars::*)(const std::string&, const std::string&)) &
+                    AppVars::envVars,
+                  std::ref(AppVars::INSTANCE()),
+                  std::placeholders::_1,
+                  std::placeholders::_2));
+  }
 
   if (args.has(STR_WITH))
     AppVars::INSTANCE().with(args.get(STR_WITH));
+
+  if (args.has(STR_WITHOUT)){
+    AppVars::INSTANCE().without(args.get(STR_WITHOUT));
+    kul::hash::set::String wop;
+    try {
+      Application::parseDependencyString(AppVars::INSTANCE().without(), wop);
+    } catch (const kul::Exception& e) {
+      KEXIT(1, MKN_ERR_INVALID_WITHOUT_CLI);
+    }
+    AppVars::INSTANCE().withoutParsed(wop);
+  }
 
   AppVars::INSTANCE().dependencyString(args.has(STR_DEP) ? &args.get(STR_DEP)
                                                          : 0);

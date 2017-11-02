@@ -112,7 +112,8 @@ maiken::Application::resolveDepOrModDirectory(const YAML::Node& n, bool module)
             return app->project().dir().name();
         }
 #ifdef _MKN_WITH_MKN_RAM_
-        KOUT(NON) << "Attempting branch deduction resolution";
+        KOUT(NON) << "Attempting branch deduction resolution for: "
+          << n[STR_NAME].Scalar();
         std::string version;
         if (Github::GET_LATEST(n[STR_NAME].Scalar(), version))
           return version;
@@ -177,6 +178,27 @@ maiken::Application::popDepOrMod(const YAML::Node& n,
     const maiken::Project& c(
       *maiken::Projects::INSTANCE().getOrCreate(projectDir));
 
+    auto withoutThis = [=](const std::string& name, const std::string& pro){
+      for(const auto& wo : AppVars::INSTANCE().withoutParsed()){
+        kul::hash::set::String profiles;
+        std::string proName(wo);
+        auto lb(wo.find("["));
+        auto rb(wo.find("]"));
+        if(lb != std::string::npos){
+          if(rb == std::string::npos || rb < lb)
+            KEXIT(1, "Invalid -t argument format provided");
+          std::string profile = proName.substr(lb + 1, rb - lb - 1);
+          for(const auto& pr : kul::String::SPLIT(profile, ",")) profiles.insert(pr);
+          proName = proName.substr(0, lb);
+        }
+        if(name == proName){
+          if(pro.empty() && profiles.count("@")) return true;
+          if(profiles.count(pro)) return true;
+        }
+      } 
+      return false;
+    };
+
     if (depOrMod[STR_PROFILE]) {
       for (auto p : kul::String::SPLIT(
              Properties::RESOLVE(*this, depOrMod[STR_PROFILE].Scalar()), ' ')) {
@@ -195,6 +217,8 @@ maiken::Application::popDepOrMod(const YAML::Node& n,
         if (!f && !p.empty())
           KEXIT(1,
                 "profile does not exist\n" + p + "\n" + project().dir().path());
+
+        if(!module && withoutThis(depOrMod[STR_NAME].Scalar(), p)) continue;
         auto* app = Applications::INSTANCE().getOrCreate(c, p, 0);
         if (!with)
           app->par = this;
@@ -203,6 +227,7 @@ maiken::Application::popDepOrMod(const YAML::Node& n,
         apps.push_back(std::make_pair(app->project().dir().path(), app->p));
       }
     } else {
+      if(!module && withoutThis(depOrMod[STR_NAME].Scalar(), "")) return;
       auto* app = Applications::INSTANCE().getOrCreate(c, "", 0);
       if (!with)
         app->par = this;

@@ -87,7 +87,9 @@ protected:
     : version(v)
   {}
   const int version;
-  std::unordered_map<uint8_t, std::string> optimise;
+  std::unordered_map<uint8_t, std::string> m_optimise_c, m_optimise_l_bin, m_optimise_l_lib,
+                                           m_debug_c   , m_debug_l_bin   , m_debug_l_lib,
+                                           m_warn_c;
 
 public:
   virtual ~Compiler() {}
@@ -125,10 +127,46 @@ public:
                                 bool dryRun = false) const
     KTHROW(kul::Exception) = 0;
 
-  std::string optimization(const uint8_t& key) const
+  std::string compilerDebug(const uint8_t& key) const
   {
-    if (optimise.count(key))
-      return (*optimise.find(key)).second;
+    if (m_debug_c.count(key))
+      return (*m_debug_c.find(key)).second;
+    return "";
+  }
+  std::string compilerOptimization(const uint8_t& key) const
+  {
+    if (m_optimise_c.count(key))
+      return (*m_optimise_c.find(key)).second;
+    return "";
+  }
+  std::string compilerWarning(const uint8_t& key) const
+  {
+    if (m_warn_c.count(key))
+      return (*m_warn_c.find(key)).second;
+    return "";
+  }
+  std::string linkerDebugBin(const uint8_t& key) const
+  {
+    if (m_debug_l_bin.count(key))
+      return (*m_debug_l_bin.find(key)).second;
+    return "";
+  }
+  std::string linkerDebugLib(const uint8_t& key) const
+  {
+    if (m_debug_l_lib.count(key))
+      return (*m_debug_l_lib.find(key)).second;
+    return "";
+  }
+  std::string linkerOptimizationBin(const uint8_t& key) const
+  {
+    if (m_optimise_l_bin.count(key))
+      return (*m_optimise_l_bin.find(key)).second;
+    return "";
+  }
+  std::string linkerOptimizationLib(const uint8_t& key) const
+  {
+    if (m_optimise_l_lib.count(key))
+      return (*m_optimise_l_lib.find(key)).second;
     return "";
   }
 };

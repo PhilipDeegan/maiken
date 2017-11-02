@@ -89,20 +89,8 @@ public:
 class GccCompiler : public CCompiler
 {
 public:
-  GccCompiler(const int& v = 0)
-    : CCompiler(v)
-  {
-    optimise.insert({ { 0, "" },
-                      { 1, "-O1" },
-                      { 2, "-O2" },
-                      { 3, "-O3" },
-                      { 4, "-O3 -funroll-loops" },
-                      { 5, "-O3 -funroll-loops" },
-                      { 6, "-O3 -funroll-loops" },
-                      { 7, "-O3 -funroll-loops" },
-                      { 8, "-O3 -funroll-loops" },
-                      { 9, "-O3 -funroll-loops -march=native" } });
-  }
+  GccCompiler(const int& v = 0);
+
   const std::string sharedLib(const std::string& lib) const override
   {
     return "lib" + lib + ".so";
@@ -155,9 +143,7 @@ public:
 class ClangCompiler : public GccCompiler
 {
 public:
-  ClangCompiler(const int& v = 0)
-    : GccCompiler(v)
-  {}
+  ClangCompiler(const int& v = 0);
   virtual const std::string cc() const override { return "clang"; }
   virtual const std::string cxx() const override { return "clang++"; }
 };
@@ -175,9 +161,7 @@ public:
 class IntelCompiler : public GccCompiler
 {
 public:
-  IntelCompiler(const int& v = 0)
-    : GccCompiler(v)
-  {}
+  IntelCompiler(const int& v = 0);
   virtual const std::string cc() const override { return "icc"; }
   virtual const std::string cxx() const override { return "icpc"; }
 };
@@ -186,20 +170,7 @@ class WINCompiler : public CCompiler
 {
 protected:
 public:
-  WINCompiler(const int& v = 0)
-    : CCompiler(v)
-  {
-    optimise.insert({ { 0, "" },
-                      { 1, "-O1" },
-                      { 2, "-O2" },
-                      { 3, "-O3" },
-                      { 4, "-O3 -funroll-loops" },
-                      { 5, "-O3 -funroll-loops" },
-                      { 6, "-O3 -funroll-loops" },
-                      { 7, "-O3 -funroll-loops" },
-                      { 8, "-O3 -funroll-loops" },
-                      { 9, "-O3 -funroll-loops -march=native" } });
-  }
+  WINCompiler(const int& v = 0);
   virtual const std::string cc() const override { return "cl"; }
   virtual const std::string cxx() const override { return "cl"; }
   const std::string sharedLib(const std::string& lib) const override

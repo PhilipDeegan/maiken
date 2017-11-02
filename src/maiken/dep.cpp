@@ -45,7 +45,7 @@ includeDependency(const std::string& s,
 }
 
 void
-maiken::Application::parseDepedencyString(std::string s,
+maiken::Application::parseDependencyString(std::string s,
                                           kul::hash::set::String& include)
 {
   kul::String::REPLACE_ALL(s, " ", "");
@@ -100,7 +100,7 @@ maiken::Application::buildDepVec(const std::string* depVal)
         AppVars::INSTANCE().dependencyLevel(kul::String::UINT16(*depVal));
       } catch (const kul::StringException& e) {
         AppVars::INSTANCE().dependencyLevel(0);
-        parseDepedencyString(*depVal, include);
+        parseDependencyString(*depVal, include);
       }
     } else
       AppVars::INSTANCE().dependencyLevel(

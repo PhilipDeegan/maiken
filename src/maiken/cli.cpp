@@ -78,7 +78,7 @@ maiken::Application::withArgs(
   if (this->ro && AppVars::INSTANCE().with().size()) {
     kul::hash::set::String withs;
     try {
-      parseDepedencyString(AppVars::INSTANCE().with(), withs);
+      parseDependencyString(AppVars::INSTANCE().with(), withs);
     } catch (const kul::Exception& e) {
       auto with(AppVars::INSTANCE().with());
       if(with[0] == '[' && with[with.size() - 1] == ']')

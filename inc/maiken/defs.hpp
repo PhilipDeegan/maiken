@@ -174,7 +174,9 @@ public:
   static constexpr const char* STR_VALUE = "value";
   static constexpr const char* STR_SUPER = "super";
   static constexpr const char* STR_OPT = "optimize";
+  static constexpr const char* STR_WARN = "warning";
   static constexpr const char* STR_WITH = "with";
+  static constexpr const char* STR_WITHOUT = "without";
 
   static constexpr const char* STR_RUN_ARG = "run-arg";
 

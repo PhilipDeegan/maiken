@@ -410,7 +410,7 @@ Also, if non numeric, special characters include
     "+", ignores current project. If only value builds all but current project.
 
 
-4.9 With dependency build rules
+4.9 With/out dependency build rules
 
 CSV with the value equating to either the current profile yaml root node "name" to includel local profiles
  OR - full project names as if dependencies i.e. mkn.kul / org.boost
@@ -437,6 +437,9 @@ such that the following commands are valid
     -w mkn.ram(https://github.com/mkn/mkn.ram)[https]
     -w https://github.com/mkn/mkn.ram[https]
     -w [profile]
+
+Similarly dependencies can be removed with the "-T" option, this is for instance if you have a library installed 
+ in your system and do not wish to use the mkn configured version.
 
 will use the master version of the project "mkn.ram" and put it in the subdirectory of the current project "directoy"
 
@@ -495,6 +498,7 @@ Available arguments:
     -C --directory $d     - Execute on directory $d rather than current directory 
     -d --dependencies     - See 4.8
     -E --env $e           - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
+    -g --debug [0-9]      - Add compiler/linker debug flags for chosen compiler - 0 = off / 9 = full - number missing = 9 / no default
     -G --get $k           - Returns string value for property K in either local yaml or settings.yaml, failure is no string 0 exit code
     -h --help             - Print help
     -j --jargs $j         - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing file-type specific args to compiler
@@ -503,7 +507,7 @@ Available arguments:
     -m --mod [$p]         - Activate modules, no argument all implies all phases, otherwise $p = CSV of phases to activate
     -M --main $f          - Set main file as $f, overrides yaml main tag
     -o --out $f           - Set output binary/lib name to be $f, overrides yaml out tag
-    -O --optimize [0-9]   - Add compiler specific flags to compile - 0 = off / 9 = full - default 9
+    -O --optimize [0-9]   - Add compiler/linker optimisation flags for chosen compiler - 0 = off / 9 = full - number missing = 9 / no default
     -L --all-linker $t    - Adds $t to linking of all projects
     -p --profile $p       - Activate profile p
     -P --property $p      - CSV key=value properties override format -P "k1=v1,k2=v2" , backslash escaps , and =
@@ -513,16 +517,18 @@ Available arguments:
     -u --scm-update       - Update project from SCM when permitted, allows -d
     -U --scm-force-update - Force update project from SCM, allows -d
     -t --threads $n       - Consume $num threads while compiling source files where $n > 0, If $n is missing optimal resolution attempted.
+    -T --threads $n       - Remove profile or dependency on the command line see 4.9
     -v --version          - Displays the current maiken version number
     -x --settings $f      - Sets settings.yaml in use to $f. Directory missing, $(4.3.1) attempted
     -K --static           - Links projects without mode as static
     -S --shared           - Links projects without mode as shared
     -w --with             - Add profile or dependency on the command line see 4.9
+    -W --warn             - Add compiler warning flags for chosen compiler - 0 = off / 9 = full - number missing = 8 / no default (Requires KLOG=1)
 
 
 5.1.3 Examples
 
-mkn clean build -dtu                 - update/clean/compile with optimal threads/link everything
+mkn clean build -dOtug 0             - update/clean/compile with optimal threads/link/flags in relase mode
 mkn clean compile link -d -t -u      - update/clean/compile with optimal threads/link everything
 mkn clean build -dtKa -DARG          - clean/compile with optimal threads passing -DARG/link everything statically
 mkn clean build -dtKa "-DARG -DARG1" - clean/compile with optimal threads passing -DARG and -DARG1/link everything statically
