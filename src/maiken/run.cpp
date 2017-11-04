@@ -85,6 +85,13 @@ maiken::Application::run(bool dbg)
     kul::cli::EnvVar pa("PATH", arg, kul::cli::EnvVarMode::PREP);
 #else
     kul::cli::EnvVar pa("LD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
+
+#if defined(__APPLE__)
+    kul::cli::EnvVar dy("DYLD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
+    KOUT(INF) << dy.name() << " : " << dy.toString();
+    p->var(dy.name(), dy.toString());
+#endif   // __APPLE__
+
 #endif
     KOUT(INF) << pa.name() << " : " << pa.toString();
     p->var(pa.name(), pa.toString());
