@@ -23,8 +23,6 @@ Testers/comments/suggestions/feature requests welcome. Email me or make an issue
 
 [mkn.kul](https://github.com/mkn/mkn.kul)
 
-[google sparsehash](https://github.com/mkn/google.sparsehash)
-
 [yaml.cpp](https://github.com/mkn/parse.yaml)
 
 ## How to use

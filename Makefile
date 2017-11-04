@@ -1,7 +1,6 @@
 
 KUL_GIT=master
 YAML_GIT=master
-HASH_GIT=master
 
 CWD:=$(CURDIR)
 ifeq ($(strip $(CURDIR)),)
@@ -15,8 +14,7 @@ INCS =  -Iinc \
 		-Iext/yaml/$(YAML_GIT)/include \
 		-Iext/kul/$(KUL_GIT)/inc \
 		-Iext/kul/$(KUL_GIT)/os/$(OS)/inc \
-		-Iext/kul/$(KUL_GIT)/os/nixish/inc \
-		-Iext/sparsehash/$(HASH_GIT)/google
+		-Iext/kul/$(KUL_GIT)/os/nixish/inc
 
 YAML = ext/yaml/$(YAML_GIT)/bin/libyaml.a
 LDFLAGS = -pthread -ldl
@@ -54,12 +52,6 @@ general:
 
 	@if [ ! -d "./ext/kul/$(KUL_GIT)" ]; then \
 		git clone --depth 1 https://github.com/mkn/mkn.kul.git --branch $(KUL_GIT) ext/kul/$(KUL_GIT); \
-	fi; 
-	@if [ ! -d "./ext/sparsehash/$(HASH_GIT)" ]; then \
-		git clone --depth 1 https://github.com/mkn/google.sparsehash.git --branch $(HASH_GIT) ext/sparsehash/$(HASH_GIT); \
-		cd ext/sparsehash/$(HASH_GIT); \
-		sh mkn.sh; \
-		cd ../../..; \
 	fi;
 
 	@if [ ! -d "ext/yaml/$(YAML_GIT)" ]; then \
