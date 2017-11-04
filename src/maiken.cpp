@@ -689,8 +689,7 @@ maiken::Application::setSuper()
   if (sup)
     return;
   if (project().root()[STR_SUPER]) {
-    const std::string& cwd(kul::env::CWD());
-    kul::env::CWD(project().dir().real());
+    kul::os::PushDir pushd(project().dir().real());
     kul::Dir d(project().root()[STR_SUPER].Scalar());
     if (!d)
       KEXIT(1, "Super does not exist in project: " + project().dir().real());
