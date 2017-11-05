@@ -224,19 +224,19 @@ maiken::Settings::write(const kul::File& file) KTHROW(kul::Exit)
   bool g = kul::env::WHICH("gcc") || kul::env::WHICH("gcc.exe");
 
   w.write("#local:", true);
-  w.write("# Optionnaly override local repository directory", true);
+  w.write("## Optionnaly override local repository directory", true);
   w.write("#    repo: <directory>", true);
   w << kul::os::EOL();
 
   if (c || g) {
-    w.write("# Add include directories to every compilation", true);
+    w.write("## Add include directories to every compilation", true);
     w.write("#inc: <directory>", true);
-    w.write("# Add library paths when linking every binary", true);
+    w.write("## Add library paths when linking every binary", true);
     w.write("#path:    <directory>\n", true);
     w << kul::os::EOL();
 
     w.write(
-      "# Modify environement variables for application commands - excludes "
+      "## Modify environement variables for application commands - excludes "
       "run",
       true);
     w.write("#env:", true);
@@ -246,7 +246,7 @@ maiken::Settings::write(const kul::File& file) KTHROW(kul::Exit)
     w << kul::os::EOL();
 
     w.write("file:", true);
-    w.write("  - type: c", true);
+    w.write("  - type: c:S", true);
     w.write("    archiver: ar -cr", true);
     w << "    compiler: " << (c ? "clang" : "gcc") << kul::os::EOL();
     w << "    linker: " << (c ? "clang" : "gcc") << kul::os::EOL();
