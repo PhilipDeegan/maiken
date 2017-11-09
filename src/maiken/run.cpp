@@ -80,7 +80,7 @@ maiken::Application::run(bool dbg)
     std::string arg;
     for (const auto& s : libraryPaths())
       arg += s + kul::env::SEP();
-    arg.pop_back();
+    if(!arg.empty()) arg.pop_back();
 #ifdef _WIN32
     kul::cli::EnvVar pa("PATH", arg, kul::cli::EnvVarMode::PREP);
 #else
