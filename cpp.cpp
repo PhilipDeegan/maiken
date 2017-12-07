@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     exit(2);
   });
   uint8_t ret = 0;
-  const int64_t s = kul::Now::MILLIS();
+  const auto s = kul::Now::MILLIS();
   try {
     for (auto app : maiken::Application::CREATE(argc, argv)) app->process();
     KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
