@@ -569,6 +569,11 @@ Type            bool
 Default         false
 Description     Links libraries with dependency libraries (gcc and  derivatives only)
 
+Key             MKN_CL_PREFERRED
+Type            bool
+Default         false
+Description     Windows only: when attempting automatic settings.yaml creation, use cl even if clang/gcc are found
+
 
 7. Switches
  

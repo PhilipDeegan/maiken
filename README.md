@@ -1,4 +1,5 @@
-[![Travis](https://travis-ci.org/Dekken/maiken.svg?branch=master)](https://travis-ci.org/Dekken/maiken)  [![Semaphore](https://semaphoreci.com/api/v1/dekken/maiken/branches/master/badge.svg)](https://semaphoreci.com/dekken/maiken) 
+[![Travis](https://travis-ci.org/Dekken/maiken.svg?branch=master)](https://travis-ci.org/Dekken/maiken)  [![Semaphore](https://semaphoreci.com/api/v1/dekken/maiken/branches/master/badge.svg)](https://semaphoreci.com/dekken/maiken) [![AppVeyor](https://ci.appveyor.com/api/projects/status/tsfqtewavevo0a8y/branch/master?svg=true)](https://ci.appveyor.com/project/Dekken/maiken)
+
 
 # maiken
 
@@ -12,6 +13,8 @@
 [README](https://raw.githubusercontent.com/Dekken/maiken/master/README.noformat)
 
 [Binaries available](https://github.com/Dekken/maiken/tree/binaries)
+
+[Latest Windows build @ appveyor](https://ci.appveyor.com/project/Dekken/maiken/build/artifacts)
 
 Testers/comments/suggestions/feature requests welcome. Email me or make an issue. Or head on over to [/r/mkn](http://reddit.com/r/mkn)
 

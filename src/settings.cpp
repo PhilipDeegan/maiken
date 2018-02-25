@@ -228,7 +228,13 @@ maiken::Settings::write(const kul::File& file) KTHROW(kul::Exit)
   w.write("#    repo: <directory>", true);
   w << kul::os::EOL();
 
+#ifdef _WIN32
+  auto cl_pref(kul::env::GET("MKN_CL_PREFERRED"));
+  bool use_cl = cl_pref.empty() ? 0 : kul::String::BOOL(cl_pref);
+  if (!use_cl && (c || g)) {
+#else
   if (c || g) {
+#endif
     w.write("## Add include directories to every compilation", true);
     w.write("#inc: <directory>", true);
     w.write("## Add library paths when linking every binary", true);
@@ -259,7 +265,7 @@ maiken::Settings::write(const kul::File& file) KTHROW(kul::Exit)
 
 #ifdef _WIN32
 
-  if (!c && !g) {
+  if (use_cl || (!c && !g)) {
     bool f = 0;
     auto cl(kul::env::WHERE("cl.exe"));
     auto inc(kul::env::GET("INCLUDE"));

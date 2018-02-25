@@ -1,0 +1,38 @@
+version: 0.1.{build}
+
+branches:
+  only:
+    - master
+
+max_jobs: 1
+
+image:
+- Visual Studio 2017
+
+init:
+  - git config --global core.autocrlf input
+
+clone_depth: 1
+
+hosts:
+  queue-server: 127.0.0.1
+  db.server.com: 127.0.0.2
+
+platform: x64
+configuration: Release
+
+cache:
+  - C:\ProgramData\chocolatey\bin -> appveyor.yml
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
+
+build_script:
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - curl -o mkn.exe -L https://ci.appveyor.com/api/projects/dekken/maiken/artifacts/bin/build/mkn.exe
+  - SET MKN_CL_PREFERRED=1
+  - mkn clean build -dtKOg 0
+  - C:\Python36-x64\Scripts\pip install flawfinder
+  - C:\Python36-x64\python C:\Python36-x64\Scripts\flawfinder .
+
+artifacts:
+  - path: "bin\\build\\mkn.exe"
+    name: mkn
