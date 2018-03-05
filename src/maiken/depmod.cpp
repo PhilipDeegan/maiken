@@ -54,7 +54,6 @@ maiken::Application::loadDepOrMod(const YAML::Node& node,
     node[STR_VERSION] ? Properties::RESOLVE(*this, node[STR_VERSION].Scalar())
                       : "");
   try{
-
     KOUT(NON) << SCMGetter::GET(depOrMod, tscr, module)
                    ->co(
                      depOrMod.path(), SCMGetter::REPO(depOrMod, tscr, module), v);
@@ -155,6 +154,8 @@ maiken::Application::popDepOrMod(const YAML::Node& n,
     if (node[STR_VERSION])
       app.scv = Properties::RESOLVE(*this, node[STR_VERSION].Scalar());
     if (module && node[STR_ARG]) {
+      if (node[STR_ARG][STR_INIT])
+        app.modInit(node[STR_ARG][STR_INIT]);
       if (node[STR_ARG][STR_COMPILE])
         app.modCompile(node[STR_ARG][STR_COMPILE]);
       if (node[STR_ARG][STR_LINK])
@@ -224,6 +225,7 @@ maiken::Application::popDepOrMod(const YAML::Node& n,
           app->par = this;
         setApp(*app, depOrMod);
         vec.push_back(app);
+        app->addRDep(this);
         apps.push_back(std::make_pair(app->project().dir().path(), app->p));
       }
     } else {
@@ -233,6 +235,7 @@ maiken::Application::popDepOrMod(const YAML::Node& n,
         app->par = this;
       setApp(*app, depOrMod);
       vec.push_back(app);
+      app->addRDep(this);
       apps.push_back(std::make_pair(app->project().dir().path(), app->p));
     }
   };
@@ -247,6 +250,7 @@ maiken::Application::popDepOrMod(const YAML::Node& n,
       app->par = this;
       app->scr = scr;
       vec.push_back(app);
+      app->addRDep(this);
       apps.push_back(std::make_pair(app->project().dir().path(), app->p));
     }
   cyclicCheck(apps);

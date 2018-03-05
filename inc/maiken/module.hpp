@@ -80,7 +80,10 @@ private:
 public:
   virtual ~Module() {}
   Module() KTHROW(ModuleException) {}
-
+  
+  virtual void init(Application& app, const YAML::Node& arg)
+    KTHROW(std::exception)
+  {}
   virtual void compile(Application& app, const YAML::Node& arg)
     KTHROW(std::exception)
   {}

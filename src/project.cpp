@@ -57,7 +57,9 @@ maiken::Project::validator() const
     NodeValidator("local"),
     NodeValidator(
       "arg",
-      { NodeValidator("compile", { NodeValidator("*") }, 0, NodeType::NON),
+      { 
+        NodeValidator("init", { NodeValidator("*") }, 0, NodeType::NON),
+        NodeValidator("compile", { NodeValidator("*") }, 0, NodeType::NON),
         NodeValidator("link", { NodeValidator("*") }, 0, NodeType::NON),
         NodeValidator("pack", { NodeValidator("*") }, 0, NodeType::NON) },
       0,

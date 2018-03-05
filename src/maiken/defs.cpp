@@ -69,6 +69,7 @@ constexpr const char* maiken::Constants::STR_MOD_REPO;
 constexpr const char* maiken::Constants::STR_DEBUGGER;
 constexpr const char* maiken::Constants::STR_DBG;
 constexpr const char* maiken::Constants::STR_RUN;
+constexpr const char* maiken::Constants::STR_INIT;
 
 constexpr const char* maiken::Constants::STR_PROJECT;
 constexpr const char* maiken::Constants::STR_ARCHIVER;

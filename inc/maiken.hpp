@@ -76,14 +76,14 @@ protected:
   std::string arg, main, lang, lnk, out, scr, scv;
   const std::string p;
   kul::Dir bd, inst;
-  YAML::Node modCArg, modLArg, modPArg;
+  YAML::Node modIArg, modCArg, modLArg, modPArg;
   const maiken::Project& proj;
   kul::hash::map::S2T<kul::hash::map::S2S> fs;
   kul::hash::map::S2S includeStamps, itss, ps;
   kul::hash::map::S2S cArg, cLnk;
   kul::hash::map::S2T<kul::hash::set::String> args;
   kul::hash::map::S2T<uint64_t> stss;
-  std::vector<Application*> deps, modDeps;
+  std::vector<Application*> deps, modDeps, rdeps;
   std::vector<std::shared_ptr<ModuleLoader>> mods;
   std::vector<kul::cli::EnvVar> evs;
   std::vector<std::string> libs, paths;
@@ -156,12 +156,19 @@ protected:
   void addSourceLine(const std::string& o) KTHROW(kul::Exception);
   void addIncludeLine(const std::string& o) KTHROW(kul::Exception);
 
+  void modInit(const YAML::Node& modArg) { modIArg = modArg; }
+  const YAML::Node& modInit() { return modIArg; }
   void modCompile(const YAML::Node& modArg) { modCArg = modArg; }
   const YAML::Node& modCompile() { return modCArg; }
   void modLink(const YAML::Node& modArg) { modLArg = modArg; }
   const YAML::Node& modLink() { return modLArg; }
   void modPack(const YAML::Node& modArg) { modPArg = modArg; }
   const YAML::Node& modPack() { return modPArg; }
+
+  void addRDep(Application* app){
+    if(std::find(rdeps.begin(), rdeps.end(), app) == rdeps.end())
+      rdeps.push_back(app);
+  }
 
   static void showHelp();
 
@@ -179,6 +186,7 @@ public:
   const std::string& profile() const { return p; }
   const maiken::Project& project() const { return proj; }
   const std::vector<Application*>& dependencies() const { return deps; }
+  const std::vector<Application*>& revendencies() const { return rdeps; }
   const std::vector<Application*>& moduleDependencies() const
   {
     return modDeps;
@@ -204,6 +212,9 @@ public:
   {
     return args;
   }
+
+  void addInclude(const std::string &s, bool p = 1){ incs.push_back(std::make_pair(s, p)); }
+  void addLibpath(const std::string &s){ paths.push_back(s); }
 
   std::string baseLibFilename() const
   {

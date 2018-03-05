@@ -110,10 +110,11 @@ maiken::Application::process() KTHROW(kul::Exception)
 
   auto loadModules = [&](Application& app) {
 #ifndef _MKN_DISABLE_MODULES_
-    if (phase.size())
-      for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod) {
-        app.mods.push_back(ModuleLoader::LOAD(**mod));
-      }
+    for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod) {
+      app.mods.push_back(ModuleLoader::LOAD(**mod));
+    }
+    for (auto& modLoader : app.mods)
+      modLoader->module()->init(app, modLoader->app()->modIArg);
 #endif //_MKN_DISABLE_MODULES_
   };
   auto proc = [&](Application& app, bool work) {
@@ -176,10 +177,8 @@ maiken::Application::process() KTHROW(kul::Exception)
   }
 
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
-    if (!(*app)->ig)
-      loadModules(**app);
-  if (!this->ig)
-    loadModules(*this);
+    loadModules(**app);  
+  loadModules(*this);
 
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) {
     if ((*app)->ig)
