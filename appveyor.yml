@@ -29,6 +29,10 @@ build_script:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
   - curl -o mkn.exe -L https://ci.appveyor.com/api/projects/dekken/maiken/artifacts/bin/build/mkn.exe
   - SET MKN_CL_PREFERRED=1
+
+  # doesnt exist for somereason?
+  - mkdir -p "C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\cppwinrt"
+
   - mkn clean build -dtKOg 0
   - C:\Python36-x64\Scripts\pip install flawfinder
   - C:\Python36-x64\python C:\Python36-x64\Scripts\flawfinder .
