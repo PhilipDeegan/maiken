@@ -11,12 +11,12 @@ OS =
 CXX=g++ 
 CXXFLAGS=-std=c++14 -Os -Wall -fmessage-length=0 -fPIC
 INCS =  -Iinc \
-		-Iext/yaml/$(YAML_GIT)/include \
+		-Iext/yaml/$(YAML_GIT)/p/include \
 		-Iext/kul/$(KUL_GIT)/inc \
 		-Iext/kul/$(KUL_GIT)/os/$(OS)/inc \
 		-Iext/kul/$(KUL_GIT)/os/nixish/inc
 
-YAML = ext/yaml/$(YAML_GIT)/bin/libyaml.a
+YAML = ext/yaml/$(YAML_GIT)/p/bin/libyaml.a
 LDFLAGS = -pthread -ldl
 LINKP= -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 
@@ -56,11 +56,14 @@ general:
 
 	@if [ ! -d "ext/yaml/$(YAML_GIT)" ]; then \
 		git clone --depth 1 https://github.com/mkn/parse.yaml.git --branch $(YAML_GIT) ext/yaml/$(YAML_GIT); \
+		cd ext/yaml/$(YAML_GIT) 2>&1 /dev/null; \
+		./mkn.sh;  \
+		cd ../../.. 2>&1 /dev/null; \
 	fi;
-	@if [ ! -d "ext/yaml/$(YAML_GIT)/bin" ]; then \
-		mkdir ext/yaml/$(YAML_GIT)/bin; \
+	@if [ ! -d "ext/yaml/$(YAML_GIT)/p/bin" ]; then \
+		mkdir ext/yaml/$(YAML_GIT)/p/bin; \
 	fi;
-	@if [ ! -f "ext/yaml/$(YAML_GIT)/bin/libyaml.a" ]; then \
+	@if [ ! -f "ext/yaml/$(YAML_GIT)/p/bin/libyaml.a" ]; then \
 		$(MAKE) caml; \
 		$(MAKE) yaml; \
 	fi;
@@ -80,17 +83,17 @@ link:
 	$(CXX) -o "$(EXE)" $(FILES) $(YAML) $(LDFLAGS) 
 
 caml:
-	@for f in $(shell find ext/yaml/$(YAML_GIT)/src -type f -name '*.cpp'); do \
-		echo $(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$$f"; \
-		$(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/include -o "ext/yaml/$(YAML_GIT)/bin/$$(basename $$f).o" -c "$$f" || exit 1 ; \
+	@for f in $(shell find ext/yaml/$(YAML_GIT)/p/src -type f -name '*.cpp'); do \
+		echo $(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/p/include -o "ext/yaml/$(YAML_GIT)/p/bin/$$(basename $$f).o" -c "$$f"; \
+		$(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/p/include -o "ext/yaml/$(YAML_GIT)/p/bin/$$(basename $$f).o" -c "$$f" || exit 1 ; \
 	done;	
 
 yaml:
-	$(eval FILES := $(foreach dir,$(shell find ext/yaml/$(YAML_GIT)/bin -type f -name *.o),$(dir)))
-	ar -r ext/yaml/$(YAML_GIT)/bin/libyaml.a $(FILES)
+	$(eval FILES := $(foreach dir,$(shell find ext/yaml/$(YAML_GIT)/p/bin -type f -name *.o),$(dir)))
+	ar -r ext/yaml/$(YAML_GIT)/p/bin/libyaml.a $(FILES)
 
 clean:
-	rm -rf ext/yaml/$(YAML_GIT)/bin	
+	rm -rf ext/yaml/$(YAML_GIT)/p/bin	
 	rm -rf bin
 
 clean-all:
