@@ -5,7 +5,7 @@ version: master
 scm: https://github.com/dekken/maiken
 
 property:
-    DATE: 05-MAR-2018
+    DATE: 24-MAR-2018
 
 parent: base
 mode: none
@@ -13,7 +13,7 @@ mode: none
 profile:
   - name: base
     inc: ./inc
-    dep: 
+    dep:
     - name: mkn.kul
     - name: parse.yaml
     src: ./src
@@ -30,13 +30,13 @@ profile:
 
   - name: shared
     parent: base
-    mode: shared 
+    mode: shared
 
   - name: mod
-    mode: shared 
+    mode: shared
     inc: ./inc
     src: ./src
-    dep: 
+    dep:
     - name: mkn.kul
     - name: parse.yaml
       profile: shared
