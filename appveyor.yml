@@ -32,8 +32,9 @@ build_script:
 
   # doesnt exist for somereason?
   - mkdir -p "C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\cppwinrt"
-
-  - mkn clean build -dtKOg 0
+  - C:\Python36-x64\Scripts\pip install conan
+  - SET PYTHON=C:\Python36-x64\python.exe
+  - mkn clean build -dtKOg 0 -w mkn.ram[https]
   - C:\Python36-x64\Scripts\pip install flawfinder
   - C:\Python36-x64\python C:\Python36-x64\Scripts\flawfinder .
 
