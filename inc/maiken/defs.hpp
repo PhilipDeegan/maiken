@@ -122,6 +122,7 @@ public:
   static constexpr const char* STR_INSTALL = "install";
   static constexpr const char* STR_GET = "get";
   static constexpr const char* STR_OUT = "out";
+  static constexpr const char* STR_QUIET = "quiet";
 
   static constexpr const char* STR_PROJECT = "project";
   static constexpr const char* STR_LOCAL = "local";

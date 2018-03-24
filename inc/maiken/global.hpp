@@ -38,7 +38,7 @@ namespace maiken {
 class AppVars : public Constants
 {
 private:
-  bool dr = 0, f = 0, s = 0, sh = 0, st = 0, u = 0;
+  bool dr = 0, f = 0, q = 0, s = 0, sh = 0, st = 0, u = 0;
   uint16_t de = -1, dl = 0, op = -1, ts = 1, wa = -1;
   std::string aa, al, la, ra, wi, wo;
   const std::string* dep;
@@ -79,6 +79,17 @@ private:
     std::string obj = kul::env::GET("MKN_OBJ");
     if (!obj.empty())
       evs["MKN_OBJ"] = obj;
+
+#ifdef _WIN32
+    evs["MKN_LIB_EXT"] = "dll";
+#elif  _APPLE_
+    evs["MKN_LIB_EXT"] = "dylib";
+#else
+    evs["MKN_LIB_EXT"] = "o";
+#endif
+    std::string ext = kul::env::GET("MKN_LIB_EXT");
+    if (!ext.empty())
+      evs["MKN_LIB_EXT"] = ext;
   }
 
 public:
@@ -99,6 +110,9 @@ public:
 
   const bool& dryRun() const { return this->dr; }
   void dryRun(const bool& dr) { this->dr = dr; }
+
+  const bool& quiet() const { return this->q; }
+  void quiet(const bool& q) { this->q = q; }
 
   const bool& update() const { return this->u; }
   void update(const bool& u) { this->u = u; }

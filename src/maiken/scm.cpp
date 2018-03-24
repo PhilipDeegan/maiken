@@ -131,5 +131,9 @@ maiken::Application::scmUpdate(const bool& f,
       ss << " FROM " << url;
     KOUT(NON) << "UPDATING: " << this->project().dir().real() << ss.str();
     scm->up(this->project().dir().real(), url, ver);
+    kul::os::PushDir pushd(this->project().dir());
+    kul::Dir build(".mkn/build");
+    kul::File ts("timestamp", build);
+    if(build && ts) ts.rm();
   }
 }

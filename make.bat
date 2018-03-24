@@ -5,7 +5,6 @@ SETLOCAL enabledelayedexpansion
 
 SET KUL_VER=master
 SET YAML_VER=master
-SET HASH_VER=master
 SET PWD=%CD%
 
 SET WIN_KIT=
@@ -21,31 +20,24 @@ SET LIBPATHS=
 ECHO "Making Maiken for Windows"
 
 IF NOT EXIST ext\kul\%KUL_VER% (
-	git clone --depth 1 https://github.com/mkn/mkn.kul.git --branch %KUL_VER% ext/kul/%KUL_VER%
+    git clone --depth 1 https://github.com/mkn/mkn.kul.git --branch %KUL_VER% ext/kul/%KUL_VER%
 )
 IF NOT EXIST ext\yaml\%YAML_VER% (
-	git clone --depth 1 https://github.com/mkn/parse.yaml.git --branch %YAML_VER% ext/yaml/%YAML_VER%
-)
-IF NOT EXIST ext\sparsehash\%HASH_VER% (
-	git clone --depth 1 https://github.com/mkn/google.sparsehash.git --branch %HASH_VER% ext/sparsehash/%HASH_VER%
-	cd ext/sparsehash/%HASH_VER%
-	CALL mkn.bat
-	cd ../../..
+    git clone --depth 1 https://github.com/mkn/parse.yaml.git --branch %YAML_VER% ext/yaml/%YAML_VER%
 )
 
 SET /P WIN_KIT="Enter Windows Kit 10 root dir (one above 'include'): "
 SET /P VIS_STU="Enter Visual Studio 14/15 root dir (one above 'VC'): "
 
 IF NOT EXIST %VIS_STU%\VC\bin\cl.exe (
-	ECHO %VIS_STU%\VC\bin\cl.exe does not exist
-	GOTO end
+    ECHO %VIS_STU%\VC\bin\cl.exe does not exist
+    GOTO end
 )
 SET VSCC=%VIS_STU%\VC\bin\cl
 SET VSCAR=%VIS_STU%\VC\bin\lib
 
 SET INCLUDES=%INCLUDES% /I%PWD%\ext\kul\%KUL_VER%\inc
 SET INCLUDES=%INCLUDES% /I%PWD%\ext\kul\%KUL_VER%\os\win\inc
-SET INCLUDES=%INCLUDES% /I%PWD%\ext\sparsehash\%HASH_VER%\google
 SET INCLUDES=%INCLUDES% /I%PWD%\ext\yaml\%YAML_VER%\include
 SET INCLUDES=%INCLUDES% /I%WIN_KIT%\Include\10.0.10240.0\um
 SET INCLUDES=%INCLUDES% /I%WIN_KIT%\Include\10.0.10240.0\ucrt

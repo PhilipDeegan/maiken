@@ -41,10 +41,18 @@ maiken::Application::link(const kul::hash::set::String& objects)
       buildExecutable(objects);
     else
       buildLibrary(objects);
+    kul::os::PushDir pushd(this->project().dir());
+    kul::Dir build(".mkn/build");
+    build.mk();
+    kul::File ts("timestamp", build);
+    if(ts) ts.rm();
+    {
+      kul::io::Writer w(ts);
+      w << kul::Now::MILLIS();
+    }    
   } else
     KEXIT(1, "No link objects found, try compile or build.");
 }
-
 
 void
 maiken::Application::checkErrors(const CompilerProcessCapture& cpc)
@@ -64,4 +72,35 @@ maiken::Application::checkErrors(const CompilerProcessCapture& cpc)
     e(cpc.errs());
   if (cpc.exception())
     std::rethrow_exception(cpc.exception());
+}
+
+bool
+maiken::Application::is_build_required(){
+  kul::os::PushDir pushd(this->project().dir());
+  return !kul::Dir(".mkn/build");
+}
+
+bool
+maiken::Application::is_build_stale() {
+  kul::os::PushDir pushd(this->project().dir());
+  kul::Dir d(".mkn/build");
+  kul::File f("timestamp", d);
+  KLOG(INF);
+  if(!d || !f) return true;
+  KLOG(INF);
+  kul::io::Reader r(f);
+  try{
+    size_t now = kul::Now::MILLIS();
+    size_t _MKN_BUILD_IS_STALE_MINUTES = (now) - (43200 * 60 * 1000);
+    const char *c = r.readLine();
+    size_t timestamp = kul::String::UINT64(std::string(c));
+    KLOG(INF) << timestamp;
+    KLOG(INF) << _MKN_BUILD_IS_STALE_MINUTES;
+    if(timestamp > _MKN_BUILD_IS_STALE_MINUTES) return true;
+  }catch(const kul::Exception &e){
+    KERR << e.stack();
+  }catch(const std::exception &e){
+    KERR << e.what();
+  }
+  return false;
 }

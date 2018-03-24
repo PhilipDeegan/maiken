@@ -70,6 +70,7 @@ maiken::Application::CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception)
                          Arg('M', STR_MAIN, ArgType::MAYBE),
                          Arg('o', STR_OUT, ArgType::STRING),
                          Arg('O', STR_OPT, ArgType::MAYBE),
+                         Arg('q', STR_QUIET),
                          Arg('p', STR_PROFILE, ArgType::STRING),
                          Arg('P', STR_PROPERTY, ArgType::STRING),
                          Arg('r', STR_RUN_ARG, ArgType::STRING),
@@ -87,9 +88,9 @@ maiken::Application::CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception)
   std::vector<Cmd> cmdV{
     Cmd(STR_INIT),  Cmd(STR_INC),       Cmd(STR_SRC),
 #ifndef _MKN_DISABLE_MODULES_
-    Cmd(STR_MODS),  Cmd(STR_BUILD_MOD),
+    Cmd(STR_MODS),
 #endif //_MKN_DISABLE_MODULES_
-    Cmd(STR_CLEAN), Cmd(STR_DEPS),      Cmd(STR_BUILD), Cmd(STR_BUILD_ALL),
+    Cmd(STR_CLEAN), Cmd(STR_DEPS),      Cmd(STR_BUILD),
     Cmd(STR_RUN),   Cmd(STR_COMPILE),   Cmd(STR_LINK),  Cmd(STR_PROFILES),
     Cmd(STR_DBG),   Cmd(STR_PACK),      Cmd(STR_INFO),  Cmd(STR_TRIM),
     Cmd(STR_TREE)

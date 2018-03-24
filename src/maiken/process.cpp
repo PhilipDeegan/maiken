@@ -144,16 +144,14 @@ maiken::Application::process() KTHROW(kul::Exception)
       app.trim();
 
     kul::hash::set::String objects;
-    if (cmds.count(STR_BUILD_ALL) || cmds.count(STR_BUILD) ||
-        cmds.count(STR_COMPILE)) {
+    if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE)) {
       if (phase.count(STR_COMPILE))
         for (auto& modLoader : app.mods)
           modLoader->module()->compile(app, modLoader->app()->modCArg);
       if (work)
         app.compile(objects);
     }
-    if (cmds.count(STR_BUILD_ALL) || cmds.count(STR_BUILD) ||
-        cmds.count(STR_LINK)) {
+    if (cmds.count(STR_BUILD) || cmds.count(STR_LINK)) {
       if (phase.count(STR_LINK))
         for (auto& modLoader : app.mods)
           modLoader->module()->link(app, modLoader->app()->modLArg);
@@ -166,14 +164,22 @@ maiken::Application::process() KTHROW(kul::Exception)
       kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
   };
 
-  if (cmds.count(STR_BUILD_ALL) || cmds.count(STR_BUILD_MOD)) {
-    auto _mods = ModuleMinimiser::INSTANCE().modules(*this);
-    if (_mods.size() && !cmds.count(STR_BUILD_ALL))
-      CommandStateMachine::INSTANCE().add(STR_BUILD);
-    CommandStateMachine::INSTANCE().main(0);
-    for (auto& m : _mods)
-      m.second->process();
-    CommandStateMachine::INSTANCE().main(1);
+  auto _mods = ModuleMinimiser::INSTANCE().modules(*this);
+  for (auto& mod : ModuleMinimiser::INSTANCE().modules(*this))  {
+    bool build = mod.second->is_build_required();
+    bool is_build_stale = mod.second->is_build_stale();
+    if(!build && (is_build_stale && !maiken::AppVars::INSTANCE().quiet())) { 
+      std::stringstream ss;
+      ss << "The project @ " << mod.second->project().dir() << " appears to be stale" << std::endl;
+      ss << "\tWould you like to build it (Y/n) - this message can be removed with -q" << std::endl;
+      build = kul::String::BOOL(kul::cli::receive(ss.str()));      
+    }
+    if(build){
+      CommandStateMachine::INSTANCE().main(0);
+      for (auto& m : _mods)
+        m.second->process();
+      CommandStateMachine::INSTANCE().main(1); 
+    }
   }
 
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)

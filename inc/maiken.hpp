@@ -170,6 +170,9 @@ protected:
       rdeps.push_back(app);
   }
 
+  bool is_build_required();
+  bool is_build_stale();
+
   static void showHelp();
 
 public:
