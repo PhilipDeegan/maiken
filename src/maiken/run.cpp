@@ -69,8 +69,7 @@ maiken::Application::run(bool dbg)
       p->arg(s);
   } else {
     const auto& cmds = AppVars::INSTANCE().commands();
-    if (!cmds.count(STR_BUILD) && !cmds.count(STR_BUILD_MOD) &&
-        !cmds.count(STR_BUILD_ALL) && !cmds.count(STR_COMPILE)) {
+    if (!cmds.count(STR_BUILD) && !cmds.count(STR_COMPILE)) {
       for (const auto& s : kul::cli::asArgs(AppVars::INSTANCE().args()))
         p->arg(s);
     }

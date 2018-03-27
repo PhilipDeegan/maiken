@@ -330,9 +330,11 @@ public:
         incs.push_back(".");
     }
   }
-  CompilerProcessCapture compile(
+
+  CompilationUnit compilationUnit(
     const std::pair<std::string, std::string>& pair) const
     KTHROW(kul::Exception);
+
 };
 
 class SCMGetter

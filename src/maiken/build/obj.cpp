@@ -30,6 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
+#include <mutex>
+
 void
 maiken::Application::compile(kul::hash::set::String& objects)
   KTHROW(kul::Exception)
@@ -133,10 +135,20 @@ maiken::Application::compile(kul::hash::set::String& objects)
       ThreadingCompiler tc(*this);
       kul::ChroncurrentThreadPool<> ctp(
         AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
-      auto lambda = [&](const std::pair<std::string, std::string>& pair) {
+      std::vector<maiken::CompilationUnit> c_units;
+      std::queue<std::pair<std::string, std::string>> cQueue;
+      while (sourceQueue.size() > 0) {
+        c_units.emplace_back(tc.compilationUnit(sourceQueue.front()));
+        cQueue.push(sourceQueue.front());
+        sourceQueue.pop();
+      }
+
+      std::mutex mute;
+      std::vector<CompilerProcessCapture> cpcs;
+      auto lambda = [o, e, &ctp, &mute, &cpcs](const maiken::CompilationUnit& c_unit) {
         if (ctp.exception())
           ctp.interrupt();
-        const CompilerProcessCapture cpc = tc.compile(pair);
+        const CompilerProcessCapture cpc = c_unit.compile();
         if (!AppVars::INSTANCE().dryRun()) {
           if (kul::LogMan::INSTANCE().inf() || cpc.exception())
             o(cpc.outs());
@@ -145,24 +157,30 @@ maiken::Application::compile(kul::hash::set::String& objects)
           KOUT(INF) << cpc.cmd();
         } else
           KOUT(NON) << cpc.cmd();
-        if (cpc.exception())
-          std::rethrow_exception(cpc.exception());
+        std::lock_guard<std::mutex> lock(mute);
+        cpcs.push_back(cpc);
       };
+
       auto lambex = [&](const kul::Exception& e) {
         ctp.stop();
+        std::cerr << ":EXCEPTION!: " << e.debug() << std::endl;
         throw e;
       };
 
-      std::queue<std::pair<std::string, std::string>> cQueue;
-      while (sourceQueue.size() > 0) {
-        ctp.async(std::bind(lambda, sourceQueue.front()),
+      for(const auto& unit : c_units) {
+        kul::this_thread::nSleep(5000000); // dup appears to be overloaded with too many threads
+        ctp.async(std::bind(lambda, unit),
                   std::bind(lambex, std::placeholders::_1));
-        cQueue.push(sourceQueue.front());
-        sourceQueue.pop();
       }
+
       ctp.finish(1000000 * 1000);
       if (ctp.exception())
         KEXIT(1, "Compile error detected");
+
+      for(auto &cpc : cpcs){
+        if(cpc.exception())
+          std::rethrow_exception(cpc.exception());
+      }
 
       while (cQueue.size()) {
         objects.insert(cQueue.front().second);

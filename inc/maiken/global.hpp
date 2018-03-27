@@ -42,7 +42,7 @@ private:
   uint16_t de = -1, dl = 0, op = -1, ts = 1, wa = -1;
   std::string aa, al, la, ra, wi, wo;
   const std::string* dep;
-  kul::hash::set::String cmds, modPhases, wop;
+  kul::hash::set::String cmds, wop;
   kul::hash::map::S2S evs, jas, pks;
   AppVars()
   {
@@ -155,9 +155,6 @@ public:
 
   void command(const std::string& s) { cmds.insert(s); }
   const kul::hash::set::String& commands() const { return cmds; }
-
-  void modulePhase(const std::string& s) { modPhases.insert(s); }
-  const kul::hash::set::String& modulePhases() const { return modPhases; }
 
   const std::string& with() const { return wi; }
   void with(const std::string& wi) { this->wi = wi; }

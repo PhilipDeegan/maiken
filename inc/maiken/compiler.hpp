@@ -171,5 +171,40 @@ public:
   }
 };
 
+// this class exists to minimise thread captures and avoid forking too much stuff
+class CompilationUnit {
+private:
+  const Compiler * comp;
+  const std::string compiler;
+  const std::vector<std::string> args;
+  const std::vector<std::string> incs;
+  const std::string in;
+  const std::string out;
+  const compiler::Mode mode;
+  const bool dryRun;
+
+ public:
+  CompilationUnit(
+    const Compiler * comp,
+    const std::string& compiler,
+    const std::vector<std::string>& args,
+    const std::vector<std::string>& incs,
+    const std::string& in,
+    const std::string& out,
+    const compiler::Mode& mode,
+    bool dryRun) :
+      comp(comp),
+      compiler(compiler),
+      args(args),
+      incs(incs),
+      in(in),
+      out(out),
+      mode(mode),
+      dryRun(dryRun)
+  {}
+
+  CompilerProcessCapture compile() const KTHROW(kul::Exception);
+};
+
 } // namespace maiken
 #endif /* _MAIKEN_COMPILER_HPP_ */

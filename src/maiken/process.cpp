@@ -106,7 +106,6 @@ maiken::Application::process() KTHROW(kul::Exception)
 {
   const kul::hash::set::String& cmds(
     CommandStateMachine::INSTANCE().commands());
-  const kul::hash::set::String& phase(AppVars::INSTANCE().modulePhases());
 
   auto loadModules = [&](Application& app) {
 #ifndef _MKN_DISABLE_MODULES_
@@ -145,16 +144,14 @@ maiken::Application::process() KTHROW(kul::Exception)
 
     kul::hash::set::String objects;
     if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE)) {
-      if (phase.count(STR_COMPILE))
-        for (auto& modLoader : app.mods)
-          modLoader->module()->compile(app, modLoader->app()->modCArg);
+      for (auto& modLoader : app.mods)
+        modLoader->module()->compile(app, modLoader->app()->modCArg);
       if (work)
         app.compile(objects);
     }
     if (cmds.count(STR_BUILD) || cmds.count(STR_LINK)) {
-      if (phase.count(STR_LINK))
-        for (auto& modLoader : app.mods)
-          modLoader->module()->link(app, modLoader->app()->modLArg);
+      for (auto& modLoader : app.mods)
+        modLoader->module()->link(app, modLoader->app()->modLArg);
       if (work) {
         app.findObjects(objects);
         app.link(objects);
@@ -168,22 +165,22 @@ maiken::Application::process() KTHROW(kul::Exception)
   for (auto& mod : ModuleMinimiser::INSTANCE().modules(*this))  {
     bool build = mod.second->is_build_required();
     bool is_build_stale = mod.second->is_build_stale();
-    if(!build && (is_build_stale && !maiken::AppVars::INSTANCE().quiet())) { 
+    if(!build && (is_build_stale && !maiken::AppVars::INSTANCE().quiet())) {
       std::stringstream ss;
       ss << "The project @ " << mod.second->project().dir() << " appears to be stale" << std::endl;
       ss << "\tWould you like to build it (Y/n) - this message can be removed with -q" << std::endl;
-      build = kul::String::BOOL(kul::cli::receive(ss.str()));      
+      build = kul::String::BOOL(kul::cli::receive(ss.str()));
     }
     if(build){
       CommandStateMachine::INSTANCE().main(0);
       for (auto& m : _mods)
         m.second->process();
-      CommandStateMachine::INSTANCE().main(1); 
+      CommandStateMachine::INSTANCE().main(1);
     }
   }
 
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
-    loadModules(**app);  
+    loadModules(**app);
   loadModules(*this);
 
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) {
@@ -199,9 +196,8 @@ maiken::Application::process() KTHROW(kul::Exception)
 
   if (cmds.count(STR_PACK)) {
     pack();
-    if (phase.count(STR_PACK))
-      for (auto& modLoader : mods)
-        modLoader->module()->pack(*this, modLoader->app()->modPArg);
+    for (auto& modLoader : mods)
+      modLoader->module()->pack(*this, modLoader->app()->modPArg);
   }
   if (CommandStateMachine::INSTANCE().main() &&
       (cmds.count(STR_RUN) || cmds.count(STR_DBG)))

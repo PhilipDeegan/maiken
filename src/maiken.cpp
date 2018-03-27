@@ -64,9 +64,6 @@ maiken::Application::CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception)
                          Arg('K', STR_STATIC),
                          Arg('l', STR_LINKER, ArgType::STRING),
                          Arg('L', STR_ALINKER, ArgType::STRING),
-#ifndef _MKN_DISABLE_MODULES_
-                         Arg('m', STR_MOD, ArgType::MAYBE),
-#endif //_MKN_DISABLE_MODULES_
                          Arg('M', STR_MAIN, ArgType::MAYBE),
                          Arg('o', STR_OUT, ArgType::STRING),
                          Arg('O', STR_OPT, ArgType::MAYBE),
@@ -209,8 +206,8 @@ maiken::Application::CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception)
 
   {
     auto getSet = [args](
-      const std::string& a, 
-      const std::string& e, 
+      const std::string& a,
+      const std::string& e,
       const uint16_t& default_value,
       const std::function<void(const uint16_t&)>& func){
       if (args.has(a))
@@ -229,15 +226,15 @@ maiken::Application::CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception)
         }
     };
 
-    getSet(STR_DEBUG, "-g", 9, std::bind((void (AppVars::*)(const uint16_t&)) 
+    getSet(STR_DEBUG, "-g", 9, std::bind((void (AppVars::*)(const uint16_t&))
       &AppVars::debug, std::ref(AppVars::INSTANCE()),
                   std::placeholders::_1));
-    getSet(STR_OPT, "-O", 9, std::bind((void (AppVars::*)(const uint16_t&)) 
+    getSet(STR_OPT, "-O", 9, std::bind((void (AppVars::*)(const uint16_t&))
       &AppVars::optimise, std::ref(AppVars::INSTANCE()),
                   std::placeholders::_1));
-    getSet(STR_WARN, "-W", 8, std::bind((void (AppVars::*)(const uint16_t&)) 
+    getSet(STR_WARN, "-W", 8, std::bind((void (AppVars::*)(const uint16_t&))
       &AppVars::warn, std::ref(AppVars::INSTANCE()),
-                  std::placeholders::_1));  
+                  std::placeholders::_1));
   }
   {
     auto splitArgs =
@@ -321,29 +318,6 @@ maiken::Application::CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception)
       KEXIT(0, "");
     }
   }
-
-  if (args.has(STR_MOD)) {
-    std::vector<std::string> vp{ STR_COMPILE, STR_LINK, STR_PACK };
-    if (args.get(STR_MOD).size()) {
-      for (const auto& s : kul::String::SPLIT(args.get(STR_MOD), ",")) {
-        if (std::find(vp.begin(), vp.end(), s) == vp.end())
-          KEXCEPSTREAM << "Invalid Module phase specified: " << s
-                       << kul::os::EOL()
-                       << "Valid phases are: compile, link, pack";
-        else if (AppVars::INSTANCE().modulePhases().count(s))
-          KEXCEPSTREAM << "Duplicate Module phase specified: " << s;
-        else
-          AppVars::INSTANCE().modulePhase(s);
-      }
-    } else
-      for (const auto& s : vp)
-        AppVars::INSTANCE().modulePhase(s);
-  }
-
-  if (!args.has(STR_MOD) &&
-      !(args.has(STR_BUILD_MOD) || args.has(STR_BUILD_ALL)))
-    for (auto a : apps)
-      a->modDeps.clear();
 
   if (args.has(STR_ARG))
     AppVars::INSTANCE().args(args.get(STR_ARG));
@@ -438,10 +412,6 @@ maiken::Application::CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception)
 
   if (args.has(STR_BUILD))
     AppVars::INSTANCE().command(STR_BUILD);
-  if (args.has(STR_BUILD_MOD))
-    AppVars::INSTANCE().command(STR_BUILD_MOD);
-  if (args.has(STR_BUILD_ALL))
-    AppVars::INSTANCE().command(STR_BUILD_ALL);
   if (args.has(STR_CLEAN))
     AppVars::INSTANCE().command(STR_CLEAN);
   if (args.has(STR_COMPILE))

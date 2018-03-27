@@ -30,8 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-maiken::CompilerProcessCapture
-maiken::ThreadingCompiler::compile(
+maiken::CompilationUnit
+maiken::ThreadingCompiler::compilationUnit(
   const std::pair<std::string, std::string>& p) const KTHROW(kul::Exception)
 {
   const std::string src(p.first);
@@ -62,6 +62,18 @@ maiken::ThreadingCompiler::compile(
   compilerFlags(comp->compilerDebug(AppVars::INSTANCE().debug()));
   compilerFlags(comp->compilerOptimization(AppVars::INSTANCE().optimise()));
   compilerFlags(comp->compilerWarning(AppVars::INSTANCE().warn()));
-  return comp->compileSource(
+  return CompilationUnit(comp,
     cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
 }
+
+maiken::CompilerProcessCapture
+maiken::CompilationUnit::compile() const KTHROW(kul::Exception) {
+  try{
+    return comp->compileSource(compiler, args, incs, in, out, mode, dryRun);
+  }catch(const kul::Exception &e){
+    std::rethrow_exception(std::current_exception());
+  }catch(const std::exception &e){
+    std::cerr << __FILE__ << " : " << __LINE__ << e.what() << std::endl;
+  }
+}
+

@@ -86,8 +86,6 @@ public:
   static constexpr const char* STR_OBJ = "obj";
 
   static constexpr const char* STR_BUILD = "build";
-  static constexpr const char* STR_BUILD_MOD = "build-mod";
-  static constexpr const char* STR_BUILD_ALL = "build-all";
   static constexpr const char* STR_DEBUG = "debug";
   static constexpr const char* STR_DEBUGGER = "debugger";
   static constexpr const char* STR_CLEAN = "clean";
