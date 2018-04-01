@@ -69,4 +69,5 @@ maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const
   } catch (const std::exception& e) {
     std::cerr << __FILE__ << " : " << __LINE__ << e.what() << std::endl;
   }
+  KEXCEPT(maiken::Exception, "this shouldn't happen!");
 }
