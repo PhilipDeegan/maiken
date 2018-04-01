@@ -78,9 +78,10 @@ bool maiken::Application::is_build_stale() {
   if (!d || !f) return true;
   KLOG(INF);
   kul::io::Reader r(f);
-  try {
+  try {    
+    size_t then = (size_t)43200 * ((size_t)60 * (size_t)1000);
     size_t now = kul::Now::MILLIS();
-    size_t _MKN_BUILD_IS_STALE_MINUTES = (now) - (43200 * 60 * 1000);
+    size_t _MKN_BUILD_IS_STALE_MINUTES = now - then;
     const char* c = r.readLine();
     size_t timestamp = kul::String::UINT64(std::string(c));
     KLOG(INF) << timestamp;
