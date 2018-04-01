@@ -41,57 +41,44 @@ namespace maiken {
 
 class Application;
 
-class ProjectException : public kul::Exception
-{
-public:
+class ProjectException : public kul::Exception {
+ public:
   ProjectException(const char* f, const uint16_t& l, const std::string& s)
-    : kul::Exception(f, l, s)
-  {}
+      : kul::Exception(f, l, s) {}
 };
 
 class Projects;
-class KUL_PUBLISH Project
-  : public kul::yaml::File
-  , public Constants
-{
+class KUL_PUBLISH Project : public kul::yaml::File, public Constants {
   friend class Projects;
 
-private:
+ private:
   const kul::Dir m_dir;
 
-protected:
-public:
+ protected:
+ public:
   Project(const kul::Dir& d)
-    : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml"))
-    , m_dir(d.real())
-  {}
-  Project(const Project& p)
-    : kul::yaml::File(p)
-    , m_dir(p.m_dir)
-  {}
+      : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml")),
+        m_dir(d.real()) {}
+  Project(const Project& p) : kul::yaml::File(p), m_dir(p.m_dir) {}
   const kul::Dir& dir() const { return m_dir; }
   const kul::yaml::Validator validator() const;
   friend class maiken::Application;
   friend class kul::yaml::File;
 };
 
-class Projects
-{
-private:
+class Projects {
+ private:
   std::vector<std::unique_ptr<Project>> m_pps;
   kul::hash::set::String m_reloaded;
   kul::hash::map::S2T<Project*> m_projects;
 
-public:
-  static Projects& INSTANCE()
-  {
+ public:
+  static Projects& INSTANCE() {
     static Projects p;
     return p;
   }
-  const Project* getOrCreate(const kul::Dir& d)
-  {
-    if (!d)
-      KEXCEPT(ProjectException, "Directory does not exist:\n" + d.path());
+  const Project* getOrCreate(const kul::Dir& d) {
+    if (!d) KEXCEPT(ProjectException, "Directory does not exist:\n" + d.path());
     kul::File f("mkn.yaml", d);
     if (!f.is())
       KEXCEPT(ProjectException, "project file does not exist:\n" + f.full());
@@ -110,8 +97,7 @@ public:
     }
     return m_projects[f.real()];
   }
-  void reload(const Project& proj)
-  {
+  void reload(const Project& proj) {
     if (!m_reloaded.count(proj.file())) {
       m_projects[proj.file()]->reload();
       m_reloaded.insert(proj.file());
@@ -119,17 +105,14 @@ public:
   }
 };
 
-class NewProject
-{
-private:
+class NewProject {
+ private:
   kul::File f;
   void write();
   const kul::File& file() const { return f; }
 
-public:
-  NewProject() KTHROW(ProjectException)
-    : f("mkn.yaml", kul::env::CWD())
-  {
+ public:
+  NewProject() KTHROW(ProjectException) : f("mkn.yaml", kul::env::CWD()) {
     if (!f.is())
       write();
     else
@@ -137,5 +120,5 @@ public:
   }
 };
 
-} // namespace maiken
+}  // namespace maiken
 #endif /* _MAIKEN_PROJECT_HPP_ */

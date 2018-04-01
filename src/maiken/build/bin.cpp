@@ -30,9 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-maiken::CompilerProcessCapture
-maiken::Application::buildExecutable(const kul::hash::set::String& objects)
-{
+maiken::CompilerProcessCapture maiken::Application::buildExecutable(
+    const kul::hash::set::String& objects) {
   using namespace kul;
   const std::string& file = main;
   const std::string& fileType = file.substr(file.rfind(".") + 1);
@@ -42,24 +41,20 @@ maiken::Application::buildExecutable(const kul::hash::set::String& objects)
     if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() &&
         !this->libraries().empty()) {
       KOUT(NON) << "LIBRARIES";
-      for (const std::string& s : this->libraries())
-        KOUT(NON) << "\t" << s;
+      for (const std::string& s : this->libraries()) KOUT(NON) << "\t" << s;
     }
     if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() &&
         !this->libraryPaths().empty()) {
       KOUT(NON) << "LIBRARY PATHS";
-      for (const std::string& s : this->libraryPaths())
-        KOUT(NON) << "\t" << s;
+      for (const std::string& s : this->libraryPaths()) KOUT(NON) << "\t" << s;
     }
     try {
       std::string linker = fs[fileType][STR_LINKER];
       std::string linkEnd;
-      if (ro)
-        linkEnd = AppVars::INSTANCE().linker();
+      if (ro) linkEnd = AppVars::INSTANCE().linker();
       if (!AppVars::INSTANCE().allinker().empty())
         linkEnd += " " + AppVars::INSTANCE().allinker();
-      if (!lnk.empty())
-        linkEnd += " " + lnk;
+      if (!lnk.empty()) linkEnd += " " + lnk;
       kul::Dir outD(inst ? inst.real() : buildDir());
       if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() &&
           linkEnd.size())
@@ -67,29 +62,20 @@ maiken::Application::buildExecutable(const kul::hash::set::String& objects)
       const std::string& n(out.empty() ? project().root()[STR_NAME].Scalar()
                                        : out);
       std::string bin(AppVars::INSTANCE().dryRun()
-                        ? kul::File(outD.join(n)).esc()
-                        : kul::File(outD.join(n)).escm());
+                          ? kul::File(outD.join(n)).esc()
+                          : kul::File(outD.join(n)).escm());
       std::vector<std::string> obV;
-      for (const auto& o : objects)
-        obV.emplace_back(o);
+      for (const auto& o : objects) obV.emplace_back(o);
       const std::string& base(Compilers::INSTANCE().base(
-        (*(*files().find(fileType)).second.find(STR_COMPILER)).second));
-      if (cLnk.count(base))
-        linkEnd += " " + cLnk[base];
+          (*(*files().find(fileType)).second.find(STR_COMPILER)).second));
+      if (cLnk.count(base)) linkEnd += " " + cLnk[base];
       auto* comp = Compilers::INSTANCE().get(base);
       auto linkOpt(comp->linkerOptimizationBin(AppVars::INSTANCE().optimise()));
-      if(!linkOpt.empty()) linker += " " + linkOpt;
+      if (!linkOpt.empty()) linker += " " + linkOpt;
       auto linkDbg(comp->linkerDebugBin(AppVars::INSTANCE().debug()));
-      if(!linkDbg.empty()) linker += " " + linkDbg;
-      const CompilerProcessCapture& cpc =
-        comp->buildExecutable(
-          linker,
-          linkEnd,
-          obV,
-          libraries(),
-          libraryPaths(),
-          bin,
-          m,
+      if (!linkDbg.empty()) linker += " " + linkDbg;
+      const CompilerProcessCapture& cpc = comp->buildExecutable(
+          linker, linkEnd, obV, libraries(), libraryPaths(), bin, m,
           AppVars::INSTANCE().dryRun());
       if (AppVars::INSTANCE().dryRun())
         KOUT(NON) << cpc.cmd();
@@ -103,7 +89,6 @@ maiken::Application::buildExecutable(const kul::hash::set::String& objects)
       KEXCEPTION("UNSUPPORTED COMPILER EXCEPTION");
     }
   } else
-    KEXIT(1,
-          "Unable to handle artifact: \"" + file +
-            "\" - type is not in file list");
+    KEXIT(1, "Unable to handle artifact: \"" + file +
+                 "\" - type is not in file list");
 }

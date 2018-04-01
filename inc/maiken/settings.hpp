@@ -39,19 +39,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken {
 
-class SettingsException : public kul::Exception
-{
-public:
+class SettingsException : public kul::Exception {
+ public:
   SettingsException(const char* f, const uint16_t& l, const std::string& s)
-    : kul::Exception(f, l, s)
-  {}
+      : kul::Exception(f, l, s) {}
 };
 
-class Settings
-  : public kul::yaml::File
-  , public Constants
-{
-private:
+class Settings : public kul::yaml::File, public Constants {
+ private:
   std::vector<std::string> rrs, rms;
   std::unique_ptr<Settings> sup;
   kul::hash::map::S2S ps;
@@ -61,7 +56,7 @@ private:
   static std::unique_ptr<Settings> instance;
   static void write(const kul::File& f) KTHROW(kul::Exit);
 
-public:
+ public:
   Settings(const std::string& s);
 
   const Settings* super() const { return sup.get(); }
@@ -76,5 +71,5 @@ public:
   static std::string RESOLVE(const std::string& s) KTHROW(SettingsException);
 };
 
-} // namespace maiken
+}  // namespace maiken
 #endif /* _MAIKEN_SETTINGS_HPP_ */

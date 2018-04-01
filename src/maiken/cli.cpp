@@ -30,18 +30,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/github.hpp"
 
-void
-maiken::Application::addCLIArgs(const kul::cli::Args& args)
-{
+void maiken::Application::addCLIArgs(const kul::cli::Args& args) {
   auto addIncsOrPaths = [&args](Application& a) {
-
     auto splitPathAndCheck = [](const std::string& path,
                                 const std::string& type) {
       const auto v(kul::String::SPLIT(path, kul::env::SEP()));
       for (const auto s : v) {
         kul::Dir d(s);
-        if (!d)
-          KEXIT(1, type + " directory does not exist: ") << s;
+        if (!d) KEXIT(1, type + " directory does not exist: ") << s;
       }
       return v;
     };
@@ -63,27 +59,21 @@ maiken::Application::addCLIArgs(const kul::cli::Args& args)
   };
 
   addIncsOrPaths(*this);
-  for (auto* d : deps)
-    addIncsOrPaths(*d);
+  for (auto* d : deps) addIncsOrPaths(*d);
 }
 
-
-void
-maiken::Application::withArgs(
-  std::vector<YAML::Node>& with_nodes, 
-  std::function<void(const YAML::Node& n, const bool mod)> getIfMissing
-)
-{
-
+void maiken::Application::withArgs(
+    std::vector<YAML::Node>& with_nodes,
+    std::function<void(const YAML::Node& n, const bool mod)> getIfMissing) {
   if (this->ro && AppVars::INSTANCE().with().size()) {
     kul::hash::set::String withs;
     try {
       parseDependencyString(AppVars::INSTANCE().with(), withs);
     } catch (const kul::Exception& e) {
       auto with(AppVars::INSTANCE().with());
-      if(with[0] == '[' && with[with.size() - 1] == ']')
+      if (with[0] == '[' && with[with.size() - 1] == ']')
         withs.insert(this->project().root()[STR_NAME].Scalar() + with);
-      else 
+      else
         KEXIT(1, MKN_ERR_INVALID_WIT_CLI);
     }
     for (const auto& with : withs) {
@@ -93,7 +83,8 @@ maiken::Application::withArgs(
         auto lbrak = proj.find("(");
         auto rbrak = proj.find(")");
         if (lbrak != std::string::npos) {
-          if(rbrak == std::string::npos) KEXIT(1, "Invalid -w - missing right bracket");
+          if (rbrak == std::string::npos)
+            KEXIT(1, "Invalid -w - missing right bracket");
           scm = proj.substr(lbrak + 1, rbrak - lbrak - 1);
           proj = proj.substr(0, lbrak) + with.substr(rbrak + 1);
           node[STR_SCM] = scm;
@@ -101,57 +92,57 @@ maiken::Application::withArgs(
         lbrak = proj.find("[");
         rbrak = proj.find("]");
         if (lbrak != std::string::npos) {
-          if(rbrak == std::string::npos) KEXIT(1, "Invalid -w - missing right bracket");
+          if (rbrak == std::string::npos)
+            KEXIT(1, "Invalid -w - missing right bracket");
           profiles = proj.substr(lbrak + 1, rbrak - lbrak - 1);
           proj = proj.substr(0, lbrak);
           kul::String::REPLACE_ALL(profiles, ",", " ");
           node[STR_PROFILE] = profiles;
         }
       }
-      auto am = proj.find("&"); // local
-      auto ha = proj.find("#"); // version
+      auto am = proj.find("&");  // local
+      auto ha = proj.find("#");  // version
       if (proj == this->project().root()[STR_NAME].Scalar()) {
         node[STR_LOCAL] = ".";
-        if(am != std::string::npos || ha != std::string::npos) 
-          KEXIT(1, "-w invalid, current project may not specify version or location");
+        if (am != std::string::npos || ha != std::string::npos)
+          KEXIT(1,
+                "-w invalid, current project may not specify version or "
+                "location");
       }
 
-      if(am != std::string::npos && ha != std::string::npos) 
-        if(ha > am) KEXIT(1, "-w invalid, version must before location");
-      
-      if(am != std::string::npos){
+      if (am != std::string::npos && ha != std::string::npos)
+        if (ha > am) KEXIT(1, "-w invalid, version must before location");
+
+      if (am != std::string::npos) {
         local = proj.substr(am + 1);
         proj = proj.substr(0, am);
         node[STR_LOCAL] = local;
       }
-      if(ha != std::string::npos){
+      if (ha != std::string::npos) {
         version = proj.substr(ha + 1);
         proj = proj.substr(0, ha);
         node[STR_VERSION] = version;
       }
-      if(proj.empty() && local.empty() && scm.empty()) 
+      if (proj.empty() && local.empty() && scm.empty())
         KEXIT(1, "-w invalid, project cannot be deduced");
-      if(!proj.empty()){
-        if(scm.empty()){
+      if (!proj.empty()) {
+        if (scm.empty()) {
           scm = proj;
           node[STR_SCM] = scm;
         }
         auto bits(kul::String::SPLIT(proj, "/"));
         proj = bits[bits.size() - 1];
-      }
-      else
-      if(proj.empty() && !scm.empty()){
+      } else if (proj.empty() && !scm.empty()) {
         auto bits(kul::String::SPLIT(scm, "/"));
         proj = bits[bits.size() - 1];
       }
-      if(!proj.empty()) node[STR_NAME] = proj;
+      if (!proj.empty()) node[STR_NAME] = proj;
 
       with_nodes.push_back(node);
       if (!proj.empty()) {
         std::stringstream with_define;
         kul::String::REPLACE_ALL(proj, ".", "_");
-        std::transform(
-          proj.begin(), proj.end(), proj.begin(), ::toupper);
+        std::transform(proj.begin(), proj.end(), proj.begin(), ::toupper);
         with_define << " -D_MKN_WITH_" << proj << "_ ";
         arg += with_define.str();
       }

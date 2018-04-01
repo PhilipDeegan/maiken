@@ -30,12 +30,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void
-maiken::Application::writeTimeStamps(kul::hash::set::String& objects,
-                                     std::vector<kul::File>& cacheFiles)
-{
+void maiken::Application::writeTimeStamps(kul::hash::set::String& objects,
+                                          std::vector<kul::File>& cacheFiles) {
   const std::string oType(
-    "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
+      "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
   kul::Dir mkn(buildDir().join(".mkn"), 1);
   kul::File srcStamps("src_stamp", mkn);
   kul::File incStamps("inc_stamp", mkn);
@@ -51,7 +49,7 @@ maiken::Application::writeTimeStamps(kul::hash::set::String& objects,
       compiler = (*compilers.find(ft)).second;
     else {
       compiler = Compilers::INSTANCE().get(
-        (*(*files().find(ft)).second.find(STR_COMPILER)).second);
+          (*(*files().find(ft)).second.find(STR_COMPILER)).second);
       compilers.insert(ft, compiler);
     }
     if (compiler->sourceIsBin())
@@ -69,14 +67,12 @@ maiken::Application::writeTimeStamps(kul::hash::set::String& objects,
     incW << i.first << " " << i.second << kul::os::EOL();
   for (const auto& src : cacheFiles)
     if (!(*compilers.find(src.name().substr(src.name().rfind(".") + 1)))
-           .second->sourceIsBin())
+             .second->sourceIsBin())
       srcW << src.mini() << " " << src.timeStamps().modified()
            << kul::os::EOL();
 }
 
-void
-maiken::Application::loadTimeStamps() KTHROW(kul::StringException)
-{
+void maiken::Application::loadTimeStamps() KTHROW(kul::StringException) {
   if (_MKN_TIMESTAMPS_) {
     kul::Dir mkn(buildDir().join(".mkn"));
     kul::File src("src_stamp", mkn);
@@ -85,8 +81,7 @@ maiken::Application::loadTimeStamps() KTHROW(kul::StringException)
       const char* c = 0;
       while ((c = r.readLine())) {
         std::string s(c);
-        if (s.size() == 0)
-          continue;
+        if (s.size() == 0) continue;
         std::vector<std::string> bits;
         kul::String::SPLIT(s, ' ', bits);
         if (bits.size() != 2)
@@ -104,8 +99,7 @@ maiken::Application::loadTimeStamps() KTHROW(kul::StringException)
       const char* c = 0;
       while ((c = r.readLine())) {
         std::string s(c);
-        if (s.size() == 0)
-          continue;
+        if (s.size() == 0) continue;
         std::vector<std::string> bits;
         kul::String::SPLIT(s, ' ', bits);
         if (bits.size() != 2)

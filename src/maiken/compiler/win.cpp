@@ -31,67 +31,90 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/compiler/cpp.hpp"
 
-maiken::cpp::WINCompiler::WINCompiler(const int& v) : CCompiler(v)
-{
-  m_optimise_c.insert({ 
-    { 0, "-Od" }, { 1, "-O1" }, { 2, "-O2" }, 
-    { 3, "-O2" }, { 4, "-O2" }, { 5, "-O2" },
-    { 6, "-O2" }, { 7, "-O2" }, { 8, "-O2" },
-    { 9, "-Ox -GA -Gw -Zc:inline -EHsc" } 
-  });
-  m_debug_c.insert({
-    { 0, "-DNDEBUG" }, { 1, "" }, { 2, "" }, 
-    { 3, "" }, { 4, "" }, { 5, "" }, 
-    { 6, "" }, { 7, "" }, { 8, "" }, 
-    { 9, "-Z7" } 
-  });
-  m_optimise_l_bin.insert({
-    { 0, "" }, { 1, "" }, { 2, "" }, 
-    { 3, "" }, { 4, "" }, { 5, "" }, 
-    { 6, "" }, { 7, "" }, { 8, "" }, 
-    { 9, "" }
-  });
-  m_optimise_l_bin.insert({
-    { 0, "" }, { 1, "" }, { 2, "" }, 
-    { 3, "" }, { 4, "" }, { 5, "" }, 
-    { 6, "" }, { 7, "" }, { 8, "" }, 
-    { 9, "" }
-  });
-  m_debug_l_bin.insert({
-    { 0, "" }, { 1, "" }, { 2, "" }, 
-    { 3, "" }, { 4, "" }, { 5, "" }, 
-    { 6, "" }, { 7, "" }, { 8, "" }, 
-    { 9, "-DEBUG" } 
-  });
-  m_debug_l_lib.insert({
-    { 0, "" }, { 1, "" }, { 2, "" }, 
-    { 3, "" }, { 4, "" }, { 5, "" }, 
-    { 6, "" }, { 7, "" }, { 8, "" }, 
-    { 9, "" }
-  });
-  m_warn_c.insert({ 
-    { 0, "-W0" }, { 1, "-W1" }, { 2, "-W2" }, { 3, "-W3" },
-    { 4, "-W4" }, { 5, "-Wall" }, { 6, "-Wall" },
-    { 7, "-Wall" }, { 8, "-Wall" }, { 9, "-Wall" } 
-  });
+maiken::cpp::WINCompiler::WINCompiler(const int& v) : CCompiler(v) {
+  m_optimise_c.insert({{0, "-Od"},
+                       {1, "-O1"},
+                       {2, "-O2"},
+                       {3, "-O2"},
+                       {4, "-O2"},
+                       {5, "-O2"},
+                       {6, "-O2"},
+                       {7, "-O2"},
+                       {8, "-O2"},
+                       {9, "-Ox -GA -Gw -Zc:inline -EHsc"}});
+  m_debug_c.insert({{0, "-DNDEBUG"},
+                    {1, ""},
+                    {2, ""},
+                    {3, ""},
+                    {4, ""},
+                    {5, ""},
+                    {6, ""},
+                    {7, ""},
+                    {8, ""},
+                    {9, "-Z7"}});
+  m_optimise_l_bin.insert({{0, ""},
+                           {1, ""},
+                           {2, ""},
+                           {3, ""},
+                           {4, ""},
+                           {5, ""},
+                           {6, ""},
+                           {7, ""},
+                           {8, ""},
+                           {9, ""}});
+  m_optimise_l_bin.insert({{0, ""},
+                           {1, ""},
+                           {2, ""},
+                           {3, ""},
+                           {4, ""},
+                           {5, ""},
+                           {6, ""},
+                           {7, ""},
+                           {8, ""},
+                           {9, ""}});
+  m_debug_l_bin.insert({{0, ""},
+                        {1, ""},
+                        {2, ""},
+                        {3, ""},
+                        {4, ""},
+                        {5, ""},
+                        {6, ""},
+                        {7, ""},
+                        {8, ""},
+                        {9, "-DEBUG"}});
+  m_debug_l_lib.insert({{0, ""},
+                        {1, ""},
+                        {2, ""},
+                        {3, ""},
+                        {4, ""},
+                        {5, ""},
+                        {6, ""},
+                        {7, ""},
+                        {8, ""},
+                        {9, ""}});
+  m_warn_c.insert({{0, "-W0"},
+                   {1, "-W1"},
+                   {2, "-W2"},
+                   {3, "-W3"},
+                   {4, "-W4"},
+                   {5, "-Wall"},
+                   {6, "-Wall"},
+                   {7, "-Wall"},
+                   {8, "-Wall"},
+                   {9, "-Wall"}});
 }
 
-maiken::CompilerProcessCapture
-maiken::cpp::WINCompiler::buildExecutable(
-  const std::string& linker,
-  const std::string& linkerEnd,
-  const std::vector<std::string>& objects,
-  const std::vector<std::string>& libs,
-  const std::vector<std::string>& libPaths,
-  const std::string& out,
-  const maiken::compiler::Mode& mode,
-  bool dryRun) const KTHROW(kul::Exception)
-{
+maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(
+    const std::string& linker, const std::string& linkerEnd,
+    const std::vector<std::string>& objects,
+    const std::vector<std::string>& libs,
+    const std::vector<std::string>& libPaths, const std::string& out,
+    const maiken::compiler::Mode& mode, bool dryRun) const
+    KTHROW(kul::Exception) {
   std::string exe = out + ".exe";
 
   kul::hash::set::String dirs;
-  for (const auto& o : objects)
-    dirs.insert(kul::File(o).dir().real());
+  for (const auto& o : objects) dirs.insert(kul::File(o).dir().real());
 
   std::string cmd = linker;
   std::vector<std::string> bits;
@@ -100,22 +123,16 @@ maiken::cpp::WINCompiler::buildExecutable(
     cmd = bits[0];
   }
   kul::Process p(cmd);
-  for (unsigned int i = 1; i < bits.size(); i++)
-    p.arg(bits[i]);
+  for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-OUT:\"" + exe + "\"").arg("-nologo");
-  for (const std::string& path : libPaths)
-    p.arg("-LIBPATH:\"" + path + "\"");
-  for (const std::string& d : dirs)
-    p.arg(kul::File(oStar(objects), d).escm());
-  for (const std::string& lib : libs)
-    p.arg(staticLib(lib));
-  for (const std::string& s : kul::cli::asArgs(linkerEnd))
-    p.arg(s);
+  for (const std::string& path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
+  for (const std::string& d : dirs) p.arg(kul::File(oStar(objects), d).escm());
+  for (const std::string& lib : libs) p.arg(staticLib(lib));
+  for (const std::string& s : kul::cli::asArgs(linkerEnd)) p.arg(s);
 
   CompilerProcessCapture pc;
   try {
-    if (!dryRun)
-      p.start();
+    if (!dryRun) p.start();
   } catch (const kul::proc::Exception& e) {
     pc.exception(std::current_exception());
   }
@@ -124,24 +141,19 @@ maiken::cpp::WINCompiler::buildExecutable(
   return pc;
 }
 
-maiken::CompilerProcessCapture
-maiken::cpp::WINCompiler::buildLibrary(const std::string& linker,
-                                       const std::string& linkerEnd,
-                                       const std::vector<std::string>& objects,
-                                       const std::vector<std::string>& libs,
-                                       const std::vector<std::string>& libPaths,
-                                       const kul::File& out,
-                                       const maiken::compiler::Mode& mode,
-                                       bool dryRun) const KTHROW(kul::Exception)
-{
+maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(
+    const std::string& linker, const std::string& linkerEnd,
+    const std::vector<std::string>& objects,
+    const std::vector<std::string>& libs,
+    const std::vector<std::string>& libPaths, const kul::File& out,
+    const maiken::compiler::Mode& mode, bool dryRun) const
+    KTHROW(kul::Exception) {
   kul::hash::set::String dirs;
-  for (const auto& o : objects)
-    dirs.insert(kul::File(o).dir().real());
+  for (const auto& o : objects) dirs.insert(kul::File(o).dir().real());
 
   std::string lib = out.dir().join(sharedLib(out.name()));
   std::string imp = out.dir().join(staticLib(out.name()));
-  if (mode == compiler::Mode::STAT)
-    lib = out.dir().join(staticLib(out.name()));
+  if (mode == compiler::Mode::STAT) lib = out.dir().join(staticLib(out.name()));
   std::string cmd = linker;
   std::vector<std::string> bits;
   if (linker.find(" ") != std::string::npos) {
@@ -149,27 +161,20 @@ maiken::cpp::WINCompiler::buildLibrary(const std::string& linker,
     cmd = bits[0];
   }
   kul::Process p(cmd);
-  for (unsigned int i = 1; i < bits.size(); i++)
-    p.arg(bits[i]);
+  for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-nologo");
-  if (mode == compiler::Mode::STAT)
-    p.arg("-LTCG");
+  if (mode == compiler::Mode::STAT) p.arg("-LTCG");
   p.arg("-OUT:\"" + lib + "\"");
   if (mode == compiler::Mode::SHAR) {
     p.arg("-IMPLIB:\"" + imp + "\"").arg("-DLL");
-    for (const std::string& path : libPaths)
-      p.arg("-LIBPATH:\"" + path + "\"");
-    for (const std::string& lib : libs)
-      p.arg(staticLib(lib));
+    for (const std::string& path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
+    for (const std::string& lib : libs) p.arg(staticLib(lib));
   }
-  for (const std::string& d : dirs)
-    p.arg(kul::File(oStar(objects), d).escm());
-  for (const std::string& s : kul::cli::asArgs(linkerEnd))
-    p.arg(s);
+  for (const std::string& d : dirs) p.arg(kul::File(oStar(objects), d).escm());
+  for (const std::string& s : kul::cli::asArgs(linkerEnd)) p.arg(s);
   CompilerProcessCapture pc;
   try {
-    if (!dryRun)
-      p.start();
+    if (!dryRun) p.start();
   } catch (const kul::proc::Exception& e) {
     pc.exception(std::current_exception());
   }
@@ -178,16 +183,11 @@ maiken::cpp::WINCompiler::buildLibrary(const std::string& linker,
   return pc;
 }
 
-maiken::CompilerProcessCapture
-maiken::cpp::WINCompiler::compileSource(const std::string& compiler,
-                                        const std::vector<std::string>& args,
-                                        const std::vector<std::string>& incs,
-                                        const std::string& in,
-                                        const std::string& out,
-                                        const maiken::compiler::Mode& mode,
-                                        bool dryRun) const
-  KTHROW(kul::Exception)
-{
+maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(
+    const std::string& compiler, const std::vector<std::string>& args,
+    const std::vector<std::string>& incs, const std::string& in,
+    const std::string& out, const maiken::compiler::Mode& mode,
+    bool dryRun) const KTHROW(kul::Exception) {
   std::string cmd = compiler;
   std::vector<std::string> bits;
   if (compiler.find(" ") != std::string::npos) {
@@ -195,20 +195,15 @@ maiken::cpp::WINCompiler::compileSource(const std::string& compiler,
     cmd = bits[0];
   }
   kul::Process p(cmd);
-  for (unsigned int i = 1; i < bits.size(); i++)
-    p.arg(bits[i]);
+  for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-nologo");
-  for (const std::string& s : incs)
-    p.arg("-I\"" + s + "\"");
-  for (const std::string& s : args)
-    p.arg(s);
+  for (const std::string& s : incs) p.arg("-I\"" + s + "\"");
+  for (const std::string& s : args) p.arg(s);
   p.arg("-c").arg("-Fo\"" + out + "\"").arg("\"" + in + "\"");
   CompilerProcessCapture pc;
-  if (!kul::LogMan::INSTANCE().inf())
-    pc.setProcess(p);
+  if (!kul::LogMan::INSTANCE().inf()) pc.setProcess(p);
   try {
-    if (!dryRun)
-      p.start();
+    if (!dryRun) p.start();
   } catch (const kul::Exception& e) {
     pc.exception(std::current_exception());
   }

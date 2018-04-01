@@ -36,31 +36,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 namespace csharp {
 
-class Exception : public kul::Exception
-{
-public:
+class Exception : public kul::Exception {
+ public:
   Exception(const char* f, const int l, std::string s)
-    : kul::Exception(f, l, s)
-  {}
+      : kul::Exception(f, l, s) {}
 };
 
-class WINCompiler : public Compiler
-{
-public:
-  WINCompiler(const int& v = 0)
-    : Compiler(v)
-  {}
+class WINCompiler : public Compiler {
+ public:
+  WINCompiler(const int& v = 0) : Compiler(v) {}
   bool sourceIsBin() const override { return true; }
 
   CompilerProcessCapture buildExecutable(
-    const std::string& linker,
-    const std::string& linkerEnd,
-    const std::vector<std::string>& objects,
-    const std::vector<std::string>& libs,
-    const std::vector<std::string>& libPaths,
-    const std::string& out,
-    const compiler::Mode& mode,
-    bool dryRun = false) const KTHROW(kul::Exception) override;
+      const std::string& linker, const std::string& linkerEnd,
+      const std::vector<std::string>& objects,
+      const std::vector<std::string>& libs,
+      const std::vector<std::string>& libPaths, const std::string& out,
+      const compiler::Mode& mode, bool dryRun = false) const
+      KTHROW(kul::Exception) override;
 
   CompilerProcessCapture buildLibrary(const std::string& linker,
                                       const std::string& linkerEnd,
@@ -70,30 +63,24 @@ public:
                                       const kul::File& out,
                                       const compiler::Mode& mode,
                                       bool dryRun = false) const
-    KTHROW(kul::Exception) override;
+      KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture compileSource(const std::string& compiler,
-                                       const std::vector<std::string>& args,
-                                       const std::vector<std::string>& incs,
-                                       const std::string& in,
-                                       const std::string& out,
-                                       const compiler::Mode& mode,
-                                       bool dryRun = false) const
-    KTHROW(kul::Exception) override
-  {
+  CompilerProcessCapture compileSource(
+      const std::string& compiler, const std::vector<std::string>& args,
+      const std::vector<std::string>& incs, const std::string& in,
+      const std::string& out, const compiler::Mode& mode,
+      bool dryRun = false) const KTHROW(kul::Exception) override {
     KEXCEPTION("Method compileSource is not implemented in C Sharp");
   }
   virtual void preCompileHeader(const std::vector<std::string>& incs,
                                 const std::vector<std::string>& args,
-                                const std::string& in,
-                                const std::string& out,
+                                const std::string& in, const std::string& out,
                                 bool dryRun = false) const
-    KTHROW(kul::Exception) override
-  {
+      KTHROW(kul::Exception) override {
     KEXCEPTION("Method preCompileHeader is not implemented in C Sharp");
   }
 };
 
-} // namespace csharp
-} // namespace maiken
+}  // namespace csharp
+}  // namespace maiken
 #endif /* _MAIKEN_CODE_CSHARP_HPP_ */

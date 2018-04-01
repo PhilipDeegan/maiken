@@ -30,9 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/github.hpp"
 
-void
-maiken::Application::setup() KTHROW(kul::Exception)
-{
+void maiken::Application::setup() KTHROW(kul::Exception) {
   if (scr.empty() && project().root()[STR_SCM])
     scr = Properties::RESOLVE(*this, project().root()[STR_SCM].Scalar());
   if (AppVars::INSTANCE().update() || AppVars::INSTANCE().fupdate()) {
@@ -40,14 +38,12 @@ maiken::Application::setup() KTHROW(kul::Exception)
     Projects::INSTANCE().reload(proj);
   }
   setSuper();
-  if (scr.empty())
-    scr = project().root()[STR_NAME].Scalar();
+  if (scr.empty()) scr = project().root()[STR_NAME].Scalar();
 
   this->resolveProperties();
   this->preSetupValidation();
   std::string buildD = kul::Dir::JOIN(STR_BIN, p);
-  if (p.empty())
-    buildD = kul::Dir::JOIN(STR_BIN, STR_BUILD);
+  if (p.empty()) buildD = kul::Dir::JOIN(STR_BIN, STR_BUILD);
   this->bd = kul::Dir(project().dir().join(buildD));
   std::string profile(p);
   std::vector<YAML::Node> nodes;
@@ -69,15 +65,13 @@ maiken::Application::setup() KTHROW(kul::Exception)
     else if (c[STR_MODE].Scalar().compare(STR_REPLACE) == 0)
       mode = EnvVarMode::REPL;
     evs.emplace_back(c[STR_NAME].Scalar(),
-                     Properties::RESOLVE(*this, c[STR_VALUE].Scalar()),
-                     mode);
+                     Properties::RESOLVE(*this, c[STR_VALUE].Scalar()), mode);
   }
 
   auto getIfMissing = [&](const YAML::Node& n, const bool mod) {
     const std::string& cwd(kul::env::CWD());
     kul::Dir projectDir(resolveDepOrModDirectory(n, mod));
-    if (!projectDir.is())
-      loadDepOrMod(n, projectDir, mod);
+    if (!projectDir.is()) loadDepOrMod(n, projectDir, mod);
     kul::env::CWD(cwd);
   };
 
@@ -86,18 +80,17 @@ maiken::Application::setup() KTHROW(kul::Exception)
   while (c) {
     c = 0;
     for (const auto& n : nodes) {
-      if (n[STR_NAME].Scalar() != profile)
-        continue;
-      for (const auto& mod : n[STR_MOD])
-        getIfMissing(mod, 1);
+      if (n[STR_NAME].Scalar() != profile) continue;
+      for (const auto& mod : n[STR_MOD]) getIfMissing(mod, 1);
       popDepOrMod(n, modDeps, STR_MOD, 1);
       if (n[STR_IF_MOD] && n[STR_IF_MOD][KTOSTRING(__KUL_OS__)]) {
         for (const auto& mod : n[STR_IF_MOD][KTOSTRING(__KUL_OS__)])
           getIfMissing(mod, 1);
         popDepOrMod(n[STR_IF_MOD], modDeps, KTOSTRING(__KUL_OS__), 1);
       }
-      profile =
-        n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
+      profile = n[STR_PARENT]
+                    ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar())
+                    : "";
       c = !profile.empty();
       break;
     }
@@ -122,10 +115,8 @@ maiken::Application::setup() KTHROW(kul::Exception)
   while (c) {
     c = 0;
     for (const auto& n : nodes) {
-      if (n[STR_NAME].Scalar() != profile)
-        continue;
-      for (const auto& dep : n[STR_DEP])
-        getIfMissing(dep, 0);
+      if (n[STR_NAME].Scalar() != profile) continue;
+      for (const auto& dep : n[STR_DEP]) getIfMissing(dep, 0);
       populateMaps(n);
       popDepOrMod(n, deps, STR_DEP, 0);
       if (n[STR_IF_DEP] && n[STR_IF_DEP][KTOSTRING(__KUL_OS__)]) {
@@ -133,8 +124,9 @@ maiken::Application::setup() KTHROW(kul::Exception)
           getIfMissing(dep, 0);
         popDepOrMod(n[STR_IF_DEP], deps, KTOSTRING(__KUL_OS__), 0);
       }
-      profile =
-        n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
+      profile = n[STR_PARENT]
+                    ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar())
+                    : "";
       c = !profile.empty();
       break;
     }
@@ -162,14 +154,12 @@ maiken::Application::setup() KTHROW(kul::Exception)
             paths.push_back(d.escr());
           else
             KEXIT(1, "library path does not exist\n")
-              << d.path() << "\n"
-              << Settings::INSTANCE().file();
+                << d.path() << "\n"
+                << Settings::INSTANCE().file();
         }
 
   this->populateMapsFromDependencies();
-  std::vector<std::string> fileStrings{ STR_ARCHIVER,
-                                        STR_COMPILER,
-                                        STR_LINKER };
+  std::vector<std::string> fileStrings{STR_ARCHIVER, STR_COMPILER, STR_LINKER};
   for (const auto& c : Settings::INSTANCE().root()[STR_FILE])
     for (const std::string& s : fileStrings)
       for (const auto& t : kul::String::SPLIT(c[STR_TYPE].Scalar(), ':'))
@@ -183,32 +173,28 @@ maiken::Application::setup() KTHROW(kul::Exception)
   while (c) {
     c = 0;
     for (const auto& n : nodes) {
-      if (n[STR_NAME].Scalar() != profile)
-        continue;
+      if (n[STR_NAME].Scalar() != profile) continue;
       if (n[STR_MODE] && nm) {
         m = n[STR_MODE].Scalar() == STR_STATIC
-              ? compiler::Mode::STAT
-              : n[STR_MODE].Scalar() == STR_SHARED ? compiler::Mode::SHAR
-                                                   : compiler::Mode::NONE;
+                ? compiler::Mode::STAT
+                : n[STR_MODE].Scalar() == STR_SHARED ? compiler::Mode::SHAR
+                                                     : compiler::Mode::NONE;
         nm = 0;
       }
       if (out.empty() && n[STR_OUT])
         out = Properties::RESOLVE(*this, n[STR_OUT].Scalar());
-      if (main.empty() && n[STR_MAIN])
-        main = n[STR_MAIN].Scalar();
-      if (lang.empty() && n[STR_LANG])
-        lang = n[STR_LANG].Scalar();
-      profile =
-        n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
+      if (main.empty() && n[STR_MAIN]) main = n[STR_MAIN].Scalar();
+      if (lang.empty() && n[STR_LANG]) lang = n[STR_LANG].Scalar();
+      profile = n[STR_PARENT]
+                    ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar())
+                    : "";
       c = !profile.empty();
       break;
     }
   }
-  if (main.empty() && lang.empty())
-    resolveLang();
+  if (main.empty() && lang.empty()) resolveLang();
   if (par) {
-    if (!main.empty() && lang.empty())
-      lang = main.substr(main.rfind(".") + 1);
+    if (!main.empty() && lang.empty()) lang = main.substr(main.rfind(".") + 1);
     main.clear();
   }
   if (nm) {
@@ -223,8 +209,7 @@ maiken::Application::setup() KTHROW(kul::Exception)
     c = 0;
     const auto& propK = AppVars::INSTANCE().properkeys();
     for (const auto& n : nodes) {
-      if (n[STR_NAME].Scalar() != profile)
-        continue;
+      if (n[STR_NAME].Scalar() != profile) continue;
       if (inst.path().empty()) {
         if (Settings::INSTANCE().root()[STR_LOCAL] && propK.count("MKN_BIN") &&
             !main.empty())
@@ -236,16 +221,13 @@ maiken::Application::setup() KTHROW(kul::Exception)
           inst = kul::Dir(Properties::RESOLVE(*this, n[STR_INSTALL].Scalar()));
         if (!inst.path().empty()) {
           if (!inst && !inst.mk())
-            KEXIT(1,
-                  "install tag is not a valid directory\n" +
-                    project().dir().path());
+            KEXIT(1, "install tag is not a valid directory\n" +
+                         project().dir().path());
           inst = kul::Dir(inst.real());
         }
       }
 
-      auto ifArgOrLnk = [=](const auto& n,
-                            const auto& nName,
-                            std::string& var,
+      auto ifArgOrLnk = [=](const auto& n, const auto& nName, std::string& var,
                             kul::hash::map::S2S& cVal) {
         if (n[nName])
           for (YAML::const_iterator it = n[nName].begin(); it != n[nName].end();
@@ -265,8 +247,7 @@ maiken::Application::setup() KTHROW(kul::Exception)
             bool isCVal = 0;
             for (const auto& s : maiken::Compilers::INSTANCE().keys()) {
               isCVal = (left == s);
-              if (isCVal)
-                break;
+              if (isCVal) break;
             }
             if (isCVal) {
               cVal[left] = cVal[left] + ifArg.str();
@@ -291,8 +272,7 @@ maiken::Application::setup() KTHROW(kul::Exception)
       try {
         if (n[STR_IF_INC])
           for (YAML::const_iterator it = n[STR_IF_INC].begin();
-               it != n[STR_IF_INC].end();
-               ++it)
+               it != n[STR_IF_INC].end(); ++it)
             if (it->first.Scalar() == KTOSTRING(__KUL_OS__))
               for (const auto& s : kul::String::LINES(it->second.Scalar()))
                 addIncludeLine(s);
@@ -304,8 +284,7 @@ maiken::Application::setup() KTHROW(kul::Exception)
       try {
         if (n[STR_IF_SRC])
           for (YAML::const_iterator it = n[STR_IF_SRC].begin();
-               it != n[STR_IF_SRC].end();
-               ++it)
+               it != n[STR_IF_SRC].end(); ++it)
             if (it->first.Scalar() == KTOSTRING(__KUL_OS__))
               for (const auto& s : kul::String::SPLIT(it->second.Scalar(), ' '))
                 addSourceLine(s);
@@ -315,15 +294,14 @@ maiken::Application::setup() KTHROW(kul::Exception)
       }
       if (n[STR_IF_LIB])
         for (YAML::const_iterator it = n[STR_IF_LIB].begin();
-             it != n[STR_IF_LIB].end();
-             ++it)
+             it != n[STR_IF_LIB].end(); ++it)
           if (it->first.Scalar() == KTOSTRING(__KUL_OS__))
             for (const auto& s : kul::String::SPLIT(it->second.Scalar(), ' '))
-              if (s.size())
-                libs.push_back(Properties::RESOLVE(*this, s));
+              if (s.size()) libs.push_back(Properties::RESOLVE(*this, s));
 
-      profile =
-        n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
+      profile = n[STR_PARENT]
+                    ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar())
+                    : "";
       c = !profile.empty();
       break;
     }

@@ -30,7 +30,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/compiler/cpp.hpp"
 
-maiken::cpp::IntelCompiler::IntelCompiler(const int& v) : GccCompiler(v)
-{
-  
-}
+maiken::cpp::IntelCompiler::IntelCompiler(const int& v) : GccCompiler(v) {}

@@ -30,55 +30,46 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-class ModuleMinimiser
-{
+class ModuleMinimiser {
   friend class maiken::Application;
 
-private:
+ private:
   void add(const std::vector<maiken::Application*>& mods,
-           kul::hash::map::S2T<maiken::Application*>& apps)
-  {
+           kul::hash::map::S2T<maiken::Application*>& apps) {
     for (auto* const m : mods)
       if (!apps.count(m->buildDir().real()))
         apps.insert(m->buildDir().real(), m);
   }
 
-public:
-  static ModuleMinimiser& INSTANCE()
-  {
+ public:
+  static ModuleMinimiser& INSTANCE() {
     static ModuleMinimiser a;
     return a;
   }
-  kul::hash::map::S2T<maiken::Application*> modules(maiken::Application& app)
-  {
+  kul::hash::map::S2T<maiken::Application*> modules(maiken::Application& app) {
     kul::hash::map::S2T<maiken::Application*> apps;
     add(app.moduleDependencies(), apps);
     for (auto dep = app.dependencies().rbegin();
-         dep != app.dependencies().rend();
-         ++dep)
+         dep != app.dependencies().rend(); ++dep)
       add((*dep)->moduleDependencies(), apps);
     return apps;
   }
 };
 
-class CommandStateMachine
-{
+class CommandStateMachine {
   friend class maiken::Application;
 
-private:
+ private:
   bool _main = 1;
   kul::hash::set::String cmds;
   CommandStateMachine() { reset(); }
-  static CommandStateMachine& INSTANCE()
-  {
+  static CommandStateMachine& INSTANCE() {
     static CommandStateMachine a;
     return a;
   }
-  void reset()
-  {
+  void reset() {
     cmds.clear();
-    for (const auto& s : maiken::AppVars::INSTANCE().commands())
-      cmds.insert(s);
+    for (const auto& s : maiken::AppVars::INSTANCE().commands()) cmds.insert(s);
   }
   void add(const std::string& s) { cmds.insert(s); }
   const kul::hash::set::String& commands() { return cmds; }
@@ -86,14 +77,12 @@ private:
   bool main() { return _main; }
 };
 
-class BuildRecorder
-{
+class BuildRecorder {
   friend class maiken::Application;
 
-private:
+ private:
   kul::hash::set::String builds;
-  static BuildRecorder& INSTANCE()
-  {
+  static BuildRecorder& INSTANCE() {
     static BuildRecorder a;
     return a;
   }
@@ -101,11 +90,9 @@ private:
   bool has(const std::string& k) { return builds.count(k); }
 };
 
-void
-maiken::Application::process() KTHROW(kul::Exception)
-{
+void maiken::Application::process() KTHROW(kul::Exception) {
   const kul::hash::set::String& cmds(
-    CommandStateMachine::INSTANCE().commands());
+      CommandStateMachine::INSTANCE().commands());
 
   auto loadModules = [&](Application& app) {
 #ifndef _MKN_DISABLE_MODULES_
@@ -114,16 +101,14 @@ maiken::Application::process() KTHROW(kul::Exception)
     }
     for (auto& modLoader : app.mods)
       modLoader->module()->init(app, modLoader->app()->modIArg);
-#endif //_MKN_DISABLE_MODULES_
+#endif  //_MKN_DISABLE_MODULES_
   };
   auto proc = [&](Application& app, bool work) {
     kul::env::CWD(app.project().dir());
 
     if (work) {
-      if (!app.buildDir())
-        app.buildDir().mk();
-      if (BuildRecorder::INSTANCE().has(app.buildDir().real()))
-        return;
+      if (!app.buildDir()) app.buildDir().mk();
+      if (BuildRecorder::INSTANCE().has(app.buildDir().real())) return;
       BuildRecorder::INSTANCE().add(app.buildDir().real());
     }
 
@@ -139,15 +124,13 @@ maiken::Application::process() KTHROW(kul::Exception)
       mkn.rm();
     }
     app.loadTimeStamps();
-    if (cmds.count(STR_TRIM))
-      app.trim();
+    if (cmds.count(STR_TRIM)) app.trim();
 
     kul::hash::set::String objects;
     if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE)) {
       for (auto& modLoader : app.mods)
         modLoader->module()->compile(app, modLoader->app()->modCArg);
-      if (work)
-        app.compile(objects);
+      if (work) app.compile(objects);
     }
     if (cmds.count(STR_BUILD) || cmds.count(STR_LINK)) {
       for (auto& modLoader : app.mods)
@@ -162,19 +145,21 @@ maiken::Application::process() KTHROW(kul::Exception)
   };
 
   auto _mods = ModuleMinimiser::INSTANCE().modules(*this);
-  for (auto& mod : ModuleMinimiser::INSTANCE().modules(*this))  {
+  for (auto& mod : ModuleMinimiser::INSTANCE().modules(*this)) {
     bool build = mod.second->is_build_required();
     bool is_build_stale = mod.second->is_build_stale();
-    if(!build && (is_build_stale && !maiken::AppVars::INSTANCE().quiet())) {
+    if (!build && (is_build_stale && !maiken::AppVars::INSTANCE().quiet())) {
       std::stringstream ss;
-      ss << "The project @ " << mod.second->project().dir() << " appears to be stale" << std::endl;
-      ss << "\tWould you like to build it (Y/n) - this message can be removed with -q" << std::endl;
+      ss << "The project @ " << mod.second->project().dir()
+         << " appears to be stale" << std::endl;
+      ss << "\tWould you like to build it (Y/n) - this message can be removed "
+            "with -q"
+         << std::endl;
       build = kul::String::BOOL(kul::cli::receive(ss.str()));
     }
-    if(build){
+    if (build) {
       CommandStateMachine::INSTANCE().main(0);
-      for (auto& m : _mods)
-        m.second->process();
+      for (auto& m : _mods) m.second->process();
       CommandStateMachine::INSTANCE().main(1);
     }
   }
@@ -184,15 +169,12 @@ maiken::Application::process() KTHROW(kul::Exception)
   loadModules(*this);
 
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) {
-    if ((*app)->ig)
-      continue;
-    if ((*app)->lang.empty())
-      (*app)->resolveLang();
+    if ((*app)->ig) continue;
+    if ((*app)->lang.empty()) (*app)->resolveLang();
     (*app)->main.clear();
     proc(**app, !(*app)->srcs.empty());
   }
-  if (!this->ig)
-    proc(*this, (!this->srcs.empty() || !this->main.empty()));
+  if (!this->ig) proc(*this, (!this->srcs.empty() || !this->main.empty()));
 
   if (cmds.count(STR_PACK)) {
     pack();

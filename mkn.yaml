@@ -47,3 +47,12 @@ profile:
     parent: base
     if_arg:
       win_shared: -DKUL_SHARED -DKUL_EXPORT
+
+  - name: format
+    mod:
+    - name: clang.format
+      arg:
+        init:
+          style: google
+          types: cpp:cxx:cc:h:hpp
+          paths: inc

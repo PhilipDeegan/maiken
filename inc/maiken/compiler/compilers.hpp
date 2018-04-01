@@ -36,33 +36,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken {
 namespace compiler {
-class Exception : public kul::Exception
-{
-public:
+class Exception : public kul::Exception {
+ public:
   Exception(const char* f, const int l, std::string s)
-    : kul::Exception(f, l, s)
-  {}
+      : kul::Exception(f, l, s) {}
 };
-} // namespace compiler
+}  // namespace compiler
 
-class CompilerNotFoundException : public kul::Exception
-{
-public:
+class CompilerNotFoundException : public kul::Exception {
+ public:
   CompilerNotFoundException(const char* f, const int l, std::string s)
-    : kul::Exception(f, l, s)
-  {}
+      : kul::Exception(f, l, s) {}
 };
 
-template<typename T, typename... Args>
-std::unique_ptr<T>
-make_unique(Args&&... args)
-{
+template <typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args) {
   return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
-class Compilers
-{
-private:
+class Compilers {
+ private:
   std::unique_ptr<Compiler> hcc;
   std::unique_ptr<Compiler> gcc;
   std::unique_ptr<Compiler> clang;
@@ -72,9 +65,8 @@ private:
 
   kul::hash::map::S2T<Compiler*> cs, masks;
 
-private:
-  Compilers()
-  {
+ private:
+  Compilers() {
     clang = make_unique<cpp::ClangCompiler>();
     gcc = make_unique<cpp::GccCompiler>();
     hcc = make_unique<cpp::HccCompiler>();
@@ -102,15 +94,12 @@ private:
   }
 
   const std::string key(std::string comp,
-                        const kul::hash::map::S2T<Compiler*>& map)
-  {
+                        const kul::hash::map::S2T<Compiler*>& map) {
     kul::String::REPLACE_ALL(comp, ".exe", "");
-    if (map.count(comp) > 0)
-      return comp;
+    if (map.count(comp) > 0) return comp;
     if (comp.find(" ") != std::string::npos)
       for (const std::string& s : kul::String::SPLIT(comp, ' ')) {
-        if (map.count(s) > 0)
-          return s;
+        if (map.count(s) > 0) return s;
         if (std::string(kul::Dir(s).locl()).find(kul::Dir::SEP()) !=
             std::string::npos)
           if (map.count(s.substr(s.rfind(kul::Dir::SEP()) + 1)))
@@ -119,45 +108,39 @@ private:
     if (std::string(kul::Dir(comp).locl()).find(kul::Dir::SEP()) !=
         std::string::npos) {
       comp = comp.substr(comp.rfind(kul::Dir::SEP()) + 1);
-      if (map.count(comp))
-        return comp;
+      if (map.count(comp)) return comp;
     }
 
     KEXCEPT(CompilerNotFoundException,
             "Compiler for " + comp + " is not implemented");
   }
 
-public:
-  static Compilers& INSTANCE()
-  {
+ public:
+  static Compilers& INSTANCE() {
     static Compilers instance;
     return instance;
   }
-  const std::vector<std::string> keys()
-  {
+  const std::vector<std::string> keys() {
     std::vector<std::string> ks;
-    for (const auto& p : cs)
-      ks.push_back(p.first);
+    for (const auto& p : cs) ks.push_back(p.first);
     return ks;
   }
   void addMask(const std::string& m, const std::string& c)
-    KTHROW(CompilerNotFoundException)
-  {
+      KTHROW(CompilerNotFoundException) {
     const std::string k(key(c, cs));
     if (cs.count(m))
       KEXCEPT(compiler::Exception, "Mask cannot replace compiler");
     masks[m] = cs[k];
   }
-  const Compiler* get(const std::string& comp) KTHROW(CompilerNotFoundException)
-  {
+  const Compiler* get(const std::string& comp)
+      KTHROW(CompilerNotFoundException) {
     try {
       return cs[key(comp, cs)];
     } catch (const CompilerNotFoundException& e) {
     }
     return masks[key(comp, masks)];
   }
-  std::string base(const std::string& comp)
-  {
+  std::string base(const std::string& comp) {
     try {
       return key(comp, cs);
     } catch (const CompilerNotFoundException& e) {
@@ -166,5 +149,5 @@ public:
   }
 };
 
-} // namespace maiken
+}  // namespace maiken
 #endif /* _MAIKEN_CODE_COMPILERS_HPP_ */

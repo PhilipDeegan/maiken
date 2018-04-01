@@ -30,11 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void
-includeDependency(const std::string& s,
-                  const std::string& p,
-                  kul::hash::set::String& include)
-{
+void includeDependency(const std::string& s, const std::string& p,
+                       kul::hash::set::String& include) {
   if (s == "+") {
     include.insert(s);
   } else {
@@ -44,10 +41,8 @@ includeDependency(const std::string& s,
   }
 }
 
-void
-maiken::Application::parseDependencyString(std::string s,
-                                          kul::hash::set::String& include)
-{
+void maiken::Application::parseDependencyString(
+    std::string s, kul::hash::set::String& include) {
   kul::String::REPLACE_ALL(s, " ", "");
   std::stringstream dep, pro;
   bool lB = 0, rB = 0;
@@ -55,12 +50,10 @@ maiken::Application::parseDependencyString(std::string s,
     if (c == '[' && (lB || rB))
       KEXIT(1, MKN_ERR_SQRBRKT_MISMATCH_DEP_CLI);
     else if (c == '[' && !lB) {
-      if (dep.str().empty())
-        KEXIT(1, MKN_ERR_INVALID_DEP_CLI);
+      if (dep.str().empty()) KEXIT(1, MKN_ERR_INVALID_DEP_CLI);
       lB = 1;
     } else if (c == ']') {
-      if (pro.str().empty())
-        KEXIT(1, MKN_ERR_INVALID_DEP_CLI);
+      if (pro.str().empty()) KEXIT(1, MKN_ERR_INVALID_DEP_CLI);
       lB = 0;
       rB = 1;
       includeDependency(dep.str(), pro.str(), include);
@@ -83,15 +76,11 @@ maiken::Application::parseDependencyString(std::string s,
         pro << c;
     }
   }
-  if (!rB)
-    includeDependency(dep.str(), "@", include);
-  if (lB)
-    KEXIT(1, MKN_ERR_SQRBRKT_MISMATCH_DEP_CLI);
+  if (!rB) includeDependency(dep.str(), "@", include);
+  if (lB) KEXIT(1, MKN_ERR_SQRBRKT_MISMATCH_DEP_CLI);
 }
 
-void
-maiken::Application::buildDepVec(const std::string* depVal)
-{
+void maiken::Application::buildDepVec(const std::string* depVal) {
   kul::hash::set::String all, ignore, include;
   ignore.insert("+");
   if (depVal) {
@@ -104,7 +93,7 @@ maiken::Application::buildDepVec(const std::string* depVal)
       }
     } else
       AppVars::INSTANCE().dependencyLevel(
-        (std::numeric_limits<int16_t>::max)());
+          (std::numeric_limits<int16_t>::max)());
   }
 
   if (include.size() == 1 && include.count("+")) {
@@ -131,11 +120,10 @@ maiken::Application::buildDepVec(const std::string* depVal)
       const std::string& s(ap->project().dir().real());
       const std::string& p(ap->p);
       const auto it =
-        std::find_if(t.begin(), t.end(), [&s, &p](Application* const a) {
-          return a->project().dir().real() == s && a->p == p;
-        });
-      if (it != t.end())
-        t.erase(it);
+          std::find_if(t.begin(), t.end(), [&s, &p](Application* const a) {
+            return a->project().dir().real() == s && a->p == p;
+          });
+      if (it != t.end()) t.erase(it);
       t.push_back(ap);
     }
   }
@@ -144,41 +132,33 @@ maiken::Application::buildDepVec(const std::string* depVal)
     const std::string& s((*app1)->project().dir().real());
     const std::string& p((*app1)->p);
     const auto it =
-      std::find_if(deps.begin(), deps.end(), [&s, &p](Application* const a) {
-        return a->project().dir().real() == s && a->p == p;
-      });
-    if (it != deps.end())
-      deps.erase(it);
+        std::find_if(deps.begin(), deps.end(), [&s, &p](Application* const a) {
+          return a->project().dir().real() == s && a->p == p;
+        });
+    if (it != deps.end()) deps.erase(it);
     deps.push_back(*app1);
   }
   for (const auto& d : include)
     if (!all.count(d) && !ignore.count(d))
       KEXIT(1, "Dependency project specified does not exist: " + d);
-  if (include.size() && include.count("+"))
-    this->ig = 1;
+  if (include.size() && include.count("+")) this->ig = 1;
 }
 
-void
-maiken::Application::buildDepVecRec(
-  std::unordered_map<uint16_t, std::vector<Application*>>& dePs,
-  int16_t ig,
-  int16_t i,
-  const kul::hash::set::String& inc)
-{
+void maiken::Application::buildDepVecRec(
+    std::unordered_map<uint16_t, std::vector<Application*>>& dePs, int16_t ig,
+    int16_t i, const kul::hash::set::String& inc) {
   for (auto* const a : deps) {
     const std::string& name(a->project().root()[STR_NAME].Scalar());
     std::stringstream ss;
     ss << name << "[" << (a->p.empty() ? name : a->p) << "]";
-    if (ig > 0 || inc.count(name) || inc.count(ss.str()))
-      a->ig = 0;
+    if (ig > 0 || inc.count(name) || inc.count(ss.str())) a->ig = 0;
     dePs[i].push_back(a);
     a->buildDepVecRec(dePs, --ig, (++i)--, inc);
   }
 }
 
-void
-maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception)
-{
+void maiken::Application::populateMapsFromDependencies()
+    KTHROW(kul::Exception) {
   for (auto depP = dependencies().rbegin(); depP != dependencies().rend();
        ++depP) {
     const auto& dep(**depP);
@@ -186,14 +166,13 @@ maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception)
       const std::string n(dep.project().root()[STR_NAME].Scalar());
       const std::string lib = dep.baseLibFilename();
       const auto& it(std::find(libraries().begin(), libraries().end(), lib));
-      if (it != libraries().end())
-        libs.erase(it);
+      if (it != libraries().end()) libs.erase(it);
       libs.push_back(lib);
     }
 
     for (const auto& s : dep.includes())
       if (s.second && std::find(includes().begin(), includes().end(), s) ==
-                        includes().end())
+                          includes().end())
         incs.push_back(std::make_pair(s.first, true));
     for (const std::string& s : dep.libraryPaths())
       if (std::find(libraryPaths().begin(), libraryPaths().end(), s) ==

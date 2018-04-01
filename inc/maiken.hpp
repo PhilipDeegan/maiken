@@ -42,33 +42,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/compiler.hpp"
 #include "maiken/compiler/compilers.hpp"
-#include "maiken/project.hpp"
-#include "maiken/settings.hpp"
 #include "maiken/global.hpp"
+#include "maiken/project.hpp"
 
-int
-main(int argc, char* argv[]);
+int main(int argc, char* argv[]);
 
 namespace maiken {
 
-class Exception : public kul::Exception
-{
-public:
+class Exception : public kul::Exception {
+ public:
   Exception(const char* f, const uint16_t& l, const std::string& s)
-    : kul::Exception(f, l, s)
-  {}
+      : kul::Exception(f, l, s) {}
 };
 
 class Module;
 class ModuleLoader;
 class ThreadingCompiler;
 class Applications;
-class KUL_PUBLISH Application : public Constants
-{
+class KUL_PUBLISH Application : public Constants {
   friend class Applications;
   friend class ThreadingCompiler;
 
-protected:
+ protected:
   bool ig = 1, isMod = 0, ro = 0;
   const Application* par = nullptr;
   Application* sup = nullptr;
@@ -100,7 +95,8 @@ protected:
   void postSetupValidation() KTHROW(Exception);
   void resolveProperties() KTHROW(Exception);
   void resolveLang() KTHROW(Exception);
-  static void parseDependencyString(std::string s, kul::hash::set::String& include);
+  static void parseDependencyString(std::string s,
+                                    kul::hash::set::String& include);
 
   void compile(kul::hash::set::String& objects) KTHROW(kul::Exception);
   void build() KTHROW(kul::Exception);
@@ -114,7 +110,7 @@ protected:
   void scmStatus(const bool& deps = false) KTHROW(kul::scm::Exception);
   void scmUpdate(const bool& f) KTHROW(kul::scm::Exception);
   void scmUpdate(const bool& f, const kul::SCM* scm, const std::string& repo)
-    KTHROW(kul::scm::Exception);
+      KTHROW(kul::scm::Exception);
 
   void setup() KTHROW(kul::Exception);
   void setSuper();
@@ -122,7 +118,7 @@ protected:
   void showTree() const;
   void showTreeRecursive(uint8_t i) const;
   void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps)
-    const KTHROW(kul::Exception);
+      const KTHROW(kul::Exception);
   void showProfiles();
 
   void writeTimeStamps(kul::hash::set::String& objects,
@@ -131,28 +127,25 @@ protected:
 
   void buildDepVec(const std::string* depVal);
   void buildDepVecRec(
-    std::unordered_map<uint16_t, std::vector<Application*>>& dePs,
-    int16_t ig,
-    int16_t i,
-    const kul::hash::set::String& inc);
+      std::unordered_map<uint16_t, std::vector<Application*>>& dePs, int16_t ig,
+      int16_t i, const kul::hash::set::String& inc);
 
   void populateMapsFromDependencies() KTHROW(kul::Exception);
 
-  void loadDepOrMod(const YAML::Node& node,
-                    const kul::Dir& depOrMod,
+  void loadDepOrMod(const YAML::Node& node, const kul::Dir& depOrMod,
                     bool module) KTHROW(kul::Exception);
   kul::Dir resolveDepOrModDirectory(const YAML::Node& d, bool module);
-  void popDepOrMod(const YAML::Node& n,
-                   std::vector<Application*>& vec,
-                   const std::string& s,
-                   bool module,
-                   bool with = 0) KTHROW(kul::Exception);
+  void popDepOrMod(const YAML::Node& n, std::vector<Application*>& vec,
+                   const std::string& s, bool module, bool with = 0)
+      KTHROW(kul::Exception);
 
   kul::hash::set::String inactiveMains() const;
 
   bool incSrc(const kul::File& f) const;
   void addCLIArgs(const kul::cli::Args& args);
-  void withArgs(std::vector<YAML::Node>& with_nodes, std::function<void(const YAML::Node& n, const bool mod)> getIfMissing);
+  void withArgs(
+      std::vector<YAML::Node>& with_nodes,
+      std::function<void(const YAML::Node& n, const bool mod)> getIfMissing);
   void addSourceLine(const std::string& o) KTHROW(kul::Exception);
   void addIncludeLine(const std::string& o) KTHROW(kul::Exception);
 
@@ -165,8 +158,8 @@ protected:
   void modPack(const YAML::Node& modArg) { modPArg = modArg; }
   const YAML::Node& modPack() { return modPArg; }
 
-  void addRDep(Application* app){
-    if(std::find(rdeps.begin(), rdeps.end(), app) == rdeps.end())
+  void addRDep(Application* app) {
+    if (std::find(rdeps.begin(), rdeps.end(), app) == rdeps.end())
       rdeps.push_back(app);
   }
 
@@ -175,10 +168,10 @@ protected:
 
   static void showHelp();
 
-public:
+ public:
   Application(const maiken::Project& proj,
               const std::string& profile =
-                ""); // : m(Mode::NONE), p(profile), proj(proj){}
+                  "");  // : m(Mode::NONE), p(profile), proj(proj){}
   Application(const Application& a) = delete;
   Application(const Application&& a) = delete;
   Application& operator=(const Application& a) = delete;
@@ -190,71 +183,63 @@ public:
   const maiken::Project& project() const { return proj; }
   const std::vector<Application*>& dependencies() const { return deps; }
   const std::vector<Application*>& revendencies() const { return rdeps; }
-  const std::vector<Application*>& moduleDependencies() const
-  {
+  const std::vector<Application*>& moduleDependencies() const {
     return modDeps;
   }
-  const std::vector<std::shared_ptr<ModuleLoader>>& modules() const
-  {
+  const std::vector<std::shared_ptr<ModuleLoader>>& modules() const {
     return mods;
   }
   const std::vector<kul::cli::EnvVar>& envVars() const { return evs; }
   const kul::hash::map::S2T<kul::hash::map::S2S>& files() const { return fs; }
   const std::vector<std::string>& libraries() const { return libs; }
-  const std::vector<std::pair<std::string, bool>>& sources() const
-  {
+  const std::vector<std::pair<std::string, bool>>& sources() const {
     return srcs;
   }
-  const std::vector<std::pair<std::string, bool>>& includes() const
-  {
+  const std::vector<std::pair<std::string, bool>>& includes() const {
     return incs;
   }
   const std::vector<std::string>& libraryPaths() const { return paths; }
   const kul::hash::map::S2S& properties() const { return ps; }
-  const kul::hash::map::S2T<kul::hash::set::String>& arguments() const
-  {
+  const kul::hash::map::S2T<kul::hash::set::String>& arguments() const {
     return args;
   }
 
-  void addInclude(const std::string &s, bool p = 1){ incs.push_back(std::make_pair(s, p)); }
-  void addLibpath(const std::string &s){ paths.push_back(s); }
+  void addInclude(const std::string& s, bool p = 1) {
+    incs.push_back(std::make_pair(s, p));
+  }
+  void addLibpath(const std::string& s) { paths.push_back(s); }
 
-  std::string baseLibFilename() const
-  {
+  std::string baseLibFilename() const {
     std::string n = project().root()[STR_NAME].Scalar();
     return out.empty() ? inst ? p.empty() ? n : n + "_" + p : n : out;
   }
   kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> sourceMap()
-    const;
+      const;
 
   static std::vector<Application*> CREATE(int16_t argc, char* argv[])
-    KTHROW(kul::Exception);
+      KTHROW(kul::Exception);
 };
 
-class Applications : public Constants
-{
+class Applications : public Constants {
   friend int ::main(int argc, char* argv[]);
 
-private:
+ private:
   kul::hash::map::S2T<kul::hash::map::S2T<Application*>> m_apps;
   std::vector<std::unique_ptr<Application>> m_appPs;
   Applications() {}
-  void clear()
-  {
+  void clear() {
     m_apps.clear();
     m_appPs.clear();
   }
 
-public:
-  static Applications& INSTANCE()
-  {
+ public:
+  static Applications& INSTANCE() {
     static Applications a;
     return a;
   }
   Application* getOrCreate(const maiken::Project& proj,
-                           const std::string& _profile = "",
-                           bool setup = 1) KTHROW(kul::Exception)
-  {
+                           const std::string& _profile = "", bool setup = 1)
+      KTHROW(kul::Exception) {
     std::string pDir(proj.dir().real());
     std::string profile = _profile.empty() ? "@" : _profile;
     if (!m_apps.count(pDir) || !m_apps[pDir].count(profile)) {
@@ -272,9 +257,8 @@ public:
     return m_apps[pDir][profile];
   }
   Application* getOrCreateRoot(const maiken::Project& proj,
-                               const std::string& _profile = "",
-                               bool setup = 1) KTHROW(kul::Exception)
-  {
+                               const std::string& _profile = "", bool setup = 1)
+      KTHROW(kul::Exception) {
     std::string pDir(proj.dir().real());
     std::string profile = _profile.empty() ? "@" : _profile;
     if (!m_apps.count(pDir) || !m_apps[pDir].count(profile)) {
@@ -292,8 +276,7 @@ public:
     }
     return m_apps[pDir][profile];
   }
-  Application* getOrNullptr(const std::string& project)
-  {
+  Application* getOrNullptr(const std::string& project) {
     uint8_t count = 0;
     Application* app = nullptr;
     for (const auto p1 : m_apps)
@@ -305,22 +288,19 @@ public:
       }
     if (count > 1) {
       KEXIT(1, "Cannot deduce project version as")
-        << " there are multiple versions in the dependency tree";
+          << " there are multiple versions in the dependency tree";
     }
     return app;
   }
 };
 
-class ThreadingCompiler : public Constants
-{
-private:
+class ThreadingCompiler : public Constants {
+ private:
   maiken::Application& app;
   std::vector<std::string> incs;
 
-public:
-  ThreadingCompiler(maiken::Application& app)
-    : app(app)
-  {
+ public:
+  ThreadingCompiler(maiken::Application& app) : app(app) {
     for (const auto& s : app.includes()) {
       kul::Dir d(s.first);
       const std::string& m(AppVars::INSTANCE().dryRun() ? d.esc() : d.escm());
@@ -332,34 +312,27 @@ public:
   }
 
   CompilationUnit compilationUnit(
-    const std::pair<std::string, std::string>& pair) const
-    KTHROW(kul::Exception);
-
+      const std::pair<std::string, std::string>& pair) const
+      KTHROW(kul::Exception);
 };
 
-class SCMGetter
-{
-private:
+class SCMGetter {
+ private:
   kul::hash::map::S2S valids;
-  static bool IS_SOLID(const std::string& r)
-  {
+  static bool IS_SOLID(const std::string& r) {
     return r.find("://") != std::string::npos ||
            r.find("@") != std::string::npos;
   }
-  static SCMGetter& INSTANCE()
-  {
+  static SCMGetter& INSTANCE() {
     static SCMGetter s;
     return s;
   }
-  static const kul::SCM* GET_SCM(const kul::Dir& d,
-                                 const std::string& r,
+  static const kul::SCM* GET_SCM(const kul::Dir& d, const std::string& r,
                                  bool module);
 
-public:
-  static const std::string REPO(const kul::Dir& d,
-                                const std::string& r,
-                                bool module)
-  {
+ public:
+  static const std::string REPO(const kul::Dir& d, const std::string& r,
+                                bool module) {
     if (INSTANCE().valids.count(d.path()))
       return (*INSTANCE().valids.find(d.path())).second;
     if (IS_SOLID(r))
@@ -370,16 +343,12 @@ public:
       return (*INSTANCE().valids.find(d.path())).second;
     KEXCEPT(Exception, "SCM not discovered for project: " + d.path());
   }
-  static bool HAS(const kul::Dir& d)
-  {
+  static bool HAS(const kul::Dir& d) {
     return (kul::Dir(d.join(".git")) || kul::Dir(d.join(".svn")));
   }
-  static const kul::SCM* GET(const kul::Dir& d,
-                             const std::string& r,
-                             bool module)
-  {
-    if (IS_SOLID(r))
-      INSTANCE().valids.insert(d.path(), r);
+  static const kul::SCM* GET(const kul::Dir& d, const std::string& r,
+                             bool module) {
+    if (IS_SOLID(r)) INSTANCE().valids.insert(d.path(), r);
     if (kul::Dir(d.join(".git")))
       return &kul::scm::Manager::INSTANCE().get("git");
     if (kul::Dir(d.join(".svn")))
@@ -388,7 +357,7 @@ public:
   }
 };
 
-} // namespace maiken
+}  // namespace maiken
 #endif /* _MAIKEN_APP_HPP_ */
 
 #include <maiken/module.hpp>

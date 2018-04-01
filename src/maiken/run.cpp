@@ -30,16 +30,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void
-maiken::Application::run(bool dbg)
-{
+void maiken::Application::run(bool dbg) {
   std::string bin(out.empty() ? project().root()[STR_NAME].Scalar() : out);
 #ifdef _WIN32
   bin += ".exe";
 #endif
   kul::File f(bin, inst ? inst : buildDir());
-  if (!f)
-    KEXIT(1, "binary does not exist \n" + f.full());
+  if (!f) KEXIT(1, "binary does not exist \n" + f.full());
   std::unique_ptr<kul::Process> p;
   if (dbg) {
     std::string dbg = kul::env::GET("MKN_DBG");
@@ -57,8 +54,7 @@ maiken::Application::run(bool dbg)
     } else {
       std::vector<std::string> bits(kul::cli::asArgs(dbg));
       p = std::make_unique<kul::Process>(bits[0]);
-      for (uint16_t i = 1; i < bits.size(); i++)
-        p->arg(bits[i]);
+      for (uint16_t i = 1; i < bits.size(); i++) p->arg(bits[i]);
     }
     p->arg(f.mini());
   } else
@@ -77,9 +73,8 @@ maiken::Application::run(bool dbg)
 
   if (m != compiler::Mode::STAT) {
     std::string arg;
-    for (const auto& s : libraryPaths())
-      arg += s + kul::env::SEP();
-    if(!arg.empty()) arg.pop_back();
+    for (const auto& s : libraryPaths()) arg += s + kul::env::SEP();
+    if (!arg.empty()) arg.pop_back();
 #ifdef _WIN32
     kul::cli::EnvVar pa("PATH", arg, kul::cli::EnvVarMode::PREP);
 #else
@@ -89,7 +84,7 @@ maiken::Application::run(bool dbg)
     kul::cli::EnvVar dy("DYLD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
     KOUT(INF) << dy.name() << " : " << dy.toString();
     p->var(dy.name(), dy.toString());
-#endif   // __APPLE__
+#endif  // __APPLE__
 
 #endif
     KOUT(INF) << pa.name() << " : " << pa.toString();
@@ -98,9 +93,8 @@ maiken::Application::run(bool dbg)
   for (const auto& ev : AppVars::INSTANCE().envVars())
     p->var(ev.first,
            kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP)
-             .toString());
+               .toString());
   KOUT(INF) << (*p);
-  if (!AppVars::INSTANCE().dryRun())
-    p->start();
+  if (!AppVars::INSTANCE().dryRun()) p->start();
   KEXIT(0, "");
 }

@@ -35,7 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MKN_DEFS_CMD "Comandi :"
 #define MKN_DEFS_BUILD "   build     | Compila e collega (link)"
-#define MKN_DEFS_BUILD_ALL                                                     \
+#define MKN_DEFS_BUILD_ALL \
   "   build-all | Compile and link all active projects and modules"
 #define MKN_DEFS_BUILD_MOD "   build-mod | Compile and link all active modules"
 #define MKN_DEFS_CLEAN "   clean     | Cancella i file da ./bin/$profile"
@@ -44,20 +44,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   "   dbg       | Esegue col debugger un programma associato a un profilo di " \
   "progetto"
 #define MKN_DEFS_INIT "   init      | Crea un file mkn.xml minimale in ./"
-#define MKN_DEFS_LINK                                                          \
-  "   link      | Collega (link) i file oggetto all'eseguibile/libreria "      \
+#define MKN_DEFS_LINK                                                     \
+  "   link      | Collega (link) i file oggetto all'eseguibile/libreria " \
   "(exe/lib)"
-#define MKN_DEFS_PACK                                                          \
+#define MKN_DEFS_PACK \
   "   pack      | Copia i file binari e le librerie in bin/$profile/pack"
 #define MKN_DEFS_PROFS "   profiles  | Mostra i profili contenuti in ./mkn.xml"
-#define MKN_DEFS_RUN                                                           \
-  "   run       | Esegue un programma associato a un profilo di progetto "     \
+#define MKN_DEFS_RUN                                                       \
+  "   run       | Esegue un programma associato a un profilo di progetto " \
   "collegando le librerie dinamiche automaticamente"
-#define MKN_DEFS_INC                                                           \
-  "   inc       | Stampa le cartelle di inclusione (include) sullo standard "  \
+#define MKN_DEFS_INC                                                          \
+  "   inc       | Stampa le cartelle di inclusione (include) sullo standard " \
   "output"
-#define MKN_DEFS_SRC                                                           \
-  "   src       | Stampa i file sorgenti trovati sullo standard output "       \
+#define MKN_DEFS_SRC                                                     \
+  "   src       | Stampa i file sorgenti trovati sullo standard output " \
   "[consente l'opzione -d]."
 #define MKN_DEFS_TRIM                                                          \
   "   trim      | Rimuove gli spazi finali dai file sorgenti (inc/src) sotto " \
@@ -65,100 +65,100 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_TREE "   tree      | Display dependency tree"
 
 #define MKN_DEFS_ARG "Argomenti:"
-#define MKN_DEFS_ARGS                                                          \
-  "   -a/--args $a           | Aggiunge l'argomento $arg in fase di "          \
+#define MKN_DEFS_ARGS                                                 \
+  "   -a/--args $a           | Aggiunge l'argomento $arg in fase di " \
   "compilazione, lo passa al processo in fase di esecuzione"
-#define MKN_DEFS_ADD                                                           \
-  "   -A --add $csv          | CSV list of additional sources to "             \
+#define MKN_DEFS_ADD                                               \
+  "   -A --add $csv          | CSV list of additional sources to " \
   "compile/link, disable recursive finding with \"<dir>\\,0\""
-#define MKN_DEFS_DEPS                                                          \
-  "   -d/--dependencies $d   | Numero di figli da includere o lista dei "      \
-  "progetti/profili separati da virgola, in assenza si assume tutti quelli "   \
+#define MKN_DEFS_DEPS                                                        \
+  "   -d/--dependencies $d   | Numero di figli da includere o lista dei "    \
+  "progetti/profili separati da virgola, in assenza si assume tutti quelli " \
   "esistenti"
-#define MKN_DEFS_DIRC                                                          \
-  "   -C/--directory $d      | Esegue nella directory $d invece che in "       \
+#define MKN_DEFS_DIRC                                                    \
+  "   -C/--directory $d      | Esegue nella directory $d invece che in " \
   "quella corrente"
-#define MKN_DEFS_EVSA                                                          \
-  "   -E/--env $a            | Sovrascrive le variabili di ambiente "          \
-  "specificate come lista di chiave=valore separate da virgola: "              \
+#define MKN_DEFS_EVSA                                                 \
+  "   -E/--env $a            | Sovrascrive le variabili di ambiente " \
+  "specificate come lista di chiave=valore separate da virgola: "     \
   "\"k1=v1,k2=v2\""
 #define MKN_DEFS_GET                                                           \
   "   -G/--get $k            | Returns string value for property K in either " \
   "local yaml or settings.yaml, failure is no string 0 exit code"
 #define MKN_DEFS_HELP "   -h/--help              | Mostra l'help sulla console"
-#define MKN_DEFS_INCL                                                          \
-  "   -i/--inc $i            | Add include directory to compile commands, "    \
+#define MKN_DEFS_INCL                                                       \
+  "   -i/--inc $i            | Add include directory to compile commands, " \
   "seperated by standard system PATH environment ; for windows : for others"
-#define MKN_DEFS_JARG                                                          \
-  "   -j/--jargs             | Argomenti specifici per tipo di file in "       \
+#define MKN_DEFS_JARG                                                    \
+  "   -j/--jargs             | Argomenti specifici per tipo di file in " \
   "formato JSON, ad es. '{\"c\": \"-DC_ARG1\", \"cpp\": \"-DCXX_ARG1\"}'"
-#define MKN_DEFS_LINKER                                                        \
-  "   -l/--linker $t         | Aggiunge $t per il collegamento (link) del "    \
+#define MKN_DEFS_LINKER                                                     \
+  "   -l/--linker $t         | Aggiunge $t per il collegamento (link) del " \
   "profilo del progetto radice (root project)"
-#define MKN_DEFS_ALINKR                                                        \
-  "   -L/--all-linker $t     | Aggiunge $t per il collegamento (link) di "     \
+#define MKN_DEFS_ALINKR                                                    \
+  "   -L/--all-linker $t     | Aggiunge $t per il collegamento (link) di " \
   "tutti i progetti che lo prevedono"
-#define MKN_DEFS_MOD                                                           \
-  "   -m/--mod [$csv]        | Activate modules with phase found in $csv, "    \
+#define MKN_DEFS_MOD                                                        \
+  "   -m/--mod [$csv]        | Activate modules with phase found in $csv, " \
   "$csv missing, all phases activated"
 #define MKN_DEFS_MAIN                                                          \
   "   -M/--main $m           | Sets main linker file to $m, supercedes /main " \
   "tag"
-#define MKN_DEFS_OUT                                                           \
-  "   -o/--out $o            | Sets output binary/library to name $o, "        \
+#define MKN_DEFS_OUT                                                    \
+  "   -o/--out $o            | Sets output binary/library to name $o, " \
   "supercedes /out tag"
 #define MKN_DEFS_PROF "   -p/--profile $p        | Attiva il profilo $p"
-#define MKN_DEFS_PROP                                                          \
-  "   -P/--property $p       | Sovrascrive le proprieta` specificate come "    \
+#define MKN_DEFS_PROP                                                       \
+  "   -P/--property $p       | Sovrascrive le proprieta` specificate come " \
   "lista di chiave=valore separate da virgola: \"k1=v1,k2=v2\""
-#define MKN_DEFS_RUN_ARGS                                                      \
-  "   -r/--run-args $a       | Passes $a to running binary as arguments, "     \
+#define MKN_DEFS_RUN_ARGS                                                  \
+  "   -r/--run-args $a       | Passes $a to running binary as arguments, " \
   "suppercedes -a"
-#define MKN_DEFS_DRYR                                                          \
-  "   -R/--dry-run           | Visualizza i comandi su console senza "         \
+#define MKN_DEFS_DRYR                                                  \
+  "   -R/--dry-run           | Visualizza i comandi su console senza " \
   "realmente compilare, eseguire, ect."
 #define MKN_DEFS_STAT                                                          \
   "   -s/--scm-status        | Mostra lo stato dell'SCM della cartella di un " \
   "progetto, consente l'opzione -d"
-#define MKN_DEFS_THREDS                                                        \
-  "   -t/--threads $n        | Utilizza $n thread in compilazione dove $n > "  \
+#define MKN_DEFS_THREDS                                                       \
+  "   -t/--threads $n        | Utilizza $n thread in compilazione dove $n > " \
   "0, se n non e` specificato ne viene calcolato uno ottimale."
 #define MKN_DEFS_UPDATE                                                        \
   "   -u/--scm-update        | Verifica se ci sono aggiornamenti ai progetti " \
   "e chiede se applicarli, consente l'opzione -d"
-#define MKN_DEFS_FUPDATE                                                       \
-  "   -U/--scm-force-update  | Forza l'aggiornamento di un progetto da SCM, "  \
+#define MKN_DEFS_FUPDATE                                                      \
+  "   -U/--scm-force-update  | Forza l'aggiornamento di un progetto da SCM, " \
   "consente l'opzione -d"
-#define MKN_DEFS_VERSON                                                        \
-  "   -v/--version           | Mostra l'attuale versione di maiken, ignora "   \
+#define MKN_DEFS_VERSON                                                      \
+  "   -v/--version           | Mostra l'attuale versione di maiken, ignora " \
   "eventuali altri argomenti specificati"
-#define MKN_DEFS_SETTNGS                                                       \
-  "   -x/--settings $f       | Imposta il file settings.xml in uso al file "   \
+#define MKN_DEFS_SETTNGS                                                     \
+  "   -x/--settings $f       | Imposta il file settings.xml in uso al file " \
   "$f, se la cartella di $f e` mancante viene cercato come $(HOME)/maiken/$f"
-#define MKN_DEFS_STATIC                                                        \
-  "   -K/--static            | Effettua il collegamento (link) statico dei "   \
+#define MKN_DEFS_STATIC                                                      \
+  "   -K/--static            | Effettua il collegamento (link) statico dei " \
   "progetti nel caso 'mode' non sia eplicitato"
-#define MKN_DEFS_SHARED                                                        \
-  "   -S/--shared            | Effettua il collegamento (link) dinamico dei "  \
+#define MKN_DEFS_SHARED                                                       \
+  "   -S/--shared            | Effettua il collegamento (link) dinamico dei " \
   "progetti nel caso 'mode' non sia eplicitato"
 
 #define MKN_DEFS_EXMPL "Examples:"
-#define MKN_DEFS_EXMPL1                                                        \
-  "   mkn build -dtKUa             | Forza l'aggiornamento / Compila col "     \
+#define MKN_DEFS_EXMPL1                                                    \
+  "   mkn build -dtKUa             | Forza l'aggiornamento / Compila col " \
   "numero ottimale di thread / Collega (link) staticamente - ogni cosa"
-#define MKN_DEFS_EXMPL2                                                        \
-  "   mkn clean build -dtu         | Aggiorna tutto se necessario, rimuove "   \
+#define MKN_DEFS_EXMPL2                                                      \
+  "   mkn clean build -dtu         | Aggiorna tutto se necessario, rimuove " \
   "ogni file intermedio, costruisce tutto con un numero ottimale di thread"
 #define MKN_DEFS_EXMPL3                                                        \
   "   mkn clean build -d 1 -t 2 -u | Aggiorna/Pulisce/Costruisce il progetto " \
   "e le dipendenze di primo livello usando due thread"
-#define MKN_DEFS_EXMPL4                                                        \
+#define MKN_DEFS_EXMPL4 \
   "   mkn -ds                      | Mostra lo stato di '${scm}' per tutto"
 
 #define MKN_PARENT "Genitore"
 #define MKN_PROFILE "Profilo"
 #define MKN_PROJECT "Progetto"
-#define MKN_PROJECT_NOT_FOUND                                                  \
+#define MKN_PROJECT_NOT_FOUND \
   "Progetto non trovato, tentativo di risoluzione automatica: "
 
 #endif /* _MAIKEN_DEFS_LANG_HPP_ */

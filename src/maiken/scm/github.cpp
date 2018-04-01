@@ -32,79 +32,73 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef _MKN_WITH_MKN_RAM_
 
-bool
-maiken::Github::GET_DEFAULT_BRANCH(const std::string& owner,
-                                   const std::string& repo,
-                                   std::string& branch)
-{
+bool maiken::Github::GET_DEFAULT_BRANCH(const std::string& owner,
+                                        const std::string& repo,
+                                        std::string& branch) {
   bool b = 0;
   std::stringstream ss;
   ss << "repos/" << owner << "/" << repo;
   kul::https::Get("api.github.com", ss.str())
-    .withHeaders({ { "User-Agent", "Mozilla not a virus" },
-                   { "Accept", "application/json" } })
-    .withResponse([&b, &branch](const kul::http::Response& r) {
-      if (r.status() == 200) {
-        kul::yaml::String yaml(r.body());
-        if (yaml.root()["default_branch"]) {
-          branch = yaml.root()["default_branch"].Scalar();
-          b = 1;
+      .withHeaders({{"User-Agent", "Mozilla not a virus"},
+                    {"Accept", "application/json"}})
+      .withResponse([&b, &branch](const kul::http::Response& r) {
+        if (r.status() == 200) {
+          kul::yaml::String yaml(r.body());
+          if (yaml.root()["default_branch"]) {
+            branch = yaml.root()["default_branch"].Scalar();
+            b = 1;
+          }
         }
-      }
-    })
-    .send();
+      })
+      .send();
   return b;
 }
 
-bool
-maiken::Github::GET_LATEST_RELEASE(const std::string& owner,
-                                   const std::string& repo,
-                                   std::string& branch)
-{
+bool maiken::Github::GET_LATEST_RELEASE(const std::string& owner,
+                                        const std::string& repo,
+                                        std::string& branch) {
   bool b = 0;
   std::stringstream ss;
   ss << "repos/" << owner << "/" << repo << "/releases/latest";
   kul::https::Get("api.github.com", ss.str())
-    .withHeaders({ { "User-Agent", "Mozilla not a virus" },
-                   { "Accept", "application/json" } })
-    .withResponse([&b, &branch](const kul::http::Response& r) {
-      if (r.status() == 200) {
-        kul::yaml::String yaml(r.body());
-        if (yaml.root()["tag_name"]) {
-          branch = yaml.root()["tag_name"].Scalar();
-          b = 1;
+      .withHeaders({{"User-Agent", "Mozilla not a virus"},
+                    {"Accept", "application/json"}})
+      .withResponse([&b, &branch](const kul::http::Response& r) {
+        if (r.status() == 200) {
+          kul::yaml::String yaml(r.body());
+          if (yaml.root()["tag_name"]) {
+            branch = yaml.root()["tag_name"].Scalar();
+            b = 1;
+          }
         }
-      }
-    })
-    .send();
+      })
+      .send();
   return b;
 }
 
-bool
-maiken::Github::GET_LATEST_TAG(const std::string& owner,
-                               const std::string& repo,
-                               std::string& branch)
-{
+bool maiken::Github::GET_LATEST_TAG(const std::string& owner,
+                                    const std::string& repo,
+                                    std::string& branch) {
   bool b = 0;
   std::stringstream ss;
   ss << "repos/" << owner << "/" << repo << "/git/tags";
   kul::https::Get("api.github.com", ss.str())
-    .withHeaders({ { "User-Agent", "Mozilla not a virus" },
-                   { "Accept", "application/json" } })
-    .withResponse([&b, &branch](const kul::http::Response& r) {
-      if (r.status() == 200) {
-        kul::yaml::String yaml(r.body());
-        if (yaml.root().Type() == 3) {
-          for (const auto& node : yaml.root()) {
-            if (yaml.root()["ref"]) {
-              branch = yaml.root()["ref"].Scalar();
-              b = 1;
+      .withHeaders({{"User-Agent", "Mozilla not a virus"},
+                    {"Accept", "application/json"}})
+      .withResponse([&b, &branch](const kul::http::Response& r) {
+        if (r.status() == 200) {
+          kul::yaml::String yaml(r.body());
+          if (yaml.root().Type() == 3) {
+            for (const auto& node : yaml.root()) {
+              if (yaml.root()["ref"]) {
+                branch = yaml.root()["ref"].Scalar();
+                b = 1;
+              }
             }
           }
         }
-      }
-    })
-    .send();
+      })
+      .send();
   if (b == 1) {
     auto bits(kul::String::SPLIT(branch, "/"));
     branch = bits[bits.size() - 1];
@@ -112,9 +106,7 @@ maiken::Github::GET_LATEST_TAG(const std::string& owner,
   return b;
 }
 
-bool
-maiken::Github::GET_LATEST(const std::string& repo, std::string& branch)
-{
+bool maiken::Github::GET_LATEST(const std::string& repo, std::string& branch) {
 #ifndef _MKN_DISABLE_SCM_
   std::vector<std::string> repos;
   if (IS_SOLID(repo))
@@ -137,12 +129,9 @@ maiken::Github::GET_LATEST(const std::string& repo, std::string& branch)
         KERR << "Invalid attempt to perform github lookup";
         continue;
       }
-      if (GET_LATEST_RELEASE(owner, repo, branch))
-        return 1;
-      if (GET_LATEST_TAG(owner, repo, branch))
-        return 1;
-      if (GET_DEFAULT_BRANCH(owner, repo, branch))
-        return 1;
+      if (GET_LATEST_RELEASE(owner, repo, branch)) return 1;
+      if (GET_LATEST_TAG(owner, repo, branch)) return 1;
+      if (GET_DEFAULT_BRANCH(owner, repo, branch)) return 1;
     }
   }
 #else

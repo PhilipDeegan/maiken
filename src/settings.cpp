@@ -33,30 +33,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 std::unique_ptr<maiken::Settings> maiken::Settings::instance;
 
 namespace maiken {
-class SuperSettings
-{
+class SuperSettings {
   friend class maiken::Settings;
 
-private:
+ private:
   kul::hash::set::String files;
-  static SuperSettings& INSTANCE()
-  {
+  static SuperSettings& INSTANCE() {
     static SuperSettings instance;
     return instance;
   }
-  void cycleCheck(const std::string& file) KTHROW(maiken::SettingsException)
-  {
+  void cycleCheck(const std::string& file) KTHROW(maiken::SettingsException) {
     if (files.count(file))
       KEXCEPT(maiken::SettingsException,
               "Super cycle detected in file: " + file);
     files.insert(file);
   }
 };
-} // namespace maiken
+}  // namespace maiken
 
-maiken::Settings::Settings(const std::string& s)
-  : kul::yaml::File(s)
-{
+maiken::Settings::Settings(const std::string& s) : kul::yaml::File(s) {
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_REPO]) {
     kul::Dir d(root()[STR_LOCAL][STR_REPO].Scalar());
     if (!d.is() && !d.mk())
@@ -69,8 +64,7 @@ maiken::Settings::Settings(const std::string& s)
       rrs.push_back(s);
   {
     const std::string& rr = _MKN_REMOTE_REPO_;
-    for (const auto& s : kul::String::SPLIT(rr, ' '))
-      rrs.push_back(s);
+    for (const auto& s : kul::String::SPLIT(rr, ' ')) rrs.push_back(s);
   }
 
   if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_MOD_REPO])
@@ -79,60 +73,50 @@ maiken::Settings::Settings(const std::string& s)
       rms.push_back(s);
   {
     const std::string& rr = _MKN_REMOTE_MOD_;
-    for (const auto& s : kul::String::SPLIT(rr, ' '))
-      rms.push_back(s);
+    for (const auto& s : kul::String::SPLIT(rr, ' ')) rms.push_back(s);
   }
 
   if (root()[STR_SUPER]) {
     kul::File f(RESOLVE(root()[STR_SUPER].Scalar()));
-    if (!f)
-      KEXCEPT(SettingsException, "super file not found\n" + file());
+    if (!f) KEXCEPT(SettingsException, "super file not found\n" + file());
     if (f.real() == kul::File(file()).real())
       KEXCEPT(SettingsException, "super cannot reference itself\n" + file());
     SuperSettings::INSTANCE().cycleCheck(f.real());
     sup =
-      std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
+        std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
     for (const auto& p : sup->properties())
-      if (!ps.count(p.first))
-        ps.insert(p.first, p.second);
+      if (!ps.count(p.first)) ps.insert(p.first, p.second);
   }
   if (root()[STR_COMPILER] && root()[STR_COMPILER][STR_MASK])
     for (const auto& k : Compilers::INSTANCE().keys())
       if (root()[STR_COMPILER][STR_MASK][k])
         for (const auto& s : kul::String::SPLIT(
-               root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
+                 root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
           Compilers::INSTANCE().addMask(s, k);
 
   resolveProperties();
 }
 
-maiken::Settings&
-maiken::Settings::INSTANCE() KTHROW(kul::Exit)
-{
+maiken::Settings& maiken::Settings::INSTANCE() KTHROW(kul::Exit) {
   if (!instance.get()) {
     const kul::File f("settings.yaml", kul::user::home("maiken"));
-    if (!f.dir().is())
-      f.dir().mk();
+    if (!f.dir().is()) f.dir().mk();
     if (!f.is()) {
       write(f);
     }
     instance =
-      std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
+        std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
   }
   return *instance.get();
 }
 
-void
-maiken::Settings::resolveProperties() KTHROW(SettingsException)
-{
+void maiken::Settings::resolveProperties() KTHROW(SettingsException) {
   ps.setDeletedKey("--DELETED--");
   for (YAML::const_iterator it = root()[STR_PROPERTY].begin();
-       it != root()[STR_PROPERTY].end();
-       ++it)
+       it != root()[STR_PROPERTY].end(); ++it)
     ps[it->first.as<std::string>()] = it->second.as<std::string>();
   for (YAML::const_iterator it = root()[STR_PROPERTY].begin();
-       it != root()[STR_PROPERTY].end();
-       ++it) {
+       it != root()[STR_PROPERTY].end(); ++it) {
     std::string s = Properties::RESOLVE(*this, it->second.as<std::string>());
     if (ps.count(it->first.as<std::string>()))
       ps.erase(it->first.as<std::string>());
@@ -140,36 +124,28 @@ maiken::Settings::resolveProperties() KTHROW(SettingsException)
   }
 }
 
-std::string
-maiken::Settings::RESOLVE(const std::string& s) KTHROW(SettingsException)
-{
-  std::vector<kul::File> pos{ kul::File(s),
-                              kul::File(s + ".yaml"),
-                              kul::File(s, kul::user::home("maiken")),
-                              kul::File(s + ".yaml",
-                                        kul::user::home("maiken")) };
+std::string maiken::Settings::RESOLVE(const std::string& s)
+    KTHROW(SettingsException) {
+  std::vector<kul::File> pos{kul::File(s), kul::File(s + ".yaml"),
+                             kul::File(s, kul::user::home("maiken")),
+                             kul::File(s + ".yaml", kul::user::home("maiken"))};
   for (const auto& f : pos)
-    if (f.is())
-      return f.real();
+    if (f.is()) return f.real();
 
   return "";
 }
 
-bool
-maiken::Settings::SET(const std::string& s)
-{
+bool maiken::Settings::SET(const std::string& s) {
   std::string file(RESOLVE(s));
   if (file.size()) {
     instance =
-      std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(file));
+        std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(file));
     return 1;
   }
   return 0;
 }
 
-const kul::yaml::Validator
-maiken::Settings::validator() const
-{
+const kul::yaml::Validator maiken::Settings::validator() const {
   using namespace kul::yaml;
 
   std::vector<NodeValidator> masks;
@@ -177,46 +153,33 @@ maiken::Settings::validator() const
     masks.push_back(NodeValidator(s, {}, 0, NodeType::STRING));
 
   NodeValidator compiler("compiler",
-                         { NodeValidator("mask", masks, 0, NodeType::MAP) },
-                         0,
+                         {NodeValidator("mask", masks, 0, NodeType::MAP)}, 0,
                          NodeType::MAP);
 
   return Validator(
-    { NodeValidator("super"),
-      NodeValidator("property", { NodeValidator("*") }, 0, NodeType::MAP),
-      NodeValidator("inc"),
-      NodeValidator("path"),
-      NodeValidator("local",
-                    { NodeValidator("repo"),
-                      NodeValidator("mod-repo"),
-                      NodeValidator("debugger"),
-                      NodeValidator("lib"),
-                      NodeValidator("bin") },
-                    0,
-                    NodeType::MAP),
-      NodeValidator("remote",
-                    { NodeValidator("repo"), NodeValidator("mod-repo") },
-                    0,
-                    NodeType::MAP),
-      NodeValidator("env",
-                    { NodeValidator("name", 1),
-                      NodeValidator("value", 1),
-                      NodeValidator("mode") },
-                    0,
-                    NodeType::LIST),
-      NodeValidator("file",
-                    { NodeValidator("type", 1),
-                      NodeValidator("compiler", 1),
-                      NodeValidator("linker"),
-                      NodeValidator("archiver") },
-                    1,
-                    NodeType::LIST),
-      compiler });
+      {NodeValidator("super"),
+       NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP),
+       NodeValidator("inc"), NodeValidator("path"),
+       NodeValidator("local",
+                     {NodeValidator("repo"), NodeValidator("mod-repo"),
+                      NodeValidator("debugger"), NodeValidator("lib"),
+                      NodeValidator("bin")},
+                     0, NodeType::MAP),
+       NodeValidator("remote",
+                     {NodeValidator("repo"), NodeValidator("mod-repo")}, 0,
+                     NodeType::MAP),
+       NodeValidator("env",
+                     {NodeValidator("name", 1), NodeValidator("value", 1),
+                      NodeValidator("mode")},
+                     0, NodeType::LIST),
+       NodeValidator("file",
+                     {NodeValidator("type", 1), NodeValidator("compiler", 1),
+                      NodeValidator("linker"), NodeValidator("archiver")},
+                     1, NodeType::LIST),
+       compiler});
 }
 
-void
-maiken::Settings::write(const kul::File& file) KTHROW(kul::Exit)
-{
+void maiken::Settings::write(const kul::File& file) KTHROW(kul::Exit) {
   kul::io::Writer w(file);
   w.write("\n", true);
 
@@ -242,9 +205,9 @@ maiken::Settings::write(const kul::File& file) KTHROW(kul::Exit)
     w << kul::os::EOL();
 
     w.write(
-      "## Modify environement variables for application commands - excludes "
-      "run",
-      true);
+        "## Modify environement variables for application commands - excludes "
+        "run",
+        true);
     w.write("#env:", true);
     w.write("#  - name: VAR", true);
     w.write("#    mode: prepend", true);
@@ -275,10 +238,10 @@ maiken::Settings::write(const kul::File& file) KTHROW(kul::Exit)
       w.flush().close();
       file.rm();
       KEXIT(1, "gcc or clang not found, vcvars not detected")
-        << kul::os::EOL()
-        << "\tRun vcvarsall.bat or view mkn wiki to see how to configure "
-           "maiken settings.yaml"
-        << kul::os::EOL() << "\t@ https://github.com/mkn/mkn/wiki";
+          << kul::os::EOL()
+          << "\tRun vcvarsall.bat or view mkn wiki to see how to configure "
+             "maiken settings.yaml"
+          << kul::os::EOL() << "\t@ https://github.com/mkn/mkn/wiki";
     }
 
     w.write("inc: ", true);

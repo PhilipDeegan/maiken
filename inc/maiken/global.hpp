@@ -32,20 +32,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MAIKEN_GLOBALS_HPP_
 
 #include "kul/map.hpp"
+#include "maiken/settings.hpp"
 
 namespace maiken {
 
-class AppVars : public Constants
-{
-private:
+class AppVars : public Constants {
+ private:
   bool dr = 0, f = 0, q = 0, s = 0, sh = 0, st = 0, u = 0;
   uint16_t de = -1, dl = 0, op = -1, ts = 1, wa = -1;
   std::string aa, al, la, ra, wi, wo;
   const std::string* dep;
   kul::hash::set::String cmds, wop;
   kul::hash::map::S2S evs, jas, pks;
-  AppVars()
-  {
+  AppVars() {
     pks["OS"] = KTOSTRING(__KUL_OS__);
     pks["HOME"] = kul::user::home().path();
     pks["MKN_HOME"] = kul::user::home(STR_MAIKEN).path();
@@ -55,18 +54,18 @@ private:
     if (Settings::INSTANCE().root()[STR_LOCAL] &&
         Settings::INSTANCE().root()[STR_LOCAL][STR_REPO])
       pks["MKN_REPO"] =
-        Settings::INSTANCE().root()[STR_LOCAL][STR_REPO].Scalar();
+          Settings::INSTANCE().root()[STR_LOCAL][STR_REPO].Scalar();
     else
       pks["MKN_REPO"] =
-        kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
+          kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
 
     if (Settings::INSTANCE().root()[STR_LOCAL] &&
         Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO])
       pks["MKN_MOD_REPO"] =
-        Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar();
+          Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar();
     else
       pks["MKN_MOD_REPO"] =
-        kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
+          kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 
     if (Settings::INSTANCE().root()[STR_LOCAL] &&
         Settings::INSTANCE().root()[STR_LOCAL][STR_BIN])
@@ -77,22 +76,20 @@ private:
 
     evs["MKN_OBJ"] = "o";
     std::string obj = kul::env::GET("MKN_OBJ");
-    if (!obj.empty())
-      evs["MKN_OBJ"] = obj;
+    if (!obj.empty()) evs["MKN_OBJ"] = obj;
 
 #ifdef _WIN32
     evs["MKN_LIB_EXT"] = "dll";
-#elif  _APPLE_
+#elif _APPLE_
     evs["MKN_LIB_EXT"] = "dylib";
 #else
     evs["MKN_LIB_EXT"] = "o";
 #endif
     std::string ext = kul::env::GET("MKN_LIB_EXT");
-    if (!ext.empty())
-      evs["MKN_LIB_EXT"] = ext;
+    if (!ext.empty()) evs["MKN_LIB_EXT"] = ext;
   }
 
-public:
+ public:
   const std::string& args() const { return aa; }
   void args(const std::string& aa) { this->aa = aa; }
 
@@ -162,16 +159,14 @@ public:
   const std::string& without() const { return wo; }
   void without(const std::string& wo) { this->wo = wo; }
 
-
   const kul::hash::set::String& withoutParsed() const { return wop; }
   void withoutParsed(const kul::hash::set::String& wop) { this->wop = wop; }
 
-  static AppVars& INSTANCE()
-  {
+  static AppVars& INSTANCE() {
     static AppVars instance;
     return instance;
   }
 };
 
-} // namespace maiken
+}  // namespace maiken
 #endif /* _MAIKEN_GLOBALS_HPP_ */

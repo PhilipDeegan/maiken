@@ -30,9 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-const kul::SCM*
-maiken::SCMGetter::GET_SCM(const kul::Dir& d, const std::string& r, bool module)
-{
+const kul::SCM* maiken::SCMGetter::GET_SCM(const kul::Dir& d,
+                                           const std::string& r, bool module) {
   std::vector<std::string> repos;
   if (IS_SOLID(r))
     repos.push_back(r);
@@ -58,9 +57,10 @@ maiken::SCMGetter::GET_SCM(const kul::Dir& d, const std::string& r, bool module)
       auto errs(gp.errs());
       kul::String::TRIM(errs);
       auto lines(kul::String::LINES(errs));
-      if(errs.empty()) lines.clear();
+      if (errs.empty()) lines.clear();
       bool allwarn = true;
-      for(const auto& line : lines) if(line.find("warning") == std::string::npos) allwarn = false;
+      for (const auto& line : lines)
+        if (line.find("warning") == std::string::npos) allwarn = false;
       if (lines.empty() || (lines.size() && allwarn)) {
         INSTANCE().valids.insert(d.path(), repo);
         return &kul::scm::Manager::INSTANCE().get("git");
@@ -70,15 +70,15 @@ maiken::SCMGetter::GET_SCM(const kul::Dir& d, const std::string& r, bool module)
     } catch (const kul::proc::ExitException& e) {
       KLOG(ERR) << e.stack();
     }
-#endif //_MKN_DISABLE_GIT_
-       // SVN NOT YET SUPPORTED
-       // #ifndef _MKN_DISABLE_SVN_
-       //                 try{
-       //                    kul::Process s("svn");
-       //                    kul::ProcessCapture sp(s);
-       //                    s.arg("ls").arg(repo).start();
-       //                    if(!sp.errs().size()) {
-       //                        INSTANCE().valids.insert(d.path(), repo);
+#endif  //_MKN_DISABLE_GIT_
+        // SVN NOT YET SUPPORTED
+        // #ifndef _MKN_DISABLE_SVN_
+        //                 try{
+        //                    kul::Process s("svn");
+        //                    kul::ProcessCapture sp(s);
+        //                    s.arg("ls").arg(repo).start();
+        //                    if(!sp.errs().size()) {
+        //                        INSTANCE().valids.insert(d.path(), repo);
     //                        return &kul::scm::Manager::INSTANCE().get("svn");
     //                    }
     //                 }catch(const kul::proc::ExitException& e){}
@@ -88,10 +88,9 @@ maiken::SCMGetter::GET_SCM(const kul::Dir& d, const std::string& r, bool module)
   KEXIT(1,
         "SCM disabled, cannot resolve dependency, check local paths and "
         "configurations");
-#endif //_MKN_DISABLE_SCM_
+#endif  //_MKN_DISABLE_SCM_
   std::stringstream ss;
   for (const auto& s : repos) ss << s << "\n";
-  KEXIT(1,
-        "SCM not found or not supported type(git/svn) for repo(s)\n\t" +
-          ss.str() + "\tproject: " + d.path());
+  KEXIT(1, "SCM not found or not supported type(git/svn) for repo(s)\n\t" +
+               ss.str() + "\tproject: " + d.path());
 }

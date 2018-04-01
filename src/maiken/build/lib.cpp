@@ -30,53 +30,39 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-maiken::CompilerProcessCapture
-maiken::Application::buildLibrary(const kul::hash::set::String& objects)
-{
+maiken::CompilerProcessCapture maiken::Application::buildLibrary(
+    const kul::hash::set::String& objects) {
   if (fs.count(lang) > 0) {
-    if (m == compiler::Mode::NONE)
-      m = compiler::Mode::SHAR;
+    if (m == compiler::Mode::NONE) m = compiler::Mode::SHAR;
     if (!(*files().find(lang)).second.count(STR_COMPILER))
       KEXIT(1, "No compiler found for filetype " + lang);
     std::string linker = fs[lang][STR_LINKER];
     std::string linkEnd;
-    if (ro)
-      linkEnd = AppVars::INSTANCE().linker();
+    if (ro) linkEnd = AppVars::INSTANCE().linker();
     if (!AppVars::INSTANCE().allinker().empty())
       linkEnd += " " + AppVars::INSTANCE().allinker();
-    if (!lnk.empty())
-      linkEnd += " " + lnk;
+    if (!lnk.empty()) linkEnd += " " + lnk;
     if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() &&
         linkEnd.size())
       KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
-    if (m == compiler::Mode::STAT)
-      linker = fs[lang][STR_ARCHIVER];
+    if (m == compiler::Mode::STAT) linker = fs[lang][STR_ARCHIVER];
     kul::Dir outD(inst ? inst.real() : buildDir());
     std::string lib(baseLibFilename());
     lib = AppVars::INSTANCE().dryRun() ? kul::File(lib, outD).esc()
                                        : kul::File(lib, outD).escm();
     std::vector<std::string> obV;
-    for (const auto& o : objects)
-      obV.emplace_back(o);
+    for (const auto& o : objects) obV.emplace_back(o);
     const std::string& base(Compilers::INSTANCE().base(
-      (*(*files().find(lang)).second.find(STR_COMPILER)).second));
-    if (cLnk.count(base))
-      linkEnd += " " + cLnk[base];
+        (*(*files().find(lang)).second.find(STR_COMPILER)).second));
+    if (cLnk.count(base)) linkEnd += " " + cLnk[base];
     auto* comp = Compilers::INSTANCE().get(base);
     auto linkOpt(comp->linkerOptimizationLib(AppVars::INSTANCE().optimise()));
-    if(!linkOpt.empty()) linker += " " + linkOpt;
+    if (!linkOpt.empty()) linker += " " + linkOpt;
     auto linkDbg(comp->linkerDebugLib(AppVars::INSTANCE().debug()));
-    if(!linkDbg.empty()) linker += " " + linkDbg;
+    if (!linkDbg.empty()) linker += " " + linkDbg;
     const CompilerProcessCapture& cpc =
-      comp->buildLibrary(
-        linker,
-        linkEnd,
-        obV,
-        libraries(),
-        libraryPaths(),
-        lib,
-        m,
-        AppVars::INSTANCE().dryRun());
+        comp->buildLibrary(linker, linkEnd, obV, libraries(), libraryPaths(),
+                           lib, m, AppVars::INSTANCE().dryRun());
     if (AppVars::INSTANCE().dryRun())
       KOUT(NON) << cpc.cmd();
     else {

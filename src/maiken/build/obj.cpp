@@ -32,16 +32,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <mutex>
 
-void
-maiken::Application::compile(kul::hash::set::String& objects)
-  KTHROW(kul::Exception)
-{
+void maiken::Application::compile(kul::hash::set::String& objects)
+    KTHROW(kul::Exception) {
   showConfig();
   if (!AppVars::INSTANCE().dryRun()) {
     std::stringstream ss;
     ss << MKN_PROJECT << ": " << this->project().dir().path();
-    if (this->profile().size() > 0)
-      ss << " [" << this->profile() << "]";
+    if (this->profile().size() > 0) ss << " [" << this->profile() << "]";
     KOUT(NON) << ss.str();
   }
 
@@ -53,7 +50,7 @@ maiken::Application::compile(kul::hash::set::String& objects)
       if (!(*files().find(ft.first)).second.count(STR_COMPILER))
         KEXIT(1, "No compiler found for filetype " + ft.first);
       Compilers::INSTANCE().get(
-        (*(*files().find(ft.first)).second.find(STR_COMPILER)).second);
+          (*(*files().find(ft.first)).second.find(STR_COMPILER)).second);
     } catch (const CompilerNotFoundException& e) {
       KEXIT(1, e.what());
     }
@@ -62,8 +59,7 @@ maiken::Application::compile(kul::hash::set::String& objects)
   if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() &&
       this->includes().size()) {
     KOUT(NON) << "INCLUDES";
-    for (const auto& s : this->includes())
-      KOUT(NON) << "\t" << s.first;
+    for (const auto& s : this->includes()) KOUT(NON) << "\t" << s.first;
   }
   if (!AppVars::INSTANCE().dryRun() && srcs.empty() && main.empty()) {
     KOUT(NON) << "NO SOURCES";
@@ -72,8 +68,7 @@ maiken::Application::compile(kul::hash::set::String& objects)
   buildDir().mk();
   std::vector<kul::File> cacheFiles;
   if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf()) {
-    if (!arg.empty())
-      KOUT(NON) << "ARGUMENTS\n\t" << arg;
+    if (!arg.empty()) KOUT(NON) << "ARGUMENTS\n\t" << arg;
     if (this->arguments().size()) {
       KOUT(NON) << "FILE ARGUMENTS";
       for (const auto& kv : this->arguments())
@@ -91,22 +86,20 @@ maiken::Application::compile(kul::hash::set::String& objects)
   if (!AppVars::INSTANCE().envVars().count("MKN_OBJ"))
     KEXCEPTION("INTERNAL BADNESS ERROR!");
   auto o = [](const std::string& s) {
-    if (s.size())
-      KOUT(NON) << s;
+    if (s.size()) KOUT(NON) << s;
   };
   auto e = [](const std::string& s) {
-    if (s.size())
-      KERR << s;
+    if (s.size()) KERR << s;
   };
   const std::string oType(
-    "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
+      "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
   for (const std::pair<std::string,
                        kul::hash::map::S2T<kul::hash::set::String>>& ft :
        sources) {
     kul::Dir objD(buildDir().join("obj"));
     objD.mk();
     const Compiler* compiler = Compilers::INSTANCE().get(
-      (*(*files().find(ft.first)).second.find(STR_COMPILER)).second);
+        (*(*files().find(ft.first)).second.find(STR_COMPILER)).second);
     if (compiler->sourceIsBin()) {
       for (const std::pair<std::string, kul::hash::set::String>& kv : ft.second)
         for (const std::string& s : kv.second) {
@@ -120,21 +113,20 @@ maiken::Application::compile(kul::hash::set::String& objects)
            ft.second) {
         for (const std::string& s : kv.second) {
           const kul::File source(s);
-          if (!incSrc(source))
-            continue;
+          if (!incSrc(source)) continue;
           std::stringstream ss, os;
           ss << std::hex << std::hash<std::string>()(source.real());
           os << ss.str() << "-" << source.name() << oType;
           kul::File object(os.str(), objD);
           sourceQueue.push(std::pair<std::string, std::string>(
-            AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
-            AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
+              AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
+              AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
         }
       }
 
       ThreadingCompiler tc(*this);
-      kul::ChroncurrentThreadPool<> ctp(
-        AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
+      kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1,
+                                        1000000000, 1000);
       std::vector<maiken::CompilationUnit> c_units;
       std::queue<std::pair<std::string, std::string>> cQueue;
       while (sourceQueue.size() > 0) {
@@ -145,15 +137,13 @@ maiken::Application::compile(kul::hash::set::String& objects)
 
       std::mutex mute;
       std::vector<CompilerProcessCapture> cpcs;
-      auto lambda = [o, e, &ctp, &mute, &cpcs](const maiken::CompilationUnit& c_unit) {
-        if (ctp.exception())
-          ctp.interrupt();
+      auto lambda = [o, e, &ctp, &mute,
+                     &cpcs](const maiken::CompilationUnit& c_unit) {
+        if (ctp.exception()) ctp.interrupt();
         const CompilerProcessCapture cpc = c_unit.compile();
         if (!AppVars::INSTANCE().dryRun()) {
-          if (kul::LogMan::INSTANCE().inf() || cpc.exception())
-            o(cpc.outs());
-          if (kul::LogMan::INSTANCE().inf() || cpc.exception())
-            e(cpc.errs());
+          if (kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
+          if (kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
           KOUT(INF) << cpc.cmd();
         } else
           KOUT(NON) << cpc.cmd();
@@ -167,19 +157,18 @@ maiken::Application::compile(kul::hash::set::String& objects)
         throw e;
       };
 
-      for(const auto& unit : c_units) {
-        kul::this_thread::nSleep(5000000); // dup appears to be overloaded with too many threads
+      for (const auto& unit : c_units) {
+        kul::this_thread::nSleep(
+            5000000);  // dup appears to be overloaded with too many threads
         ctp.async(std::bind(lambda, unit),
                   std::bind(lambex, std::placeholders::_1));
       }
 
       ctp.finish(1000000 * 1000);
-      if (ctp.exception())
-        KEXIT(1, "Compile error detected");
+      if (ctp.exception()) KEXIT(1, "Compile error detected");
 
-      for(auto &cpc : cpcs){
-        if(cpc.exception())
-          std::rethrow_exception(cpc.exception());
+      for (auto& cpc : cpcs) {
+        if (cpc.exception()) std::rethrow_exception(cpc.exception());
       }
 
       while (cQueue.size()) {
@@ -189,6 +178,5 @@ maiken::Application::compile(kul::hash::set::String& objects)
       }
     }
   }
-  if (_MKN_TIMESTAMPS_)
-    writeTimeStamps(objects, cacheFiles);
+  if (_MKN_TIMESTAMPS_) writeTimeStamps(objects, cacheFiles);
 }

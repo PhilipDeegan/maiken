@@ -30,24 +30,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-class UpdateTracker
-{
-private:
+class UpdateTracker {
+ private:
   kul::hash::set::String paths;
 
-public:
+ public:
   bool has(const std::string& path) { return paths.count(path); }
   void add(const std::string& path) { paths.insert(path); }
-  static UpdateTracker& INSTANCE()
-  {
+  static UpdateTracker& INSTANCE() {
     static UpdateTracker i;
     return i;
   }
 };
 
-void
-maiken::Application::scmStatus(const bool& deps) KTHROW(kul::scm::Exception)
-{
+void maiken::Application::scmStatus(const bool& deps)
+    KTHROW(kul::scm::Exception) {
   std::vector<Application*> v;
   if (deps)
     for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) {
@@ -60,8 +57,7 @@ maiken::Application::scmStatus(const bool& deps) KTHROW(kul::scm::Exception)
         v.push_back(*app);
     }
 
-  for (auto* app : v)
-    app->scmStatus(0);
+  for (auto* app : v) app->scmStatus(0);
   if (!scm && SCMGetter::HAS(this->project().dir()))
     scm = SCMGetter::GET(this->project().dir(), this->scr, isMod);
   if (scm) {
@@ -71,15 +67,11 @@ maiken::Application::scmStatus(const bool& deps) KTHROW(kul::scm::Exception)
   }
 }
 
-void
-maiken::Application::scmUpdate(const bool& f) KTHROW(kul::scm::Exception)
-{
+void maiken::Application::scmUpdate(const bool& f) KTHROW(kul::scm::Exception) {
   uint i = 0;
   const Application* p = this;
-  while ((p = p->par))
-    i++;
-  if (i > AppVars::INSTANCE().dependencyLevel())
-    return;
+  while ((p = p->par)) i++;
+  if (i > AppVars::INSTANCE().dependencyLevel()) return;
   if (!scm && SCMGetter::HAS(this->project().dir()))
     scm = SCMGetter::GET(this->project().dir(), this->scr, isMod);
   if (scm && !UpdateTracker::INSTANCE().has(this->project().dir().real())) {
@@ -88,27 +80,24 @@ maiken::Application::scmUpdate(const bool& f) KTHROW(kul::scm::Exception)
                    "REQUIRED!";
 
     const std::string& tscr(
-      !this->scr.empty()
-        ? this->scr
-        : this->project().root()[STR_SCM]
-            ? Properties::RESOLVE(*this,
-                                  this->project().root()[STR_SCM].Scalar())
-            : this->project().root()[STR_NAME].Scalar());
+        !this->scr.empty()
+            ? this->scr
+            : this->project().root()[STR_SCM]
+                  ? Properties::RESOLVE(
+                        *this, this->project().root()[STR_SCM].Scalar())
+                  : this->project().root()[STR_NAME].Scalar());
 
     scmUpdate(f, scm, SCMGetter::REPO(this->project().dir(), tscr, isMod));
     UpdateTracker::INSTANCE().add(this->project().dir().real());
   }
 }
 
-void
-maiken::Application::scmUpdate(const bool& f,
-                               const kul::SCM* scm,
-                               const std::string& url)
-  KTHROW(kul::scm::Exception)
-{
-  const std::string& ver(!this->scv.empty()
-                           ? this->scv
-                           : this->project().root()[STR_VERSION]
+void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm,
+                                    const std::string& url)
+    KTHROW(kul::scm::Exception) {
+  const std::string& ver(
+      !this->scv.empty() ? this->scv
+                         : this->project().root()[STR_VERSION]
                                ? this->project().root()[STR_VERSION].Scalar()
                                : "");
   bool c = true;
@@ -127,13 +116,12 @@ maiken::Application::scmUpdate(const bool& f,
   }
   if (f || c) {
     std::stringstream ss;
-    if (url.size())
-      ss << " FROM " << url;
+    if (url.size()) ss << " FROM " << url;
     KOUT(NON) << "UPDATING: " << this->project().dir().real() << ss.str();
     scm->up(this->project().dir().real(), url, ver);
     kul::os::PushDir pushd(this->project().dir());
     kul::Dir build(".mkn/build");
     kul::File ts("timestamp", build);
-    if(build && ts) ts.rm();
+    if (build && ts) ts.rm();
   }
 }
