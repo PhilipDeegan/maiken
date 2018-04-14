@@ -5,7 +5,7 @@ version: master
 scm: https://github.com/dekken/maiken
 
 property:
-    DATE: 01-APR-2018
+    DATE: 14-APR-2018
 
 parent: base
 mode: none
@@ -48,11 +48,15 @@ profile:
     if_arg:
       win_shared: -DKUL_SHARED -DKUL_EXPORT
 
+  - name: lint
+    mod:
+    - name: mkn-mod.exec
+      init:
+        python3 -m cpplint --recursive inc src
+
   - name: format
     mod:
     - name: clang.format
-      arg:
-        init:
-          style: google
-          types: cpp:cxx:cc:h:hpp
-          paths: inc
+      init:
+        style: google
+        paths: inc src

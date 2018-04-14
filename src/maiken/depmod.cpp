@@ -142,12 +142,11 @@ void maiken::Application::popDepOrMod(const YAML::Node& n,
       app.scr = Properties::RESOLVE(*this, node[STR_SCM].Scalar());
     if (node[STR_VERSION])
       app.scv = Properties::RESOLVE(*this, node[STR_VERSION].Scalar());
-    if (module && node[STR_ARG]) {
-      if (node[STR_ARG][STR_INIT]) app.modInit(node[STR_ARG][STR_INIT]);
-      if (node[STR_ARG][STR_COMPILE])
-        app.modCompile(node[STR_ARG][STR_COMPILE]);
-      if (node[STR_ARG][STR_LINK]) app.modLink(node[STR_ARG][STR_LINK]);
-      if (node[STR_ARG][STR_PACK]) app.modPack(node[STR_ARG][STR_PACK]);
+    if (module && node) {
+      if (node[STR_INIT]) app.modInit(node[STR_INIT]);
+      if (node[STR_COMPILE]) app.modCompile(node[STR_COMPILE]);
+      if (node[STR_LINK]) app.modLink(node[STR_LINK]);
+      if (node[STR_PACK]) app.modPack(node[STR_PACK]);
       app.isMod = 1;
     }
   };

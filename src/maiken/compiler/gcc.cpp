@@ -123,7 +123,9 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   for (const std::string& path : libPaths) p.arg("-L" + path);
   if (mode == compiler::Mode::STAT) p.arg("-static");
-  p.arg("-o").arg(out);
+  std::string exe = out;
+  if (KTOSTRING(__KUL_OS__) == "win") exe += ".exe";
+  p.arg("-o").arg(exe);
   for (const std::string& d : dirs) p.arg(kul::File(oStar(objects), d).escm());
   for (const std::string& lib : libs) p.arg("-l" + lib);
   for (const std::string& s : kul::cli::asArgs(linkerEnd)) p.arg(s);
