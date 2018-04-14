@@ -124,7 +124,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(int16_t argc,
   if (args.has(STR_VERSION)) {
     std::stringstream ss, mod;
     ss << KTOSTRING(_MKN_VERSION_) << " (" << KTOSTRING(__KUL_OS__) << ") w/[";
-    if(_MKN_REMOTE_EXEC_) mod << "exec,";
+    if (_MKN_REMOTE_EXEC_) mod << "exec,";
 #ifndef _MKN_DISABLE_MODULES_
     mod << "mod,";
 #endif  //_MKN_DISABLE_MODULES_
