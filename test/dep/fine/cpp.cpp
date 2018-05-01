@@ -31,12 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 
+int main(int argc, char* argv[]) {
+  std::cout << "HELLO WORLD!" << std::endl;
 
-int main(int argc, char* argv[]){
-
-
-    std::cout << "HELLO WORLD!" << std::endl;
-
-
-    return 0;
+  return 0;
 }

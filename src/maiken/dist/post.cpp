@@ -28,5 +28,27 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
 
-void z() { double i = 0; }
+#include "maiken/dist.hpp"
+
+void maiken::dist::Post::send(const std::string &&host, const std::string &&res,
+                              const uint16_t &&port) KTHROW(maiken::Exception) {
+  if (!msg) KEXCEPTION("Cannot send post without message");
+  std::ostringstream ss(std::ios::out | std::ios::binary);
+  {
+    cereal::PortableBinaryOutputArchive oarchive(ss);
+    oarchive(msg);
+  }
+  std::string s1(ss.str());
+  KLOG(INF) << s1.size();
+  kul::http::_1_1PostRequest(host, res, port)
+      .withBody(s1)
+      .withResponse([&](const kul::http::_1_1Response &r) {
+        KLOG(INF) << r.body();
+        this->_body = std::move(r.body());
+      })
+      .send();
+}
+
+#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_

@@ -1,12 +1,10 @@
 /**
 Copyright (c) 2017, Philip Deegan.
 All rights reserved.
-
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
-
-    * Redistributions of source code must retain the above copyright
+    * Redistributions of source code must exit_codeain the above copyright
 notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above
 copyright notice, this list of conditions and the following disclaimer
@@ -15,7 +13,6 @@ distribution.
     * Neither the name of Philip Deegan nor the names of its
 contributors may be used to endorse or promote products derived from
 this software without specific prior written permission.
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -28,36 +25,57 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "kul/log.hpp"
+
+#include "maiken/dist.hpp"
+
+#include "kul/cli.hpp"
 #include "kul/signal.hpp"
-#include "maiken.hpp"
+
+#ifdef _WIN32
+#define bzero ZeroMemory
+#endif
 
 int main(int argc, char* argv[]) {
-  maiken::PROGRAM = argv[0];
   kul::Signal sig;
-  sig.intr([=](int16_t) {
-    KERR << "Interrupted";
-    exit(2);
-  });
-  uint8_t ret = 0;
-  const auto s = kul::Now::MILLIS();
+  int exit_code = 0;
   try {
-    for (auto app : maiken::Application::CREATE(argc, argv)) app->process();
-    KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
-    KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
+    using namespace kul::cli;
+    kul::Dir d = kul::user::home(
+        kul::Dir::JOIN(maiken::Constants::STR_MAIKEN, "server"));
+    Args args({}, {Arg('d', maiken::Constants::STR_DIR, ArgType::STRING)});
+    try {
+      args.process(argc, argv);
+    } catch (const kul::cli::Exception& e) {
+      KEXIT(1, e.what());
+    }
+    if (args.has(maiken::Constants::STR_DIR)) {
+      d = kul::Dir(args.get(maiken::Constants::STR_DIR));
+      if (!d && !d.mk())
+        KEXCEPT(kul::Exception,
+                "diretory provided does not exist or cannot be created");
+    }
+
+    maiken::dist::Server serv(8888, d);
+    kul::Thread thread(std::ref(serv));
+    sig.intr([&](int16_t) {
+      KERR << "Interrupted";
+      thread.interrupt();
+      exit(2);
+    });
+    thread.join();
   } catch (const kul::Exit& e) {
     if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e;
-    ret = e.code();
+    exit_code = e.code();
+    KLOG(INF);
   } catch (const kul::proc::ExitException& e) {
     KERR << e;
-    ret = e.code();
+    exit_code = e.code();
   } catch (const kul::Exception& e) {
     KERR << e.stack();
-    ret = 2;
+    exit_code = 2;
   } catch (const std::exception& e) {
     KERR << e.what();
-    ret = 3;
+    exit_code = 3;
   }
-  maiken::Applications::INSTANCE().clear();
-  return ret;
+  return exit_code;
 }

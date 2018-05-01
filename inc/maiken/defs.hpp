@@ -189,6 +189,10 @@ class Constants {
   static constexpr const char* STR_IF_SRC = "if_src";
   static constexpr const char* STR_IF_LIB = "if_lib";
   static constexpr const char* STR_IF_LNK = "if_link";
+
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+  static constexpr const char* STR_NODES = "nodes";
+#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
 };
 }  // namespace maiken
 #endif /* _MAIKEN_DEFS_HPP_ */

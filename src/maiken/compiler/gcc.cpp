@@ -28,7 +28,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken/compiler/cpp.hpp"
+#include "maiken.hpp"
+
+const std::string maiken::cpp::GccCompiler::sharedLib(
+    const std::string& lib) const {
+  return AppVars::INSTANCE().envVar("MKN_LIB_PRE") + lib + "." + AppVars::INSTANCE().envVar("MKN_LIB_EXT");
+}
 
 maiken::cpp::GccCompiler::GccCompiler(const int& v) : CCompiler(v) {
   m_optimise_c.insert({{0, ""},
@@ -124,7 +129,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(
   for (const std::string& path : libPaths) p.arg("-L" + path);
   if (mode == compiler::Mode::STAT) p.arg("-static");
   std::string exe = out;
-  if (KTOSTRING(__KUL_OS__) == "win") exe += ".exe";
+  if (KTOSTRING(__KUL_OS__) == std::string("win")) exe += ".exe";
   p.arg("-o").arg(exe);
   for (const std::string& d : dirs) p.arg(kul::File(oStar(objects), d).escm());
   for (const std::string& lib : libs) p.arg("-l" + lib);

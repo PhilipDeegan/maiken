@@ -156,27 +156,42 @@ const kul::yaml::Validator maiken::Settings::validator() const {
                          {NodeValidator("mask", masks, 0, NodeType::MAP)}, 0,
                          NodeType::MAP);
 
-  return Validator(
-      {NodeValidator("super"),
-       NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP),
-       NodeValidator("inc"), NodeValidator("path"),
-       NodeValidator("local",
-                     {NodeValidator("repo"), NodeValidator("mod-repo"),
-                      NodeValidator("debugger"), NodeValidator("lib"),
-                      NodeValidator("bin")},
-                     0, NodeType::MAP),
-       NodeValidator("remote",
-                     {NodeValidator("repo"), NodeValidator("mod-repo")}, 0,
-                     NodeType::MAP),
-       NodeValidator("env",
-                     {NodeValidator("name", 1), NodeValidator("value", 1),
-                      NodeValidator("mode")},
-                     0, NodeType::LIST),
-       NodeValidator("file",
-                     {NodeValidator("type", 1), NodeValidator("compiler", 1),
-                      NodeValidator("linker"), NodeValidator("archiver")},
-                     1, NodeType::LIST),
-       compiler});
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+  NodeValidator dist(
+      "dist",
+      {NodeValidator("port"),
+       NodeValidator("nodes",
+                     {NodeValidator("host", 1), NodeValidator("user"),
+                      NodeValidator("pass")},
+                     0, NodeType::LIST)},
+      0, NodeType::MAP);
+#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+
+  return Validator({
+    NodeValidator("super"),
+        NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP),
+        NodeValidator("inc"), NodeValidator("path"),
+        NodeValidator("local",
+                      {NodeValidator("repo"), NodeValidator("mod-repo"),
+                       NodeValidator("debugger"), NodeValidator("lib"),
+                       NodeValidator("bin")},
+                      0, NodeType::MAP),
+        NodeValidator("remote",
+                      {NodeValidator("repo"), NodeValidator("mod-repo")}, 0,
+                      NodeType::MAP),
+        NodeValidator("env",
+                      {NodeValidator("name", 1), NodeValidator("value", 1),
+                       NodeValidator("mode")},
+                      0, NodeType::LIST),
+        NodeValidator("file",
+                      {NodeValidator("type", 1), NodeValidator("compiler", 1),
+                       NodeValidator("linker"), NodeValidator("archiver")},
+                      1, NodeType::LIST),
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+        dist,
+#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+        compiler
+  });
 }
 
 void maiken::Settings::write(const kul::File& file) KTHROW(kul::Exit) {

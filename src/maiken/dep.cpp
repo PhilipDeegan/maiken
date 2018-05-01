@@ -80,20 +80,17 @@ void maiken::Application::parseDependencyString(
   if (lB) KEXIT(1, MKN_ERR_SQRBRKT_MISMATCH_DEP_CLI);
 }
 
-void maiken::Application::buildDepVec(const std::string* depVal) {
+void maiken::Application::buildDepVec(const std::string& depVal) {
   kul::hash::set::String all, ignore, include;
   ignore.insert("+");
-  if (depVal) {
-    if (depVal->size()) {
-      try {
-        AppVars::INSTANCE().dependencyLevel(kul::String::UINT16(*depVal));
-      } catch (const kul::StringException& e) {
-        AppVars::INSTANCE().dependencyLevel(0);
-        parseDependencyString(*depVal, include);
-      }
-    } else
-      AppVars::INSTANCE().dependencyLevel(
-          (std::numeric_limits<int16_t>::max)());
+
+  if (!depVal.empty()) {
+    try {
+      AppVars::INSTANCE().dependencyLevel(kul::String::UINT16(depVal));
+    } catch (const kul::StringException& e) {
+      AppVars::INSTANCE().dependencyLevel(0);
+      parseDependencyString(depVal, include);
+    }
   }
 
   if (include.size() == 1 && include.count("+")) {

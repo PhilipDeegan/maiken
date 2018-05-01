@@ -8,8 +8,8 @@ ifeq ($(strip $(CURDIR)),)
 endif
 
 OS =
-CXX=g++ 
-CXXFLAGS=-std=c++14 -Os -Wall -fmessage-length=0 -fPIC
+CXX=g++
+CXXFLAGS=-std=c++14 -Os -Wall -fmessage-length=0 -fPIC -g3
 INCS =  -Iinc \
 		-Iext/yaml/$(YAML_GIT)/p/include \
 		-Iext/kul/$(KUL_GIT)/inc \
@@ -36,7 +36,7 @@ nix:
 	$(eval OS := nix)
 	$(MAKE) general OS=$(OS)
 	@@rm -rf ext bin
-	
+
 bsd:
 	@@echo "Making for bsd"
 	$(eval CXXFLAGS := $(CXXFLAGS))
@@ -80,20 +80,20 @@ general:
 
 link:
 	$(eval FILES := $(foreach dir,$(shell find bin -type f -name *.o),$(dir)))
-	$(CXX) -o "$(EXE)" $(FILES) $(YAML) $(LDFLAGS) 
+	$(CXX) -o "$(EXE)" $(FILES) $(YAML) $(LDFLAGS)
 
 caml:
 	@for f in $(shell find ext/yaml/$(YAML_GIT)/p/src -type f -name '*.cpp'); do \
 		echo $(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/p/include -o "ext/yaml/$(YAML_GIT)/p/bin/$$(basename $$f).o" -c "$$f"; \
 		$(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/p/include -o "ext/yaml/$(YAML_GIT)/p/bin/$$(basename $$f).o" -c "$$f" || exit 1 ; \
-	done;	
+	done;
 
 yaml:
 	$(eval FILES := $(foreach dir,$(shell find ext/yaml/$(YAML_GIT)/p/bin -type f -name *.o),$(dir)))
 	ar -r ext/yaml/$(YAML_GIT)/p/bin/libyaml.a $(FILES)
 
 clean:
-	rm -rf ext/yaml/$(YAML_GIT)/p/bin	
+	rm -rf ext/yaml/$(YAML_GIT)/p/bin
 	rm -rf bin
 
 clean-all:

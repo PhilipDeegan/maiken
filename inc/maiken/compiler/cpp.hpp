@@ -82,9 +82,7 @@ class GccCompiler : public CCompiler {
  public:
   GccCompiler(const int& v = 0);
 
-  const std::string sharedLib(const std::string& lib) const override {
-    return "lib" + lib + ".so";
-  }
+  const std::string sharedLib(const std::string& lib) const override;
   const std::string staticLib(const std::string& lib) const override {
     return "lib" + lib + ".a";
   }
@@ -150,9 +148,7 @@ class WINCompiler : public CCompiler {
   WINCompiler(const int& v = 0);
   virtual const std::string cc() const override { return "cl"; }
   virtual const std::string cxx() const override { return "cl"; }
-  const std::string sharedLib(const std::string& lib) const override {
-    return lib + ".dll";
-  }
+  const std::string sharedLib(const std::string& lib) const override;
   const std::string staticLib(const std::string& lib) const override {
     return lib + ".lib";
   }

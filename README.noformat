@@ -48,12 +48,12 @@ src: ./src
 
 Values which allow property resolution are marked with ${aaa}
 
-name: name 
-version: version                    # considered git branch for pulling 
+name: name
+version: version                    # considered git branch for pulling
 scm: string                         # Appended to remote URLs for lookup if non concrete URL, used if concrete
 super: $directory                   # Inherit properties of project at directory, super (..) or sub directory advisable
 parent: $directory                  # See profile inheritence @ 2.2.4
-property:                                     
+property:
   - aaa: AAA
     bbb: ${aaa}.BBB
 inc: <directory> <directory> ${aaa}
@@ -67,7 +67,7 @@ dep:
     local: ${aaa}                   # overrides local repository directory
     profile: ${aaa}                 # choose profile from config
 if_dep:                             # optional deps for OS valid values [ bsd / nix / win ]
-    win: 
+    win:
       - name: name                  # Used in URL lookup if ${scm} is missing
         version: version            # git branch and directory name of dependency under $name if no local tag
         scm: ${aaa}                 # Appended to remote URLs for lookup if non concrete URL, used if concrete
@@ -114,11 +114,11 @@ env:
     value: ${aaa}
 profiles:
   - name: a
-    inc: | 
+    inc: |
         <directory>, false/no/0     # Don't expose if dependency / private include
         <directory>, true/yes/1     # Include if dependency / public include
         <directory> <directory>     # Include both if dependency / public includes
-    src: | 
+    src: |
         <directory>, false/no/0     # Don't find sources recursively
         <directory>, true/yes/1     # Find/add sources recursively
         <directory> <file>          # Find/add sources recursively, add file
@@ -140,7 +140,7 @@ profiles:
     main: test.cpp
     out: ${aaa}                     # override default binary/library name
     install: ${aaa}                 # install binary or library to directory specified
-                                    # library naming convention is libname_profile.a/so if linux, name_profile.lib if windows 
+                                    # library naming convention is libname_profile.a/so if linux, name_profile.lib if windows
 
 
 2.2.1 Caveats
@@ -153,7 +153,7 @@ If no lang tag is found, language is deduced from first main tag found in file
 If the project is a dependency, even if a main tag is present, library linking is assumed.
 
 
-2.2.1.2 Mode 
+2.2.1.2 Mode
 
 The mode tag may have three values: static/shared/none
 If the mode tag is found, it takes precedence for linking
@@ -166,17 +166,17 @@ If a application includes both static and shared dependencies, using the mode "n
 
 2.2.1.3 Entry points
 
-All entry points must be referenced by at least one main tag, otherwise linking cannot be guaranteed.   
-eg. 
+All entry points must be referenced by at least one main tag, otherwise linking cannot be guaranteed.
+eg.
 profiles:
   - name: a
     main: a.cpp
   - name: b
     main: b.cpp
-    
+
 2.2.1.4 Compiler deduction
 
-Compiler binares are expected to have their default names e.g. gcc/gcc.exe/cl.exe. This only applies to compilers and not archivers or linkers. Compiler masking is provided to use alternate compiler binaries with the same functionality as the underlying compiler.  
+Compiler binares are expected to have their default names e.g. gcc/gcc.exe/cl.exe. This only applies to compilers and not archivers or linkers. Compiler masking is provided to use alternate compiler binaries with the same functionality as the underlying compiler.
 
 
 2.2.2 Properties
@@ -203,7 +203,7 @@ Adding a profile as a dependency can do a number of things:
 2.2.4  Profile Inheritence
 
 Using the "parent" tag, one profile may derive a number of values from the selected profile.
-Generally all values are inherited, however even if this is the case, some values such as 
+Generally all values are inherited, however even if this is the case, some values such as
 the "main" tag or others with only a single value are overridden in the case they exist in the active profile.
 
 2.3 SCM
@@ -250,13 +250,13 @@ Operations:
     - static
         make nix LDFLAGS="-pthread -ldl"
     WITH CLANG
-        make nix CXX=clang++ 
+        make nix CXX=clang++
     IF CLANG SECONDARY TO GCC
-        LD_LIBRARY_PATH=<GCC_INSTALL>/lib64 make nix CXX=clang++ CXXFLAGS="-O2 -std=c++14 -Wall -I<GCC_INSTALL>/include/c++/5.2.0 -I<GCC_INSTALL>/include/c++/5.2.0/x86_64-unknown-linux-gnu" LDFLAGS="-L<GCC_INSTALL>/lib64" 
+        LD_LIBRARY_PATH=<GCC_INSTALL>/lib64 make nix CXX=clang++ CXXFLAGS="-O2 -std=c++14 -Wall -I<GCC_INSTALL>/include/c++/5.2.0 -I<GCC_INSTALL>/include/c++/5.2.0/x86_64-unknown-linux-gnu" LDFLAGS="-L<GCC_INSTALL>/lib64"
 
 Testing:
     ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l "-pthread -ldl"
-    
+
 
 3.2.1 Mac/OSX
 
@@ -286,10 +286,10 @@ Operations:
     - gmake bsd CXXFLAGS="-std=c++14 -Os -Wall -D_GLIBCXX_USE_C99"
 
 Operations:
-    ./mkn clean build -dtKa "-Os -std=c++14 -Wall -D_GLIBCXX_USE_C99" -l "-pthread -ldl" 
+    ./mkn clean build -dtKa "-Os -std=c++14 -Wall -D_GLIBCXX_USE_C99" -l "-pthread -ldl"
 
 
-4.1 Logging - 
+4.1 Logging -
 
 [missing] - turns on NONE logging to std out
 KLOG=1    - turns on INFO logging to std out
@@ -319,7 +319,7 @@ The settings file is the default global configuration for projects.
 
 super: $directory                   # Inherit properties of project at directory, super (..) or sub directory advisable
 
-property:                                     
+property:
   - aaa: AAA
     bbb: ${aaa}.BBB
 
@@ -331,7 +331,7 @@ local:
 remote:
     repo: URL_ROOTA URL_ROOTB           # Optional, overrides switch _MKN_REMOTE_REPO_ for incomplete SCM URL lookups
 
-inc: <directory> <directory>            # Optional, add include directories compiling 
+inc: <directory> <directory>            # Optional, add include directories compiling
 path: <directory> <directory>           # Optional, add library path directories linking
 
 env:                                    # Optional, useful for compiler specific settings
@@ -343,14 +343,14 @@ compiler:
     mask:                               # To use a compiler binary with a name other than the default
         cl: $var_cl                     # masking is provided to alter the command line call
         gcc: $var_gcc                   # while using the same functionality as the mask key
-                                        # e.g. gcc: gcc-armhf would allow the compiler tag to contain 
-                                        # gcc-armhf instead of just "gcc" 
+                                        # e.g. gcc: gcc-armhf would allow the compiler tag to contain
+                                        # gcc-armhf instead of just "gcc"
 
 file:                                   # Must include at least one item in list
   - type: c:cpp:cxx                     # Sources won't be compiled if the filetype is missing
     archiver: ${aaa}                    # Archiver is not used for C#
     compiler: ${aaa}
-    linker:   ${aaa}    
+    linker:   ${aaa}
 
 4.3.2 Location
     - Linux   -    ~/.maiken/settings.yaml
@@ -401,7 +401,7 @@ The subsequent string is used as the default command if mkn is executed with zer
 
 Using the argument -d / --dep
     The following rules apply
-If soley numeric, must be greater than 0, used to limit which dependencies are built, 
+If soley numeric, must be greater than 0, used to limit which dependencies are built,
     if 1, project immediate dependencies are built, if two, includes dependencies of dependencies.
 If non-numeric, CSV apply, with the value equating to the yaml root node "name", only those found, plus the current project are built.
 Project profiles may be specified with square brackets, e.g. "-d project[profile]"
@@ -438,15 +438,15 @@ such that the following commands are valid
     -w https://github.com/mkn/mkn.ram[https]
     -w [profile]
 
-Similarly dependencies can be removed with the "-T" option, this is for instance if you have a library installed 
+Similarly dependencies can be removed with the "-T" option, this is for instance if you have a library installed
  in your system and do not wish to use the mkn configured version.
 
 4.10 Github integration
 
-When maiken is compiled with "-w mkn.ram[https]" features are activated when attempting to resolve dependencies when they 
+When maiken is compiled with "-w mkn.ram[https]" features are activated when attempting to resolve dependencies when they
  do not have versions specified. The formula to deduce the branch/tag are as follows:
 
-    if there are any releases, the most recent release is used, 
+    if there are any releases, the most recent release is used,
     or
     if there is some tags, the most recent tag is used
     or
@@ -506,7 +506,7 @@ Available commands
 Available arguments:
     -a --args $arg        - Adds $arg to the compile command if compile/build, passes arguments to application if run
     -A --add  $arg        - CSV list of additional sources to compile/link, disable recursive finding with "<dir>\, 0"
-    -C --directory $d     - Execute on directory $d rather than current directory 
+    -C --directory $d     - Execute on directory $d rather than current directory
     -d --dependencies     - See 4.8
     -E --env $e           - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
     -g --debug [0-9]      - Add compiler/linker debug flags for chosen compiler - 0 = off / 9 = full - number missing = 9 / no default
@@ -515,8 +515,8 @@ Available arguments:
     -j --jargs $j         - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing file-type specific args to compiler
     -l --linker $t        - Adds $t to linking of root project
     -L --all-linker $t    - Adds $t to linking of all projects
-    -m --mod [$p]         - Activate modules, no argument all implies all phases, otherwise $p = CSV of phases to activate
     -M --main $f          - Set main file as $f, overrides yaml main tag
+    -n --nodes [$n]       - Activate distributed compilation with $n nodes from chosen settings.yaml (-x)
     -o --out $f           - Set output binary/lib name to be $f, overrides yaml out tag
     -O --optimize [0-9]   - Add compiler/linker optimisation flags for chosen compiler - 0 = off / 9 = full - number missing = 9 / no default
     -L --all-linker $t    - Adds $t to linking of all projects
@@ -574,10 +574,22 @@ Type            bool
 Default         false
 Description     Windows only: when attempting automatic settings.yaml creation, use cl even if clang/gcc are found
 
+Key             MKN_LIB_EXT
+Type            string
+Default         #ifdef _WIN32 evs["MKN_LIB_EXT"] = "dll";
+                #else         evs["MKN_LIB_EXT"] = "so";
+Description     The file extention of shared objects being created, useful for python modules.
+
+Key             MKN_LIB_PRE
+Type            string
+Default         #ifdef _WIN32 evs["MKN_LIB_PRE"] = "";
+                #else         evs["MKN_LIB_PRE"] = "lib";
+Description     The file prefix of shared objects being created.
+
 
 7. Switches
- 
-Key             _MKN_REP_NAME_DOT_ 
+
+Key             _MKN_REP_NAME_DOT_
 Type            bool
 Default         1
 Description     split project name by period
@@ -589,10 +601,10 @@ Description     split project name by period
                     otherwise
                         ${LOCAL_REPO}/pro.ject/version
 
-Key             _MKN_REP_VERS_DOT_ 
+Key             _MKN_REP_VERS_DOT_
 Type            bool
 Default         0
-Description     split project version by period. 
+Description     split project version by period.
                     if true
                         name: project
                         version: ver.si.on
@@ -601,12 +613,12 @@ Description     split project version by period.
                     otherwise
                         ${LOCAL_REPO}/project/ver.si.on
 
-Key             _MKN_TIMESTAMPS_ 
+Key             _MKN_TIMESTAMPS_
 Type            bool
 Default         0
 Description     Logs timestamps of source/includes to skip files with no changes.
 
-Key             _MKN_REMOTE_EXEC_ 
+Key             _MKN_REMOTE_EXEC_
 Type            bool
 Default         1
 Description     Execute mkn.(bat/sh etc) in directory of missing dependencies when retrieved from SCM
@@ -618,8 +630,8 @@ Description     Space separated list of URLs to use as roots for non-complete SC
                     i.e.
                     scm: http://github.com/mkn/mkn.kul.git  # ignored
                     scm: git@github.com:mkn/mkn.kul.git     # ignored
-                    scm: mkn.kul.git                        # becomes 
-                                                                for(const std::string& s: split(_MKN_REMOTE_REPO_, " ") 
+                    scm: mkn.kul.git                        # becomes
+                                                                for(const std::string& s: split(_MKN_REMOTE_REPO_, " ")
                                                                     attempt(s + "mkn.kul.git")
                                                                 if all attempts fail, throw
 

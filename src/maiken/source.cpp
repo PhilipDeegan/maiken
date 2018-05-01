@@ -28,106 +28,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include <regex>
 #include "maiken.hpp"
-
-class Regexer {
-  friend class maiken::Application;
-  static std::vector<std::string> RESOLVE_REGEX(std::string str)
-      KTHROW(kul::Exception) {
-    std::vector<std::string> v;
-    auto posL = str.find("(");
-    auto posR = str.find(")");
-    if (posL == std::string::npos || posR == std::string::npos) return v;
-
-    if (str.size() > 1 && str.substr(0, 2) == "./") str = str.substr(2);
-
-    kul::Dir d(str);
-    std::string built, prnt;
-    std::vector<std::string> bits;
-    bits.insert(bits.begin(), d.name());
-    while (d.parent().name() != prnt && !d.parent().root()) {
-      bits.insert(bits.begin(), d.parent().name());
-      prnt = d.parent().name();
-      d = d.parent();
-    }
-    if (d.parent().root()) {
-      bits.insert(bits.begin(), d.parent().name());
-    } else {
-      d = kul::env::CWD();
-      bits.insert(bits.begin(), d.name());
-      while (d.parent().name() != prnt && !d.parent().root()) {
-        bits.insert(bits.begin(), d.parent().name());
-        prnt = d.parent().name();
-        d = d.parent();
-      }
-      str = kul::env::CWD() + kul::Dir::SEP() + str;
-    }
-
-    std::string rem, rule;
-    size_t bitsIndex = 0;
-    for (const auto& s : bits) {
-      auto posL = s.find("(");
-      auto posR = s.find(")");
-      if (posL != std::string::npos && posR != std::string::npos) {
-        if (built.size() + s.size() + 2 > str.size()) {
-          rem = str.substr(built.size() + s.size() + 1);
-        } else
-          rem = str.substr(built.size() + s.size() + 2);
-        rule = s;
-        break;
-      }
-      if (kul::Dir(s).root())
-        built = s;
-      else if (kul::Dir(built).root())
-        built = built + s;
-      else
-        built = built + kul::Dir::SEP() + s;
-      bitsIndex++;
-    }
-    d = built;
-
-    auto regexer = [&](auto items) {
-      for (const auto& item : items) {
-        try {
-          std::regex re(rule);
-          std::smatch match;
-          std::string subject(item.name());
-          if (std::regex_search(subject, match, re) && match.size() > 1)
-            RESOLVE_REGEX_REC(item.real(), built, subject, rem, bits, bitsIndex,
-                              v);
-        } catch (std::regex_error& e) {
-          KEXIT(1, "Regex Failure:\n") << e.what();
-        }
-      }
-    };
-    regexer(d.dirs());
-    regexer(d.files(0));
-    return v;
-  }
-
-  static void RESOLVE_REGEX_REC(const std::string& i, const std::string& b,
-                                const std::string& s, const std::string& r,
-                                const std::vector<std::string>& bits,
-                                const size_t& bitsIndex,
-                                std::vector<std::string>& v)
-      KTHROW(kul::Exception) {
-    if (kul::File(i).is() && !kul::Dir(i).is()) {
-      v.push_back(i);
-      return;
-    }
-
-    if (bits.size() >= bitsIndex + 1) {
-      std::string n(kul::Dir::JOIN(b, kul::Dir::JOIN(s, r)));
-
-      const auto again = RESOLVE_REGEX(n);
-      if (again.empty()) {
-        v.push_back(n);
-      } else
-        for (const auto& v1 : again) v.push_back(v1);
-    }
-  }
-};
 
 void maiken::Application::addSourceLine(const std::string& s)
     KTHROW(kul::Exception) {
@@ -229,4 +130,64 @@ bool maiken::Application::incSrc(const kul::File& file) const {
     }
   }
   return c;
+}
+
+std::vector<std::pair<std::string, std::string>>
+maiken::SourceFinder::all_sources_from(
+    const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>>&
+        sources,
+    kul::hash::set::String& objects, std::vector<kul::File>& cacheFiles) {
+  const std::string oType(
+      "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
+  kul::Dir objD(app.buildDir().join("obj"));
+  std::vector<std::pair<std::string, std::string>> source_objects;
+  for (const std::pair<std::string,
+                       kul::hash::map::S2T<kul::hash::set::String>>& ft :
+       sources) {
+    const maiken::Compiler* compiler = maiken::Compilers::INSTANCE().get(
+        (*(*app.files().find(ft.first)).second.find(STR_COMPILER)).second);
+    if (compiler->sourceIsBin()) {
+      for (const std::pair<std::string, kul::hash::set::String>& kv : ft.second)
+        for (const std::string& s : kv.second) {
+          kul::File source(s);
+          objects.insert(source.escm());
+          cacheFiles.push_back(source);
+        }
+    } else {
+      objD.mk();
+      for (const std::pair<std::string, kul::hash::set::String>& kv :
+           ft.second) {
+        for (const std::string& s : kv.second) {
+          const kul::File source(s);
+          if (!app.incSrc(source)) continue;
+          std::stringstream ss, os;
+          ss << std::hex << std::hash<std::string>()(source.real());
+          os << ss.str() << "-" << source.name() << oType;
+          kul::File object(os.str(), objD);
+          source_objects.emplace_back(std::make_pair(
+              AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
+              AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
+        }
+      }
+    }
+  }
+  return source_objects;
+}
+
+void maiken::CompilerValidation::check_compiler_for(
+    const maiken::Application& app,
+    const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>>&
+        sources) {
+  for (const std::pair<std::string,
+                       kul::hash::map::S2T<kul::hash::set::String>>& ft :
+       sources) {
+    try {
+      if (!(*app.files().find(ft.first)).second.count(STR_COMPILER))
+        KEXIT(1, "No compiler found for filetype " + ft.first);
+      Compilers::INSTANCE().get(
+          (*(*app.files().find(ft.first)).second.find(STR_COMPILER)).second);
+    } catch (const CompilerNotFoundException& e) {
+      KEXIT(1, e.what());
+    }
+  }
 }

@@ -28,5 +28,39 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
 
-void z() { double i = 0; }
+#include <iomanip>
+#include "maiken/dist.hpp"
+
+kul::http::_1_1Response maiken::dist::Server::respond(
+    const kul::http::A1_1Request &req) {
+  kul::http::_1_1Response r;
+  // check session exists - if not error
+  if (!sessions.count(req.ip())) {
+    r.withBody("ruh roh");
+    return r.withDefaultHeaders();
+  }
+
+  maiken::dist::Post p;
+  std::istringstream iss(req.body());
+  {
+    cereal::PortableBinaryInputArchive iarchive(iss);
+    iarchive(p);
+  }
+  p.message()->do_response_for(req, p, sessions, r);
+
+  return r.withDefaultHeaders();
+}
+
+void maiken::dist::Server::operator()() {
+  try {
+    start();
+  } catch (const std::runtime_error &e) {
+    KLOG(ERR) << e.what();
+  } catch (...) {
+    KLOG(ERR) << "UNKNOWN ERROR";
+  }
+}
+
+#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_

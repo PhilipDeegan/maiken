@@ -94,3 +94,32 @@ const kul::SCM* maiken::SCMGetter::GET_SCM(const kul::Dir& d,
   KEXIT(1, "SCM not found or not supported type(git/svn) for repo(s)\n\t" +
                ss.str() + "\tproject: " + d.path());
 }
+
+bool maiken::SCMGetter::IS_SOLID(const std::string& r) {
+  return r.find("://") != std::string::npos || r.find("@") != std::string::npos;
+}
+
+const std::string maiken::SCMGetter::REPO(const kul::Dir& d,
+                                          const std::string& r, bool module) {
+  if (INSTANCE().valids.count(d.path()))
+    return (*INSTANCE().valids.find(d.path())).second;
+  if (IS_SOLID(r))
+    INSTANCE().valids.insert(d.path(), r);
+  else
+    GET_SCM(d, r, module);
+  if (INSTANCE().valids.count(d.path()))
+    return (*INSTANCE().valids.find(d.path())).second;
+  KEXCEPT(Exception, "SCM not discovered for project: " + d.path());
+}
+bool maiken::SCMGetter::HAS(const kul::Dir& d) {
+  return (kul::Dir(d.join(".git")) || kul::Dir(d.join(".svn")));
+}
+const kul::SCM* maiken::SCMGetter::GET(const kul::Dir& d, const std::string& r,
+                                       bool module) {
+  if (IS_SOLID(r)) INSTANCE().valids.insert(d.path(), r);
+  if (kul::Dir(d.join(".git")))
+    return &kul::scm::Manager::INSTANCE().get("git");
+  if (kul::Dir(d.join(".svn")))
+    return &kul::scm::Manager::INSTANCE().get("svn");
+  return r.size() ? GET_SCM(d, r, module) : 0;
+}

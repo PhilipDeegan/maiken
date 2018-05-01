@@ -28,8 +28,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "maiken.hpp"
 
-#include "maiken/compiler/cpp.hpp"
+const std::string maiken::cpp::WINCompiler::sharedLib(
+    const std::string& lib) const {
+  return AppVars::INSTANCE().envVar("MKN_LIB_PRE") + lib + "." + AppVars::INSTANCE().envVar("MKN_LIB_EXT");
+}
 
 maiken::cpp::WINCompiler::WINCompiler(const int& v) : CCompiler(v) {
   m_optimise_c.insert({{0, "-Od"},

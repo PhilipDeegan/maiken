@@ -29,17 +29,13 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 #include "lib/a.hpp"
 #include "lib/b.hpp"
 #include "lib/z.hpp"
 
+int main(int argc, char* argv[]) {
+  a();
+  b();
 
-int main(int argc, char* argv[]){
-
-
-    a();
-    b();
-
-    return 0;
+  return 0;
 }

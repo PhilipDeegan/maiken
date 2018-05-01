@@ -48,6 +48,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int main(int argc, char* argv[]);
 
 namespace maiken {
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+namespace dist {
+class CompileRequest;
+}  //  end namespace dist
+#endif  //  _MKN_WITH_MKN_RAM_  &&         _MKN_WITH_IO_CEREAL_
+
+static std::string PROGRAM = "";
 
 class Exception : public kul::Exception {
  public:
@@ -59,9 +66,16 @@ class Module;
 class ModuleLoader;
 class ThreadingCompiler;
 class Applications;
+class SourceFinder;
+class CompilerPrinter;
 class KUL_PUBLISH Application : public Constants {
   friend class Applications;
   friend class ThreadingCompiler;
+  friend class SourceFinder;
+  friend class CompilerPrinter;
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+  friend class dist::CompileRequest;
+#endif  //  _MKN_WITH_MKN_RAM_  &&         _MKN_WITH_IO_CEREAL_
 
  protected:
   bool ig = 1, isMod = 0, ro = 0;
@@ -99,6 +113,12 @@ class KUL_PUBLISH Application : public Constants {
                                     kul::hash::set::String& include);
 
   void compile(kul::hash::set::String& objects) KTHROW(kul::Exception);
+  void compile(std::vector<std::pair<std::string, std::string>>& src_objs,
+               kul::hash::set::String& objects,
+               std::vector<kul::File>& cacheFiles) KTHROW(kul::Exception);
+  void compile(std::queue<std::pair<std::string, std::string>>& src_objs,
+               kul::hash::set::String& objects,
+               std::vector<kul::File>& cacheFiles) KTHROW(kul::Exception);
   void build() KTHROW(kul::Exception);
   void pack() KTHROW(kul::Exception);
   void findObjects(kul::hash::set::String& objects) const;
@@ -125,7 +145,7 @@ class KUL_PUBLISH Application : public Constants {
                        std::vector<kul::File>& cacheFiles);
   void loadTimeStamps() KTHROW(kul::StringException);
 
-  void buildDepVec(const std::string* depVal);
+  void buildDepVec(const std::string& depVal);
   void buildDepVecRec(
       std::unordered_map<uint16_t, std::vector<Application*>>& dePs, int16_t ig,
       int16_t i, const kul::hash::set::String& inc);
@@ -216,6 +236,8 @@ class KUL_PUBLISH Application : public Constants {
   kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> sourceMap()
       const;
 
+  static std::vector<Application*> CREATE(const kul::cli::Args& args)
+      KTHROW(kul::Exception);
   static std::vector<Application*> CREATE(int16_t argc, char* argv[])
       KTHROW(kul::Exception);
 };
@@ -317,44 +339,61 @@ class ThreadingCompiler : public Constants {
 };
 
 class SCMGetter {
- private:
-  kul::hash::map::S2S valids;
-  static bool IS_SOLID(const std::string& r) {
-    return r.find("://") != std::string::npos ||
-           r.find("@") != std::string::npos;
-  }
+ public:
   static SCMGetter& INSTANCE() {
     static SCMGetter s;
     return s;
   }
+
+  static const std::string REPO(const kul::Dir& d, const std::string& r,
+                                bool module);
+
+  static bool HAS(const kul::Dir& d);
+
+  static const kul::SCM* GET(const kul::Dir& d, const std::string& r,
+                             bool module);
+
+ private:
+  static bool IS_SOLID(const std::string& r);
+
   static const kul::SCM* GET_SCM(const kul::Dir& d, const std::string& r,
                                  bool module);
 
+ private:
+  kul::hash::map::S2S valids;
+};
+
+class SourceFinder : public Constants {
+ private:
+  const maiken::Application& app;
+
  public:
-  static const std::string REPO(const kul::Dir& d, const std::string& r,
-                                bool module) {
-    if (INSTANCE().valids.count(d.path()))
-      return (*INSTANCE().valids.find(d.path())).second;
-    if (IS_SOLID(r))
-      INSTANCE().valids.insert(d.path(), r);
-    else
-      GET_SCM(d, r, module);
-    if (INSTANCE().valids.count(d.path()))
-      return (*INSTANCE().valids.find(d.path())).second;
-    KEXCEPT(Exception, "SCM not discovered for project: " + d.path());
-  }
-  static bool HAS(const kul::Dir& d) {
-    return (kul::Dir(d.join(".git")) || kul::Dir(d.join(".svn")));
-  }
-  static const kul::SCM* GET(const kul::Dir& d, const std::string& r,
-                             bool module) {
-    if (IS_SOLID(r)) INSTANCE().valids.insert(d.path(), r);
-    if (kul::Dir(d.join(".git")))
-      return &kul::scm::Manager::INSTANCE().get("git");
-    if (kul::Dir(d.join(".svn")))
-      return &kul::scm::Manager::INSTANCE().get("svn");
-    return r.size() ? GET_SCM(d, r, module) : 0;
-  }
+  SourceFinder(const maiken::Application& _app) : app(_app) {}
+  std::vector<std::pair<std::string, std::string>> all_sources_from(
+      const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>>&
+          sources,
+      kul::hash::set::String& objects, std::vector<kul::File>& cacheFiles);
+};
+
+class Regexer {
+ public:
+  static std::vector<std::string> RESOLVE_REGEX(std::string str)
+      KTHROW(kul::Exception);
+
+  static void RESOLVE_REGEX_REC(const std::string& i, const std::string& b,
+                                const std::string& s, const std::string& r,
+                                const std::vector<std::string>& bits,
+                                const size_t& bitsIndex,
+                                std::vector<std::string>& v)
+      KTHROW(kul::Exception);
+};
+
+class CompilerValidation : public Constants {
+ public:
+  static void check_compiler_for(
+      const maiken::Application& app,
+      const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>>&
+          sources);
 };
 
 }  // namespace maiken
