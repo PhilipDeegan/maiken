@@ -77,7 +77,8 @@ class CLIHandler : public Constants {
 }  // namespace maiken
 
 std::vector<maiken::Application*> maiken::Application::CREATE(int16_t argc,
-                                                              char* argv[]) {
+                                                              char* argv[])
+    KTHROW(kul::Exception) {
   using namespace kul::cli;
   CLIHandler cli;
   Args args(cli.cmds(), cli.args());
@@ -191,7 +192,6 @@ std::vector<maiken::Application*> maiken::Application::CREATE(
     AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-  KLOG(INF) << args.has(STR_NODES);
   if (args.has(STR_NODES)) {
     try {
       AppVars::INSTANCE().nodes((std::numeric_limits<int16_t>::max)());
@@ -234,19 +234,18 @@ std::vector<maiken::Application*> maiken::Application::CREATE(
                      std::ref(AppVars::INSTANCE()), std::placeholders::_1));
   }
   {
-    auto splitArgs =
-        [](const std::string& s, const std::string& t,
-           const std::function<void(const std::string&, const std::string&)>&
-               f) {
-          for (const auto& p : kul::String::ESC_SPLIT(s, ',')) {
-            if (p.find("=") == std::string::npos)
-              KEXIT(1, t + " override invalid, = missing");
-            std::vector<std::string> ps = kul::String::ESC_SPLIT(p, '=');
-            if (ps.size() > 2)
-              KEXIT(1, t + " override invalid, escape extra \"=\"");
-            f(ps[0], ps[1]);
-          }
-        };
+    auto splitArgs = [](
+        const std::string& s, const std::string& t,
+        const std::function<void(const std::string&, const std::string&)>& f) {
+      for (const auto& p : kul::String::ESC_SPLIT(s, ',')) {
+        if (p.find("=") == std::string::npos)
+          KEXIT(1, t + " override invalid, = missing");
+        std::vector<std::string> ps = kul::String::ESC_SPLIT(p, '=');
+        if (ps.size() > 2)
+          KEXIT(1, t + " override invalid, escape extra \"=\"");
+        f(ps[0], ps[1]);
+      }
+    };
 
     if (args.has(STR_PROPERTY))
       splitArgs(args.get(STR_PROPERTY), "property",
@@ -398,21 +397,31 @@ std::vector<maiken::Application*> maiken::Application::CREATE(
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   if (AppVars::INSTANCE().nodes()) {
+    maiken::dist::RemoteCommandManager::INST().build_hosts(
+        Settings::INSTANCE());
+    auto& hosts(maiken::dist::RemoteCommandManager::INST().hosts());
+    if (hosts.empty()) KEXCEPTION("Settings file has no hosts configured");
+    size_t threads = (hosts.size() < AppVars::INSTANCE().nodes())
+                         ? hosts.size()
+                         : AppVars::INSTANCE().nodes();
     // ping nodes and set active
-    auto post = std::make_unique<maiken::dist::Post>(
-        maiken::dist::RemoteCommandManager::INST().build_setup_query(*apps[0],
-                                                                     args));
-    try {
-      post->send();
-    } catch (const kul::Exception& e) {
-      KLOG(ERR) << e.stack();
-    } catch (const std::exception& e) {
-      KLOG(ERR) << e.what();
-    } catch (...) {
-      KLOG(ERR) << "negotiate.send() ERROR!";
-    }
+    auto ping = [&](const maiken::dist::Host& host) {
+      auto post = std::make_unique<maiken::dist::Post>(std::move(
+          maiken::dist::RemoteCommandManager::INST().build_setup_query(*apps[0],
+                                                                       args)));
+      post->send(host);
+    };
+    kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);
+    std::exception_ptr exp;
+    auto pingex = [&](const kul::Exception& e) {
+      ctp.stop().interrupt();
+      throw e;
+    };
+    for (size_t i = 0; i < threads; i++)
+      ctp.async(std::bind(ping, std::ref(hosts[i])), pingex);
+    ctp.finish(10000000);  // 10 milliseconds
+    ctp.rethrow();
   }
 #endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-
   return apps;
 }

@@ -160,16 +160,16 @@ void maiken::Application::populateMapsFromDependencies()
        ++depP) {
     const auto& dep(**depP);
     if (!dep.sources().empty()) {
-      const std::string n(dep.project().root()[STR_NAME].Scalar());
-      const std::string lib = dep.baseLibFilename();
+      const std::string lib(dep.baseLibFilename());
       const auto& it(std::find(libraries().begin(), libraries().end(), lib));
       if (it != libraries().end()) libs.erase(it);
       libs.push_back(lib);
     }
 
     for (const auto& s : dep.includes())
-      if (s.second && std::find(includes().begin(), includes().end(), s) ==
-                          includes().end())
+      if (s.second &&
+          std::find(includes().begin(), includes().end(), s) ==
+              includes().end())
         incs.push_back(std::make_pair(s.first, true));
     for (const std::string& s : dep.libraryPaths())
       if (std::find(libraryPaths().begin(), libraryPaths().end(), s) ==

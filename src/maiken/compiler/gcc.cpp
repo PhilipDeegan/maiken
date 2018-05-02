@@ -32,7 +32,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const std::string maiken::cpp::GccCompiler::sharedLib(
     const std::string& lib) const {
-  return AppVars::INSTANCE().envVar("MKN_LIB_PRE") + lib + "." + AppVars::INSTANCE().envVar("MKN_LIB_EXT");
+  return AppVars::INSTANCE().envVar("MKN_LIB_PRE") + lib + "." +
+         AppVars::INSTANCE().envVar("MKN_LIB_EXT");
 }
 
 maiken::cpp::GccCompiler::GccCompiler(const int& v) : CCompiler(v) {

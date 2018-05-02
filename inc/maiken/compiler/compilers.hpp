@@ -63,7 +63,7 @@ class Compilers {
   std::unique_ptr<Compiler> winc;
   std::unique_ptr<Compiler> wincs;
 
-  kul::hash::map::S2T<Compiler*> cs, masks;
+  kul::hash::map::S2T<Compiler *> cs, masks;
 
  private:
   Compilers() {

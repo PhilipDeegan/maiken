@@ -34,19 +34,16 @@ class ModuleMinimiser {
   friend class maiken::Application;
 
  private:
-  void add(const std::vector<maiken::Application*>& mods,
-           kul::hash::map::S2T<maiken::Application*>& apps) {
+  static void add(const std::vector<maiken::Application*>& mods,
+                  kul::hash::map::S2T<maiken::Application*>& apps) {
     for (auto* const m : mods)
       if (!apps.count(m->buildDir().real()))
         apps.insert(m->buildDir().real(), m);
   }
 
  public:
-  static ModuleMinimiser& INSTANCE() {
-    static ModuleMinimiser a;
-    return a;
-  }
-  kul::hash::map::S2T<maiken::Application*> modules(maiken::Application& app) {
+  static kul::hash::map::S2T<maiken::Application*> modules(
+      maiken::Application& app) {
     kul::hash::map::S2T<maiken::Application*> apps;
     add(app.moduleDependencies(), apps);
     for (auto dep = app.dependencies().rbegin();
@@ -72,9 +69,9 @@ class CommandStateMachine {
     for (const auto& s : maiken::AppVars::INSTANCE().commands()) cmds.insert(s);
   }
   void add(const std::string& s) { cmds.insert(s); }
-  const kul::hash::set::String& commands() { return cmds; }
+  const kul::hash::set::String& commands() const { return cmds; }
   void main(bool m) { _main = m; }
-  bool main() { return _main; }
+  bool main() const { return _main; }
 };
 
 class BuildRecorder {
@@ -144,8 +141,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
   };
 
-  auto _mods = ModuleMinimiser::INSTANCE().modules(*this);
-  for (auto& mod : ModuleMinimiser::INSTANCE().modules(*this)) {
+  for (auto& mod : ModuleMinimiser::modules(*this)) {
     bool build = mod.second->is_build_required();
     bool is_build_stale = mod.second->is_build_stale();
     if (!build && (is_build_stale && !maiken::AppVars::INSTANCE().quiet())) {
@@ -159,7 +155,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     }
     if (build) {
       CommandStateMachine::INSTANCE().main(0);
-      for (auto& m : _mods) m.second->process();
+      mod.second->process();
       CommandStateMachine::INSTANCE().main(1);
     }
   }

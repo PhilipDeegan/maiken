@@ -92,7 +92,7 @@ class KUL_PUBLISH Application : public Constants {
   kul::hash::map::S2S cArg, cLnk;
   kul::hash::map::S2T<kul::hash::set::String> args;
   kul::hash::map::S2T<uint64_t> stss;
-  std::vector<Application*> deps, modDeps, rdeps;
+  std::vector<Application *> deps, modDeps, rdeps;
   std::vector<std::shared_ptr<ModuleLoader>> mods;
   std::vector<kul::cli::EnvVar> evs;
   std::vector<std::string> libs, paths;

@@ -36,7 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 class CompilerPrinter {
  public:
-  void print_for(const Application& app) const {
+  static void print_for(const Application& app) {
     if (!AppVars::INSTANCE().dryRun()) {
       std::stringstream ss;
       ss << MKN_PROJECT << ": " << app.project().dir().path();
@@ -80,7 +80,7 @@ void maiken::Application::compile(kul::hash::set::String& objects)
   auto sources = sourceMap();
 
   showConfig();
-  CompilerPrinter().print_for(*this);
+  CompilerPrinter::print_for(*this);
 
   SourceFinder s_finder(*this);
   CompilerValidation::check_compiler_for(*this, sources);
@@ -95,69 +95,76 @@ void maiken::Application::compile(
     kul::hash::set::String& objects, std::vector<kul::File>& cacheFiles)
     KTHROW(kul::Exception) {
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-  std::vector<std::thread> wait_for_compile(0);
-  auto compile_lambda = [](std::shared_ptr<maiken::dist::Post>& post) {
-    try {
-      post->send();
-      dist::FileWriter fw;
-      dist::Blob b;
-      do {
-        auto dowd = std::make_shared<maiken::dist::Post>(
-            maiken::dist::RemoteCommandManager::INST()
-                .build_download_request());
-        dowd->send();
-        std::string body(std::move(dowd->body()));
-        std::istringstream iss(body);
-        {
-          cereal::PortableBinaryInputArchive iarchive(iss);
-          iarchive(b);
+  std::vector<std::shared_ptr<maiken::dist::Post>> posts;
+  auto compile_lambda = [](std::shared_ptr<maiken::dist::Post> post,
+                           const dist::Host& host) {
+    post->send(host);
+    dist::FileWriter fw;
+    dist::Blob b;
+    do {
+      auto dowd = std::make_shared<maiken::dist::Post>(std::move(
+          maiken::dist::RemoteCommandManager::INST().build_download_request()));
+      dowd->send(host);
+      std::string body(std::move(dowd->body()));
+      std::istringstream iss(body);
+      {
+        cereal::PortableBinaryInputArchive iarchive(iss);
+        iarchive(b);
+      }
+      size_t size = b.len;
+      if (!b.file.empty()) {
+        if (!fw.bw) {
+          kul::File obj(b.file);
+          if (obj) obj = kul::File(std::string(b.file + ".new"));
+          fw.bw = std::make_unique<kul::io::BinaryWriter>(obj);
         }
-        size_t size = b.len;
-        if (!b.file.empty()) {
-          if (!fw.bw) {
-            kul::File obj(b.file);
-            if (obj) obj = kul::File(std::string(b.file + ".new"));
-            fw.bw = std::make_unique<kul::io::BinaryWriter>(obj);
-          }
-          for (size_t i = 0; i < b.len; i++) (*fw.bw.get()) << b.c1[i];
-        }
-        if (b.last_packet) fw.bw.reset();
-      } while (b.files_left > 0);
-    } catch (const kul::Exception& e) {
-      KLOG(ERR) << e.stack();
-    } catch (const std::exception& e) {
-      KLOG(ERR) << e.what();
-    } catch (...) {
-      KLOG(ERR) << "negotiate.send() ERROR!";
-    }
+        for (size_t i = 0; i < b.len; i++) (*fw.bw.get()) << b.c1[i];
+      }
+      if (b.last_packet) fw.bw.reset();
+    } while (b.files_left > 0);
+
   };
-  std::shared_ptr<maiken::dist::Post> post;
+  size_t threads = 0;
+
+  auto& hosts(maiken::dist::RemoteCommandManager::INST().hosts());
   if (AppVars::INSTANCE().nodes()) {
+    threads = (hosts.size() < AppVars::INSTANCE().nodes())
+                  ? hosts.size()
+                  : AppVars::INSTANCE().nodes();
+  }
+  kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);
+  auto compile_ex = [&](const kul::Exception& e) {
+    ctp.stop().interrupt();
+    throw e;
+  };
+
+  for (size_t i = 0; i < threads; i++) {
     std::vector<std::pair<std::string, std::string>> remote_src_objs;
-    {
+    if (src_objs.size() > 1) {
       remote_src_objs.push_back(src_objs[0]);
       src_objs.erase(src_objs.begin());
     }
-    post = std::make_shared<maiken::dist::Post>(
-        maiken::dist::RemoteCommandManager::INST().build_compile_request(
-            this->project().dir().real(),
-            remote_src_objs));
-    wait_for_compile.emplace_back(compile_lambda, std::ref(post));
-  }
-  wait_for_compile.emplace_back([&]() {
-#endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-    std::queue<std::pair<std::string, std::string>> sourceQueue;
-    for (auto& so : src_objs) {
-      sourceQueue.push(std::make_pair(so.first, so.second));
-      kul::File object_file(so.second);
-      if (!object_file.dir()) object_file.dir().mk();
+
+    if (!remote_src_objs.empty()) {
+      posts.emplace_back(std::make_shared<maiken::dist::Post>(std::move(
+          maiken::dist::RemoteCommandManager::INST().build_compile_request(
+              this->project().dir().real(), remote_src_objs))));
+      ctp.async(std::bind(compile_lambda, posts[i], std::ref(hosts[i])),
+                compile_ex);
     }
-    if (!src_objs.empty()) compile(sourceQueue, objects, cacheFiles);
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-  });
-  for (auto& thread : wait_for_compile) {
-    thread.join();
   }
+
+#endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+  std::queue<std::pair<std::string, std::string>> sourceQueue;
+  for (auto& so : src_objs) {
+    sourceQueue.push(std::make_pair(so.first, so.second));
+    kul::File object_file(so.second);
+    if (!object_file.dir()) object_file.dir().mk();
+  }
+  if (!src_objs.empty()) compile(sourceQueue, objects, cacheFiles);
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+  ctp.finish(10000000);  // 10 milliseconds
+  ctp.rethrow();
 #endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
 
   if (_MKN_TIMESTAMPS_) writeTimeStamps(objects, cacheFiles);

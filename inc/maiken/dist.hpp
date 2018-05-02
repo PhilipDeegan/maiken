@@ -92,16 +92,19 @@ class Post {
  public:
   ~Post() { KLOG(INF); }
   explicit Post(ARequest *_msg) : msg(std::unique_ptr<ARequest>(_msg)) {
-    if (!_msg) KLOG(INF) << "NOOOOOOOOOOO";
+    if (msg == nullptr) KLOG(INF) << "NOOOOOOOOOOO";
     KLOG(INF);
   }
+
   explicit Post(std::unique_ptr<ARequest> _msg) : msg(std::move(_msg)) {
-    if (!_msg) KLOG(INF) << "NOOOOOOOOOOO";
+    if (msg == nullptr) KLOG(INF) << "NOOOOOOOOOOO";
     KLOG(INF);
   }
-  void send() KTHROW(Exception) { send("localhost", "res", 8888); }
-  void send(const std::string &&host, const std::string &&res,
-            const uint16_t &&port) KTHROW(maiken::Exception);
+  void send(const Host &host) KTHROW(Exception) {
+    send(host.host(), "res", host.port());
+  }
+  void send(const std::string &host, const std::string &res,
+            const uint16_t &port) KTHROW(maiken::Exception);
   ARequest *message() { return msg.get(); }
 
   const std::string &body() { return _body; }
@@ -121,7 +124,7 @@ class Post {
 
  private:
   std::string _body;
-  std::unique_ptr<ARequest> msg;
+  std::unique_ptr<ARequest> msg = nullptr;
 };
 
 class RemoteCommandManager {
@@ -139,6 +142,21 @@ class RemoteCommandManager {
       const std::vector<std::pair<std::string, std::string> > &src_obj);
 
   std::unique_ptr<DownloadRequest> build_download_request();
+
+  void build_hosts(const Settings &settings) KTHROW(kul::Exception) {
+    if (settings.root()["dist"]) {
+      if (settings.root()["dist"]["nodes"]) {
+        for (const auto &node : settings.root()["dist"]["nodes"]) {
+          m_hosts.emplace_back(node["host"].Scalar(),
+                               kul::String::UINT16(node["port"].Scalar()));
+        }
+      }
+    }
+  }
+  const std::vector<Host> &hosts() const { return m_hosts; }
+
+ private:
+  std::vector<Host> m_hosts;
 };
 using RMC = RemoteCommandManager;
 

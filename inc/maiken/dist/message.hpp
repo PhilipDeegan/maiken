@@ -131,7 +131,8 @@ class CompileRequest : public ARequest {
 
  public:
   CompileRequest() {}
-  CompileRequest(const std::string &directory,
+  CompileRequest(
+      const std::string &directory,
       const std::vector<std::pair<std::string, std::string> > &src_obj)
       : m_directory(directory), m_src_obj(src_obj) {}
 

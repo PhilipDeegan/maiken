@@ -152,21 +152,6 @@ const kul::yaml::Validator maiken::Settings::validator() const {
   for (const auto& s : Compilers::INSTANCE().keys())
     masks.push_back(NodeValidator(s, {}, 0, NodeType::STRING));
 
-  NodeValidator compiler("compiler",
-                         {NodeValidator("mask", masks, 0, NodeType::MAP)}, 0,
-                         NodeType::MAP);
-
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-  NodeValidator dist(
-      "dist",
-      {NodeValidator("port"),
-       NodeValidator("nodes",
-                     {NodeValidator("host", 1), NodeValidator("user"),
-                      NodeValidator("pass")},
-                     0, NodeType::LIST)},
-      0, NodeType::MAP);
-#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
-
   return Validator({
     NodeValidator("super"),
         NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP),
@@ -179,18 +164,26 @@ const kul::yaml::Validator maiken::Settings::validator() const {
         NodeValidator("remote",
                       {NodeValidator("repo"), NodeValidator("mod-repo")}, 0,
                       NodeType::MAP),
-        NodeValidator("env",
-                      {NodeValidator("name", 1), NodeValidator("value", 1),
-                       NodeValidator("mode")},
+        NodeValidator("env", {NodeValidator("name", 1),
+                              NodeValidator("value", 1), NodeValidator("mode")},
                       0, NodeType::LIST),
         NodeValidator("file",
                       {NodeValidator("type", 1), NodeValidator("compiler", 1),
                        NodeValidator("linker"), NodeValidator("archiver")},
                       1, NodeType::LIST),
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-        dist,
+        NodeValidator(
+            "dist",
+            {NodeValidator("port"),
+             NodeValidator("nodes",
+                           {NodeValidator("host", 1), NodeValidator("port", 1),
+                            NodeValidator("user"), NodeValidator("pass")},
+                           0, NodeType::LIST)},
+            0, NodeType::MAP),
 #endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
-        compiler
+        NodeValidator("compiler",
+                      {NodeValidator("mask", masks, 0, NodeType::MAP)}, 0,
+                      NodeType::MAP)
   });
 }
 
@@ -244,7 +237,6 @@ void maiken::Settings::write(const kul::File& file) KTHROW(kul::Exit) {
 #ifdef _WIN32
 
   if (use_cl || (!c && !g)) {
-    bool f = 0;
     auto cl(kul::env::WHERE("cl.exe"));
     auto inc(kul::env::GET("INCLUDE"));
     auto lib(kul::env::GET("LIB"));
