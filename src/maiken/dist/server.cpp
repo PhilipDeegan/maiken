@@ -56,6 +56,7 @@ kul::http::_1_1Response maiken::dist::Server::respond(
 void maiken::dist::Server::operator()() {
   try {
     start();
+    join();
   } catch (const std::runtime_error &e) {
     KLOG(ERR) << e.what();
   } catch (...) {

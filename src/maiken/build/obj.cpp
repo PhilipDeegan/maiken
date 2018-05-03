@@ -137,7 +137,7 @@ void maiken::Application::compile(
     ctp.stop().interrupt();
     throw e;
   };
-
+  KLOG(INF) << threads;
   for (size_t i = 0; i < threads; i++) {
     std::vector<std::pair<std::string, std::string>> remote_src_objs;
     if (src_objs.size() > 1) {

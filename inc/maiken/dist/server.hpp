@@ -66,18 +66,22 @@ class ServerSession {
   SessionState state = SessionState::NON;
 };
 
-class Server : public kul::http::Server, public Constants {
+class Server : public kul::http::MultiServer, public Constants {
   friend class kul::Thread;
 
  public:
-  Server(const uint16_t port, const kul::Dir &_home)
-      : busy(false), kul::http::Server(port), m_home(_home) {}
+  Server(const uint16_t port, const kul::Dir &_home, uint16_t threads)
+      : busy(false), kul::http::MultiServer(port, 2, 3), m_home(_home) {}
   virtual ~Server() {}
   kul::http::_1_1Response respond(const kul::http::A1_1Request &req);
 
  private:
   void operator()();
 
+  Server(const Server &) = delete;
+  Server(const Server &&) = delete;
+  Server &operator=(const Server &) = delete;
+  Server &operator=(const Server &&) = delete;
  protected:
   void onConnect(const char *cip, const uint16_t &port) override {
     std::string ip(cip);

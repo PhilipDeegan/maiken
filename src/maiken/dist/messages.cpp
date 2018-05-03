@@ -37,6 +37,10 @@ void maiken::dist::SetupRequest::do_response_for(
     kul::http::_1_1Response &resp) {
   KLOG(INF) << req.ip();
 
+  if(!req.header("session"))
+    KEXCEPTION("BAD 41"); //resp.withBody("FAILUIRE");
+  auto session_id = (*req.headers().find("session")).second;
+
   YAML::Node root;
   bool expected = false;
   bool success =
@@ -50,10 +54,10 @@ void maiken::dist::SetupRequest::do_response_for(
   YAML::Emitter out;
   out << root;
   p.release();
-  sessions[req.ip()].reset_setup(this);
-  sessions[req.ip()].setup_ptr()->m_args.erase(STR_NODES);
-  sessions[req.ip()].set_apps(
-      maiken::Application::CREATE(sessions[req.ip()].setup_ptr()->m_args));
+  sessions[session_id].reset_setup(this);
+  sessions[session_id].setup_ptr()->m_args.erase(STR_NODES);
+  sessions[session_id].set_apps(
+      maiken::Application::CREATE(sessions[session_id].setup_ptr()->m_args));
 
   resp.withBody(std::string(out.c_str()));
 }
@@ -62,11 +66,16 @@ void maiken::dist::CompileRequest::do_response_for(
     const kul::http::A1_1Request &req, Post &p, Sessions &sessions,
     kul::http::_1_1Response &resp) {
   KLOG(INF) << req.ip();
+
+  if(!req.header("session"))
+    KEXCEPTION("BAD 71"); //resp.withBody("FAILUIRE");
+  auto session_id = (*req.headers().find("session")).second;
+
   kul::env::CWD(this->m_directory);
 
   std::vector<kul::File> cacheFiles;
-  sessions[req.ip()].apps_vector()[0]->compile(
-      this->m_src_obj, sessions[req.ip()].objects, cacheFiles);
+  sessions[session_id].apps_vector()[0]->compile(
+      this->m_src_obj, sessions[session_id].objects, cacheFiles);
 
   YAML::Node root;
   bool expected = false;
@@ -80,7 +89,7 @@ void maiken::dist::CompileRequest::do_response_for(
   root["files"] = this->m_src_obj.size();
   YAML::Emitter out;
   out << root;
-  sessions[req.ip()].m_src_obj = std::move(this->m_src_obj);
+  sessions[session_id].m_src_obj = std::move(this->m_src_obj);
   resp.withBody(std::string(out.c_str()));
 }
 
@@ -89,12 +98,16 @@ void maiken::dist::DownloadRequest::do_response_for(
     kul::http::_1_1Response &resp) {
   KLOG(INF) << req.ip();
 
-  auto &src_obj = sessions[req.ip()].m_src_obj;
-  if (!sessions[req.ip()].binary_reader) {
+  if(!req.header("session"))
+    KEXCEPTION("BAD 102");  //resp.withBody("FAILUIRE");
+  auto session_id = (*req.headers().find("session")).second;
+
+  auto &src_obj = sessions[session_id].m_src_obj;
+  if (!sessions[session_id].binary_reader) {
     if (!src_obj.empty()) {
       auto &pair = src_obj[0];
       kul::File bin(pair.second);
-      sessions[req.ip()].binary_reader =
+      sessions[session_id].binary_reader =
           std::make_unique<kul::io::BinaryReader>(bin);
     }
   }
@@ -103,12 +116,12 @@ void maiken::dist::DownloadRequest::do_response_for(
   b.files_left = src_obj.size();
   bzero(b.c1, BUFF_SIZE);
   b.file = src_obj[0].second;
-  auto &br(*sessions[req.ip()].binary_reader.get());
+  auto &br(*sessions[session_id].binary_reader.get());
   size_t red = b.len = br.read(b.c1, BUFF_SIZE);
   if (red == 0) {
     src_obj.erase(src_obj.begin());
     b.files_left = src_obj.size();
-    sessions[req.ip()].binary_reader.reset();
+    sessions[session_id].binary_reader.reset();
     // if (b.files_left == 0) sessions.erase(req.ip());
     b.last_packet = 1;
   }

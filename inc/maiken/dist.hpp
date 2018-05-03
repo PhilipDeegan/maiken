@@ -83,6 +83,11 @@ class Host {
   Host(std::string host, uint16_t port) : m_port(port), m_host(host) {}
   const std::string &host() const { return m_host; }
   const uint16_t &port() const { return m_port; }
+  const std::string session_id() const {
+    std::stringstream ss;
+    ss << std::hex << m_host << this;
+    return ss.str();
+  }
 };
 
 class Post {
@@ -101,10 +106,11 @@ class Post {
     KLOG(INF);
   }
   void send(const Host &host) KTHROW(Exception) {
-    send(host.host(), "res", host.port());
+    send(host.host(), "res", host.port(), {{"session", host.session_id()}});
   }
   void send(const std::string &host, const std::string &res,
-            const uint16_t &port) KTHROW(maiken::Exception);
+            const uint16_t &port,
+            const std::unordered_map<std::string, std::string> headers = {{}}) KTHROW(maiken::Exception);
   ARequest *message() { return msg.get(); }
 
   const std::string &body() { return _body; }
@@ -112,7 +118,7 @@ class Post {
   void release() { msg.release(); }
 
  private:
-  Post() { KLOG(INF); }
+  Post(){}
   Post(const Post &) = delete;
   Post(const Post &&) = delete;
   Post &operator=(const Post &) = delete;

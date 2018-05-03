@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
                 "diretory provided does not exist or cannot be created");
     }
 
-    maiken::dist::Server serv(8888, d);
+    maiken::dist::Server serv(8888, d, 3);
     kul::Thread thread(std::ref(serv));
     sig.intr([&](int16_t) {
       KERR << "Interrupted";
@@ -63,6 +63,7 @@ int main(int argc, char* argv[]) {
       exit(2);
     });
     thread.join();
+    KLOG(INF);
   } catch (const kul::Exit& e) {
     if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e;
     exit_code = e.code();
