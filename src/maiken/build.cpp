@@ -35,10 +35,10 @@ void maiken::Application::link(const kul::hash::set::String& objects)
   showConfig();
   if (objects.size() > 0) {
     buildDir().mk();
-    if (!main.empty())
-      buildExecutable(objects);
-    else
-      buildLibrary(objects);
+    if (!main.empty()) buildExecutable(objects);
+    else buildLibrary(objects);
+    KLOG(INF) << tests.size();
+    if (!tests.empty()) buildTest(objects);
     kul::os::PushDir pushd(this->project().dir());
     kul::Dir build(".mkn/build");
     build.mk();

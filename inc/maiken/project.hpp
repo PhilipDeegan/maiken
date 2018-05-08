@@ -50,11 +50,9 @@ class ProjectException : public kul::Exception {
 class Projects;
 class KUL_PUBLISH Project : public kul::yaml::File, public Constants {
   friend class Projects;
+  friend class Application;
+  friend class kul::yaml::File;
 
- private:
-  const kul::Dir m_dir;
-
- protected:
  public:
   Project(const kul::Dir& d)
       : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml")),
@@ -62,16 +60,14 @@ class KUL_PUBLISH Project : public kul::yaml::File, public Constants {
   Project(const Project& p) : kul::yaml::File(p), m_dir(p.m_dir) {}
   const kul::Dir& dir() const { return m_dir; }
   const kul::yaml::Validator validator() const;
-  friend class maiken::Application;
-  friend class kul::yaml::File;
+
+  static kul::hash::map::S2S populate_tests(const YAML::Node &node);
+
+ private:
+  const kul::Dir m_dir;
 };
 
 class Projects {
- private:
-  std::vector<std::unique_ptr<Project>> m_pps;
-  kul::hash::set::String m_reloaded;
-  kul::hash::map::S2T<Project*> m_projects;
-
  public:
   static Projects& INSTANCE() {
     static Projects p;
@@ -103,6 +99,10 @@ class Projects {
       m_reloaded.insert(proj.file());
     }
   }
+ private:
+  std::vector<std::unique_ptr<Project>> m_pps;
+  kul::hash::set::String m_reloaded;
+  kul::hash::map::S2T<Project*> m_projects;
 };
 
 class NewProject {

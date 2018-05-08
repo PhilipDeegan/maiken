@@ -67,15 +67,15 @@ class Validator : public maiken::Constants {
  public:
   static void PRE_BUILD(const maiken::Application& a, const YAML::Node& n)
       KTHROW(maiken::Exception) {
-    if (n[STR_MAIN] && n[STR_LANG])
-      KEXIT(1,
-            "cannot have both main and lang tag\n" + a.project().dir().path());
-    if (n[STR_MAIN]) {
-      const std::string& m(n[STR_MAIN].Scalar());
-      if (m.find(".") == std::string::npos)
-        KEXIT(1, "main tag invalid format, expects <file>.<type>\n" +
-                     a.project().dir().path());
-    }
+    // if (n[STR_MAIN] && n[STR_LANG])
+    //   KEXIT(1,
+    //         "cannot have both main and lang tag\n" + a.project().dir().path());
+    // if (n[STR_MAIN]) {
+    //   const std::string& m(n[STR_MAIN].Scalar());
+    //   if (m.find(".") == std::string::npos)
+    //     KEXIT(1, "main tag invalid format, expects <file>.<type>\n" +
+    //                  a.project().dir().path());
+    // }
     if (n[STR_MODE]) {
       const auto& s(n[STR_MODE].Scalar());
       if (s != STR_NONE && s != STR_STATIC && s != STR_SHARED)
@@ -114,6 +114,7 @@ class Validator : public maiken::Constants {
     else if (n[STR_LANG] && !a.files().count(n[STR_LANG].Scalar()))
       KEXIT(1, "lang tag invalid type, valid types are\n" + ss.str() + "\n" +
                    a.project().dir().path());
+
   }
   static bool PARENT_CYCLE(const maiken::Application& a, const std::string& pr,
                            const std::string& pa) {

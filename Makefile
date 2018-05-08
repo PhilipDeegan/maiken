@@ -75,7 +75,7 @@ general:
 		echo $(CXX) $(CXXFLAGS) $(INCS) -o "bin/$$(basename $$f).o" -c "$$f"; \
 		$(CXX) $(CXXFLAGS) $(INCS) -o "bin/$$(basename $$f).o" -c "$$f" || exit 1 ; \
 	done;
-	@$(CXX) $(CXXFLAGS) $(INCS) -o "bin/cpp.cpp.o" -c "cpp.cpp"
+	@$(CXX) $(CXXFLAGS) $(INCS) -o "bin/mkn.cpp.o" -c "mkn.cpp"
 	$(MAKE) link
 
 link:

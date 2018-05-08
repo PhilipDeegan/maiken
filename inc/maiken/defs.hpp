@@ -117,6 +117,7 @@ class Constants {
   static constexpr const char* STR_LANG = "lang";
   static constexpr const char* STR_HEADER = "header";
   static constexpr const char* STR_MAIN = "main";
+  static constexpr const char* STR_TEST = "test";
   static constexpr const char* STR_INSTALL = "install";
   static constexpr const char* STR_GET = "get";
   static constexpr const char* STR_OUT = "out";

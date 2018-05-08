@@ -70,9 +70,10 @@ class SourceFinder;
 class CompilerPrinter;
 class KUL_PUBLISH Application : public Constants {
   friend class Applications;
-  friend class ThreadingCompiler;
-  friend class SourceFinder;
   friend class CompilerPrinter;
+  friend class Executioner;
+  friend class SourceFinder;
+  friend class ThreadingCompiler;
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   friend class dist::CompileRequest;
 #endif  //  _MKN_WITH_MKN_RAM_  &&         _MKN_WITH_IO_CEREAL_
@@ -82,13 +83,13 @@ class KUL_PUBLISH Application : public Constants {
   const Application* par = nullptr;
   Application* sup = nullptr;
   compiler::Mode m;
-  std::string arg, main, lang, lnk, out, scr, scv;
+  std::string arg, lang, lnk, main, out, scr, scv;
   const std::string p;
   kul::Dir bd, inst;
   YAML::Node modIArg, modCArg, modLArg, modPArg;
   const maiken::Project& proj;
   kul::hash::map::S2T<kul::hash::map::S2S> fs;
-  kul::hash::map::S2S includeStamps, itss, ps;
+  kul::hash::map::S2S includeStamps, itss, ps, tests;
   kul::hash::map::S2S cArg, cLnk;
   kul::hash::map::S2T<kul::hash::set::String> args;
   kul::hash::map::S2T<uint64_t> stss;
@@ -99,8 +100,9 @@ class KUL_PUBLISH Application : public Constants {
   std::vector<std::pair<std::string, bool>> incs, srcs;
   const kul::SCM* scm = 0;
 
-  CompilerProcessCapture buildExecutable(const kul::hash::set::String& objects);
-  CompilerProcessCapture buildLibrary(const kul::hash::set::String& objects);
+  void buildExecutable(const kul::hash::set::String& objects) KTHROW(kul::Exception);
+  CompilerProcessCapture buildLibrary(const kul::hash::set::String& objects) KTHROW(kul::Exception);
+  void buildTest(const kul::hash::set::String& objects) KTHROW(kul::Exception);
   void checkErrors(const CompilerProcessCapture& cpc) KTHROW(kul::Exception);
 
   void populateMaps(const YAML::Node& n) KTHROW(kul::Exception);
@@ -124,6 +126,7 @@ class KUL_PUBLISH Application : public Constants {
   void findObjects(kul::hash::set::String& objects) const;
   void link(const kul::hash::set::String& objects) KTHROW(kul::Exception);
   void run(bool dbg);
+  void test();
   void trim();
   void trim(const kul::File& f);
 

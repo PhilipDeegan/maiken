@@ -141,6 +141,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
   };
 
+  auto _mods = ModuleMinimiser::modules(*this);
   for (auto& mod : ModuleMinimiser::modules(*this)) {
     bool build = mod.second->is_build_required();
     bool is_build_stale = mod.second->is_build_stale();
@@ -155,7 +156,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     }
     if (build) {
       CommandStateMachine::INSTANCE().main(0);
-      mod.second->process();
+      for (auto& m : _mods) m.second->process();
       CommandStateMachine::INSTANCE().main(1);
     }
   }
@@ -171,6 +172,8 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     proc(**app, !(*app)->srcs.empty());
   }
   if (!this->ig) proc(*this, (!this->srcs.empty() || !this->main.empty()));
+
+  if (cmds.count(STR_TEST) && !this->ig) test();
 
   if (cmds.count(STR_PACK)) {
     pack();

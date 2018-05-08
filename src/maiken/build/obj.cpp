@@ -48,10 +48,6 @@ class CompilerPrinter {
       KOUT(NON) << "INCLUDES";
       for (const auto& s : app.includes()) KOUT(NON) << "\t" << s.first;
     }
-    if (!AppVars::INSTANCE().dryRun() && app.srcs.empty() && app.main.empty()) {
-      KOUT(NON) << "NO SOURCES";
-      return;
-    }
 
     if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf()) {
       if (!app.arg.empty()) KOUT(NON) << "ARGUMENTS\n\t" << app.arg;
@@ -137,7 +133,6 @@ void maiken::Application::compile(
     ctp.stop().interrupt();
     throw e;
   };
-  KLOG(INF) << threads;
   for (size_t i = 0; i < threads; i++) {
     std::vector<std::pair<std::string, std::string>> remote_src_objs;
     if (src_objs.size() > 1) {

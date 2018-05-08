@@ -72,15 +72,32 @@ kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>>
 maiken::Application::sourceMap() const {
   const kul::hash::set::String iMs = inactiveMains();
   kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> sm;
-  if (main.size()) {
-    kul::File f(kul::Dir(main).locl());
-    if (!f) f = kul::File(main, project().dir());
-    if (f.is())
-      sm[f.name().substr(f.name().rfind(".") + 1)][f.dir().real()].insert(
-          f.real());
-    else if (!AppVars::INSTANCE().dryRun() && !f.is())
-      KOUT(NON) << "WARN : main does not exist: " << f;
-  }
+
+  // if(!main.empty()){
+  //   kul::File f(kul::Dir(main).locl());
+  //   if (!f) f = kul::File(main, project().dir());
+  //   if (f.is()){}
+  //   else if (!AppVars::INSTANCE().dryRun() && !f.is())
+  //     KEXIT(1, "") << "ERROR : main does not exist: " << f;
+  //   if (f.is())
+  //     sm[f.name().substr(f.name().rfind(".") + 1)][f.dir().real()].insert(
+  //         f.real());
+  //   else if (!AppVars::INSTANCE().dryRun() && !f.is())
+  //     KEXIT(1, "") << "ERROR : main does not exist: " << f;
+  // }
+
+  // for(const auto &p : tests){
+  //   kul::File f(kul::Dir(p.first).locl());
+  //   if (!f) f = kul::File(p.first, project().dir());
+  //   if (f.is()){}
+  //   else if (!AppVars::INSTANCE().dryRun() && !f.is())
+  //     KEXIT(1, "") << "ERROR : test does not exist: " << f;
+  //   // if (f.is())
+  //   //   sm[f.name().substr(f.name().rfind(".") + 1)][f.dir().real()].insert(
+  //   //       f.real());
+  //   // else if (!AppVars::INSTANCE().dryRun() && !f.is())
+  //   //   KEXIT(1) << "ERROR : main does not exist: " << f;
+  // }
   for (const std::pair<std::string, bool>& sourceDir : sources()) {
     std::vector<kul::File> files;
     kul::Dir d(sourceDir.first);

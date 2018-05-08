@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 maiken::CompilerProcessCapture maiken::Application::buildLibrary(
-    const kul::hash::set::String& objects) {
+    const kul::hash::set::String& objects) KTHROW(kul::Exception) {
   if (fs.count(lang) > 0) {
     if (m == compiler::Mode::NONE) m = compiler::Mode::SHAR;
     if (!(*files().find(lang)).second.count(STR_COMPILER))

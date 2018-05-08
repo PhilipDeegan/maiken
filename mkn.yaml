@@ -17,7 +17,8 @@ profile:
     - name: mkn.kul
     - name: parse.yaml
     src: ./src
-    main: cpp.cpp
+    main: mkn.cpp
+    test: test/cpp.cpp test/py.py
     arg: -D_MKN_VERSION_=${version}_${DATE}
     if_arg:
       win_shared: -DYAML_CPP_DLL

@@ -30,12 +30,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
+void maiken::Application::test(void) {
+  KLOG(INF) << kul::env::CWD();
+  kul::os::PushDir pushd(this->project().dir());
+  kul::Dir testsD(buildDir().join("test"));
+  for(const auto &pair: tests){
+    if(kul::File(pair.second))
+      kul::Process(pair.second).start();
+    else
+      kul::Process(kul::File(pair.second, testsD).real()).start();
+  }
+}
+
 void maiken::Application::run(bool dbg) {
-  std::string bin(out.empty() ? project().root()[STR_NAME].Scalar() : out);
+  std::string bin;
+  for(const auto &file : buildDir().files(false)) bin = file.name();
+
 #ifdef _WIN32
   bin += ".exe";
 #endif
-  kul::File f(bin, inst ? inst : buildDir());
+  kul::File f(bin, buildDir());
   if (!f) KEXIT(1, "binary does not exist \n" + f.full());
   std::unique_ptr<kul::Process> p;
   if (dbg) {

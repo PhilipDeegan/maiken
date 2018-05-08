@@ -46,7 +46,7 @@ class CLIHandler : public Constants {
         Arg('h', STR_HELP), Arg('j', STR_JARG, ArgType::STRING),
         Arg('K', STR_STATIC), Arg('l', STR_LINKER, ArgType::STRING),
         Arg('L', STR_ALINKER, ArgType::STRING),
-        Arg('M', STR_MAIN, ArgType::MAYBE),
+        Arg('m', STR_MAIN, ArgType::STRING),
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
         Arg('n', STR_NODES, ArgType::MAYBE),
 #endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
@@ -68,7 +68,8 @@ class CLIHandler : public Constants {
 #endif  //_MKN_DISABLE_MODULES_
       Cmd(STR_CLEAN),   Cmd(STR_DEPS), Cmd(STR_BUILD),    Cmd(STR_RUN),
       Cmd(STR_COMPILE), Cmd(STR_LINK), Cmd(STR_PROFILES), Cmd(STR_DBG),
-      Cmd(STR_PACK),    Cmd(STR_INFO), Cmd(STR_TRIM),     Cmd(STR_TREE)};
+      Cmd(STR_PACK),    Cmd(STR_INFO), Cmd(STR_TRIM),     Cmd(STR_TREE),
+      Cmd(STR_TEST)};
 
  public:
   std::vector<kul::cli::Arg> args() { return argV; }
@@ -377,23 +378,20 @@ std::vector<maiken::Application*> maiken::Application::CREATE(
     KEXIT(0, "");
   }
 
-  if (apps.size() == 1)
+  if (apps.size() == 1){
     if (args.has(STR_ADD))
       for (const auto& s : kul::String::ESC_SPLIT(args.get(STR_ADD), ','))
         apps[0]->addSourceLine(s);
-  if (apps.size() == 1)
     if (args.has(STR_MAIN)) apps[0]->main = args.get(STR_MAIN);
-  if (apps.size() == 1)
     if (args.has(STR_OUT)) apps[0]->out = args.get(STR_OUT);
+  }
 
-  if (args.has(STR_BUILD)) AppVars::INSTANCE().command(STR_BUILD);
-  if (args.has(STR_CLEAN)) AppVars::INSTANCE().command(STR_CLEAN);
-  if (args.has(STR_COMPILE)) AppVars::INSTANCE().command(STR_COMPILE);
-  if (args.has(STR_LINK)) AppVars::INSTANCE().command(STR_LINK);
-  if (args.has(STR_RUN)) AppVars::INSTANCE().command(STR_RUN);
-  if (args.has(STR_DBG)) AppVars::INSTANCE().command(STR_DBG);
-  if (args.has(STR_TRIM)) AppVars::INSTANCE().command(STR_TRIM);
-  if (args.has(STR_PACK)) AppVars::INSTANCE().command(STR_PACK);
+  std::vector<std::string> cmds = {{
+    STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK, STR_RUN, STR_TEST,
+    STR_DBG, STR_TRIM, STR_PACK
+  }};
+  for(const auto &cmd : cmds)
+    if (args.has(cmd)) AppVars::INSTANCE().command(cmd);
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   if (AppVars::INSTANCE().nodes()) {
