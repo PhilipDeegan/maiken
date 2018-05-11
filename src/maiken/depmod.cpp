@@ -29,6 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/github.hpp"
+#include "maiken/scm.hpp"
 
 void maiken::Application::loadDepOrMod(const YAML::Node& node,
                                        const kul::Dir& depOrMod, bool module)

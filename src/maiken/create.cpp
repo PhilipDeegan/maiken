@@ -378,7 +378,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(
     KEXIT(0, "");
   }
 
-  if (apps.size() == 1){
+  if (apps.size() == 1) {
     if (args.has(STR_ADD))
       for (const auto& s : kul::String::ESC_SPLIT(args.get(STR_ADD), ','))
         apps[0]->addSourceLine(s);
@@ -386,11 +386,10 @@ std::vector<maiken::Application*> maiken::Application::CREATE(
     if (args.has(STR_OUT)) apps[0]->out = args.get(STR_OUT);
   }
 
-  std::vector<std::string> cmds = {{
-    STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK, STR_RUN, STR_TEST,
-    STR_DBG, STR_TRIM, STR_PACK
-  }};
-  for(const auto &cmd : cmds)
+  std::vector<std::string> cmds = {{STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK,
+                                    STR_RUN, STR_TEST, STR_DBG, STR_TRIM,
+                                    STR_PACK}};
+  for (const auto& cmd : cmds)
     if (args.has(cmd)) AppVars::INSTANCE().command(cmd);
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)

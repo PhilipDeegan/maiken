@@ -32,10 +32,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/dist.hpp"
 
-
-void maiken::dist::Post::send(const std::string &host, const std::string &res,
-                              const uint16_t &port,
-                              const std::unordered_map<std::string, std::string> headers) KTHROW(maiken::Exception) {
+void maiken::dist::Post::send(
+    const std::string &host, const std::string &res, const uint16_t &port,
+    const std::unordered_map<std::string, std::string> headers)
+    KTHROW(maiken::Exception) {
   if (msg == nullptr) KEXCEPTION("Cannot send post without message");
   std::ostringstream ss(std::ios::out | std::ios::binary);
   {

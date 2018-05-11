@@ -28,7 +28,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "maiken/source.hpp"
 #include "maiken.hpp"
+#include "maiken/regex.hpp"
 
 void maiken::Application::addSourceLine(const std::string& s)
     KTHROW(kul::Exception) {

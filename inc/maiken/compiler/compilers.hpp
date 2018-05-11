@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_CODE_COMPILERS_HPP_
 #define _MAIKEN_CODE_COMPILERS_HPP_
 
+#include "maiken/app.hpp"
 #include "maiken/compiler/cpp.hpp"
 #include "maiken/compiler/csharp.hpp"
 
@@ -55,72 +56,12 @@ std::unique_ptr<T> make_unique(Args&&... args) {
 }
 
 class Compilers {
- private:
-  std::unique_ptr<Compiler> hcc;
-  std::unique_ptr<Compiler> gcc;
-  std::unique_ptr<Compiler> clang;
-  std::unique_ptr<Compiler> intel;
-  std::unique_ptr<Compiler> winc;
-  std::unique_ptr<Compiler> wincs;
-
-  kul::hash::map::S2T<Compiler *> cs, masks;
-
- private:
-  Compilers() {
-    clang = make_unique<cpp::ClangCompiler>();
-    gcc = make_unique<cpp::GccCompiler>();
-    hcc = make_unique<cpp::HccCompiler>();
-
-    intel = make_unique<cpp::IntelCompiler>();
-    winc = make_unique<cpp::WINCompiler>();
-
-    wincs = make_unique<csharp::WINCompiler>();
-
-    cs.insert(std::pair<std::string, Compiler*>("cl", winc.get()));
-    cs.insert(std::pair<std::string, Compiler*>("csc", wincs.get()));
-
-    cs.insert(std::pair<std::string, Compiler*>("clang", clang.get()));
-    cs.insert(std::pair<std::string, Compiler*>("clang++", clang.get()));
-
-    cs.insert(std::pair<std::string, Compiler*>("gcc", gcc.get()));
-    cs.insert(std::pair<std::string, Compiler*>("g++", gcc.get()));
-
-    cs.insert(std::pair<std::string, Compiler*>("hcc", hcc.get()));
-
-    cs.insert(std::pair<std::string, Compiler*>("icc", intel.get()));
-    cs.insert(std::pair<std::string, Compiler*>("icpc", intel.get()));
-
-    cs.insert(std::pair<std::string, Compiler*>("nvcc", gcc.get()));
-  }
-
-  const std::string key(std::string comp,
-                        const kul::hash::map::S2T<Compiler*>& map) {
-    kul::String::REPLACE_ALL(comp, ".exe", "");
-    if (map.count(comp) > 0) return comp;
-    if (comp.find(" ") != std::string::npos)
-      for (const std::string& s : kul::String::SPLIT(comp, ' ')) {
-        if (map.count(s) > 0) return s;
-        if (std::string(kul::Dir(s).locl()).find(kul::Dir::SEP()) !=
-            std::string::npos)
-          if (map.count(s.substr(s.rfind(kul::Dir::SEP()) + 1)))
-            return s.substr(s.rfind(kul::Dir::SEP()) + 1);
-      }
-    if (std::string(kul::Dir(comp).locl()).find(kul::Dir::SEP()) !=
-        std::string::npos) {
-      comp = comp.substr(comp.rfind(kul::Dir::SEP()) + 1);
-      if (map.count(comp)) return comp;
-    }
-
-    KEXCEPT(CompilerNotFoundException,
-            "Compiler for " + comp + " is not implemented");
-  }
-
  public:
   static Compilers& INSTANCE() {
     static Compilers instance;
     return instance;
   }
-  const std::vector<std::string> keys() {
+  std::vector<std::string> keys() {
     std::vector<std::string> ks;
     for (const auto& p : cs) ks.push_back(p.first);
     return ks;
@@ -147,6 +88,20 @@ class Compilers {
     }
     return key(comp, masks);
   }
+
+ private:
+  std::unique_ptr<Compiler> hcc;
+  std::unique_ptr<Compiler> gcc;
+  std::unique_ptr<Compiler> clang;
+  std::unique_ptr<Compiler> intel;
+  std::unique_ptr<Compiler> winc;
+  std::unique_ptr<Compiler> wincs;
+
+  kul::hash::map::S2T<Compiler *> cs, masks;
+
+ private:
+  Compilers();
+  std::string key(std::string comp, const kul::hash::map::S2T<Compiler*>& map);
 };
 
 }  // namespace maiken

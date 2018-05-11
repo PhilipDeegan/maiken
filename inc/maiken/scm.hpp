@@ -28,11 +28,38 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_HPP_
-#define _MAIKEN_HPP_
+#ifndef _MAIKEN_SCM_HPP_
+#define _MAIKEN_SCM_HPP_
 
-#include "maiken/app.hpp"
-#include "maiken/module.hpp"
-#include "maiken/property.hpp"
+#include "kul/os.hpp"
+#include "kul/scm/man.hpp"
 
-#endif /* _MAIKEN_HPP_ */
+namespace maiken {
+
+class SCMGetter {
+ public:
+  static SCMGetter& INSTANCE() {
+    static SCMGetter s;
+    return s;
+  }
+
+  static std::string REPO(const kul::Dir& d, const std::string& r, bool module);
+
+  static bool HAS(const kul::Dir& d);
+
+  static const kul::SCM* GET(const kul::Dir& d, const std::string& r,
+                             bool module);
+
+ private:
+  static bool IS_SOLID(const std::string& r);
+
+  static const kul::SCM* GET_SCM(const kul::Dir& d, const std::string& r,
+                                 bool module);
+
+ private:
+  kul::hash::map::S2S valids;
+};
+
+}  // end namespace maiken
+
+#endif  // _MAIKEN_SCM_HPP_

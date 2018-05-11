@@ -34,8 +34,8 @@ void maiken::Application::test(void) {
   KLOG(INF) << kul::env::CWD();
   kul::os::PushDir pushd(this->project().dir());
   kul::Dir testsD(buildDir().join("test"));
-  for(const auto &pair: tests){
-    if(kul::File(pair.second))
+  for (const auto& pair : tests) {
+    if (kul::File(pair.second))
       kul::Process(pair.second).start();
     else
       kul::Process(kul::File(pair.second, testsD).real()).start();
@@ -44,7 +44,7 @@ void maiken::Application::test(void) {
 
 void maiken::Application::run(bool dbg) {
   std::string bin;
-  for(const auto &file : buildDir().files(false)) bin = file.name();
+  for (const auto& file : buildDir().files(false)) bin = file.name();
 
 #ifdef _WIN32
   bin += ".exe";

@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 #include "maiken/dist.hpp"
+#include "maiken/source.hpp"
 
 #include <mutex>
 
@@ -134,6 +135,7 @@ void maiken::Application::compile(
     throw e;
   };
   for (size_t i = 0; i < threads; i++) {
+    KLOG(INF);
     std::vector<std::pair<std::string, std::string>> remote_src_objs;
     if (src_objs.size() > 1) {
       remote_src_objs.push_back(src_objs[0]);

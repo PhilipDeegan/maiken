@@ -28,11 +28,26 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_HPP_
-#define _MAIKEN_HPP_
+#ifndef _MAIKEN_REGEX_HPP_
+#define _MAIKEN_REGEX_HPP_
 
-#include "maiken/app.hpp"
-#include "maiken/module.hpp"
-#include "maiken/property.hpp"
+#include "kul/os.hpp"
 
-#endif /* _MAIKEN_HPP_ */
+namespace maiken {
+
+class Regexer {
+ public:
+  static std::vector<std::string> RESOLVE_REGEX(std::string str)
+      KTHROW(kul::Exception);
+
+  static void RESOLVE_REGEX_REC(const std::string& i, const std::string& b,
+                                const std::string& s, const std::string& r,
+                                const std::vector<std::string>& bits,
+                                const size_t& bitsIndex,
+                                std::vector<std::string>& v)
+      KTHROW(kul::Exception);
+};
+
+}  // end namespace maiken
+
+#endif  // _MAIKEN_REGEX_HPP_

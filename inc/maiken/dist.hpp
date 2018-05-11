@@ -110,7 +110,8 @@ class Post {
   }
   void send(const std::string &host, const std::string &res,
             const uint16_t &port,
-            const std::unordered_map<std::string, std::string> headers = {{}}) KTHROW(maiken::Exception);
+            const std::unordered_map<std::string, std::string> headers = {{}})
+      KTHROW(maiken::Exception);
   ARequest *message() { return msg.get(); }
 
   const std::string &body() { return _body; }
@@ -118,7 +119,7 @@ class Post {
   void release() { msg.release(); }
 
  private:
-  Post(){}
+  Post() {}
   Post(const Post &) = delete;
   Post(const Post &&) = delete;
   Post &operator=(const Post &) = delete;

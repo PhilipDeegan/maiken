@@ -28,7 +28,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
+#include "maiken/except.hpp"
+#include "maiken/scm.hpp"
+#include "maiken/settings.hpp"
 
 const kul::SCM* maiken::SCMGetter::GET_SCM(const kul::Dir& d,
                                            const std::string& r, bool module) {
@@ -99,8 +101,8 @@ bool maiken::SCMGetter::IS_SOLID(const std::string& r) {
   return r.find("://") != std::string::npos || r.find("@") != std::string::npos;
 }
 
-const std::string maiken::SCMGetter::REPO(const kul::Dir& d,
-                                          const std::string& r, bool module) {
+std::string maiken::SCMGetter::REPO(const kul::Dir& d, const std::string& r,
+                                    bool module) {
   if (INSTANCE().valids.count(d.path()))
     return (*INSTANCE().valids.find(d.path())).second;
   if (IS_SOLID(r))

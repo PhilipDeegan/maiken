@@ -28,11 +28,25 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_HPP_
-#define _MAIKEN_HPP_
+#ifndef _MAIKEN_SOURCE_HPP_
+#define _MAIKEN_SOURCE_HPP_
 
 #include "maiken/app.hpp"
-#include "maiken/module.hpp"
-#include "maiken/property.hpp"
 
-#endif /* _MAIKEN_HPP_ */
+namespace maiken {
+
+class SourceFinder : public Constants {
+ private:
+  const maiken::Application& app;
+
+ public:
+  SourceFinder(const maiken::Application& _app) : app(_app) {}
+  std::vector<std::pair<std::string, std::string>> all_sources_from(
+      const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>>&
+          sources,
+      kul::hash::set::String& objects, std::vector<kul::File>& cacheFiles);
+};
+
+}  // end namespace maiken
+
+#endif  // _MAIKEN_SOURCE_HPP_

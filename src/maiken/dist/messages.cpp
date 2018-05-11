@@ -37,8 +37,8 @@ void maiken::dist::SetupRequest::do_response_for(
     kul::http::_1_1Response &resp) {
   KLOG(INF) << req.ip();
 
-  if(!req.header("session"))
-    KEXCEPTION("BAD 41"); //resp.withBody("FAILUIRE");
+  if (!req.header("session"))
+    KEXCEPTION("BAD 41");  // resp.withBody("FAILUIRE");
   auto session_id = (*req.headers().find("session")).second;
 
   YAML::Node root;
@@ -67,8 +67,8 @@ void maiken::dist::CompileRequest::do_response_for(
     kul::http::_1_1Response &resp) {
   KLOG(INF) << req.ip();
 
-  if(!req.header("session"))
-    KEXCEPTION("BAD 71"); //resp.withBody("FAILUIRE");
+  if (!req.header("session"))
+    KEXCEPTION("BAD 71");  // resp.withBody("FAILUIRE");
   auto session_id = (*req.headers().find("session")).second;
 
   kul::env::CWD(this->m_directory);
@@ -98,8 +98,8 @@ void maiken::dist::DownloadRequest::do_response_for(
     kul::http::_1_1Response &resp) {
   KLOG(INF) << req.ip();
 
-  if(!req.header("session"))
-    KEXCEPTION("BAD 102");  //resp.withBody("FAILUIRE");
+  if (!req.header("session"))
+    KEXCEPTION("BAD 102");  // resp.withBody("FAILUIRE");
   auto session_id = (*req.headers().find("session")).second;
 
   auto &src_obj = sessions[session_id].m_src_obj;

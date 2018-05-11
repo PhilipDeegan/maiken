@@ -82,6 +82,7 @@ class Server : public kul::http::MultiServer, public Constants {
   Server(const Server &&) = delete;
   Server &operator=(const Server &) = delete;
   Server &operator=(const Server &&) = delete;
+
  protected:
   void onConnect(const char *cip, const uint16_t &port) override {
     std::string ip(cip);

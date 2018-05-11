@@ -184,7 +184,8 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
       if (out.empty() && n[STR_OUT])
         out = Properties::RESOLVE(*this, n[STR_OUT].Scalar());
       if (main.empty() && n[STR_MAIN]) main = n[STR_MAIN].Scalar();
-      if (tests.empty() && n[STR_TEST]) tests = Project::populate_tests(n[STR_TEST]);
+      if (tests.empty() && n[STR_TEST])
+        tests = Project::populate_tests(n[STR_TEST]);
       if (lang.empty() && n[STR_LANG]) lang = n[STR_LANG].Scalar();
       profile = n[STR_PARENT]
                     ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar())
@@ -313,12 +314,12 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     kul::hash::map::S2S n_tests;
     kul::Dir testsD(buildDir().join("test"));
 
-    for(const auto pair : tests){
+    for (const auto pair : tests) {
       const std::string& file = pair.first;
       const std::string& fileType = file.substr(file.rfind(".") + 1);
-      if (fs.count(fileType) == 0){
+      if (fs.count(fileType) == 0) {
         n_tests.insert(file, file);
-      }else{
+      } else {
         testsD.mk();
         std::string name = kul::File(file).name();
         n_tests.insert(file, name.substr(0, name.rfind(".")));

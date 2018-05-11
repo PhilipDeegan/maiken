@@ -30,17 +30,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-namespace maiken{
+namespace maiken {
 class Executioner : public Constants {
   friend class Application;
 
-  static CompilerProcessCapture build_exe(
-    const kul::hash::set::String& objects,
-    const std::string &main,
-    const std::string &out,
-    const kul::Dir outD,
-    Application &app){
-
+  static CompilerProcessCapture build_exe(const kul::hash::set::String& objects,
+                                          const std::string& main,
+                                          const std::string& out,
+                                          const kul::Dir outD,
+                                          Application& app) {
     const std::string& file = main;
     const std::string& fileType = file.substr(file.rfind(".") + 1);
 
@@ -97,9 +95,8 @@ class Executioner : public Constants {
 };
 }
 
-void maiken::Application::buildExecutable(
-    const kul::hash::set::String& objects) KTHROW(kul::Exception) {
-
+void maiken::Application::buildExecutable(const kul::hash::set::String& objects)
+    KTHROW(kul::Exception) {
   KLOG(INF) << main;
   const std::string& file = main;
   const std::string& fileType = file.substr(file.rfind(".") + 1);
@@ -112,7 +109,7 @@ void maiken::Application::buildExecutable(
   kul::Dir objD(buildDir().join("obj"));
 
   const std::string& name(out.empty() ? project().root()[STR_NAME].Scalar()
-                                       : out);
+                                      : out);
 
   std::vector<std::pair<std::string, std::string>> source_objects;
   kul::hash::set::String cobjects = objects;
@@ -122,6 +119,7 @@ void maiken::Application::buildExecutable(
   ss << std::hex << std::hash<std::string>()(source.real());
   os << ss.str() << "-" << source.name() << oType;
   kul::File object(os.str(), objD);
+  KLOG(INF) << object;
   source_objects.emplace_back(std::make_pair(
       AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
       AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
@@ -129,24 +127,23 @@ void maiken::Application::buildExecutable(
   std::vector<kul::File> cacheFiles;
   compile(source_objects, cobjects, cacheFiles);
   Executioner::build_exe(cobjects, main, name,
-    kul::Dir(inst ? inst.real() : buildDir()), *this);
-  object.mv(kul::File(object.name().substr(0, object.name().rfind("."))));
+                         kul::Dir(inst ? inst.real() : buildDir()), *this);
+  object.mv(kul::File(object.name().substr(0, object.name().rfind(".")), objD));
 }
 
-void maiken::Application::buildTest(
-    const kul::hash::set::String& objects) KTHROW(kul::Exception) {
-
+void maiken::Application::buildTest(const kul::hash::set::String& objects)
+    KTHROW(kul::Exception) {
   const std::string oType(
       "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
   kul::Dir objD(buildDir().join("obj"));
 
   kul::Dir testsD(buildDir().join("test"));
-  for(const auto &p : tests){
+  for (const auto& p : tests) {
     const std::string& file = p.first;
     const std::string& fileType = file.substr(file.rfind(".") + 1);
     if (fs.count(fileType) == 0) continue;
 
-    if(!testsD) testsD.mk();
+    if (!testsD) testsD.mk();
     std::vector<std::pair<std::string, std::string>> source_objects;
     kul::hash::set::String cobjects = objects;
 
@@ -162,6 +159,6 @@ void maiken::Application::buildTest(
     std::vector<kul::File> cacheFiles;
     compile(source_objects, cobjects, cacheFiles);
     Executioner::build_exe(cobjects, p.first, p.second, testsD, *this);
-    object.mv(kul::File(object.name().substr(0, object.name().rfind("."))));
+    object.mv(kul::File(object.name().substr(0, object.name().rfind(".")), objD));
   }
 }

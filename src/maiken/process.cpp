@@ -30,63 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-class ModuleMinimiser {
-  friend class maiken::Application;
-
- private:
-  static void add(const std::vector<maiken::Application*>& mods,
-                  kul::hash::map::S2T<maiken::Application*>& apps) {
-    for (auto* const m : mods)
-      if (!apps.count(m->buildDir().real()))
-        apps.insert(m->buildDir().real(), m);
-  }
-
- public:
-  static kul::hash::map::S2T<maiken::Application*> modules(
-      maiken::Application& app) {
-    kul::hash::map::S2T<maiken::Application*> apps;
-    add(app.moduleDependencies(), apps);
-    for (auto dep = app.dependencies().rbegin();
-         dep != app.dependencies().rend(); ++dep)
-      add((*dep)->moduleDependencies(), apps);
-    return apps;
-  }
-};
-
-class CommandStateMachine {
-  friend class maiken::Application;
-
- private:
-  bool _main = 1;
-  kul::hash::set::String cmds;
-  CommandStateMachine() { reset(); }
-  static CommandStateMachine& INSTANCE() {
-    static CommandStateMachine a;
-    return a;
-  }
-  void reset() {
-    cmds.clear();
-    for (const auto& s : maiken::AppVars::INSTANCE().commands()) cmds.insert(s);
-  }
-  void add(const std::string& s) { cmds.insert(s); }
-  const kul::hash::set::String& commands() const { return cmds; }
-  void main(bool m) { _main = m; }
-  bool main() const { return _main; }
-};
-
-class BuildRecorder {
-  friend class maiken::Application;
-
- private:
-  kul::hash::set::String builds;
-  static BuildRecorder& INSTANCE() {
-    static BuildRecorder a;
-    return a;
-  }
-  void add(const std::string& k) { builds.insert(k); }
-  bool has(const std::string& k) { return builds.count(k); }
-};
-
 void maiken::Application::process() KTHROW(kul::Exception) {
   const kul::hash::set::String& cmds(
       CommandStateMachine::INSTANCE().commands());

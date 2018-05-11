@@ -61,7 +61,7 @@ class KUL_PUBLISH Project : public kul::yaml::File, public Constants {
   const kul::Dir& dir() const { return m_dir; }
   const kul::yaml::Validator validator() const;
 
-  static kul::hash::map::S2S populate_tests(const YAML::Node &node);
+  static kul::hash::map::S2S populate_tests(const YAML::Node& node);
 
  private:
   const kul::Dir m_dir;
@@ -99,6 +99,7 @@ class Projects {
       m_reloaded.insert(proj.file());
     }
   }
+
  private:
   std::vector<std::unique_ptr<Project>> m_pps;
   kul::hash::set::String m_reloaded;
