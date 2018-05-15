@@ -278,8 +278,12 @@ class ThreadingCompiler : public Constants {
  public:
   ThreadingCompiler(maiken::Application& app) : app(app) {
     for (const auto& s : app.includes()) {
-      kul::Dir d(s.first);
-      const std::string& m(AppVars::INSTANCE().dryRun() ? d.esc() : d.escm());
+      std::string m;
+      kul::Dir  d(s.first);
+      kul::File f(s.first);
+      if(d) m = (AppVars::INSTANCE().dryRun() ? d.esc() : d.escm());
+      else
+      if(f) m = (AppVars::INSTANCE().dryRun() ? f.esc() : f.escm());
       if (!m.empty())
         incs.push_back(m);
       else

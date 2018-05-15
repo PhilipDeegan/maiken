@@ -58,7 +58,7 @@ maiken::Application* maiken::Applications::getOrCreateRoot(
   if (!m_apps.count(pDir) || !m_apps[pDir].count(profile)) {
     auto app = std::make_unique<Application>(proj, _profile);
     auto pp = app.get();
-    pp->ro;
+    pp->ro = 1;
     m_appPs.push_back(std::move(app));
     m_apps[pDir][profile] = pp;
     if (setup) {

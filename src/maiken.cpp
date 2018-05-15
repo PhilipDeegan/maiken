@@ -216,21 +216,31 @@ void maiken::Application::addIncludeLine(const std::string& o)
   if (o.find(',') == std::string::npos) {
     for (const auto& s : kul::cli::asArgs(o))
       if (s.size()) {
-        kul::Dir d(Properties::RESOLVE(*this, s));
-        if (d)
-          incs.push_back(std::make_pair(d.real(), true));
+        auto str(Properties::RESOLVE(*this, s));
+        kul::Dir  d(str);
+        kul::File f(str);
+        if (d) incs.push_back(std::make_pair(d.real(), true));
         else
-          KEXIT(1, "include does not exist\n" + d.path() + "\n" +
+        if (f) incs.push_back(std::make_pair(f.real(), false));
+        else{
+          KEXIT(1, "include does not exist\n" + str + "\n" +
                        project().dir().path());
+        }
       }
   } else {
     std::vector<std::string> v;
     kul::String::SPLIT(o, ",", v);
     if (v.size() == 0 || v.size() > 2)
       KEXIT(1, "include invalid format\n" + project().dir().path());
-    kul::Dir d(Properties::RESOLVE(*this, v[0]));
+    auto str(Properties::RESOLVE(*this, v[0]));
+    kul::Dir  d(str);
+    kul::File f(str);
     if (d)
       incs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
+    else
+    if (f)
+      KEXIT(1, "include file does not support CSV syntax\n\t" + str + "\n" +
+                   project().dir().path());
     else
       KEXIT(1, "include does not exist\n" + d.path() + "\n" +
                    project().dir().path());

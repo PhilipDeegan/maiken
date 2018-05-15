@@ -5,7 +5,7 @@ version: serv
 scm: https://github.com/dekken/maiken
 
 property:
-    DATE: 14-APR-2018
+    DATE: 14-MAY-2018
 
 parent: base
 mode: none

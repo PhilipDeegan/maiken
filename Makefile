@@ -93,8 +93,4 @@ yaml:
 	ar -r ext/yaml/$(YAML_GIT)/p/bin/libyaml.a $(FILES)
 
 clean:
-	rm -rf ext/yaml/$(YAML_GIT)/p/bin
-	rm -rf bin
-
-clean-all:
 	rm -rf bin ext

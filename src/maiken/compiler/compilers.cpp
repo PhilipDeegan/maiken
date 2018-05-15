@@ -74,4 +74,5 @@ std::string maiken::Compilers::key(std::string comp,
     comp = comp.substr(comp.rfind(kul::Dir::SEP()) + 1);
     if (map.count(comp)) return comp;
   }
+  KEXCEPTION("Key not found");
 }

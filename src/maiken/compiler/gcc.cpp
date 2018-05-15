@@ -203,7 +203,11 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::compileSource(
   }
   kul::Process p(cmd);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
-  for (const std::string& s : incs) p.arg("-I" + s);
+  for (const std::string& s : incs) {
+    kul::Dir d(s);
+    if(d) p.arg("-I" + s);
+    else  p.arg("-include " + s);
+  }
   for (const std::string& s : args) p.arg(s);
   p.arg("-o").arg(out).arg("-c").arg(in);
   CompilerProcessCapture pc;
