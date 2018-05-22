@@ -186,6 +186,11 @@ class KUL_PUBLISH Application : public Constants {
   bool is_build_required();
   bool is_build_stale();
 
+  void with(
+    kul::hash::set::String &withs,
+    std::vector<YAML::Node>& with_nodes,
+    std::function<void(const YAML::Node& n, const bool mod)> getIfMissing);
+
   static void showHelp();
 
  public:

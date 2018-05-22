@@ -66,7 +66,9 @@ dep:
     scm: ${aaa}                     # Appended to remote URLs for lookup if non concrete URL, used if concrete
     local: ${aaa}                   # overrides local repository directory
     profile: ${aaa}                 # choose profile from config
-if_dep:                             # optional deps for OS valid values [ bsd / nix / win ]
+with:
+  xxx.yyy[profile]                  # The same as "-w" (See 4.9)
+ if_dep:                             # optional deps for OS valid values [ bsd / nix / win ]
     win:
       - name: name                  # Used in URL lookup if ${scm} is missing
         version: version            # git branch and directory name of dependency under $name if no local tag

@@ -208,6 +208,7 @@ void maiken::Application::compile(
   auto lambex = [&](const kul::Exception& e) {
     ctp.stop();
     std::cerr << ":EXCEPTION!: " << e.debug() << std::endl;
+    ctp.interrupt();
     throw e;
   };
 
