@@ -134,20 +134,23 @@ void maiken::Application::compile(
     ctp.stop().interrupt();
     throw e;
   };
-  for (size_t i = 0; i < threads; i++) {
-    KLOG(INF);
-    std::vector<std::pair<std::string, std::string>> remote_src_objs;
-    if (src_objs.size() > 1) {
-      remote_src_objs.push_back(src_objs[0]);
-      src_objs.erase(src_objs.begin());
-    }
+  {
+    size_t sources = src_objs.size();
+    size_t divisor = std::floor(sources / (threads + 1));
+    for (size_t i = 0; i < threads; i++) {
+      std::vector<std::pair<std::string, std::string>> remote_src_objs;
+      for (size_t k = 0; k < divisor; k++) {
+        remote_src_objs.push_back(src_objs[0]);
+        src_objs.erase(src_objs.begin());
+      }
 
-    if (!remote_src_objs.empty()) {
-      posts.emplace_back(std::make_shared<maiken::dist::Post>(std::move(
-          maiken::dist::RemoteCommandManager::INST().build_compile_request(
-              this->project().dir().real(), remote_src_objs))));
-      ctp.async(std::bind(compile_lambda, posts[i], std::ref(hosts[i])),
-                compile_ex);
+      if (!remote_src_objs.empty()) {
+        posts.emplace_back(std::make_shared<maiken::dist::Post>(std::move(
+            maiken::dist::RemoteCommandManager::INST().build_compile_request(
+                this->project().dir().real(), remote_src_objs))));
+        ctp.async(std::bind(compile_lambda, posts[i], std::ref(hosts[i])),
+                  compile_ex);
+      }
     }
   }
 
