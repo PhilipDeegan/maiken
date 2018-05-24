@@ -115,7 +115,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   "   -r/--run-args $a       | Passes $a to running binary as arguments, " \
   "suppercedes -a"
 #define MKN_DEFS_DRYR                                                  \
-  "   -R/--dry-run           | Visualizza i comandi su console senza " \
+  "   -D/--dry-run           | Visualizza i comandi su console senza " \
   "realmente compilare, eseguire, ect."
 #define MKN_DEFS_STAT                                                          \
   "   -s/--scm-status        | Mostra lo stato dell'SCM della cartella di un " \

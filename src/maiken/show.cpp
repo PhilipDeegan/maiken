@@ -143,8 +143,9 @@ void maiken::Application::showHelp() {
   ss.push_back(MKN_DEFS_BINC);
   ss.push_back(MKN_DEFS_BPATH);
   ss.push_back(MKN_DEFS_DIRC);
-  ss.push_back(MKN_DEFS_DEBUG);
   ss.push_back(MKN_DEFS_DEPS);
+  ss.push_back(MKN_DEFS_DRYR);
+  ss.push_back(MKN_DEFS_DEBUG);
   ss.push_back(MKN_DEFS_EVSA);
   ss.push_back(MKN_DEFS_FINC);
   ss.push_back(MKN_DEFS_FPATH);
@@ -161,7 +162,6 @@ void maiken::Application::showHelp() {
   ss.push_back(MKN_DEFS_PROF);
   ss.push_back(MKN_DEFS_PROP);
   ss.push_back(MKN_DEFS_RUN_ARGS);
-  ss.push_back(MKN_DEFS_DRYR);
   ss.push_back(MKN_DEFS_STAT);
   ss.push_back(MKN_DEFS_SHARED);
   ss.push_back(MKN_DEFS_THREDS);

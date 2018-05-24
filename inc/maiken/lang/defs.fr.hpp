@@ -106,7 +106,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   "   -r/--run-args $a       | Passes $a to running binary as arguments, " \
   "suppercedes -a"
 #define MKN_DEFS_DRYR                                                 \
-  "   -R/--dry-run           | Do not compile but print out process " \
+  "   -D/--dry-run           | Do not compile but print out process " \
   "commands, do not run etc"
 #define MKN_DEFS_STAT                                                     \
   "   -s/--scm-status        | Display SCM status of project directory, " \

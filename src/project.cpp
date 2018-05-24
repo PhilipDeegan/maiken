@@ -113,7 +113,7 @@ void maiken::NewProject::write() {
   {
     kul::io::Writer w(file());
     w.write("\n", true);
-    w.write("name: new_mkn_project", true);
+    w.write("name: hello_world", true);
     w.write("#inc: ./inc\n#src: ./src", true);
     w.write("main: cpp.cpp", true);
   }

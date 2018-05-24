@@ -36,30 +36,30 @@ using namespace kul::cli;
 class CLIHandler : public Constants {
  private:
   std::vector<kul::cli::Arg> argV {
-    Arg('a', STR_ARG, ArgType::STRING), Arg('A', STR_ADD, ArgType::STRING),
-        Arg('b', STR_BINC, ArgType::STRING),
-        Arg('B', STR_BPATH, ArgType::STRING),
-        Arg('C', STR_DIR, ArgType::STRING), Arg('d', STR_DEP, ArgType::MAYBE),
-        Arg('E', STR_ENV, ArgType::STRING), Arg('f', STR_FINC, ArgType::STRING),
-        Arg('F', STR_FPATH, ArgType::STRING),
-        Arg('g', STR_DEBUG, ArgType::MAYBE), Arg('G', STR_GET, ArgType::STRING),
-        Arg('h', STR_HELP), Arg('j', STR_JARG, ArgType::STRING),
-        Arg('K', STR_STATIC), Arg('l', STR_LINKER, ArgType::STRING),
-        Arg('L', STR_ALINKER, ArgType::STRING),
-        Arg('m', STR_MAIN, ArgType::STRING),
+      Arg('a', STR_ARG, ArgType::STRING), Arg('A', STR_ADD, ArgType::STRING),
+      Arg('b', STR_BINC, ArgType::STRING), Arg('B', STR_BPATH, ArgType::STRING),
+      Arg('C', STR_DIR, ArgType::STRING),
+      Arg('d', STR_DEP, ArgType::MAYBE), Arg('D', STR_DRY_RUN),
+      Arg('E', STR_ENV, ArgType::STRING),
+      Arg('f', STR_FINC, ArgType::STRING), Arg('F', STR_FPATH, ArgType::STRING),
+      Arg('g', STR_DEBUG, ArgType::MAYBE), Arg('G', STR_GET, ArgType::STRING),
+      Arg('h', STR_HELP), Arg('j', STR_JARG, ArgType::STRING),
+      Arg('K', STR_STATIC), Arg('l', STR_LINKER, ArgType::STRING),
+      Arg('L', STR_ALINKER, ArgType::STRING),
+      Arg('m', STR_MAIN, ArgType::STRING),
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-        Arg('n', STR_NODES, ArgType::MAYBE),
+      Arg('n', STR_NODES, ArgType::MAYBE),
 #endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
-        Arg('o', STR_OUT, ArgType::STRING), Arg('O', STR_OPT, ArgType::MAYBE),
-        Arg('q', STR_QUIET), Arg('p', STR_PROFILE, ArgType::STRING),
-        Arg('P', STR_PROPERTY, ArgType::STRING),
-        Arg('r', STR_RUN_ARG, ArgType::STRING), Arg('R', STR_DRY_RUN),
-        Arg('s', STR_SCM_STATUS), Arg('S', STR_SHARED),
-        Arg('t', STR_THREADS, ArgType::MAYBE),
-        Arg('T', STR_WITHOUT, ArgType::STRING), Arg('u', STR_SCM_UPDATE),
-        Arg('U', STR_SCM_FUPDATE), Arg('v', STR_VERSION),
-        Arg('w', STR_WITH, ArgType::STRING), Arg('W', STR_WARN, ArgType::MAYBE),
-        Arg('x', STR_SETTINGS, ArgType::STRING)
+      Arg('o', STR_OUT, ArgType::STRING), Arg('O', STR_OPT, ArgType::MAYBE),
+      Arg('q', STR_QUIET), Arg('p', STR_PROFILE, ArgType::STRING),
+      Arg('P', STR_PROPERTY, ArgType::STRING),
+      Arg('r', STR_RUN_ARG, ArgType::STRING),
+      Arg('s', STR_SCM_STATUS), Arg('S', STR_SHARED),
+      Arg('t', STR_THREADS, ArgType::MAYBE),
+      Arg('T', STR_WITHOUT, ArgType::STRING), Arg('u', STR_SCM_UPDATE),
+      Arg('U', STR_SCM_FUPDATE), Arg('v', STR_VERSION),
+      Arg('w', STR_WITH, ArgType::STRING), Arg('W', STR_WARN, ArgType::MAYBE),
+      Arg('x', STR_SETTINGS, ArgType::STRING)
   };
   std::vector<kul::cli::Cmd> cmdV{
       Cmd(STR_INIT),    Cmd(STR_INC),  Cmd(STR_SRC),
@@ -69,7 +69,8 @@ class CLIHandler : public Constants {
       Cmd(STR_CLEAN),   Cmd(STR_DEPS), Cmd(STR_BUILD),    Cmd(STR_RUN),
       Cmd(STR_COMPILE), Cmd(STR_LINK), Cmd(STR_PROFILES), Cmd(STR_DBG),
       Cmd(STR_PACK),    Cmd(STR_INFO), Cmd(STR_TRIM),     Cmd(STR_TREE),
-      Cmd(STR_TEST)};
+      Cmd(STR_TEST)
+  };
 
  public:
   std::vector<kul::cli::Arg> args() { return argV; }
