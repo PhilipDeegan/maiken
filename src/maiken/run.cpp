@@ -35,10 +35,32 @@ void maiken::Application::test(void) {
   kul::os::PushDir pushd(this->project().dir());
   kul::Dir testsD(buildDir().join("test"));
   for (const auto& pair : tests) {
+    std::unique_ptr<kul::Process> p;
     if (kul::File(pair.second))
-      kul::Process(pair.second).start();
+      p = std::make_unique<kul::Process>(pair.second);
     else
-      kul::Process(kul::File(pair.second, testsD).real()).start();
+      p = std::make_unique<kul::Process>(kul::File(pair.second, testsD).real());
+
+    if (m != compiler::Mode::STAT) {
+      std::string arg;
+      for (const auto& s : libraryPaths()) arg += s + kul::env::SEP();
+      if (!arg.empty()) arg.pop_back();
+#ifdef _WIN32
+      kul::cli::EnvVar pa("PATH", arg, kul::cli::EnvVarMode::PREP);
+#else
+      kul::cli::EnvVar pa("LD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
+
+#if defined(__APPLE__)
+      kul::cli::EnvVar dy("DYLD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
+      KOUT(INF) << dy.name() << " : " << dy.toString();
+      p->var(dy.name(), dy.toString());
+#endif  // __APPLE__
+
+#endif
+      KOUT(INF) << pa.name() << " : " << pa.toString();
+      p->var(pa.name(), pa.toString());
+    }
+    p->start();
   }
 }
 
