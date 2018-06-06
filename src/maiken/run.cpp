@@ -103,14 +103,15 @@ class Runner : public Constants{
 };
 }
 
+
 void maiken::Application::test(void) {
   kul::os::PushDir pushd(this->project().dir());
   kul::Dir testsD(buildDir().join("test"));
-  for (const auto& pair : tests) {
-    if (kul::File(pair.second))
-      Runner::RUN(*this, pair.second, buildDir().real(), m);
+  for (const auto& file : testsD.files()) {
+    if (file)
+      Runner::RUN(*this, file.name(), testsD.real(), m);
     else
-      Runner::RUN(*this, kul::File(pair.second, testsD).real(), buildDir().real(), m);
+      Runner::RUN(*this, kul::File(file.full(), testsD).real(), buildDir().real(), m);
   }
 }
 
@@ -119,3 +120,4 @@ void maiken::Application::run(bool dbg) {
   for (const auto& file : buildDir().files(false)) bin = file.name();
   Runner::RUN(*this, bin, buildDir().real(), m, dbg);
 }
+

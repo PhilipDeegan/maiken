@@ -148,11 +148,13 @@ void maiken::Application::buildTest(const kul::hash::set::String& objects)
     kul::hash::set::String cobjects = objects;
 
     const kul::File source(p.first);
+    KLOG(INF) << source.name();
 
     std::stringstream exe_ss, exe_os;
     exe_ss << std::hex << std::hash<std::string>()(source.real());
-    exe_os << exe_ss.str() << "-" << source.real() << source.name();
+    exe_os << exe_ss.str() << "-" << source.name();
     kul::File exe(exe_os.str(), objD);
+    KLOG(INF) << exe.full();
 
     std::stringstream ss, os;
     ss << std::hex << std::hash<std::string>()(source.real());
@@ -163,7 +165,7 @@ void maiken::Application::buildTest(const kul::hash::set::String& objects)
         AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
     std::vector<kul::File> cacheFiles;
     compile(source_objects, cobjects, cacheFiles);
-    Executioner::build_exe(cobjects, p.first, exe.real(), testsD, *this);
+    Executioner::build_exe(cobjects, p.first, exe.name(), testsD, *this);
     object.mv(kul::File(object.name().substr(0, object.name().rfind(".")), objD));
   }
 }
