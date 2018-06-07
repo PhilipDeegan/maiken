@@ -29,6 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/github.hpp"
+#include "maiken/regex.hpp"
 
 void maiken::Application::setup() KTHROW(kul::Exception) {
   if (scr.empty() && project().root()[STR_SCM])
@@ -313,16 +314,20 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
   {
     kul::hash::map::S2S n_tests;
     kul::Dir testsD(buildDir().join("test"));
-
     for (const auto pair : tests) {
-      const std::string& file = pair.first;
-      const std::string& fileType = file.substr(file.rfind(".") + 1);
-      if (fs.count(fileType) == 0) {
-        n_tests.insert(file, file);
-      } else {
-        testsD.mk();
-        std::string name = kul::File(file).name();
-        n_tests.insert(file, name.substr(0, name.rfind(".")));
+      auto files = Regexer::RESOLVE_REGEX(pair.first);
+      KLOG(INF) << files.size();
+      for(const auto file : files) KLOG(INF) << file;
+      if(files.empty()) files.emplace_back(pair.first);
+      for(const auto file : files){
+        const std::string& fileType = file.substr(file.rfind(".") + 1);
+        if (fs.count(fileType) == 0) {
+          n_tests.insert(file, file);
+        } else {
+          testsD.mk();
+          std::string name = kul::File(file).name();
+          n_tests.insert(file, name.substr(0, name.rfind(".")));
+        }
       }
     }
     this->tests = n_tests;

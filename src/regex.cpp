@@ -28,6 +28,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "kul/log.hpp"
 #include "maiken/regex.hpp"
 #include <regex>
 
@@ -36,8 +37,8 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
   std::vector<std::string> v;
   auto posL = str.find("(");
   auto posR = str.find(")");
-  if (posL == std::string::npos || posR == std::string::npos) return v;
 
+  if (posL == std::string::npos || posR == std::string::npos) return v;
   if (str.size() > 1 && str.substr(0, 2) == "./") str = str.substr(2);
 
   kul::Dir d(str);
@@ -88,9 +89,9 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
   auto regexer = [&](auto items) {
     for (const auto& item : items) {
       try {
-        std::regex re(rule);
+        std::regex re(str);
         std::smatch match;
-        std::string subject(item.name());
+        std::string subject(item.real());
         if (std::regex_search(subject, match, re) && match.size() > 1)
           RESOLVE_REGEX_REC(item.real(), built, subject, rem, bits, bitsIndex,
                             v);
@@ -99,8 +100,7 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
       }
     }
   };
-  regexer(d.dirs());
-  regexer(d.files(0));
+  regexer(d.files(1));
   return v;
 }
 
@@ -112,15 +112,5 @@ void maiken::Regexer::RESOLVE_REGEX_REC(
   if (kul::File(i).is() && !kul::Dir(i).is()) {
     v.push_back(i);
     return;
-  }
-
-  if (bits.size() >= bitsIndex + 1) {
-    std::string n(kul::Dir::JOIN(b, kul::Dir::JOIN(s, r)));
-
-    const auto again = RESOLVE_REGEX(n);
-    if (again.empty()) {
-      v.push_back(n);
-    } else
-      for (const auto& v1 : again) v.push_back(v1);
   }
 }

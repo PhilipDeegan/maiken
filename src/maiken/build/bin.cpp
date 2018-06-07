@@ -128,7 +128,9 @@ void maiken::Application::buildExecutable(const kul::hash::set::String& objects)
   compile(source_objects, cobjects, cacheFiles);
   Executioner::build_exe(cobjects, main, name,
                          kul::Dir(inst ? inst.real() : buildDir()), *this);
-  object.mv(kul::File(object.name().substr(0, object.name().rfind(".")), objD));
+  kul::Dir tmpD(buildDir().join("tmp"));
+  if (!tmpD) tmpD.mk();
+  object.mv(tmpD);
 }
 
 void maiken::Application::buildTest(const kul::hash::set::String& objects)
@@ -138,12 +140,14 @@ void maiken::Application::buildTest(const kul::hash::set::String& objects)
   kul::Dir objD(buildDir().join("obj"));
 
   kul::Dir testsD(buildDir().join("test"));
+  kul::Dir tmpD(buildDir().join("tmp"));
   for (const auto& p : tests) {
     const std::string& file = p.first;
     const std::string& fileType = file.substr(file.rfind(".") + 1);
     if (fs.count(fileType) == 0) continue;
 
     if (!testsD) testsD.mk();
+    if (!tmpD) tmpD.mk();
     std::vector<std::pair<std::string, std::string>> source_objects;
     kul::hash::set::String cobjects = objects;
 
@@ -166,6 +170,6 @@ void maiken::Application::buildTest(const kul::hash::set::String& objects)
     std::vector<kul::File> cacheFiles;
     compile(source_objects, cobjects, cacheFiles);
     Executioner::build_exe(cobjects, p.first, exe.name(), testsD, *this);
-    object.mv(kul::File(object.name().substr(0, object.name().rfind(".")), objD));
+    object.mv(tmpD);
   }
 }
