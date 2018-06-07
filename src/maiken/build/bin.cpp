@@ -138,42 +138,40 @@ void maiken::Application::buildTest(const kul::hash::set::String& objects)
   const std::string oType(
       "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
   kul::Dir objD(buildDir().join("obj"));
-
-  std::vector<std::string> test_objects;
+  std::vector<std::pair<std::string, std::string>> test_objects;
   std::vector<std::pair<std::string, std::string>> source_objects;
-
   kul::Dir testsD(buildDir().join("test"));
   kul::Dir tmpD(buildDir().join("tmp"));
   for (const auto& p : tests) {
     const std::string& file = p.first;
     const std::string& fileType = file.substr(file.rfind(".") + 1);
     if (fs.count(fileType) == 0) continue;
-
     if (!testsD) testsD.mk();
     if (!tmpD) tmpD.mk();
-
     const kul::File source(p.first);
-
     std::stringstream ss, os;
     ss << std::hex << std::hash<std::string>()(source.real());
     os << ss.str() << "-" << source.name() << oType;
     kul::File object(os.str(), objD);
-    test_objects.push_back(os.str());
+    test_objects.push_back(std::make_pair(p.first, os.str()));
     source_objects.emplace_back(std::make_pair(
         AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
         AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
-    kul::hash::set::String cobjects = objects;
   }
   {
     std::vector<kul::File> cacheFiles;
     kul::hash::set::String cobjects;
     compile(source_objects, cobjects, cacheFiles);
   }
+  for(const auto &to : test_objects) kul::File(to.second, objD).mv(tmpD);    
+  
   for (const auto& to : test_objects) {
-    kul::File object(to, objD);
+    kul::File(to.second, tmpD).mv(objD);    
     kul::hash::set::String cobjects = objects;
-    cobjects.insert(to);
-    Executioner::build_exe(cobjects, to, to, testsD, *this);
-    object.mv(tmpD);
+    for(const auto &co: cobjects) KLOG(INF) << co;
+    cobjects.insert(kul::File(to.second, objD).escm());
+    Executioner::build_exe(cobjects, to.first, to.second, testsD, *this);
+    kul::File(to.second, objD).mv(tmpD);
   }
 }
+
