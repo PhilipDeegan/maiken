@@ -29,8 +29,25 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken/github.hpp"
+#include "maiken/app.hpp"
 
+void maiken::Application::withArgs(
+    const std::string with_str,
+    std::vector<YAML::Node>& with_nodes,
+    std::function<void(const YAML::Node& n, const bool mod)> getIfMissing, bool add) {
+  if (add && with_str.size()) {
+    kul::hash::set::String withs;
+    try {
+      parseDependencyString(with_str, withs);
+    } catch (const kul::Exception& e) {
+      if (with_str[0] == '[' && with_str[with_str.size() - 1] == ']')
+        withs.insert(this->project().root()[STR_NAME].Scalar() + with_str);
+      else
+        KEXIT(1, MKN_ERR_INVALID_WIT_CLI);
+    }
+    with(withs, with_nodes, getIfMissing);
+  }
+}
 
 void maiken::Application::with(
     kul::hash::set::String &withs,

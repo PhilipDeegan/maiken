@@ -164,8 +164,9 @@ class KUL_PUBLISH Application : public Constants {
   bool incSrc(const kul::File& f) const;
   void addCLIArgs(const kul::cli::Args& args);
   void withArgs(
+      const std::string with,
       std::vector<YAML::Node>& with_nodes,
-      std::function<void(const YAML::Node& n, const bool mod)> getIfMissing);
+      std::function<void(const YAML::Node& n, const bool mod)> getIfMissing, bool root = 0);
   void addSourceLine(const std::string& o) KTHROW(kul::Exception);
   void addIncludeLine(const std::string& o) KTHROW(kul::Exception);
 

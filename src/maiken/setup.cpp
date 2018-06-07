@@ -106,17 +106,21 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
 #endif
 
   std::vector<YAML::Node> with_nodes;
-  withArgs(with_nodes, getIfMissing);
+  withArgs(AppVars::INSTANCE().with(), with_nodes, getIfMissing, this->ro);
   YAML::Node with_node;
-  with_node[STR_DEP] = with_nodes;
-  popDepOrMod(with_node, deps, STR_DEP, 0, 1);
 
   c = 1;
   profile = p.size() ? p : project().root()[STR_NAME].Scalar();
   while (c) {
     c = 0;
     for (const auto& n : nodes) {
+      KLOG(INF) << (n[STR_NAME].Scalar() != profile);
       if (n[STR_NAME].Scalar() != profile) continue;
+      if (n[STR_WITH])
+        for(const auto &with : kul::cli::asArgs(n[STR_WITH].Scalar())){
+          KLOG(INF) << with;
+          withArgs(with, with_nodes, getIfMissing, 1);
+        }
       for (const auto& dep : n[STR_DEP]) getIfMissing(dep, 0);
       populateMaps(n);
       popDepOrMod(n, deps, STR_DEP, 0);
@@ -132,6 +136,8 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
       break;
     }
   }
+  with_node[STR_DEP] = with_nodes;
+  popDepOrMod(with_node, deps, STR_DEP, 0, 1);
 
   if (Settings::INSTANCE().root()[STR_INC])
     for (const auto& l :
@@ -316,8 +322,6 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     kul::Dir testsD(buildDir().join("test"));
     for (const auto pair : tests) {
       auto files = Regexer::RESOLVE_REGEX(pair.first);
-      KLOG(INF) << files.size();
-      for(const auto file : files) KLOG(INF) << file;
       if(files.empty()) files.emplace_back(pair.first);
       for(const auto file : files){
         const std::string& fileType = file.substr(file.rfind(".") + 1);

@@ -45,6 +45,7 @@ profile:
       win_shared: -DYAML_CPP_DLL -DKUL_SHARED -DKUL_EXPORT
 
   - name: all_options
+    parent: base
     with:
       io.cereal mkn.ram[https]
 

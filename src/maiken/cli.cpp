@@ -61,21 +61,3 @@ void maiken::Application::addCLIArgs(const kul::cli::Args& args) {
   addIncsOrPaths(*this);
   for (auto* d : deps) addIncsOrPaths(*d);
 }
-
-void maiken::Application::withArgs(
-    std::vector<YAML::Node>& with_nodes,
-    std::function<void(const YAML::Node& n, const bool mod)> getIfMissing) {
-  if (this->ro && AppVars::INSTANCE().with().size()) {
-    kul::hash::set::String withs;
-    try {
-      parseDependencyString(AppVars::INSTANCE().with(), withs);
-    } catch (const kul::Exception& e) {
-      auto with(AppVars::INSTANCE().with());
-      if (with[0] == '[' && with[with.size() - 1] == ']')
-        withs.insert(this->project().root()[STR_NAME].Scalar() + with);
-      else
-        KEXIT(1, MKN_ERR_INVALID_WIT_CLI);
-    }
-    with(withs, with_nodes, getIfMissing);
-  }
-}
