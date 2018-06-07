@@ -139,6 +139,9 @@ void maiken::Application::buildTest(const kul::hash::set::String& objects)
       "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
   kul::Dir objD(buildDir().join("obj"));
 
+  std::vector<std::string> test_objects;
+  std::vector<std::pair<std::string, std::string>> source_objects;
+
   kul::Dir testsD(buildDir().join("test"));
   kul::Dir tmpD(buildDir().join("tmp"));
   for (const auto& p : tests) {
@@ -148,28 +151,29 @@ void maiken::Application::buildTest(const kul::hash::set::String& objects)
 
     if (!testsD) testsD.mk();
     if (!tmpD) tmpD.mk();
-    std::vector<std::pair<std::string, std::string>> source_objects;
-    kul::hash::set::String cobjects = objects;
 
     const kul::File source(p.first);
-    KLOG(INF) << source.name();
-
-    std::stringstream exe_ss, exe_os;
-    exe_ss << std::hex << std::hash<std::string>()(source.real());
-    exe_os << exe_ss.str() << "-" << source.name();
-    kul::File exe(exe_os.str(), objD);
-    KLOG(INF) << exe.full();
 
     std::stringstream ss, os;
     ss << std::hex << std::hash<std::string>()(source.real());
     os << ss.str() << "-" << source.name() << oType;
     kul::File object(os.str(), objD);
+    test_objects.push_back(os.str());
     source_objects.emplace_back(std::make_pair(
         AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
         AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
+    kul::hash::set::String cobjects = objects;
+  }
+  {
     std::vector<kul::File> cacheFiles;
+    kul::hash::set::String cobjects;
     compile(source_objects, cobjects, cacheFiles);
-    Executioner::build_exe(cobjects, p.first, exe.name(), testsD, *this);
+  }
+  for (const auto& to : test_objects) {
+    kul::File object(to, objD);
+    kul::hash::set::String cobjects = objects;
+    cobjects.insert(to);
+    Executioner::build_exe(cobjects, to, to, testsD, *this);
     object.mv(tmpD);
   }
 }
