@@ -28,7 +28,7 @@ cache:
 build_script:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
   # - curl -o mkn.exe -L https://ci.appveyor.com/api/projects/dekken/maiken/artifacts/bin/build/mkn.exe
-  - curl -o mkn.exe -L https://github.com/Dekken/maiken/raw/binaries/win10_msvc17_x64/mkn.exe
+  - curl -o mkn.exe -L https://github.com/Dekken/maiken/raw/binaries/win10_x64/mkn.exe
   - SET MKN_CL_PREFERRED=1
 
   # doesnt exist for somereason?

@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 class Runner : public Constants {
  public:
-  static void RUN(const Application& a, const std::string& bin,
+  static void RUN(const Application& a, std::string bin,
                   const std::string buildDir, compiler::Mode m, bool dbg = 0) {
 #ifdef _WIN32
     bin += ".exe";
