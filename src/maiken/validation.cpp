@@ -107,9 +107,8 @@ class Validator : public maiken::Constants {
       KTHROW(maiken::Exception) {
     std::stringstream ss;
     for (const auto f : a.files()) ss << f.first << " ";
-    if (n[STR_MAIN] &&
-        !a.files().count(
-            n[STR_MAIN].Scalar().substr(n[STR_MAIN].Scalar().rfind(".") + 1)))
+    if (n[STR_MAIN] && !a.files().count(n[STR_MAIN].Scalar().substr(
+                           n[STR_MAIN].Scalar().rfind(".") + 1)))
       KEXIT(1, "main tag invalid type, valid types are\n" + ss.str() + "\n" +
                    a.project().dir().path());
     else if (n[STR_LANG] && !a.files().count(n[STR_LANG].Scalar()))

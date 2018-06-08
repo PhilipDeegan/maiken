@@ -162,6 +162,5 @@ class CompilationUnit {
 
   CompilerProcessCapture compile() const KTHROW(kul::Exception);
 };
-
 }  // namespace maiken
 #endif /* _MAIKEN_COMPILER_HPP_ */

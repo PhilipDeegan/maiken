@@ -97,12 +97,11 @@ class Compilers {
   std::unique_ptr<Compiler> winc;
   std::unique_ptr<Compiler> wincs;
 
-  kul::hash::map::S2T<Compiler *> cs, masks;
+  kul::hash::map::S2T<Compiler*> cs, masks;
 
  private:
   Compilers();
   std::string key(std::string comp, const kul::hash::map::S2T<Compiler*>& map);
 };
-
 }  // namespace maiken
 #endif /* _MAIKEN_CODE_COMPILERS_HPP_ */

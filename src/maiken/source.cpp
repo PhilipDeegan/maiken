@@ -75,11 +75,11 @@ maiken::Application::sourceMap() const {
   const kul::hash::set::String iMs = inactiveMains();
   kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> sm;
 
-  if(!main.empty()){
+  if (!main.empty()) {
     kul::File f(kul::Dir(main).locl());
     if (!f) f = kul::File(main, project().dir());
-    if (f.is()){}
-    else if (!AppVars::INSTANCE().dryRun() && !f.is())
+    if (f.is()) {
+    } else if (!AppVars::INSTANCE().dryRun() && !f.is())
       KEXIT(1, "") << "ERROR : main does not exist: " << f;
     if (f.is())
       sm[f.name().substr(f.name().rfind(".") + 1)][f.dir().real()].insert(

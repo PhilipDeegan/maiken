@@ -119,7 +119,6 @@ void maiken::Application::compile(
       }
       if (b.last_packet) fw.bw.reset();
     } while (b.files_left > 0);
-
   };
   size_t threads = 0;
 

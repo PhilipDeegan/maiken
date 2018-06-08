@@ -44,6 +44,5 @@ class Properties : public Constants {
   static std::string RESOLVE(const Settings& app, const std::string& s)
       KTHROW(kul::Exception);
 };
-
 }  // namespace maiken
 #endif  //_MAIKEN_PROPERTY_HPP_

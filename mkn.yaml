@@ -1,11 +1,11 @@
 #! clean build -dtKOWg 0
 
 name: mkn
-version: serv
+version: master
 scm: https://github.com/dekken/maiken
 
 property:
-    DATE: 14-MAY-2018
+    DATE: 08-JUN-2018
 
 parent: base
 mode: none
@@ -13,9 +13,7 @@ mode: none
 profile:
   - name: base
     inc: ./inc
-    dep:
-    - name: mkn.kul
-    - name: parse.yaml
+    with: mkn.kul parse.yaml
     src: ./src
     main: mkn.cpp
     test: test/cpp.cpp test/py.py
@@ -37,17 +35,13 @@ profile:
     mode: shared
     inc: ./inc
     src: ./src
-    dep:
-    - name: mkn.kul
-    - name: parse.yaml
-      profile: shared
+    with: mkn.kul parse.yaml[shared]
     if_arg:
       win_shared: -DYAML_CPP_DLL -DKUL_SHARED -DKUL_EXPORT
 
   - name: all_options
     parent: base
-    with:
-      io.cereal mkn.ram[https]
+    with: io.cereal mkn.ram[https]
 
   - name: lib
     parent: base
@@ -56,13 +50,10 @@ profile:
 
   - name: server
     parent: lib
-    dep:
-      - name: mkn.ram
-        profile: https
-      - name: io.cereal
-    arg: -D_MKN_WITH_MKN_RAM_ -D_MKN_WITH_IO_CEREAL_
+    with: io.cereal mkn.ram[https]
     main: server.cpp
     mode: none
+    arg: -D_MKN_WITH_MKN_RAM_ -D_MKN_WITH_IO_CEREAL_
 
   - name: lint
     mod:

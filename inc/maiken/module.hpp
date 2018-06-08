@@ -40,7 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/defs.hpp"
 
-/*
+// How to create external modules
+/**
 extern "C"
 KUL_PUBLISH
 void maiken_module_construct(maiken::Plugin* p);
@@ -157,6 +158,5 @@ class GlobalModules {
   void load(const Application& ap) {}
 #endif  //_MKN_DISABLE_MODULES_
 };
-
 }  // namespace maiken
 #endif /* _MAIKEN_MODULE_HPP_ */

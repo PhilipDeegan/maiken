@@ -40,7 +40,6 @@ class Exception : public kul::Exception {
   Exception(const char* f, const uint16_t& l, const std::string& s)
       : kul::Exception(f, l, s) {}
 };
-
 }  // end namespace maiken
 
 #endif  // _MAIKEN_EXCEPT_HPP_

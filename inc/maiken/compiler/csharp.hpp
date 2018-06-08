@@ -80,7 +80,6 @@ class WINCompiler : public Compiler {
     KEXCEPTION("Method preCompileHeader is not implemented in C Sharp");
   }
 };
-
 }  // namespace csharp
 }  // namespace maiken
 #endif /* _MAIKEN_CODE_CSHARP_HPP_ */

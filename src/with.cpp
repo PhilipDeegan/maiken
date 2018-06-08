@@ -32,9 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/app.hpp"
 
 void maiken::Application::withArgs(
-    const std::string with_str,
-    std::vector<YAML::Node>& with_nodes,
-    std::function<void(const YAML::Node& n, const bool mod)> getIfMissing, bool add) {
+    const std::string with_str, std::vector<YAML::Node>& with_nodes,
+    std::function<void(const YAML::Node& n, const bool mod)> getIfMissing,
+    bool add) {
   if (add && with_str.size()) {
     kul::hash::set::String withs;
     try {
@@ -50,10 +50,8 @@ void maiken::Application::withArgs(
 }
 
 void maiken::Application::with(
-    kul::hash::set::String &withs,
-    std::vector<YAML::Node>& with_nodes,
+    kul::hash::set::String& withs, std::vector<YAML::Node>& with_nodes,
     std::function<void(const YAML::Node& n, const bool mod)> getIfMissing) {
-
   for (const auto& with : withs) {
     YAML::Node node;
     std::string local, profiles, proj = with, version, scm;

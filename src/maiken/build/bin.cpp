@@ -93,7 +93,7 @@ class Executioner : public Constants {
     }
   }
 };
-}
+}  // namespace maiken
 
 void maiken::Application::buildExecutable(const kul::hash::set::String& objects)
     KTHROW(kul::Exception) {
@@ -103,27 +103,21 @@ void maiken::Application::buildExecutable(const kul::hash::set::String& objects)
   if (fs.count(fileType) == 0)
     KEXIT(1, "Unable to handle artifact: \"" + file +
                  "\" - type is not in file list");
-
   const std::string oType(
       "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
   kul::Dir objD(buildDir().join("obj"));
-
   const std::string& name(out.empty() ? project().root()[STR_NAME].Scalar()
                                       : out);
-
   std::vector<std::pair<std::string, std::string>> source_objects;
   kul::hash::set::String cobjects = objects;
-
   const kul::File source(main);
   std::stringstream ss, os;
   ss << std::hex << std::hash<std::string>()(source.real());
   os << ss.str() << "-" << source.name() << oType;
   kul::File object(os.str(), objD);
-  KLOG(INF) << object;
   source_objects.emplace_back(std::make_pair(
       AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
       AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
-
   std::vector<kul::File> cacheFiles;
   compile(source_objects, cobjects, cacheFiles);
   Executioner::build_exe(cobjects, main, name,
@@ -137,11 +131,9 @@ void maiken::Application::buildTest(const kul::hash::set::String& objects)
     KTHROW(kul::Exception) {
   const std::string oType(
       "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
-  kul::Dir objD(buildDir().join("obj"));
-  std::vector<std::pair<std::string, std::string>> test_objects;
-  std::vector<std::pair<std::string, std::string>> source_objects;
-  kul::Dir testsD(buildDir().join("test"));
-  kul::Dir tmpD(buildDir().join("tmp"));
+  std::vector<std::pair<std::string, std::string>> test_objects, source_objects;
+  kul::Dir objD(buildDir().join("obj")), testsD(buildDir().join("test")),
+      tmpD(buildDir().join("tmp"));
   for (const auto& p : tests) {
     const std::string& file = p.first;
     const std::string& fileType = file.substr(file.rfind(".") + 1);
@@ -163,15 +155,13 @@ void maiken::Application::buildTest(const kul::hash::set::String& objects)
     kul::hash::set::String cobjects;
     compile(source_objects, cobjects, cacheFiles);
   }
-  for(const auto &to : test_objects) kul::File(to.second, objD).mv(tmpD);    
-  
+  for (const auto& to : test_objects) kul::File(to.second, objD).mv(tmpD);
   for (const auto& to : test_objects) {
-    kul::File(to.second, tmpD).mv(objD);    
+    kul::File(to.second, tmpD).mv(objD);
     kul::hash::set::String cobjects = objects;
-    for(const auto &co: cobjects) KLOG(INF) << co;
+    for (const auto& co : cobjects) KLOG(INF) << co;
     cobjects.insert(kul::File(to.second, objD).escm());
     Executioner::build_exe(cobjects, to.first, to.second, testsD, *this);
     kul::File(to.second, objD).mv(tmpD);
   }
 }
-

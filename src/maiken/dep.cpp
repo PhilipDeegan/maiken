@@ -167,9 +167,8 @@ void maiken::Application::populateMapsFromDependencies()
     }
 
     for (const auto& s : dep.includes())
-      if (s.second &&
-          std::find(includes().begin(), includes().end(), s) ==
-              includes().end())
+      if (s.second && std::find(includes().begin(), includes().end(), s) ==
+                          includes().end())
         incs.push_back(std::make_pair(s.first, true));
     for (const std::string& s : dep.libraryPaths())
       if (std::find(libraryPaths().begin(), libraryPaths().end(), s) ==

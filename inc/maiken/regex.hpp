@@ -47,7 +47,6 @@ class Regexer {
                                 std::vector<std::string>& v)
       KTHROW(kul::Exception);
 };
-
 }  // end namespace maiken
 
 #endif  // _MAIKEN_REGEX_HPP_

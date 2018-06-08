@@ -185,7 +185,6 @@ class WINCompiler : public CCompiler {
     KEXCEPTION("Method is not implemented");
   }
 };
-
 }  // namespace cpp
 }  // namespace maiken
 #endif /* _MAIKEN_CODE_CPP_HPP_ */

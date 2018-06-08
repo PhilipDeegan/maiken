@@ -52,7 +52,6 @@ class Settings : public kul::yaml::File, public Constants {
   kul::hash::map::S2S ps;
 
   void resolveProperties() KTHROW(SettingsException);
-
   static std::unique_ptr<Settings> instance;
   static void write(const kul::File& f) KTHROW(kul::Exit);
 
@@ -70,6 +69,5 @@ class Settings : public kul::yaml::File, public Constants {
   static bool SET(const std::string& s);
   static std::string RESOLVE(const std::string& s) KTHROW(SettingsException);
 };
-
 }  // namespace maiken
 #endif /* _MAIKEN_SETTINGS_HPP_ */

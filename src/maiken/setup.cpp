@@ -116,7 +116,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     for (const auto& n : nodes) {
       if (n[STR_NAME].Scalar() != profile) continue;
       if (n[STR_WITH])
-        for(const auto &with : kul::cli::asArgs(n[STR_WITH].Scalar()))
+        for (const auto& with : kul::cli::asArgs(n[STR_WITH].Scalar()))
           withArgs(with, with_nodes, getIfMissing, 1);
       for (const auto& dep : n[STR_DEP]) getIfMissing(dep, 0);
       populateMaps(n);
@@ -319,8 +319,8 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     kul::Dir testsD(buildDir().join("test"));
     for (const auto pair : tests) {
       auto files = Regexer::RESOLVE_REGEX(pair.first);
-      if(files.empty()) files.emplace_back(pair.first);
-      for(const auto file : files){
+      if (files.empty()) files.emplace_back(pair.first);
+      for (const auto file : files) {
         const std::string& fileType = file.substr(file.rfind(".") + 1);
         if (fs.count(fileType) == 0) {
           n_tests.insert(file, file);

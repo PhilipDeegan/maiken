@@ -42,24 +42,19 @@ class SCMGetter {
     static SCMGetter s;
     return s;
   }
-
-  static std::string REPO(const kul::Dir& d, const std::string& r, bool module);
-
   static bool HAS(const kul::Dir& d);
-
+  static std::string REPO(const kul::Dir& d, const std::string& r, bool module);
   static const kul::SCM* GET(const kul::Dir& d, const std::string& r,
                              bool module);
 
  private:
   static bool IS_SOLID(const std::string& r);
-
   static const kul::SCM* GET_SCM(const kul::Dir& d, const std::string& r,
                                  bool module);
 
  private:
   kul::hash::map::S2S valids;
 };
-
 }  // end namespace maiken
 
 #endif  // _MAIKEN_SCM_HPP_

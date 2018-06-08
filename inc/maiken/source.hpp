@@ -46,7 +46,6 @@ class SourceFinder : public Constants {
           sources,
       kul::hash::set::String& objects, std::vector<kul::File>& cacheFiles);
 };
-
 }  // end namespace maiken
 
 #endif  // _MAIKEN_SOURCE_HPP_

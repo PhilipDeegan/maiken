@@ -120,6 +120,5 @@ class NewProject {
       KEXCEPT(ProjectException, "mkn.yaml already exists");
   }
 };
-
 }  // namespace maiken
 #endif /* _MAIKEN_PROJECT_HPP_ */

@@ -217,12 +217,13 @@ void maiken::Application::addIncludeLine(const std::string& o)
     for (const auto& s : kul::cli::asArgs(o))
       if (s.size()) {
         auto str(Properties::RESOLVE(*this, s));
-        kul::Dir  d(str);
+        kul::Dir d(str);
         kul::File f(str);
-        if (d) incs.push_back(std::make_pair(d.real(), true));
-        else
-        if (f) incs.push_back(std::make_pair(f.real(), false));
-        else{
+        if (d)
+          incs.push_back(std::make_pair(d.real(), true));
+        else if (f)
+          incs.push_back(std::make_pair(f.real(), false));
+        else {
           KEXIT(1, "include does not exist\n" + str + "\n" +
                        project().dir().path());
         }
@@ -233,12 +234,11 @@ void maiken::Application::addIncludeLine(const std::string& o)
     if (v.size() == 0 || v.size() > 2)
       KEXIT(1, "include invalid format\n" + project().dir().path());
     auto str(Properties::RESOLVE(*this, v[0]));
-    kul::Dir  d(str);
+    kul::Dir d(str);
     kul::File f(str);
     if (d)
       incs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
-    else
-    if (f)
+    else if (f)
       KEXIT(1, "include file does not support CSV syntax\n\t" + str + "\n" +
                    project().dir().path());
     else

@@ -178,10 +178,10 @@ class AppVars : public Constants {
     };
     auto convert_to_std_map = [](const kul::hash::map::S2S& s)
         -> std::unordered_map<std::string, std::string> {
-          std::unordered_map<std::string, std::string> ret;
-          for (const auto& p : s) ret.emplace(p.first, p.second);
-          return ret;
-        };
+      std::unordered_map<std::string, std::string> ret;
+      for (const auto& p : s) ret.emplace(p.first, p.second);
+      return ret;
+    };
 
     ar(convert_to_std_set(cmds), convert_to_std_set(wop));
     ar(convert_to_std_map(evs), convert_to_std_map(jas),
@@ -205,10 +205,10 @@ class AppVars : public Constants {
     auto convert_to_kul_map =
         [](const std::unordered_map<std::string, std::string>& s)
         -> kul::hash::map::S2S {
-          kul::hash::map::S2S ret;
-          for (const auto& p : s) ret.insert(p.first, p.second);
-          return ret;
-        };
+      kul::hash::map::S2S ret;
+      for (const auto& p : s) ret.insert(p.first, p.second);
+      return ret;
+    };
     std::unordered_set<std::string> _cmds, _wop;
     ar(cmds, _wop);
     cmds = convert_to_kul_set(_cmds);
@@ -229,7 +229,6 @@ class AppVars : public Constants {
     return *instance;
   }
 };
-
 }  // namespace maiken
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)

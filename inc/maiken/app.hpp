@@ -88,7 +88,7 @@ class KUL_PUBLISH Application : public Constants {
   kul::hash::map::S2S cArg, cLnk;
   kul::hash::map::S2T<kul::hash::set::String> args;
   kul::hash::map::S2T<uint64_t> stss;
-  std::vector<Application *> deps, modDeps, rdeps;
+  std::vector<Application*> deps, modDeps, rdeps;
   std::vector<std::shared_ptr<ModuleLoader>> mods;
   std::vector<kul::cli::EnvVar> evs;
   std::vector<std::string> libs, paths;
@@ -164,9 +164,9 @@ class KUL_PUBLISH Application : public Constants {
   bool incSrc(const kul::File& f) const;
   void addCLIArgs(const kul::cli::Args& args);
   void withArgs(
-      const std::string with,
-      std::vector<YAML::Node>& with_nodes,
-      std::function<void(const YAML::Node& n, const bool mod)> getIfMissing, bool root = 0);
+      const std::string with, std::vector<YAML::Node>& with_nodes,
+      std::function<void(const YAML::Node& n, const bool mod)> getIfMissing,
+      bool root = 0);
   void addSourceLine(const std::string& o) KTHROW(kul::Exception);
   void addIncludeLine(const std::string& o) KTHROW(kul::Exception);
 
@@ -188,9 +188,8 @@ class KUL_PUBLISH Application : public Constants {
   bool is_build_stale();
 
   void with(
-    kul::hash::set::String &withs,
-    std::vector<YAML::Node>& with_nodes,
-    std::function<void(const YAML::Node& n, const bool mod)> getIfMissing);
+      kul::hash::set::String& withs, std::vector<YAML::Node>& with_nodes,
+      std::function<void(const YAML::Node& n, const bool mod)> getIfMissing);
 
   static void showHelp();
 
@@ -285,11 +284,12 @@ class ThreadingCompiler : public Constants {
   ThreadingCompiler(maiken::Application& app) : app(app) {
     for (const auto& s : app.includes()) {
       std::string m;
-      kul::Dir  d(s.first);
+      kul::Dir d(s.first);
       kul::File f(s.first);
-      if(d) m = (AppVars::INSTANCE().dryRun() ? d.esc() : d.escm());
-      else
-      if(f) m = (AppVars::INSTANCE().dryRun() ? f.esc() : f.escm());
+      if (d)
+        m = (AppVars::INSTANCE().dryRun() ? d.esc() : d.escm());
+      else if (f)
+        m = (AppVars::INSTANCE().dryRun() ? f.esc() : f.escm());
       if (!m.empty())
         incs.push_back(m);
       else
@@ -366,6 +366,5 @@ class CompilerValidation : public Constants {
       const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>>&
           sources);
 };
-
 }  // namespace maiken
 #endif /* _MAIKEN_APP_HPP_ */

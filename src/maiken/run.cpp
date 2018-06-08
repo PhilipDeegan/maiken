@@ -30,14 +30,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-namespace maiken{
-class Runner : public Constants{
+namespace maiken {
+class Runner : public Constants {
  public:
-  static void RUN(const Application &a, const std::string &bin, const std::string buildDir, compiler::Mode m, bool dbg = 0){
-
-  #ifdef _WIN32
+  static void RUN(const Application& a, const std::string& bin,
+                  const std::string buildDir, compiler::Mode m, bool dbg = 0) {
+#ifdef _WIN32
     bin += ".exe";
-  #endif
+#endif
     kul::File f(bin, buildDir);
     if (!f) KEXIT(1, "binary does not exist \n" + f.full());
     std::unique_ptr<kul::Process> p;
@@ -48,12 +48,12 @@ class Runner : public Constants{
             Settings::INSTANCE().root()[STR_LOCAL][STR_DEBUGGER])
           dbg = Settings::INSTANCE().root()[STR_LOCAL][STR_DEBUGGER].Scalar();
       if (dbg.empty()) {
-  #ifdef _WIN32
+#ifdef _WIN32
         p = std::make_unique<kul::Process>("cdb");
         p->arg("-o");
-  #else
+#else
         p = std::make_unique<kul::Process>("gdb");
-  #endif
+#endif
       } else {
         std::vector<std::string> bits(kul::cli::asArgs(dbg));
         p = std::make_unique<kul::Process>(bits[0]);
@@ -78,18 +78,18 @@ class Runner : public Constants{
       std::string arg;
       for (const auto& s : a.libraryPaths()) arg += s + kul::env::SEP();
       if (!arg.empty()) arg.pop_back();
-  #ifdef _WIN32
+#ifdef _WIN32
       kul::cli::EnvVar pa("PATH", arg, kul::cli::EnvVarMode::PREP);
-  #else
+#else
       kul::cli::EnvVar pa("LD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
 
-  #if defined(__APPLE__)
+#if defined(__APPLE__)
       kul::cli::EnvVar dy("DYLD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
       KOUT(INF) << dy.name() << " : " << dy.toString();
       p->var(dy.name(), dy.toString());
-  #endif  // __APPLE__
+#endif  // __APPLE__
 
-  #endif
+#endif
       KOUT(INF) << pa.name() << " : " << pa.toString();
       p->var(pa.name(), pa.toString());
     }
@@ -101,17 +101,18 @@ class Runner : public Constants{
     if (!AppVars::INSTANCE().dryRun()) p->start();
   }
 };
-}
+}  // namespace maiken
 
 void maiken::Application::test(void) {
   kul::os::PushDir pushd(this->project().dir());
   kul::Dir testsD(buildDir().join("test"));
-  if(testsD)
+  if (testsD)
     for (const auto& file : testsD.files()) {
       if (file)
         Runner::RUN(*this, file.name(), testsD.real(), m);
       else
-        Runner::RUN(*this, kul::File(file.full(), testsD).real(), buildDir().real(), m);
+        Runner::RUN(*this, kul::File(file.full(), testsD).real(),
+                    buildDir().real(), m);
     }
 }
 

@@ -28,9 +28,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "kul/log.hpp"
 #include "maiken/regex.hpp"
 #include <regex>
+#include "kul/log.hpp"
 
 std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
     KTHROW(kul::Exception) {

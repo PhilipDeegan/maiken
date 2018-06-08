@@ -95,16 +95,10 @@ class Post {
   friend class Server;
 
  public:
-  ~Post() { KLOG(INF); }
-  explicit Post(ARequest *_msg) : msg(std::unique_ptr<ARequest>(_msg)) {
-    if (msg == nullptr) KLOG(INF) << "NOOOOOOOOOOO";
-    KLOG(INF);
-  }
+  ~Post() {}
+  explicit Post(ARequest *_msg) : msg(std::unique_ptr<ARequest>(_msg)) {}
 
-  explicit Post(std::unique_ptr<ARequest> _msg) : msg(std::move(_msg)) {
-    if (msg == nullptr) KLOG(INF) << "NOOOOOOOOOOO";
-    KLOG(INF);
-  }
+  explicit Post(std::unique_ptr<ARequest> _msg) : msg(std::move(_msg)) {}
   void send(const Host &host) KTHROW(Exception) {
     send(host.host(), "res", host.port(), {{"session", host.session_id()}});
   }
@@ -166,7 +160,6 @@ class RemoteCommandManager {
   std::vector<Host> m_hosts;
 };
 using RMC = RemoteCommandManager;
-
 }  // end namespace dist
 }  // end namespace maiken
 

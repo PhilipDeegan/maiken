@@ -212,7 +212,6 @@ class Blob {
   Blob &operator=(const Blob &) = delete;
   Blob &operator=(const Blob &&) = delete;
 };
-
 }  // end namespace dist
 }  // end namespace maiken
 

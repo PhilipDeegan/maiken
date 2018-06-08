@@ -101,7 +101,6 @@ class Server : public kul::http::MultiServer, public Constants {
   kul::Dir m_home;
   FileWriter fw;
 };
-
 }  // end namespace dist
 }  // end namespace maiken
 
