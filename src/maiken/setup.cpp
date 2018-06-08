@@ -114,13 +114,10 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
   while (c) {
     c = 0;
     for (const auto& n : nodes) {
-      KLOG(INF) << (n[STR_NAME].Scalar() != profile);
       if (n[STR_NAME].Scalar() != profile) continue;
       if (n[STR_WITH])
-        for(const auto &with : kul::cli::asArgs(n[STR_WITH].Scalar())){
-          KLOG(INF) << with;
+        for(const auto &with : kul::cli::asArgs(n[STR_WITH].Scalar()))
           withArgs(with, with_nodes, getIfMissing, 1);
-        }
       for (const auto& dep : n[STR_DEP]) getIfMissing(dep, 0);
       populateMaps(n);
       popDepOrMod(n, deps, STR_DEP, 0);
