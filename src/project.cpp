@@ -39,7 +39,7 @@ const kul::yaml::Validator maiken::Project::validator() const {
   std::vector<NodeValidator> depVals{
       NodeValidator("name"), NodeValidator("version"), NodeValidator("profile"),
       NodeValidator("scm"), NodeValidator("local")};
-  NodeValidator dep("dep", depVals, 0, NodeType::LIST);
+  NodeValidator dep("dep", depVals, 0, NodeType::NON);
   NodeValidator if_dep("if_dep",
                        {NodeValidator("*", depVals, 0, NodeType::LIST)}, 0,
                        NodeType::MAP);

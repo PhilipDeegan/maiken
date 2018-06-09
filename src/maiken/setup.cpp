@@ -106,7 +106,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
 #endif
 
   std::vector<YAML::Node> with_nodes;
-  withArgs(AppVars::INSTANCE().with(), with_nodes, getIfMissing, this->ro);
+  withArgs(AppVars::INSTANCE().with(), with_nodes, getIfMissing, this->ro, 0);
   YAML::Node with_node;
 
   c = 1;
@@ -116,9 +116,17 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     for (const auto& n : nodes) {
       if (n[STR_NAME].Scalar() != profile) continue;
       if (n[STR_WITH])
-        for (const auto& with : kul::cli::asArgs(n[STR_WITH].Scalar()))
-          withArgs(with, with_nodes, getIfMissing, 1);
-      for (const auto& dep : n[STR_DEP]) getIfMissing(dep, 0);
+        for (const auto& with_str : kul::cli::asArgs(n[STR_WITH].Scalar()))
+          withArgs(with_str, with_nodes, getIfMissing, 1, 0);
+      if(n[STR_DEP]){
+        if(n[STR_DEP].IsScalar())
+          for (const auto& with_str : kul::cli::asArgs(n[STR_DEP].Scalar()))
+            withArgs(with_str, with_nodes, getIfMissing, 1, 1);
+        else
+        if(n[STR_DEP].IsSequence())
+          for (const auto& dep : n[STR_DEP]) getIfMissing(dep, 0);
+        else KEXCEPTION(STR_DEP) << " is invalid type";
+      }
       populateMaps(n);
       popDepOrMod(n, deps, STR_DEP, 0);
       if (n[STR_IF_DEP] && n[STR_IF_DEP][KTOSTRING(__KUL_OS__)]) {

@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 void maiken::Application::withArgs(
     const std::string with_str, std::vector<YAML::Node>& with_nodes,
     std::function<void(const YAML::Node& n, const bool mod)> getIfMissing,
-    bool add) {
+    bool add, bool dep) {
   if (add && with_str.size()) {
     kul::hash::set::String withs;
     try {
@@ -45,13 +45,13 @@ void maiken::Application::withArgs(
       else
         KEXIT(1, MKN_ERR_INVALID_WIT_CLI);
     }
-    with(withs, with_nodes, getIfMissing);
+    with(withs, with_nodes, getIfMissing, dep);
   }
 }
 
 void maiken::Application::with(
     kul::hash::set::String& withs, std::vector<YAML::Node>& with_nodes,
-    std::function<void(const YAML::Node& n, const bool mod)> getIfMissing) {
+    std::function<void(const YAML::Node& n, const bool mod)> getIfMissing, bool dep) {
   for (const auto& with : withs) {
     YAML::Node node;
     std::string local, profiles, proj = with, version, scm;
@@ -115,7 +115,7 @@ void maiken::Application::with(
     if (!proj.empty()) node[STR_NAME] = proj;
 
     with_nodes.push_back(node);
-    if (!proj.empty()) {
+    if (!dep && !proj.empty()) {
       std::stringstream with_define;
       kul::String::REPLACE_ALL(proj, ".", "_");
       std::transform(proj.begin(), proj.end(), proj.begin(), ::toupper);

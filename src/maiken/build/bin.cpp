@@ -97,7 +97,6 @@ class Executioner : public Constants {
 
 void maiken::Application::buildExecutable(const kul::hash::set::String& objects)
     KTHROW(kul::Exception) {
-  KLOG(INF) << main;
   const std::string& file = main;
   const std::string& fileType = file.substr(file.rfind(".") + 1);
   if (fs.count(fileType) == 0)
