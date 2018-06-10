@@ -234,6 +234,9 @@ class KUL_PUBLISH Application : public Constants {
   }
   void addLibpath(const std::string& s) { paths.push_back(s); }
 
+  void prependCompileString(const std::string &s){ arg = s + " " + arg; }
+  void prependLinkString(const std::string &s){ lnk = s + " " + lnk; }
+
   std::string baseLibFilename() const {
     std::string n = project().root()[STR_NAME].Scalar();
     return out.empty() ? inst ? p.empty() ? n : n + "_" + p : n : out;

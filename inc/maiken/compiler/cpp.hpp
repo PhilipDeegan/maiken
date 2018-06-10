@@ -44,6 +44,10 @@ class Exception : public kul::Exception {
       : kul::Exception(f, l, s) {}
 };
 
+enum class CCompiler_Type : uint16_t {
+  NON = 0, GCC = 1, CLANG = 2, ICC = 3, HCC = 4, WIN = 5
+};
+
 class CCompiler : public Compiler {
  protected:
   CCompiler(const int& v) : Compiler(v) {}
@@ -76,6 +80,8 @@ class CCompiler : public Compiler {
   const std::string oStar(const std::vector<std::string>& objs) const {
     return "*." + oType(objs);
   }
+
+  virtual CCompiler_Type type() const = 0;
 };
 
 class GccCompiler : public CCompiler {
@@ -119,6 +125,8 @@ class GccCompiler : public CCompiler {
                                 const std::string& in, const std::string& out,
                                 bool dryRun = false) const
       KTHROW(kul::Exception) override;
+
+  CCompiler_Type type() const override { return CCompiler_Type::GCC; }
 };
 
 class ClangCompiler : public GccCompiler {
@@ -126,6 +134,7 @@ class ClangCompiler : public GccCompiler {
   ClangCompiler(const int& v = 0);
   virtual const std::string cc() const override { return "clang"; }
   virtual const std::string cxx() const override { return "clang++"; }
+  CCompiler_Type type() const override { return CCompiler_Type::CLANG; }
 };
 
 class HccCompiler : public GccCompiler {
@@ -133,6 +142,7 @@ class HccCompiler : public GccCompiler {
   HccCompiler(const int& v = 0) : GccCompiler(v) {}
   virtual const std::string cc() const override { return "hcc"; }
   virtual const std::string cxx() const override { return "h++"; }
+  CCompiler_Type type() const override { return CCompiler_Type::HCC; }
 };
 
 class IntelCompiler : public GccCompiler {
@@ -140,6 +150,7 @@ class IntelCompiler : public GccCompiler {
   IntelCompiler(const int& v = 0);
   virtual const std::string cc() const override { return "icc"; }
   virtual const std::string cxx() const override { return "icpc"; }
+  CCompiler_Type type() const override { return CCompiler_Type::ICC; }
 };
 
 class WINCompiler : public CCompiler {
@@ -184,6 +195,7 @@ class WINCompiler : public CCompiler {
       KTHROW(kul::Exception) override {
     KEXCEPTION("Method is not implemented");
   }
+  CCompiler_Type type() const override { return CCompiler_Type::WIN; }
 };
 }  // namespace cpp
 }  // namespace maiken
