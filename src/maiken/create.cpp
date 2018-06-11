@@ -40,14 +40,14 @@ class CLIHandler : public Constants {
         Arg('b', STR_BINC, ArgType::STRING),
         Arg('B', STR_BPATH, ArgType::STRING),
         Arg('C', STR_DIR, ArgType::STRING), Arg('d', STR_DEP, ArgType::MAYBE),
-        Arg('D', STR_DRY_RUN), Arg('E', STR_ENV, ArgType::STRING),
+        Arg('R', STR_DRY_RUN), Arg('E', STR_ENV, ArgType::STRING),
         Arg('f', STR_FINC, ArgType::STRING),
         Arg('F', STR_FPATH, ArgType::STRING),
         Arg('g', STR_DEBUG, ArgType::MAYBE), Arg('G', STR_GET, ArgType::STRING),
         Arg('h', STR_HELP), Arg('j', STR_JARG, ArgType::STRING),
         Arg('K', STR_STATIC), Arg('l', STR_LINKER, ArgType::STRING),
         Arg('L', STR_ALINKER, ArgType::STRING),
-        Arg('m', STR_MAIN, ArgType::STRING),
+        Arg('M', STR_MAIN, ArgType::STRING),
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
         Arg('n', STR_NODES, ArgType::MAYBE),
 #endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
