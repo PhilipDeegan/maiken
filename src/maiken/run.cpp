@@ -35,9 +35,7 @@ class Runner : public Constants {
  public:
   static void RUN(const Application& a, std::string bin,
                   const std::string buildDir, compiler::Mode m, bool dbg = 0) {
-#ifdef _WIN32
-    bin += ".exe";
-#endif
+
     kul::File f(bin, buildDir);
     if (!f) KEXIT(1, "binary does not exist \n" + f.full());
     std::unique_ptr<kul::Process> p;
@@ -106,18 +104,28 @@ class Runner : public Constants {
 void maiken::Application::test(void) {
   kul::os::PushDir pushd(this->project().dir());
   kul::Dir testsD(buildDir().join("test"));
-  if (testsD)
+  if (testsD){
     for (const auto& file : testsD.files()) {
-      if (file)
+      if (file){
+#if defined(_WIN32)
+        if(file.name().rfind(".exe") == std::string::npos) continue;
         Runner::RUN(*this, file.name(), testsD.real(), m);
+#endif
+      }
       else
         Runner::RUN(*this, kul::File(file.full(), testsD).real(),
                     buildDir().real(), m);
     }
+  }
 }
 
 void maiken::Application::run(bool dbg) {
   std::string bin;
-  for (const auto& file : buildDir().files(false)) bin = file.name();
-  Runner::RUN(*this, bin, buildDir().real(), m, dbg);
+  for (const auto& file : buildDir().files(false)){
+    bin = file.name();
+#if defined(_WIN32)
+    if(bin.rfind(".exe") == std::string::npos) continue;
+#endif
+    Runner::RUN(*this, bin, buildDir().real(), m, dbg);
+  }
 }
