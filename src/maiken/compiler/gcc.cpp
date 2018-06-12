@@ -184,7 +184,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(
           for (const std::string& lib : libs){
             kul::File lib_file(sharedLib(lib), path);
             if(lib_file){
-              std::stringstring loader;
+              std::stringstream loader;
               loader << "-Wl,-rpath,@loader_path/";
               // loader << lib_file.relative(out);
               p << loader.str();

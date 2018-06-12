@@ -218,7 +218,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(
           } else
             func(default_value);
         } catch (const kul::StringException& e) {
-          KEXIT(1, "-O argument is invalid");
+          KEXIT(1, "") << e << " argument is invalid";
         } catch (const kul::Exception& e) {
           KEXIT(1, e.stack());
         }

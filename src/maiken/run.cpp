@@ -107,10 +107,10 @@ void maiken::Application::test(void) {
   if (testsD){
     for (const auto& file : testsD.files()) {
       if (file){
-#if defined(_WIN32)
+#ifdef _WIN32
         if(file.name().rfind(".exe") == std::string::npos) continue;
-        Runner::RUN(*this, file.name(), testsD.real(), m);
 #endif
+        Runner::RUN(*this, file.name(), testsD.real(), m);
       }
       else
         Runner::RUN(*this, kul::File(file.full(), testsD).real(),
