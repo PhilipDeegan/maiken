@@ -176,6 +176,24 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(
     if ((ll.size() ? kul::String::BOOL(ll) : 0)) {
       for (const std::string& path : libPaths) p.arg("-L" + path);
       for (const std::string& lib : libs) p.arg("-l" + lib);
+#if defined(__APPLE__)
+      if(type() == CCompiler_Type::CLANG &&
+        (mode == compiler::Mode::SHAR || mode == compiler::Mode::NONE)){
+        bool found = 1;
+        for (const std::string& path : libPaths){
+          for (const std::string& lib : libs){
+            kul::File lib_file(sharedLib(lib), path);
+            if(lib_file){
+              std::stringstring loader;
+              loader << "-Wl,-rpath,@loader_path/";
+              // loader << lib_file.relative(out);
+              p << loader.str();
+            }
+          }
+        }
+      }
+#else
+#endif
     }
   }
   for (const std::string& s : kul::cli::asArgs(linkerEnd)) p.arg(s);
