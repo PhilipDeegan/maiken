@@ -129,6 +129,34 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   for (const std::string& path : libPaths) p.arg("-L" + path);
   if (mode == compiler::Mode::STAT) p.arg("-static");
+  {
+    auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
+    if ((ll.size() ? kul::String::BOOL(ll) : 0)) {
+      if(mode == compiler::Mode::SHAR || mode == compiler::Mode::NONE){
+        for (const std::string& path : libPaths){
+          for (const std::string& lib : libs){
+            kul::File lib_file(sharedLib(lib), path);
+            if(lib_file){
+              std::stringstream loader;
+#if defined(__APPLE__)
+              loader << "-Wl,-rpath,"
+                     << kul::Dir(lib_file.dir().real()).esc();
+              kul::File tmp_out(out);
+              tmp_out.mk();
+              loader << " -Wl,-rpath,@loader_path/"
+                     << tmp_out.relative(lib_file.dir());
+              tmp_out.rm();
+#else
+              loader << "-Wl,-rpath="
+                     << kul::Dir(lib_file.dir().real()).esc();
+#endif
+              p << loader.str();
+            }
+          }
+        }
+      }
+    }
+  }
   std::string exe = out;
   if (KTOSTRING(__KUL_OS__) == std::string("win")) exe += ".exe";
   p.arg("-o").arg(exe);
@@ -176,9 +204,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(
     if ((ll.size() ? kul::String::BOOL(ll) : 0)) {
       for (const std::string& path : libPaths) p.arg("-L" + path);
       for (const std::string& lib : libs) p.arg("-l" + lib);
-      if(type() == CCompiler_Type::CLANG &&
-        (mode == compiler::Mode::SHAR || mode == compiler::Mode::NONE)){
-        bool found = 1;
+      if(mode == compiler::Mode::SHAR || mode == compiler::Mode::NONE){
         for (const std::string& path : libPaths){
           for (const std::string& lib : libs){
             kul::File lib_file(sharedLib(lib), path);
@@ -187,6 +213,11 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(
 #if defined(__APPLE__)
               loader << "-Wl,-rpath,"
                      << kul::Dir(lib_file.dir().real()).esc();
+              kul::File tmp_out(out);
+              tmp_out.mk();
+              loader << " -Wl,-rpath,@loader_path/"
+                     << tmp_out.relative(lib_file.dir());
+              tmp_out.rm();
 #else
               loader << "-Wl,-rpath="
                      << kul::Dir(lib_file.dir().real()).esc();
@@ -196,6 +227,11 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(
           }
         }
       }
+#if defined(__APPLE__)
+      std::stringstream loader;
+      loader << "-Wl,-install_name,@rpath/" << kul::File(lib).name();
+      p << loader.str();
+#endif
     }
   }
   for (const std::string& s : kul::cli::asArgs(linkerEnd)) p.arg(s);

@@ -657,3 +657,15 @@ Type            flag
 Default         0
 Description     disables modules from executing at any point
 
+
+7. With options
+
+1. io.cereal
+
+   Enables serialization of some classes - requirement for distributed compilation
+
+
+2. mkn.ram[https]
+
+   Enables calls to github.com API to deduce most recent release or branch if no
+     dependency version is set

@@ -39,10 +39,6 @@ profile:
     if_arg:
       win_shared: -DYAML_CPP_DLL -DKUL_SHARED -DKUL_EXPORT
 
-  - name: all_options
-    parent: base
-    with: io.cereal mkn.ram[https]
-
   - name: lib
     parent: base
     if_arg:
@@ -53,7 +49,6 @@ profile:
     with: io.cereal mkn.ram[https]
     main: server.cpp
     mode: none
-    arg: -D_MKN_WITH_MKN_RAM_ -D_MKN_WITH_IO_CEREAL_
 
   - name: lint
     mod:
