@@ -158,7 +158,6 @@ void maiken::Application::buildTest(const kul::hash::set::String& objects)
   for (const auto& to : test_objects) {
     kul::File(to.second, tmpD).mv(objD);
     kul::hash::set::String cobjects = objects;
-    for (const auto& co : cobjects) KLOG(INF) << co;
     cobjects.insert(kul::File(to.second, objD).escm());
     Executioner::build_exe(cobjects, to.first, to.second, testsD, *this);
     kul::File(to.second, objD).mv(tmpD);
