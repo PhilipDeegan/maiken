@@ -70,7 +70,9 @@ void maiken::Application::checkErrors(const CompilerProcessCapture& cpc)
 
 bool maiken::Application::is_build_required() {
   kul::os::PushDir pushd(this->project().dir());
-  return !kul::Dir(".mkn/build");
+  kul::Dir bDir(".mkn/build");
+  return !bDir || bDir.dirs().size() == 0
+               || bDir.files().size() == 0;;
 }
 
 bool maiken::Application::is_build_stale() {

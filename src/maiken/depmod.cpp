@@ -244,6 +244,7 @@ void maiken::Application::popDepOrMod(const YAML::Node& n,
       if (app.project().root()[STR_SCM])
         app.scr =
             Properties::RESOLVE(app, app.project().root()[STR_SCM].Scalar());
+      if(module) app.ro = false;
       app.setup();
       if (app.sources().size()) app.buildDir().mk();
       kul::env::CWD(this->project().dir());

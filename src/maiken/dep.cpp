@@ -136,7 +136,7 @@ void maiken::Application::buildDepVec(const std::string& depVal) {
     deps.push_back(*app1);
   }
   for (const auto& d : include)
-    if (!all.count(d) && !ignore.count(d))
+    if (!all.count(d) && !ignore.count(d) && !isMod)
       KEXIT(1, "Dependency project specified does not exist: " + d);
   if (include.size() && include.count("+")) this->ig = 1;
 }

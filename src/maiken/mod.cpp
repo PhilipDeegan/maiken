@@ -53,7 +53,6 @@ kul::File maiken::ModuleLoader::FIND(const Application& ap)
       break;
     }
   }
-  KOUT(DBG) << "Maiken - DBG - Loading module: " << file;
   kul::File lib(file);
 #ifndef _MKN_DISABLE_MODULES_
   if (!lib)
