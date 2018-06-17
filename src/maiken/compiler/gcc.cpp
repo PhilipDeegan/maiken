@@ -131,7 +131,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(
   if (mode == compiler::Mode::STAT) p.arg("-static");
   {
     auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
-    if ((ll.size() ? kul::String::BOOL(ll) : 0)) {
+    if ((ll.size())) {
       if(mode == compiler::Mode::SHAR || mode == compiler::Mode::NONE){
         for (const std::string& path : libPaths){
           for (const std::string& lib : libs){
