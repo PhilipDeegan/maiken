@@ -203,8 +203,8 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(
     auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
     if ((ll.size())) {
       uint16_t llv = kul::String::UINT16(ll);
+      for (const std::string& path : libPaths) p.arg("-L" + path);
       if(llv == 1){
-        for (const std::string& path : libPaths) p.arg("-L" + path);
         for (const std::string& lib : libs) p.arg("-l" + lib);
         if(mode == compiler::Mode::SHAR || mode == compiler::Mode::NONE){
           for (const std::string& path : libPaths){
