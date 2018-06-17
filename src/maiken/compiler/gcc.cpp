@@ -201,29 +201,39 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(
   for (const std::string& d : dirs) p.arg(kul::File(oStar(objects), d).escm());
   {
     auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
-    if ((ll.size() ? kul::String::BOOL(ll) : 0)) {
-      for (const std::string& path : libPaths) p.arg("-L" + path);
-      for (const std::string& lib : libs) p.arg("-l" + lib);
-      if(mode == compiler::Mode::SHAR || mode == compiler::Mode::NONE){
+    if ((ll.size())) {
+      uint16_t llv = kul::String::UINT16(ll);
+      if(llv == 1){
+        // for (const std::string& path : libPaths) p.arg("-L" + path);
+        for (const std::string& lib : libs) p.arg("-l" + lib);
+        if(mode == compiler::Mode::SHAR || mode == compiler::Mode::NONE){
+          for (const std::string& path : libPaths){
+            for (const std::string& lib : libs){
+              kul::File lib_file(sharedLib(lib), path);
+              if(lib_file){
+                std::stringstream loader;
+  #if defined(__APPLE__)
+                loader << "-Wl,-rpath,"
+                       << kul::Dir(lib_file.dir().real()).esc();
+                kul::File tmp_out(out);
+                tmp_out.mk();
+                loader << " -Wl,-rpath,@loader_path/"
+                       << tmp_out.relative(lib_file.dir());
+                tmp_out.rm();
+  #else
+                loader << "-Wl,-rpath="
+                       << kul::Dir(lib_file.dir().real()).esc();
+  #endif
+                p << loader.str();
+              }
+            }
+          }
+        }
+      }else {
         for (const std::string& path : libPaths){
           for (const std::string& lib : libs){
             kul::File lib_file(sharedLib(lib), path);
-            if(lib_file){
-              std::stringstream loader;
-#if defined(__APPLE__)
-              loader << "-Wl,-rpath,"
-                     << kul::Dir(lib_file.dir().real()).esc();
-              kul::File tmp_out(out);
-              tmp_out.mk();
-              loader << " -Wl,-rpath,@loader_path/"
-                     << tmp_out.relative(lib_file.dir());
-              tmp_out.rm();
-#else
-              loader << "-Wl,-rpath="
-                     << kul::Dir(lib_file.dir().real()).esc();
-#endif
-              p << loader.str();
-            }
+            if(lib_file) p.arg(lib_file.escm());
           }
         }
       }
