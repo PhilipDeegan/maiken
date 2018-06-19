@@ -75,11 +75,11 @@ class Compilers {
   }
   const Compiler* get(const std::string& comp)
       KTHROW(CompilerNotFoundException) {
-    try {
-      return cs[key(comp, cs)];
-    } catch (const CompilerNotFoundException& e) {
-    }
-    return masks[key(comp, masks)];
+    auto k = key(comp, cs);
+    if(cs.count(k)) return cs[k];
+    k = key(comp, masks);
+    if(masks.count(k)) return masks[k];
+    KEXCEPT(CompilerNotFoundException, "Key not found ") << comp;
   }
   std::string base(const std::string& comp) {
     try {

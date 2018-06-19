@@ -59,6 +59,7 @@ maiken::Compilers::Compilers() {
 
 std::string maiken::Compilers::key(std::string comp,
                                    const kul::hash::map::S2T<Compiler*>& map) {
+
   kul::String::REPLACE_ALL(comp, ".exe", "");
   if (map.count(comp) > 0) return comp;
   if (comp.find(" ") != std::string::npos)
@@ -74,5 +75,5 @@ std::string maiken::Compilers::key(std::string comp,
     comp = comp.substr(comp.rfind(kul::Dir::SEP()) + 1);
     if (map.count(comp)) return comp;
   }
-  KEXCEPTION("Key not found");
+  return comp;
 }
