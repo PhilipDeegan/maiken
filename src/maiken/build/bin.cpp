@@ -107,22 +107,17 @@ void maiken::Application::buildExecutable(const kul::hash::set::String& objects)
   kul::Dir objD(buildDir().join("obj"));
   const std::string& name(out.empty() ? project().root()[STR_NAME].Scalar()
                                       : out);
-  std::vector<std::pair<std::string, std::string>> source_objects;
-  kul::hash::set::String cobjects = objects;
   const kul::File source(main);
   std::stringstream ss, os;
   ss << std::hex << std::hash<std::string>()(source.real());
   os << ss.str() << "-" << source.name() << oType;
   kul::File object(os.str(), objD);
-  source_objects.emplace_back(std::make_pair(
-      AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
-      AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
-  std::vector<kul::File> cacheFiles;
-  compile(source_objects, cobjects, cacheFiles);
-  Executioner::build_exe(cobjects, main, name,
-                         kul::Dir(inst ? inst.real() : buildDir()), *this);
   kul::Dir tmpD(buildDir().join("tmp"));
-  if (!tmpD) tmpD.mk();
+  kul::File tbject(os.str(), tmpD);
+  if(!tbject) KEXCEPTION("Uhoh : ") << tbject;
+  tbject.mv(objD);
+  Executioner::build_exe(objects, main, name,
+                         kul::Dir(inst ? inst.real() : buildDir()), *this);  object.mv(tmpD);
   object.mv(tmpD);
 }
 

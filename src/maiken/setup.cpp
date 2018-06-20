@@ -182,6 +182,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
   profile = p.size() ? p : project().root()[STR_NAME].Scalar();
   bool nm = 1;
   c = 1;
+
   while (c) {
     c = 0;
     for (const auto& n : nodes) {
@@ -206,6 +207,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
       break;
     }
   }
+
   if (main.empty() && lang.empty()) resolveLang();
   if (par) {
     if (!main.empty() && lang.empty()) lang = main.substr(main.rfind(".") + 1);

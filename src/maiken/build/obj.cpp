@@ -184,6 +184,23 @@ void maiken::Application::compile(
     sourceQueue.pop();
   }
 
+  if(!main.empty()){
+    const std::string oType(
+        "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
+    const kul::File source(main);
+    std::stringstream ss, os;
+    ss << std::hex << std::hash<std::string>()(source.real());
+    os << ss.str() << "-" << source.name() << oType;
+    kul::Dir tmpD(buildDir().join("tmp"));
+    if (!tmpD) tmpD.mk();
+    kul::File object(os.str(), tmpD);
+    c_units.emplace_back(
+      tc.compilationUnit(
+          std::make_pair(
+              AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
+              AppVars::INSTANCE().dryRun() ? object.esc() : object.escm())));
+  }
+
   auto o = [](const std::string& s) {
     if (s.size()) KOUT(NON) << s;
   };

@@ -35,6 +35,7 @@ maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
   const std::string src(p.first);
   const std::string obj(p.second);
   const std::string& fileType = src.substr(src.rfind(".") + 1);
+  if(!(app.files().count(fileType))) KEXCEPTION("NOOOOOOO ") << fileType;
   const std::string& compiler =
       (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
   const std::string& base = maiken::Compilers::INSTANCE().base(compiler);
