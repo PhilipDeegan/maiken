@@ -7,5 +7,6 @@ compiler:
   - clang
 
 script:
+  - export KUL_GIT_CO="--depth 3"
   - make bsd CXX=clang++
   - ./mkn build -dtSa "-std=c++14 -fPIC" -l "-pthread -ldl" -WOg 0

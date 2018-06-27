@@ -77,7 +77,7 @@ maiken::AppVars::AppVars() {
   std::string ext = kul::env::GET("MKN_LIB_EXT");
   if (!ext.empty()) evs["MKN_LIB_EXT"] = ext;
 
-  if(kul::env::IS_SET("MKN_LIB_PRE")){
+  if(kul::env::EXISTS("MKN_LIB_PRE")){
     evs["MKN_LIB_PRE"] = kul::env::GET("MKN_LIB_PRE");
   }
 }
