@@ -177,6 +177,7 @@ void maiken::Application::compile(
   kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1,
                                     1000000000, 1000);
   std::vector<maiken::CompilationUnit> c_units;
+  std::queue<std::pair<std::string, std::string>> cQueue;
 
   kul::File init;
   if(!main.empty()){
@@ -190,6 +191,7 @@ void maiken::Application::compile(
     kul::Dir tmpD(buildDir().join("tmp"));
     if (!tmpD) tmpD.mk();
     kul::File object(os.str(), tmpD);
+
     c_units.emplace_back(
       tc.compilationUnit(
           std::make_pair(
@@ -197,14 +199,13 @@ void maiken::Application::compile(
               AppVars::INSTANCE().dryRun() ? object.esc() : object.escm())));
   }
 
-  std::queue<std::pair<std::string, std::string>> cQueue;
   while (sourceQueue.size() > 0) {
+    cQueue.push(sourceQueue.front());
     if(init && kul::File(sourceQueue.front().first) == init) {
       sourceQueue.pop();
       continue;
     };
     c_units.emplace_back(tc.compilationUnit(sourceQueue.front()));
-    cQueue.push(sourceQueue.front());
     sourceQueue.pop();
   }
 
