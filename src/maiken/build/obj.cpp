@@ -177,17 +177,13 @@ void maiken::Application::compile(
   kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1,
                                     1000000000, 1000);
   std::vector<maiken::CompilationUnit> c_units;
-  std::queue<std::pair<std::string, std::string>> cQueue;
-  while (sourceQueue.size() > 0) {
-    c_units.emplace_back(tc.compilationUnit(sourceQueue.front()));
-    cQueue.push(sourceQueue.front());
-    sourceQueue.pop();
-  }
 
+  kul::File init;
   if(!main.empty()){
     const std::string oType(
         "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
     const kul::File source(main);
+    init = source;
     std::stringstream ss, os;
     ss << std::hex << std::hash<std::string>()(source.real());
     os << ss.str() << "-" << source.name() << oType;
@@ -199,6 +195,17 @@ void maiken::Application::compile(
           std::make_pair(
               AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
               AppVars::INSTANCE().dryRun() ? object.esc() : object.escm())));
+  }
+
+  std::queue<std::pair<std::string, std::string>> cQueue;
+  while (sourceQueue.size() > 0) {
+    if(init && kul::File(sourceQueue.front().first) == init) {
+      sourceQueue.pop();
+      continue;
+    };
+    c_units.emplace_back(tc.compilationUnit(sourceQueue.front()));
+    cQueue.push(sourceQueue.front());
+    sourceQueue.pop();
   }
 
   auto o = [](const std::string& s) {

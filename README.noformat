@@ -508,35 +508,38 @@ Available commands
 Available arguments:
     -a --args $arg        - Adds $arg to the compile command if compile/build, passes arguments to application if run
     -A --add  $arg        - CSV list of additional sources to compile/link, disable recursive finding with "<dir>\, 0"
+    -b --binc $s          - Add include directories to back of compile command, seperated by standard system PATH environment win=; others=:
+    -B --bpath $s         - Add library search directory to back of link command, seperated by standard system PATH environment win=; others=:
     -C --directory $d     - Execute on directory $d rather than current directory
     -d --dependencies     - See 4.8
+    -D --dry-run $f       - Do not compile/link, but print out compiler process strings, do not run etc
     -E --env $e           - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
+    -f --finc $s          - Add include directories to front of compile command, seperated by standard system PATH environment win=; others=:
+    -F --fpath $s         - Add library search directory to front of link command, seperated by standard system PATH environment win=; others=:
     -g --debug [0-9]      - Add compiler/linker debug flags for chosen compiler - 0 = off / 9 = full - number missing = 9 / no default
     -G --get $k           - Returns string value for property K in either local yaml or settings.yaml, failure is no string 0 exit code
     -h --help             - Print help
     -j --jargs $j         - Takes JSON in the form of {"c": "-DC_ARG1 -DC_ARG2", "cpp": "-DCXX_ARG1 -DCXX_ARG2"} passing file-type specific args to compiler
     -l --linker $t        - Adds $t to linking of root project
+    -K --static           - Links projects without mode as static
     -L --all-linker $t    - Adds $t to linking of all projects
     -M --main $f          - Set main file as $f, overrides yaml main tag
     -n --nodes [$n]       - Activate distributed compilation with $n nodes from chosen settings.yaml (-x)
     -o --out $f           - Set output binary/lib name to be $f, overrides yaml out tag
     -O --optimize [0-9]   - Add compiler/linker optimisation flags for chosen compiler - 0 = off / 9 = full - number missing = 9 / no default
-    -L --all-linker $t    - Adds $t to linking of all projects
     -p --profile $p       - Activate profile p
     -P --property $p      - CSV key=value properties override format -P "k1=v1,k2=v2" , backslash escaps , and =
     -r --run-args $a      - Passes $a to running binary as arguments, suppercedes -a
-    -R --dry-run $f       - Do not compile/link, but print out compiler process strings, do not run etc
     -s --scm-status       - Display SCM status of project, allows -d
-    -u --scm-update       - Update project from SCM when permitted, allows -d
-    -U --scm-force-update - Force update project from SCM, allows -d
+    -S --shared           - Links projects without mode as shared
     -t --threads $n       - Consume $num threads while compiling source files where $n > 0, If $n is missing optimal resolution attempted.
     -T --threads $n       - Remove profile or dependency on the command line see 4.9
+    -u --scm-update       - Update project from SCM when permitted, allows -d
+    -U --scm-force-update - Force update project from SCM, allows -d
     -v --version          - Displays the current maiken version number
-    -x --settings $f      - Sets settings.yaml in use to $f. Directory missing, $(4.3.1) attempted
-    -K --static           - Links projects without mode as static
-    -S --shared           - Links projects without mode as shared
     -w --with             - Add profile or dependency on the command line see 4.9
     -W --warn             - Add compiler warning flags for chosen compiler - 0 = off / 9 = full - number missing = 8 / no default (Requires KLOG=1)
+    -x --settings $f      - Sets settings.yaml in use to $f. Directory missing, $(4.3.1) attempted
 
 
 5.1.3 Examples
@@ -554,6 +557,12 @@ Key             KLOG
 Type            Number
 Default         0
 Description     See section 4
+
+Key             MKN_COMPILE_THREADS
+Type            uint
+Default         none
+Description     Global override, if set forces all compile calls to use value
+                Example, low RAM systems
 
 Key             MKN_DBG
 Type            String
