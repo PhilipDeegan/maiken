@@ -114,8 +114,8 @@ void maiken::Application::buildExecutable(const kul::hash::set::String& objects)
   kul::File object(os.str(), objD);
   kul::Dir tmpD(buildDir().join("tmp"));
   kul::File tbject(os.str(), tmpD);
-  if(!tbject) KEXCEPTION("Uhoh : ") << tbject;
-  tbject.mv(objD);
+  if(!tbject) KERR << "Source expected not found (ignoring) " << tbject;
+  else tbject.mv(objD);
   Executioner::build_exe(objects, main, name,
                          kul::Dir(inst ? inst.real() : buildDir()), *this);  object.mv(tmpD);
   object.mv(tmpD);
