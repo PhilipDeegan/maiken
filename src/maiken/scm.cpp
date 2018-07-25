@@ -70,7 +70,7 @@ void maiken::Application::scmStatus(const bool& deps)
 }
 
 void maiken::Application::scmUpdate(const bool& f) KTHROW(kul::scm::Exception) {
-  uint i = 0;
+  size_t i = 0;
   const Application* p = this;
   while ((p = p->par)) i++;
   if (i > AppVars::INSTANCE().dependencyLevel()) return;

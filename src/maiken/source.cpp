@@ -120,7 +120,7 @@ bool maiken::Application::incSrc(const kul::File& file) const {
     const std::string& rl(file.mini());
     c = !stss.count(rl);
     if (!c) {
-      const uint& mod = file.timeStamps().modified();
+      const size_t mod = file.timeStamps().modified();
       if (mod == (*stss.find(rl)).second) {
         for (const auto& i : includes()) {
           kul::Dir inc(i.first);

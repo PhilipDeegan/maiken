@@ -1,3 +1,4 @@
+
 language: cpp
 
 os:
@@ -10,3 +11,12 @@ script:
   - export KUL_GIT_CO="--depth 3"
   - make bsd CXX=clang++
   - ./mkn build -dtSa "-std=c++14 -fPIC" -l "-pthread -ldl" -WOg 0
+
+deploy:
+  - provider: bintray
+    file: res/travis/mac_bintray.json
+    user: dekken
+    key:
+      secure: ZMfDtmzwNq60lbX3nCr2PIKYXMcb1p976TJFl/i//AsnraFhlwvn30Q48FG2uY1cWuXCtr6ATdtThMlUd01zq5WVktTmmf4Q5CYFy5kiOr7Rajyg/5dMgSK3butJyHUVCki7dM0ztIPc82zQaWSy6wNUMPxf12e73cgGwWTnT1jUpTs1kKB5LpfduI4lOzggNc08Q23mlNYGW9XReV14QAdPgULogL+T0ABy8GKBQ/0Hx4eaj6IM9FHrZpDbfkgaeSsSByIY9sFi8njOirQ4YAzXG7J/GiubqGcLVYYwegbD8E3wJLSXny0s61nEzsMigG2ZQKfxlFmxW1TAOklEOd+B/vF9QBHF0/NuPSNEXAT2miZ9QqHKeN+B5vEZJqCEJ19nmEA5WDTfyHIojH0ZgCBUUCqfIuSOaYLmU7pgk2KUHfFtvDEQx2uy7Afjzmn+Ho+H4LXUwLliYZPNq2yHcqk0zd1xwI+h3B2N4npTxdwCMxUlr6QOSuEAGAssUdZyIZyTWttho6CQSDWpVGAMQYwkAMCWLC7nq9qy11RtIV/yJhOKIlJMMHFQYJtXTysWQs9mIZwKOG6O3tHiLABXdw7D2kkjpdxN85qeYUHa5oHeaBVKQTsLrYG+z6p66N/w+/1hyj4fkcsTBOziJwtTU1Vse+c3bMuRdlsAA1ToIJA=
+    edge:
+        branch: v1.8.47

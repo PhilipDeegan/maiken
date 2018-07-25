@@ -182,7 +182,7 @@ void maiken::Application::showHelp() {
 
 void maiken::Application::showProfiles() {
   std::vector<std::string> ss;
-  uint b = 0, o = 0;
+  size_t b = 0, o = 0;
   for (const auto& n : this->project().root()[STR_PROFILE]) {
     b = n[STR_NAME].Scalar().size() > b ? n[STR_NAME].Scalar().size() : b;
     o = n["os"] ? n["os"].Scalar().size() > o ? n["os"].Scalar().size() : o : o;
