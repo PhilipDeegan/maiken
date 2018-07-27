@@ -134,7 +134,9 @@ class Executioner : public Constants {
         app.checkErrors(cpc);
         KOUT(INF) << cpc.cmd();
         KOUT(NON) << "Creating bin: " << kul::File(cpc.file()).real();
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
         if (AppVars::INSTANCE().nodes()) DistLinker::send(cpc.file());
+#endif
       }
       return cpc;
     } catch (const CompilerNotFoundException& e) {
@@ -247,7 +249,9 @@ maiken::CompilerProcessCapture maiken::Application::buildLibrary(
       checkErrors(cpc);
       KOUT(INF) << cpc.cmd();
       KOUT(NON) << "Creating lib: " << kul::File(cpc.file()).real();
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
       if (AppVars::INSTANCE().nodes()) DistLinker::send(cpc.file());
+#endif
     }
     return cpc;
   } else
