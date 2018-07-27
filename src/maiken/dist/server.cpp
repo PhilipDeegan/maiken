@@ -41,7 +41,6 @@ kul::http::_1_1Response maiken::dist::Server::respond(
     r.withBody("ruh roh");
     return r.withDefaultHeaders();
   }
-
   maiken::dist::Post p;
   std::istringstream iss(req.body());
   {
@@ -49,7 +48,6 @@ kul::http::_1_1Response maiken::dist::Server::respond(
     iarchive(p);
   }
   p.message()->do_response_for(req, p, sessions, r);
-
   return r.withDefaultHeaders();
 }
 

@@ -79,4 +79,11 @@ maiken::dist::RemoteCommandManager::build_download_request() {
   return std::move(std::make_unique<maiken::dist::DownloadRequest>());
 }
 
+std::unique_ptr<maiken::dist::LinkRequest>
+maiken::dist::RemoteCommandManager::build_link_request(const std::string &b) {
+  return std::move(std::make_unique<maiken::dist::LinkRequest>(b));
+}
+
+
+
 #endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_

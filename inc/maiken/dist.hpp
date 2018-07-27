@@ -57,6 +57,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken {
 namespace dist {
+
+const constexpr size_t BUFF_SIZE = (_KUL_TCP_READ_BUFFER_ - 666);
+
 class Exception : public kul::Exception {
  public:
   Exception(const char *f, const uint16_t &l, const std::string &s)
@@ -144,6 +147,8 @@ class RemoteCommandManager {
 
   std::unique_ptr<DownloadRequest> build_download_request();
 
+  std::unique_ptr<LinkRequest> build_link_request(const std::string &b);
+
   void build_hosts(const Settings &settings) KTHROW(kul::Exception) {
     if (settings.root()["dist"]) {
       if (settings.root()["dist"]["nodes"]) {
@@ -180,6 +185,11 @@ CEREAL_REGISTER_TYPE(maiken::dist::CompileRequest)
 CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::dist::DownloadRequest,
                                    cereal::specialization::member_serialize)
 CEREAL_REGISTER_TYPE(maiken::dist::DownloadRequest)
+
+CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::dist::LinkRequest,
+                                   cereal::specialization::member_serialize)
+CEREAL_REGISTER_TYPE(maiken::dist::LinkRequest)
+
 
 #endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
 #endif  // _MAIKEN_DIST_HPP_

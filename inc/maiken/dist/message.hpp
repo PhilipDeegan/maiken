@@ -34,8 +34,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 namespace dist {
 
-const constexpr size_t BUFF_SIZE = (_KUL_TCP_READ_BUFFER_ - 666);
-
 class Post;
 class Server;
 class ServerSession;
@@ -55,19 +53,20 @@ class AMessage : public Constants {
   void build_from(const YAML::Node &&node) {
     YAML::Emitter out;
     out << node;
-    yaml_str = out.c_str();
+    str = out.c_str();
   }
 
   YAML::Node validate() {
-    kul::yaml::String s(yaml_str);
+    kul::yaml::String s(str);
     return s.validate(validater());
   }
 
+ protected:
+  std::string str;
  private:
-  std::string yaml_str;
   template <class Archive>
   void serialize(Archive &ar) {
-    ar(yaml_str);
+    ar(str);
   }
 };
 
@@ -185,8 +184,36 @@ class DownloadRequest : public ARequest {
   void serialize(Archive &ar) {
     ar(::cereal::make_nvp("ARequest", ::cereal::base_class<ARequest>(this)));
   }
+};
+
+class LinkRequest : public ARequest {
+  friend class ::cereal::access;
+  friend class RemoteCommandManager;
+  friend class Server;
+
+ public:
+  LinkRequest() {}
+  LinkRequest(const std::string &b) {
+    str = b;
+    KLOG(INF) << str.size();
+  }
+  void do_response_for(const kul::http::A1_1Request &req, Post &p,
+                       Sessions &sessions,
+                       kul::http::_1_1Response &resp) override;
 
  private:
+  LinkRequest(const LinkRequest &) = delete;
+  LinkRequest(const LinkRequest &&) = delete;
+  LinkRequest &operator=(const LinkRequest &) = delete;
+  LinkRequest &operator=(const LinkRequest &&) = delete;
+
+  virtual kul::yaml::Validator validater() const override {
+    return kul::yaml::Validator({});
+  };
+  template <class Archive>
+  void serialize(Archive &ar) {
+    ar(::cereal::make_nvp("ARequest", ::cereal::base_class<ARequest>(this)));
+  }
 };
 
 class Blob {

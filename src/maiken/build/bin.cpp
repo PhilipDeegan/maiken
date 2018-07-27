@@ -29,8 +29,56 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
+#include "maiken/dist.hpp"
 
 namespace maiken {
+
+class DistLinker {
+ public:
+  static void send(const kul::File &bin) {
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+    std::vector<std::shared_ptr<maiken::dist::Post>> posts;
+    auto post_lambda = [](const dist::Host& host, const kul::File &bin) {
+      kul::io::BinaryReader br(bin);
+      dist::Blob b;
+      b.files_left = 1;
+      b.file = bin.real();
+      size_t red = 0;
+      do {
+        bzero(b.c1, dist::BUFF_SIZE / 2);
+        red = b.len = br.read(b.c1, dist::BUFF_SIZE / 2);
+        if (red == 0) {
+          b.last_packet = 1;
+          b.files_left = 0;
+        }
+        std::ostringstream ss(std::ios::out | std::ios::binary);
+        {
+          cereal::PortableBinaryOutputArchive oarchive(ss);
+          oarchive(b);
+        }
+        auto link = std::make_shared<maiken::dist::Post>(std::move(
+            maiken::dist::RemoteCommandManager::INST().build_link_request(ss.str())));
+        link->send(host);
+      } while(red > 0);
+    };
+
+
+    auto& hosts(maiken::dist::RemoteCommandManager::INST().hosts());
+    size_t threads = hosts.size();
+    kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);
+    auto post_ex = [&](const kul::Exception& e) {
+      ctp.stop().interrupt();
+      throw e;
+    };
+    for (size_t i = 0; i < threads; i++) {
+      ctp.async(std::bind(post_lambda, std::ref(hosts[i]), std::ref(bin)), post_ex);
+    }
+    ctp.finish(10000000);  // 10 milliseconds
+    ctp.rethrow();
+#endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+  }
+};
+
 class Executioner : public Constants {
   friend class Application;
 
@@ -86,6 +134,7 @@ class Executioner : public Constants {
         app.checkErrors(cpc);
         KOUT(INF) << cpc.cmd();
         KOUT(NON) << "Creating bin: " << kul::File(cpc.file()).real();
+        if (AppVars::INSTANCE().nodes()) DistLinker::send(cpc.file());
       }
       return cpc;
     } catch (const CompilerNotFoundException& e) {
@@ -157,4 +206,51 @@ void maiken::Application::buildTest(const kul::hash::set::String& objects)
     Executioner::build_exe(cobjects, to.first, to.second, testsD, *this);
     kul::File(to.second, objD).mv(tmpD);
   }
+}
+
+maiken::CompilerProcessCapture maiken::Application::buildLibrary(
+    const kul::hash::set::String& objects) KTHROW(kul::Exception) {
+  if (fs.count(lang) > 0) {
+    if (m == compiler::Mode::NONE) m = compiler::Mode::SHAR;
+    if (!(*files().find(lang)).second.count(STR_COMPILER))
+      KEXIT(1, "No compiler found for filetype " + lang);
+    std::string linker = fs[lang][STR_LINKER];
+    std::string linkEnd;
+    if (ro) linkEnd = AppVars::INSTANCE().linker();
+    if (!AppVars::INSTANCE().allinker().empty())
+      linkEnd += " " + AppVars::INSTANCE().allinker();
+    if (!lnk.empty()) linkEnd += " " + lnk;
+    if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() &&
+        linkEnd.size())
+      KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
+    if (m == compiler::Mode::STAT) linker = fs[lang][STR_ARCHIVER];
+    kul::Dir outD(inst ? inst.real() : buildDir());
+    std::string lib(baseLibFilename());
+    lib = AppVars::INSTANCE().dryRun() ? kul::File(lib, outD).esc()
+                                       : kul::File(lib, outD).escm();
+    std::vector<std::string> obV;
+    for (const auto& o : objects) obV.emplace_back(o);
+    const std::string& base(Compilers::INSTANCE().base(
+        (*(*files().find(lang)).second.find(STR_COMPILER)).second));
+    if (cLnk.count(base)) linkEnd += " " + cLnk[base];
+    auto* comp = Compilers::INSTANCE().get(base);
+    auto linkOpt(comp->linkerOptimizationLib(AppVars::INSTANCE().optimise()));
+    if (!linkOpt.empty()) linker += " " + linkOpt;
+    auto linkDbg(comp->linkerDebugLib(AppVars::INSTANCE().debug()));
+    if (!linkDbg.empty()) linker += " " + linkDbg;
+    const CompilerProcessCapture& cpc =
+        comp->buildLibrary(linker, linkEnd, obV, libraries(), libraryPaths(),
+                           lib, m, AppVars::INSTANCE().dryRun());
+    if (AppVars::INSTANCE().dryRun())
+      KOUT(NON) << cpc.cmd();
+    else {
+      checkErrors(cpc);
+      KOUT(INF) << cpc.cmd();
+      KOUT(NON) << "Creating lib: " << kul::File(cpc.file()).real();
+      if (AppVars::INSTANCE().nodes()) DistLinker::send(cpc.file());
+    }
+    return cpc;
+  } else
+    KEXCEPTION("Unable to handle artifact: \"" + lang +
+               "\" - type is not in file list");
 }

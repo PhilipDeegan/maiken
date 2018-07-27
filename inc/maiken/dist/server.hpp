@@ -56,6 +56,7 @@ class ServerSession {
 
  public:
   std::unique_ptr<kul::io::BinaryReader> binary_reader;
+  std::unique_ptr<kul::io::BinaryWriter> binary_writer;
   std::vector<std::pair<std::string, std::string> > m_src_obj;
   kul::hash::set::String objects;
 

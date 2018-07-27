@@ -40,7 +40,7 @@ void maiken::dist::Post::send(
   std::ostringstream ss(std::ios::out | std::ios::binary);
   {
     cereal::PortableBinaryOutputArchive oarchive(ss);
-    oarchive(msg);
+    oarchive(*this);
   }
   std::string s1(ss.str());
   kul::http::_1_1PostRequest(host, res, port)
@@ -48,8 +48,7 @@ void maiken::dist::Post::send(
       .withHeaders(headers)
       .withResponse([&](const kul::http::_1_1Response &r) {
         this->_body = std::move(r.body());
-      })
-      .send();
+      }).send();
 }
 
 #endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
