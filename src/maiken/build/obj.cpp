@@ -218,9 +218,14 @@ void maiken::Application::compile(
 
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
-  auto lambda = [o, e, &ctp, &mute,
+
+  auto lambex = [&](const kul::Exception& e) {
+    ctp.stop();
+    ctp.interrupt();
+  };
+
+  auto lambda = [o, e, &ctp, &mute, &lambex,
                  &cpcs](const maiken::CompilationUnit& c_unit) {
-    if (ctp.exception()) ctp.interrupt();
     const CompilerProcessCapture cpc = c_unit.compile();
     if (!AppVars::INSTANCE().dryRun()) {
       if (kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
@@ -230,13 +235,14 @@ void maiken::Application::compile(
       KOUT(NON) << cpc.cmd();
     std::lock_guard<std::mutex> lock(mute);
     cpcs.push_back(cpc);
-  };
-
-  auto lambex = [&](const kul::Exception& e) {
-    ctp.stop();
-    std::cerr << ":EXCEPTION!: " << e.debug() << std::endl;
-    ctp.interrupt();
-    throw e;
+    try{
+      if (cpc.exception()) std::rethrow_exception(cpc.exception());
+    }
+    catch (const kul::Exception& e) {
+      lambex(e);
+    } catch (const std::exception& e) {
+      KLOG(ERR) << e.what();
+    }
   };
 
   for (const auto& unit : c_units) {

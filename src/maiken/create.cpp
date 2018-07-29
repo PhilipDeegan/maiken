@@ -326,6 +326,15 @@ std::vector<maiken::Application*> maiken::Application::CREATE(
       KEXIT(1, e.stack());
     }
   }
+  if(kul::env::EXISTS("MKN_COMPILE_THREADS")){
+    try {
+      AppVars::INSTANCE().threads(kul::String::UINT16(kul::env::GET("MKN_COMPILE_THREADS")));
+    } catch (const kul::StringException& e) {
+      KEXIT(1, "MKN_COMPILE_THREADS is invalid");
+    } catch (const kul::Exception& e) {
+      KEXIT(1, e.stack());
+    }
+  }
   if (args.has(STR_JARG)) {
     try {
       YAML::Node node = YAML::Load(args.get(STR_JARG));
