@@ -30,8 +30,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/app.hpp"
 
-maiken::Application* maiken::Applications::getOrCreate(
-    const maiken::Project& proj, const std::string& _profile, bool setup)
+maiken::Application *
+maiken::Applications::getOrCreate(const maiken::Project &proj,
+                                  const std::string &_profile, bool setup)
     KTHROW(kul::Exception) {
   std::string pDir(proj.dir().real());
   std::string profile = _profile.empty() ? "@" : _profile;
@@ -41,7 +42,7 @@ maiken::Application* maiken::Applications::getOrCreate(
     m_appPs.push_back(std::move(app));
     m_apps[pDir][profile] = pp;
     if (setup) {
-      const std::string& cwd(kul::env::CWD());
+      const std::string &cwd(kul::env::CWD());
       kul::env::CWD(proj.dir());
       pp->setup();
       kul::env::CWD(cwd);
@@ -50,8 +51,9 @@ maiken::Application* maiken::Applications::getOrCreate(
   return m_apps[pDir][profile];
 }
 
-maiken::Application* maiken::Applications::getOrCreateRoot(
-    const maiken::Project& proj, const std::string& _profile, bool setup)
+maiken::Application *
+maiken::Applications::getOrCreateRoot(const maiken::Project &proj,
+                                      const std::string &_profile, bool setup)
     KTHROW(kul::Exception) {
   std::string pDir(proj.dir().real());
   std::string profile = _profile.empty() ? "@" : _profile;
@@ -62,7 +64,7 @@ maiken::Application* maiken::Applications::getOrCreateRoot(
     m_appPs.push_back(std::move(app));
     m_apps[pDir][profile] = pp;
     if (setup) {
-      const std::string& cwd(kul::env::CWD());
+      const std::string &cwd(kul::env::CWD());
       kul::env::CWD(proj.dir());
       pp->setup();
       kul::env::CWD(cwd);
@@ -71,10 +73,10 @@ maiken::Application* maiken::Applications::getOrCreateRoot(
   return m_apps[pDir][profile];
 }
 
-maiken::Application* maiken::Applications::getOrNullptr(
-    const std::string& project) {
+maiken::Application *
+maiken::Applications::getOrNullptr(const std::string &project) {
   uint8_t count = 0;
-  Application* app = nullptr;
+  Application *app = nullptr;
   for (const auto p1 : m_apps)
     for (const auto p2 : p1.second) {
       if (p2.second->project().root()[STR_NAME].Scalar() == project) {

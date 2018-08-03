@@ -67,7 +67,7 @@ maiken::dist::RemoteCommandManager::build_setup_query(
 std::unique_ptr<maiken::dist::CompileRequest>
 maiken::dist::RemoteCommandManager::build_compile_request(
     const std::string &directory,
-    const std::vector<std::pair<std::string, std::string> > &src_objs) {
+    const std::vector<std::pair<std::string, std::string>> &src_objs) {
   // kul::os::PushDir pushd(a.project().dir());
   return std::move(
       std::make_unique<maiken::dist::CompileRequest>(directory, src_objs));
@@ -84,6 +84,4 @@ maiken::dist::RemoteCommandManager::build_link_request(const std::string &b) {
   return std::move(std::make_unique<maiken::dist::LinkRequest>(b));
 }
 
-
-
-#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+#endif // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_

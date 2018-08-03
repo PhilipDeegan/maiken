@@ -33,25 +33,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/property.hpp"
 
 class UpdateTracker {
- private:
+private:
   kul::hash::set::String paths;
 
- public:
-  bool has(const std::string& path) { return paths.count(path); }
-  void add(const std::string& path) { paths.insert(path); }
-  static UpdateTracker& INSTANCE() {
+public:
+  bool has(const std::string &path) { return paths.count(path); }
+  void add(const std::string &path) { paths.insert(path); }
+  static UpdateTracker &INSTANCE() {
     static UpdateTracker i;
     return i;
   }
 };
 
-void maiken::Application::scmStatus(const bool& deps)
+void maiken::Application::scmStatus(const bool &deps)
     KTHROW(kul::scm::Exception) {
-  std::vector<Application*> v;
+  std::vector<Application *> v;
   if (deps)
     for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) {
-      const std::string& s((*app)->project().dir().real());
-      auto it = std::find_if(v.begin(), v.end(), [&s](const Application* a) {
+      const std::string &s((*app)->project().dir().real());
+      auto it = std::find_if(v.begin(), v.end(), [&s](const Application *a) {
         return a->project().dir().real() == s;
       });
       if (it == v.end() &&
@@ -59,21 +59,24 @@ void maiken::Application::scmStatus(const bool& deps)
         v.push_back(*app);
     }
 
-  for (auto* app : v) app->scmStatus(0);
+  for (auto *app : v)
+    app->scmStatus(0);
   if (!scm && SCMGetter::HAS(this->project().dir()))
     scm = SCMGetter::GET(this->project().dir(), this->scr, isMod);
   if (scm) {
     KOUT(NON) << "SCM STATUS CHECK ON: " << project().dir().real();
-    const std::string& r(this->project().dir().real());
+    const std::string &r(this->project().dir().real());
     scm->status(r);
   }
 }
 
-void maiken::Application::scmUpdate(const bool& f) KTHROW(kul::scm::Exception) {
+void maiken::Application::scmUpdate(const bool &f) KTHROW(kul::scm::Exception) {
   size_t i = 0;
-  const Application* p = this;
-  while ((p = p->par)) i++;
-  if (i > AppVars::INSTANCE().dependencyLevel()) return;
+  const Application *p = this;
+  while ((p = p->par))
+    i++;
+  if (i > AppVars::INSTANCE().dependencyLevel())
+    return;
   if (!scm && SCMGetter::HAS(this->project().dir()))
     scm = SCMGetter::GET(this->project().dir(), this->scr, isMod);
   if (scm && !UpdateTracker::INSTANCE().has(this->project().dir().real())) {
@@ -81,7 +84,7 @@ void maiken::Application::scmUpdate(const bool& f) KTHROW(kul::scm::Exception) {
       KOUT(NON) << "WARNING: ATTEMPTING SCM UPDATE, USER INTERACTION MAY BE "
                    "REQUIRED!";
 
-    const std::string& tscr(
+    const std::string &tscr(
         !this->scr.empty()
             ? this->scr
             : this->project().root()[STR_SCM]
@@ -94,10 +97,10 @@ void maiken::Application::scmUpdate(const bool& f) KTHROW(kul::scm::Exception) {
   }
 }
 
-void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm,
-                                    const std::string& url)
+void maiken::Application::scmUpdate(const bool &f, const kul::SCM *scm,
+                                    const std::string &url)
     KTHROW(kul::scm::Exception) {
-  const std::string& ver(
+  const std::string &ver(
       !this->scv.empty() ? this->scv
                          : this->project().root()[STR_VERSION]
                                ? this->project().root()[STR_VERSION].Scalar()
@@ -106,8 +109,8 @@ void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm,
   if (!f) {
     KOUT(NON) << "CHECKING: " << this->project().dir().real() << " FROM "
               << url;
-    const std::string& lV(scm->localVersion(this->project().dir().real(), ver));
-    const std::string& rV(url.size() ? scm->remoteVersion(url, ver) : "");
+    const std::string &lV(scm->localVersion(this->project().dir().real(), ver));
+    const std::string &rV(url.size() ? scm->remoteVersion(url, ver) : "");
     c = lV != rV;
     std::stringstream ss;
     ss << "UPDATE FROM " << url << " VERSION: " << rV << " (Yes/No/1/0)";
@@ -118,12 +121,14 @@ void maiken::Application::scmUpdate(const bool& f, const kul::SCM* scm,
   }
   if (f || c) {
     std::stringstream ss;
-    if (url.size()) ss << " FROM " << url;
+    if (url.size())
+      ss << " FROM " << url;
     KOUT(NON) << "UPDATING: " << this->project().dir().real() << ss.str();
     scm->up(this->project().dir().real(), url, ver);
     kul::os::PushDir pushd(this->project().dir());
     kul::Dir build(".mkn/build");
     kul::File ts("timestamp", build);
-    if (build && ts) ts.rm();
+    if (build && ts)
+      ts.rm();
   }
 }

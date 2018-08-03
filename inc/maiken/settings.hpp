@@ -40,34 +40,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 
 class SettingsException : public kul::Exception {
- public:
-  SettingsException(const char* f, const uint16_t& l, const std::string& s)
+public:
+  SettingsException(const char *f, const uint16_t &l, const std::string &s)
       : kul::Exception(f, l, s) {}
 };
 
 class Settings : public kul::yaml::File, public Constants {
- private:
+private:
   std::vector<std::string> rrs, rms;
   std::unique_ptr<Settings> sup;
   kul::hash::map::S2S ps;
 
   void resolveProperties() KTHROW(SettingsException);
   static std::unique_ptr<Settings> instance;
-  static void write(const kul::File& f) KTHROW(kul::Exit);
+  static void write(const kul::File &f) KTHROW(kul::Exit);
 
- public:
-  Settings(const std::string& s);
+public:
+  Settings(const std::string &s);
 
-  const Settings* super() const { return sup.get(); }
+  const Settings *super() const { return sup.get(); }
 
   const kul::yaml::Validator validator() const;
-  const std::vector<std::string>& remoteModules() const { return rms; }
-  const std::vector<std::string>& remoteRepos() const { return rrs; }
-  const kul::hash::map::S2S& properties() const { return ps; }
+  const std::vector<std::string> &remoteModules() const { return rms; }
+  const std::vector<std::string> &remoteRepos() const { return rrs; }
+  const kul::hash::map::S2S &properties() const { return ps; }
 
-  static Settings& INSTANCE() KTHROW(kul::Exit);
-  static bool SET(const std::string& s);
-  static std::string RESOLVE(const std::string& s) KTHROW(SettingsException);
+  static Settings &INSTANCE() KTHROW(kul::Exit);
+  static bool SET(const std::string &s);
+  static std::string RESOLVE(const std::string &s) KTHROW(SettingsException);
 };
-}  // namespace maiken
+} // namespace maiken
 #endif /* _MAIKEN_SETTINGS_HPP_ */

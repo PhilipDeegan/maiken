@@ -36,10 +36,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 
 class Exception : public kul::Exception {
- public:
-  Exception(const char* f, const uint16_t& l, const std::string& s)
+public:
+  Exception(const char *f, const uint16_t &l, const std::string &s)
       : kul::Exception(f, l, s) {}
 };
-}  // end namespace maiken
+} // end namespace maiken
 
-#endif  // _MAIKEN_EXCEPT_HPP_
+#endif // _MAIKEN_EXCEPT_HPP_

@@ -65,7 +65,8 @@ maiken::AppVars::AppVars() {
 
   evs["MKN_OBJ"] = "o";
   std::string obj = kul::env::GET("MKN_OBJ");
-  if (!obj.empty()) evs["MKN_OBJ"] = obj;
+  if (!obj.empty())
+    evs["MKN_OBJ"] = obj;
 
 #ifdef _WIN32
   evs["MKN_LIB_EXT"] = "dll";
@@ -75,9 +76,10 @@ maiken::AppVars::AppVars() {
   evs["MKN_LIB_PRE"] = "lib";
 #endif
   std::string ext = kul::env::GET("MKN_LIB_EXT");
-  if (!ext.empty()) evs["MKN_LIB_EXT"] = ext;
+  if (!ext.empty())
+    evs["MKN_LIB_EXT"] = ext;
 
-  if(kul::env::EXISTS("MKN_LIB_PRE")){
+  if (kul::env::EXISTS("MKN_LIB_PRE")) {
     evs["MKN_LIB_PRE"] = kul::env::GET("MKN_LIB_PRE");
   }
 }

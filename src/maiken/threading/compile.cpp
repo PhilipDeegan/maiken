@@ -31,27 +31,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
-    const std::pair<std::string, std::string>& p) const KTHROW(kul::Exception) {
+    const std::pair<std::string, std::string> &p) const KTHROW(kul::Exception) {
   const std::string src(p.first);
   const std::string obj(p.second);
-  const std::string& fileType = src.substr(src.rfind(".") + 1);
-  if(!(app.files().count(fileType))) KEXCEPTION("NOOOOOOO ") << fileType;
-  const std::string& compiler =
+  const std::string &fileType = src.substr(src.rfind(".") + 1);
+  if (!(app.files().count(fileType)))
+    KEXCEPTION("NOOOOOOO ") << fileType;
+  const std::string &compiler =
       (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
-  const std::string& base = maiken::Compilers::INSTANCE().base(compiler);
+  const std::string &base = maiken::Compilers::INSTANCE().base(compiler);
   std::vector<std::string> args;
   if (app.arguments().count(fileType) > 0)
-    for (const std::string& o : (*app.arguments().find(fileType)).second)
-      for (const auto& s : kul::cli::asArgs(o)) args.push_back(s);
-  for (const auto& s : kul::cli::asArgs(app.arg)) args.push_back(s);
+    for (const std::string &o : (*app.arguments().find(fileType)).second)
+      for (const auto &s : kul::cli::asArgs(o))
+        args.push_back(s);
+  for (const auto &s : kul::cli::asArgs(app.arg))
+    args.push_back(s);
   if (app.cArg.count(base))
-    for (const auto& s : kul::cli::asArgs(app.cArg[base])) args.push_back(s);
+    for (const auto &s : kul::cli::asArgs(app.cArg[base]))
+      args.push_back(s);
   std::string cmd = compiler + " " + AppVars::INSTANCE().args();
   if (AppVars::INSTANCE().jargs().count(fileType) > 0)
     cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;
   // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
-  auto compilerFlags = [&args](const std::string&& as) {
-    for (const auto& s : kul::cli::asArgs(as)) args.push_back(s);
+  auto compilerFlags = [&args](const std::string &&as) {
+    for (const auto &s : kul::cli::asArgs(as))
+      args.push_back(s);
   };
   auto comp = Compilers::INSTANCE().get(compiler);
   compilerFlags(comp->compilerDebug(AppVars::INSTANCE().debug()));
@@ -65,9 +70,9 @@ maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const
     KTHROW(kul::Exception) {
   try {
     return comp->compileSource(compiler, args, incs, in, out, mode, dryRun);
-  } catch (const kul::Exception& e) {
+  } catch (const kul::Exception &e) {
     std::rethrow_exception(std::current_exception());
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     std::rethrow_exception(std::current_exception());
   }
   KEXCEPT(maiken::Exception, "this shouldn't happen!");

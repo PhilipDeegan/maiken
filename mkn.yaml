@@ -5,7 +5,7 @@ version: master
 scm: https://github.com/dekken/maiken
 
 property:
-    DATE: 29-JUL-2018
+    DATE: 03-AUG-2018
 
 parent: base
 mode: none
@@ -60,5 +60,5 @@ profile:
     mod:
     - name: clang.format
       init:
-        style: google
+        style: file
         paths: .

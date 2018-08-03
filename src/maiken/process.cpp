@@ -31,30 +31,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 void maiken::Application::process() KTHROW(kul::Exception) {
-  const kul::hash::set::String& cmds(
+  const kul::hash::set::String &cmds(
       CommandStateMachine::INSTANCE().commands());
 
-  auto loadModules = [&](Application& app) {
+  auto loadModules = [&](Application &app) {
 #ifndef _MKN_DISABLE_MODULES_
     for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod) {
       app.mods.push_back(ModuleLoader::LOAD(**mod));
     }
-    for (auto& modLoader : app.mods)
+    for (auto &modLoader : app.mods)
       modLoader->module()->init(app, modLoader->app()->modIArg);
-#endif  //_MKN_DISABLE_MODULES_
+#endif //_MKN_DISABLE_MODULES_
   };
-  auto proc = [&](Application& app, bool work) {
+  auto proc = [&](Application &app, bool work) {
     kul::env::CWD(app.project().dir());
 
     if (work) {
-      if (!app.buildDir()) app.buildDir().mk();
-      if (BuildRecorder::INSTANCE().has(app.buildDir().real())) return;
+      if (!app.buildDir())
+        app.buildDir().mk();
+      if (BuildRecorder::INSTANCE().has(app.buildDir().real()))
+        return;
       BuildRecorder::INSTANCE().add(app.buildDir().real());
     }
 
     kul::Dir mkn(app.buildDir().join(".mkn"));
     std::vector<std::pair<std::string, std::string>> oldEvs;
-    for (const kul::cli::EnvVar& ev : app.envVars()) {
+    for (const kul::cli::EnvVar &ev : app.envVars()) {
       const std::string v = kul::env::GET(ev.name());
       oldEvs.push_back(std::pair<std::string, std::string>(ev.name(), v));
       kul::env::SET(ev.name(), ev.toString().c_str());
@@ -64,28 +66,30 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       mkn.rm();
     }
     app.loadTimeStamps();
-    if (cmds.count(STR_TRIM)) app.trim();
+    if (cmds.count(STR_TRIM))
+      app.trim();
 
     kul::hash::set::String objects;
     if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE)) {
-      for (auto& modLoader : app.mods)
+      for (auto &modLoader : app.mods)
         modLoader->module()->compile(app, modLoader->app()->modCArg);
-      if (work) app.compile(objects);
+      if (work)
+        app.compile(objects);
     }
     if (cmds.count(STR_BUILD) || cmds.count(STR_LINK)) {
-      for (auto& modLoader : app.mods)
+      for (auto &modLoader : app.mods)
         modLoader->module()->link(app, modLoader->app()->modLArg);
       if (work) {
         app.findObjects(objects);
         app.link(objects);
       }
     }
-    for (const std::pair<std::string, std::string>& oldEv : oldEvs)
+    for (const std::pair<std::string, std::string> &oldEv : oldEvs)
       kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
   };
 
   auto _mods = ModuleMinimiser::modules(*this);
-  for (auto& mod : ModuleMinimiser::modules(*this)) {
+  for (auto &mod : ModuleMinimiser::modules(*this)) {
     bool build = mod.second->is_build_required();
     bool is_build_stale = mod.second->is_build_stale();
     if (!build && (is_build_stale && !maiken::AppVars::INSTANCE().quiet())) {
@@ -99,7 +103,8 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     }
     if (build) {
       CommandStateMachine::INSTANCE().main(0);
-      for (auto& m : _mods) m.second->process();
+      for (auto &m : _mods)
+        m.second->process();
       CommandStateMachine::INSTANCE().main(1);
     }
   }
@@ -109,18 +114,22 @@ void maiken::Application::process() KTHROW(kul::Exception) {
   loadModules(*this);
 
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) {
-    if ((*app)->ig) continue;
-    if ((*app)->lang.empty()) (*app)->resolveLang();
+    if ((*app)->ig)
+      continue;
+    if ((*app)->lang.empty())
+      (*app)->resolveLang();
     (*app)->main.clear();
     proc(**app, !(*app)->srcs.empty());
   }
-  if (!this->ig) proc(*this, (!this->srcs.empty() || !this->main.empty()));
+  if (!this->ig)
+    proc(*this, (!this->srcs.empty() || !this->main.empty()));
 
-  if (cmds.count(STR_TEST) && !this->ig) test();
+  if (cmds.count(STR_TEST) && !this->ig)
+    test();
 
   if (cmds.count(STR_PACK)) {
     pack();
-    for (auto& modLoader : mods)
+    for (auto &modLoader : mods)
       modLoader->module()->pack(*this, modLoader->app()->modPArg);
   }
   if (CommandStateMachine::INSTANCE().main() &&

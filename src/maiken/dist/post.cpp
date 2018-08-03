@@ -36,7 +36,8 @@ void maiken::dist::Post::send(
     const std::string &host, const std::string &res, const uint16_t &port,
     const std::unordered_map<std::string, std::string> headers)
     KTHROW(maiken::Exception) {
-  if (msg == nullptr) KEXCEPTION("Cannot send post without message");
+  if (msg == nullptr)
+    KEXCEPTION("Cannot send post without message");
   std::ostringstream ss(std::ios::out | std::ios::binary);
   {
     cereal::PortableBinaryOutputArchive oarchive(ss);
@@ -48,7 +49,8 @@ void maiken::dist::Post::send(
       .withHeaders(headers)
       .withResponse([&](const kul::http::_1_1Response &r) {
         this->_body = std::move(r.body());
-      }).send();
+      })
+      .send();
 }
 
-#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+#endif // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_

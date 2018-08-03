@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_LANG_ERR_HPP_
 #define _MAIKEN_LANG_ERR_HPP_
 
-#define MKN_ERR_SQRBRKT_MISMATCH_DEP_CLI \
+#define MKN_ERR_SQRBRKT_MISMATCH_DEP_CLI                                       \
   "Square bracket [] mismatch in dependency arguments"
 #define MKN_ERR_INVALID_DEP_CLI "Invalid -d argument provided"
 #define MKN_ERR_INVALID_WIT_CLI "Invalid -w argument provided"

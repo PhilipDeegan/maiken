@@ -43,11 +43,11 @@ using Sessions = std::unordered_map<std::string, ServerSession>;
 class AMessage : public Constants {
   friend class ::cereal::access;
 
- public:
+public:
   virtual ~AMessage() {}
   std::string clazz_name() const { return std::string(typeid(*this).name()); }
 
- protected:
+protected:
   virtual kul::yaml::Validator validater() const = 0;
 
   void build_from(const YAML::Node &&node) {
@@ -61,22 +61,19 @@ class AMessage : public Constants {
     return s.validate(validater());
   }
 
- protected:
+protected:
   std::string str;
- private:
-  template <class Archive>
-  void serialize(Archive &ar) {
-    ar(str);
-  }
+
+private:
+  template <class Archive> void serialize(Archive &ar) { ar(str); }
 };
 
 class ARequest : public AMessage {
   friend class ::cereal::access;
 
- public:
+public:
   ARequest() {}
-  template <class Archive>
-  void serialize(Archive &ar) {
+  template <class Archive> void serialize(Archive &ar) {
     ar(::cereal::make_nvp("AMessage", ::cereal::base_class<AMessage>(this)));
   }
 
@@ -90,7 +87,7 @@ class SetupRequest : public ARequest {
   friend class RemoteCommandManager;
   friend class Server;
 
- public:
+public:
   SetupRequest() {}
   SetupRequest(const std::string &project, const std::string &settings,
                const kul::cli::Args &args)
@@ -103,23 +100,22 @@ class SetupRequest : public ARequest {
                        Sessions &sessions,
                        kul::http::_1_1Response &resp) override;
 
- public:
+public:
   kul::cli::Args m_args;
 
- private:
+private:
   SetupRequest(const SetupRequest &) = delete;
   SetupRequest(const SetupRequest &&) = delete;
   SetupRequest &operator=(const SetupRequest &) = delete;
   SetupRequest &operator=(const SetupRequest &&) = delete;
-  template <class Archive>
-  void serialize(Archive &ar) {
+  template <class Archive> void serialize(Archive &ar) {
     ar(::cereal::make_nvp("ARequest", ::cereal::base_class<ARequest>(this)));
     ar(::cereal::make_nvp("m_project_yaml", m_project_yaml));
     ar(::cereal::make_nvp("m_settings_yaml", m_settings_yaml));
     ar(::cereal::make_nvp("m_args", m_args));
   }
 
- private:
+private:
   std::string m_project_yaml, m_settings_yaml;
 };
 
@@ -128,18 +124,18 @@ class CompileRequest : public ARequest {
   friend class RemoteCommandManager;
   friend class Server;
 
- public:
+public:
   CompileRequest() {}
   CompileRequest(
       const std::string &directory,
-      const std::vector<std::pair<std::string, std::string> > &src_obj)
+      const std::vector<std::pair<std::string, std::string>> &src_obj)
       : m_directory(directory), m_src_obj(src_obj) {}
 
   void do_response_for(const kul::http::A1_1Request &req, Post &p,
                        Sessions &sessions,
                        kul::http::_1_1Response &resp) override;
 
- private:
+private:
   CompileRequest(const CompileRequest &) = delete;
   CompileRequest(const CompileRequest &&) = delete;
   CompileRequest &operator=(const CompileRequest &) = delete;
@@ -148,16 +144,15 @@ class CompileRequest : public ARequest {
   virtual kul::yaml::Validator validater() const override {
     return kul::yaml::Validator({});
   };
-  template <class Archive>
-  void serialize(Archive &ar) {
+  template <class Archive> void serialize(Archive &ar) {
     ar(::cereal::make_nvp("ARequest", ::cereal::base_class<ARequest>(this)));
     ar(::cereal::make_nvp("m_src_obj", m_src_obj));
     ar(::cereal::make_nvp("m_directory", m_directory));
   }
 
- private:
+private:
   std::string m_directory;
-  std::vector<std::pair<std::string, std::string> > m_src_obj;
+  std::vector<std::pair<std::string, std::string>> m_src_obj;
 };
 
 class DownloadRequest : public ARequest {
@@ -165,13 +160,13 @@ class DownloadRequest : public ARequest {
   friend class RemoteCommandManager;
   friend class Server;
 
- public:
+public:
   DownloadRequest() {}
   void do_response_for(const kul::http::A1_1Request &req, Post &p,
                        Sessions &sessions,
                        kul::http::_1_1Response &resp) override;
 
- private:
+private:
   DownloadRequest(const DownloadRequest &) = delete;
   DownloadRequest(const DownloadRequest &&) = delete;
   DownloadRequest &operator=(const DownloadRequest &) = delete;
@@ -180,8 +175,7 @@ class DownloadRequest : public ARequest {
   virtual kul::yaml::Validator validater() const override {
     return kul::yaml::Validator({});
   };
-  template <class Archive>
-  void serialize(Archive &ar) {
+  template <class Archive> void serialize(Archive &ar) {
     ar(::cereal::make_nvp("ARequest", ::cereal::base_class<ARequest>(this)));
   }
 };
@@ -191,17 +185,16 @@ class LinkRequest : public ARequest {
   friend class RemoteCommandManager;
   friend class Server;
 
- public:
+public:
   LinkRequest() {}
   LinkRequest(const std::string &b) {
     str = b;
-    KLOG(INF) << str.size();
   }
   void do_response_for(const kul::http::A1_1Request &req, Post &p,
                        Sessions &sessions,
                        kul::http::_1_1Response &resp) override;
 
- private:
+private:
   LinkRequest(const LinkRequest &) = delete;
   LinkRequest(const LinkRequest &&) = delete;
   LinkRequest &operator=(const LinkRequest &) = delete;
@@ -210,22 +203,20 @@ class LinkRequest : public ARequest {
   virtual kul::yaml::Validator validater() const override {
     return kul::yaml::Validator({});
   };
-  template <class Archive>
-  void serialize(Archive &ar) {
+  template <class Archive> void serialize(Archive &ar) {
     ar(::cereal::make_nvp("ARequest", ::cereal::base_class<ARequest>(this)));
   }
 };
 
 class Blob {
- public:
+public:
   bool last_packet = 0;
   size_t len = 0, files_left = 1;
   uint8_t *c1 = new uint8_t[BUFF_SIZE];
   std::string file;
   Blob() {}
   ~Blob() { delete[] c1; }
-  template <class Archive>
-  void serialize(Archive &ar) {
+  template <class Archive> void serialize(Archive &ar) {
     ar(last_packet);
     ar(cereal::make_size_tag(files_left));
     ar(cereal::make_size_tag(len));
@@ -233,13 +224,13 @@ class Blob {
     ar(file);
   }
 
- private:
+private:
   Blob(const Blob &) = delete;
   Blob(const Blob &&) = delete;
   Blob &operator=(const Blob &) = delete;
   Blob &operator=(const Blob &&) = delete;
 };
-}  // end namespace dist
-}  // end namespace maiken
+} // end namespace dist
+} // end namespace maiken
 
-#endif  // _MAIKEN_DIST_MESSAGE_HPP_
+#endif // _MAIKEN_DIST_MESSAGE_HPP_

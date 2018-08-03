@@ -29,8 +29,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/regex.hpp"
-#include <regex>
 #include "kul/log.hpp"
+#include <regex>
 
 std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
     KTHROW(kul::Exception) {
@@ -38,8 +38,10 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
   auto posL = str.find("(");
   auto posR = str.find(")");
 
-  if (posL == std::string::npos || posR == std::string::npos) return v;
-  if (str.size() > 1 && str.substr(0, 2) == "./") str = str.substr(2);
+  if (posL == std::string::npos || posR == std::string::npos)
+    return v;
+  if (str.size() > 1 && str.substr(0, 2) == "./")
+    str = str.substr(2);
 
   kul::Dir d(str);
   std::string built, prnt;
@@ -65,7 +67,7 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
 
   std::string rem, rule;
   size_t bitsIndex = 0;
-  for (const auto& s : bits) {
+  for (const auto &s : bits) {
     auto posL = s.find("(");
     auto posR = s.find(")");
     if (posL != std::string::npos && posR != std::string::npos) {
@@ -87,7 +89,7 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
   d = built;
 
   auto regexer = [&](auto items) {
-    for (const auto& item : items) {
+    for (const auto &item : items) {
       try {
         std::regex re(str);
         std::smatch match;
@@ -95,7 +97,7 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
         if (std::regex_search(subject, match, re) && match.size() > 1)
           RESOLVE_REGEX_REC(item.real(), built, subject, rem, bits, bitsIndex,
                             v);
-      } catch (std::regex_error& e) {
+      } catch (std::regex_error &e) {
         KEXIT(1, "Regex Failure:\n") << e.what();
       }
     }
@@ -105,9 +107,9 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
 }
 
 void maiken::Regexer::RESOLVE_REGEX_REC(
-    const std::string& i, const std::string& b, const std::string& s,
-    const std::string& r, const std::vector<std::string>& bits,
-    const size_t& bitsIndex, std::vector<std::string>& v)
+    const std::string &i, const std::string &b, const std::string &s,
+    const std::string &r, const std::vector<std::string> &bits,
+    const size_t &bitsIndex, std::vector<std::string> &v)
     KTHROW(kul::Exception) {
   if (kul::File(i).is() && !kul::Dir(i).is()) {
     v.push_back(i);

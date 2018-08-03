@@ -30,4 +30,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/compiler/cpp.hpp"
 
-maiken::cpp::ClangCompiler::ClangCompiler(const int& v) : GccCompiler(v) {}
+maiken::cpp::ClangCompiler::ClangCompiler(const int &v) : GccCompiler(v) {}

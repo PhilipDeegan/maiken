@@ -30,18 +30,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-kul::File maiken::ModuleLoader::FIND(const Application& ap)
+kul::File maiken::ModuleLoader::FIND(const Application &ap)
 #ifndef _MKN_DISABLE_MODULES_
     KTHROW(kul::sys::Exception)
-#endif  //_MKN_DISABLE_MODULES_
+#endif //_MKN_DISABLE_MODULES_
 {
 #ifdef _MKN_DISABLE_MODULES_
   KEXCEPT(kul::Exception, "Modules are disabled: ") << ap.project().dir();
-#endif  //_MKN_DISABLE_MODULES_
+#endif //_MKN_DISABLE_MODULES_
 
   std::string file;
-  for (const auto& f : ap.buildDir().files(0)) {
-    const auto& name(f.name());
+  for (const auto &f : ap.buildDir().files(0)) {
+    const auto &name(f.name());
     if (name.find(".") != std::string::npos &&
         name.find(ap.project().root()["name"].Scalar()) != std::string::npos
 #ifdef _WIN32
@@ -58,18 +58,19 @@ kul::File maiken::ModuleLoader::FIND(const Application& ap)
   if (!lib)
     KEXCEPT(kul::sys::Exception, "No loadable library found for project: ")
         << ap.project().dir();
-#endif  //_MKN_DISABLE_MODULES_
+#endif //_MKN_DISABLE_MODULES_
   return lib;
 }
 
-std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(
-    const Application& ap)
+std::shared_ptr<maiken::ModuleLoader>
+maiken::ModuleLoader::LOAD(const Application &ap)
 #ifndef _MKN_DISABLE_MODULES_
     KTHROW(kul::sys::Exception)
-#endif  //_MKN_DISABLE_MODULES_
+#endif //_MKN_DISABLE_MODULES_
 {
   for (auto dep = ap.dependencies().rbegin(); dep != ap.dependencies().rend();
        ++dep)
-    if (!(**dep).sources().empty()) GlobalModules::INSTANCE().load(**dep);
+    if (!(**dep).sources().empty())
+      GlobalModules::INSTANCE().load(**dep);
   return std::make_shared<ModuleLoader>(ap, kul::File(FIND(ap)));
 }

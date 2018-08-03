@@ -31,24 +31,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/log.hpp"
 #include "maiken.hpp"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   maiken::PROGRAM = argv[0];
   uint8_t ret = 0;
   const auto s = kul::Now::MILLIS();
   try {
-    for (auto app : maiken::Application::CREATE(argc, argv)) app->process();
+    for (auto app : maiken::Application::CREATE(argc, argv))
+      app->process();
     KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
     KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
-  } catch (const kul::Exit& e) {
-    if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e;
+  } catch (const kul::Exit &e) {
+    if (e.code() != 0)
+      KERR << kul::os::EOL() << "ERROR: " << e;
     ret = e.code();
-  } catch (const kul::proc::ExitException& e) {
+  } catch (const kul::proc::ExitException &e) {
     KERR << e;
     ret = e.code();
-  } catch (const kul::Exception& e) {
+  } catch (const kul::Exception &e) {
     KERR << e.stack();
     ret = 2;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     KERR << e.what();
     ret = 3;
   }

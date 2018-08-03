@@ -42,8 +42,8 @@ namespace maiken {
 class Application;
 
 class ProjectException : public kul::Exception {
- public:
-  ProjectException(const char* f, const uint16_t& l, const std::string& s)
+public:
+  ProjectException(const char *f, const uint16_t &l, const std::string &s)
       : kul::Exception(f, l, s) {}
 };
 
@@ -53,28 +53,29 @@ class KUL_PUBLISH Project : public kul::yaml::File, public Constants {
   friend class Application;
   friend class kul::yaml::File;
 
- public:
-  Project(const kul::Dir& d)
-      : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml")),
-        m_dir(d.real()) {}
-  Project(const Project& p) : kul::yaml::File(p), m_dir(p.m_dir) {}
-  const kul::Dir& dir() const { return m_dir; }
+public:
+  Project(const kul::Dir &d)
+      : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml")), m_dir(d.real()) {
+  }
+  Project(const Project &p) : kul::yaml::File(p), m_dir(p.m_dir) {}
+  const kul::Dir &dir() const { return m_dir; }
   const kul::yaml::Validator validator() const;
 
-  static kul::hash::map::S2S populate_tests(const YAML::Node& node);
+  static kul::hash::map::S2S populate_tests(const YAML::Node &node);
 
- private:
+private:
   const kul::Dir m_dir;
 };
 
 class Projects {
- public:
-  static Projects& INSTANCE() {
+public:
+  static Projects &INSTANCE() {
     static Projects p;
     return p;
   }
-  const Project* getOrCreate(const kul::Dir& d) {
-    if (!d) KEXCEPT(ProjectException, "Directory does not exist:\n" + d.path());
+  const Project *getOrCreate(const kul::Dir &d) {
+    if (!d)
+      KEXCEPT(ProjectException, "Directory does not exist:\n" + d.path());
     kul::File f("mkn.yaml", d);
     if (!f.is())
       KEXCEPT(ProjectException, "project file does not exist:\n" + f.full());
@@ -83,7 +84,7 @@ class Projects {
       try {
         kul::yaml::Item::VALIDATE(project->root(),
                                   project->validator().children());
-      } catch (const kul::yaml::Exception& e) {
+      } catch (const kul::yaml::Exception &e) {
         KEXCEPT(ProjectException,
                 "YAML error encountered in file: " + f.real());
       }
@@ -93,26 +94,26 @@ class Projects {
     }
     return m_projects[f.real()];
   }
-  void reload(const Project& proj) {
+  void reload(const Project &proj) {
     if (!m_reloaded.count(proj.file())) {
       m_projects[proj.file()]->reload();
       m_reloaded.insert(proj.file());
     }
   }
 
- private:
+private:
   std::vector<std::unique_ptr<Project>> m_pps;
   kul::hash::set::String m_reloaded;
-  kul::hash::map::S2T<Project*> m_projects;
+  kul::hash::map::S2T<Project *> m_projects;
 };
 
 class NewProject {
- private:
+private:
   kul::File f;
   void write();
-  const kul::File& file() const { return f; }
+  const kul::File &file() const { return f; }
 
- public:
+public:
   NewProject() KTHROW(ProjectException) : f("mkn.yaml", kul::env::CWD()) {
     if (!f.is())
       write();
@@ -120,5 +121,5 @@ class NewProject {
       KEXCEPT(ProjectException, "mkn.yaml already exists");
   }
 };
-}  // namespace maiken
+} // namespace maiken
 #endif /* _MAIKEN_PROJECT_HPP_ */

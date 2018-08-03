@@ -25,17 +25,15 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#include "maiken/dist.hpp"
-
 #include "kul/cli.hpp"
 #include "kul/signal.hpp"
+#include "maiken/dist.hpp"
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(bzero)
 #define bzero ZeroMemory
 #endif
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   kul::Signal sig;
   int exit_code = 0;
   try {
@@ -45,7 +43,7 @@ int main(int argc, char* argv[]) {
     Args args({}, {Arg('d', maiken::Constants::STR_DIR, ArgType::STRING)});
     try {
       args.process(argc, argv);
-    } catch (const kul::cli::Exception& e) {
+    } catch (const kul::cli::Exception &e) {
       KEXIT(1, e.what());
     }
     if (args.has(maiken::Constants::STR_DIR)) {
@@ -54,7 +52,6 @@ int main(int argc, char* argv[]) {
         KEXCEPT(kul::Exception,
                 "diretory provided does not exist or cannot be created");
     }
-
     maiken::dist::Server serv(8888, d, 3);
     kul::Thread thread(std::ref(serv));
     sig.intr([&](int16_t) {
@@ -64,17 +61,16 @@ int main(int argc, char* argv[]) {
     });
     thread.join();
     KLOG(INF);
-  } catch (const kul::Exit& e) {
-    if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e;
+  } catch (const kul::Exit &e) {
+    if (e.code() != 0)
+      KERR << kul::os::EOL() << "ERROR: " << e;
     exit_code = e.code();
-    KLOG(INF);
-  } catch (const kul::proc::ExitException& e) {
-    KERR << e;
+  } catch (const kul::proc::ExitException &e) {
     exit_code = e.code();
-  } catch (const kul::Exception& e) {
+  } catch (const kul::Exception &e) {
     KERR << e.stack();
     exit_code = 2;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     KERR << e.what();
     exit_code = 3;
   }

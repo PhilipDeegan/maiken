@@ -44,8 +44,8 @@ void maiken::Application::resolveProperties() KTHROW(maiken::Exception) {
   }
 }
 
-std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(
-    const kul::hash::map::S2S& ps, const std::string& s)
+std::shared_ptr<std::tuple<std::string, int, int>>
+maiken::Properties::KEY(const kul::hash::map::S2S &ps, const std::string &s)
     KTHROW(kul::Exception) {
   std::string r = s;
   int lb = s.find("${");
@@ -66,16 +66,16 @@ std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(
   return std::shared_ptr<std::tuple<std::string, int, int>>(0);
 }
 
-std::string maiken::Properties::RESOLVE(const Application& app,
-                                        const std::string& s)
+std::string maiken::Properties::RESOLVE(const Application &app,
+                                        const std::string &s)
     KTHROW(kul::Exception) {
   std::string r = s;
   std::shared_ptr<std::tuple<std::string, int, int>> t =
       KEY(app.properties(), s);
   if (t) {
     std::string k = std::get<0>(*t);
-    const int& lb = std::get<1>(*t);
-    const int& rb = std::get<2>(*t);
+    const int &lb = std::get<1>(*t);
+    const int &rb = std::get<2>(*t);
 
     if (AppVars::INSTANCE().properkeys().count(k))
       k = (*AppVars::INSTANCE().properkeys().find(k)).second;
@@ -92,16 +92,16 @@ std::string maiken::Properties::RESOLVE(const Application& app,
   return r;
 }
 
-std::string maiken::Properties::RESOLVE(const Settings& set,
-                                        const std::string& s)
+std::string maiken::Properties::RESOLVE(const Settings &set,
+                                        const std::string &s)
     KTHROW(kul::Exception) {
   std::string r = s;
   std::shared_ptr<std::tuple<std::string, int, int>> t =
       KEY(set.properties(), s);
   if (t) {
     std::string k = std::get<0>(*t);
-    const int& lb = std::get<1>(*t);
-    const int& rb = std::get<2>(*t);
+    const int &lb = std::get<1>(*t);
+    const int &rb = std::get<2>(*t);
 
     if (AppVars::INSTANCE().properkeys().count(k))
       k = (*AppVars::INSTANCE().properkeys().find(k)).second;
