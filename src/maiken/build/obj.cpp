@@ -119,8 +119,7 @@ void maiken::Application::compile(
             obj = kul::File(std::string(b.file + ".new"));
           fw.bw = std::make_unique<kul::io::BinaryWriter>(obj);
         }
-        for (size_t i = 0; i < b.len; i++)
-          (*fw.bw.get()) << b.c1[i];
+        fw.bw->write(b.c1, b.len);
       }
       if (b.last_packet)
         fw.bw.reset();
