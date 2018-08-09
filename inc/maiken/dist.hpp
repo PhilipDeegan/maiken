@@ -61,14 +61,13 @@ namespace dist {
 const constexpr size_t BUFF_SIZE = (_KUL_TCP_READ_BUFFER_ - 666);
 
 class Exception : public kul::Exception {
-public:
-  Exception(const char *f, const uint16_t &l, const std::string &s)
-      : kul::Exception(f, l, s) {}
+ public:
+  Exception(const char *f, const uint16_t &l, const std::string &s) : kul::Exception(f, l, s) {}
 };
 class RemoteCommandManager;
 class Server;
-} // namespace dist
-} // namespace maiken
+}  // namespace dist
+}  // namespace maiken
 
 #include "maiken/dist/message.hpp"
 #include "maiken/dist/server.hpp"
@@ -78,11 +77,11 @@ class Application;
 namespace dist {
 
 class Host {
-private:
+ private:
   uint16_t m_port;
   std::string m_host;
 
-public:
+ public:
   Host(std::string host, uint16_t port) : m_port(port), m_host(host) {}
   const std::string &host() const { return m_host; }
   const uint16_t &port() const { return m_port; }
@@ -97,7 +96,7 @@ class Post {
   friend class ::cereal::access;
   friend class Server;
 
-public:
+ public:
   ~Post() {}
   explicit Post(ARequest *_msg) : msg(std::unique_ptr<ARequest>(_msg)) {}
 
@@ -105,8 +104,7 @@ public:
   void send(const Host &host) KTHROW(Exception) {
     send(host.host(), "res", host.port(), {{"session", host.session_id()}});
   }
-  void send(const std::string &host, const std::string &res,
-            const uint16_t &port,
+  void send(const std::string &host, const std::string &res, const uint16_t &port,
             const std::unordered_map<std::string, std::string> headers = {{}})
       KTHROW(maiken::Exception);
   ARequest *message() { return msg.get(); }
@@ -115,23 +113,24 @@ public:
 
   void release() { msg.release(); }
 
-private:
+ private:
   Post() {}
   Post(const Post &) = delete;
   Post(const Post &&) = delete;
   Post &operator=(const Post &) = delete;
   Post &operator=(const Post &&) = delete;
-  template <class Archive> void serialize(Archive &ar) {
+  template <class Archive>
+  void serialize(Archive &ar) {
     ar(::cereal::make_nvp("msg", msg));
   }
 
-private:
+ private:
   std::string _body;
   std::unique_ptr<ARequest> msg = nullptr;
 };
 
 class RemoteCommandManager {
-public:
+ public:
   static RemoteCommandManager &INST() {
     static RemoteCommandManager inst;
     return inst;
@@ -152,26 +151,23 @@ public:
     if (settings.root()["dist"]) {
       if (settings.root()["dist"]["nodes"]) {
         for (const auto &node : settings.root()["dist"]["nodes"]) {
-          m_hosts.emplace_back(node["host"].Scalar(),
-                               kul::String::UINT16(node["port"].Scalar()));
+          m_hosts.emplace_back(node["host"].Scalar(), kul::String::UINT16(node["port"].Scalar()));
         }
       }
     }
   }
   const std::vector<Host> &hosts() const { return m_hosts; }
 
-private:
+ private:
   std::vector<Host> m_hosts;
 };
 using RMC = RemoteCommandManager;
-} // end namespace dist
-} // end namespace maiken
+}  // end namespace dist
+}  // end namespace maiken
 
-CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::dist::AMessage,
-                                   cereal::specialization::member_serialize)
+CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::dist::AMessage, cereal::specialization::member_serialize)
 
-CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::dist::ARequest,
-                                   cereal::specialization::member_serialize)
+CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::dist::ARequest, cereal::specialization::member_serialize)
 
 CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::dist::SetupRequest,
                                    cereal::specialization::member_serialize)
@@ -189,5 +185,5 @@ CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::dist::LinkRequest,
                                    cereal::specialization::member_serialize)
 CEREAL_REGISTER_TYPE(maiken::dist::LinkRequest)
 
-#endif // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
-#endif // _MAIKEN_DIST_HPP_
+#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+#endif  // _MAIKEN_DIST_HPP_

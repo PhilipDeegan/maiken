@@ -58,8 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _MKN_REMOTE_REPO_ */
 
 #ifndef _MKN_REMOTE_MOD_
-#define _MKN_REMOTE_MOD_                                                       \
-  "https://github.com/mkn-mod/ https://gitlab.com/mkn-mod/"
+#define _MKN_REMOTE_MOD_ "https://github.com/mkn-mod/ https://gitlab.com/mkn-mod/"
 #endif /* _MKN_REMOTE_MOD_ */
 
 #ifndef _MKN_TIMESTAMPS_
@@ -76,7 +75,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken {
 class Constants {
-public:
+ public:
   static constexpr const char *STR_VERSION = "version";
 
   static constexpr const char *STR_MAIKEN = "maiken";
@@ -193,7 +192,7 @@ public:
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   static constexpr const char *STR_NODES = "nodes";
-#endif //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
 };
-} // namespace maiken
+}  // namespace maiken
 #endif /* _MAIKEN_DEFS_HPP_ */

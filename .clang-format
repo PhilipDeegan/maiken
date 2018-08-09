@@ -1,1 +1,2 @@
-../../lib/.clang-format
+BasedOnStyle: 'google'
+ColumnLimit: 100

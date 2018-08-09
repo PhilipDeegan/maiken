@@ -32,14 +32,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void maiken::Application::writeTimeStamps(kul::hash::set::String &objects,
                                           std::vector<kul::File> &cacheFiles) {
-  const std::string oType(
-      "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
+  const std::string oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
   kul::Dir mkn(buildDir().join(".mkn"), 1);
   kul::File srcStamps("src_stamp", mkn);
   kul::File incStamps("inc_stamp", mkn);
   for (const auto &src : stss)
-    if (std::find(cacheFiles.begin(), cacheFiles.end(), src.first) ==
-        cacheFiles.end())
+    if (std::find(cacheFiles.begin(), cacheFiles.end(), src.first) == cacheFiles.end())
       cacheFiles.push_back(src.first);
   kul::hash::map::S2T<const Compiler *> compilers;
   for (const auto &f : cacheFiles) {
@@ -48,8 +46,7 @@ void maiken::Application::writeTimeStamps(kul::hash::set::String &objects,
     if (compilers.count(ft))
       compiler = (*compilers.find(ft)).second;
     else {
-      compiler = Compilers::INSTANCE().get(
-          (*(*files().find(ft)).second.find(STR_COMPILER)).second);
+      compiler = Compilers::INSTANCE().get((*(*files().find(ft)).second.find(STR_COMPILER)).second);
       compilers.insert(ft, compiler);
     }
     if (compiler->sourceIsBin())
@@ -63,13 +60,10 @@ void maiken::Application::writeTimeStamps(kul::hash::set::String &objects,
 
   kul::io::Writer srcW(srcStamps);
   kul::io::Writer incW(incStamps);
-  for (const auto &i : includeStamps)
-    incW << i.first << " " << i.second << kul::os::EOL();
+  for (const auto &i : includeStamps) incW << i.first << " " << i.second << kul::os::EOL();
   for (const auto &src : cacheFiles)
-    if (!(*compilers.find(src.name().substr(src.name().rfind(".") + 1)))
-             .second->sourceIsBin())
-      srcW << src.mini() << " " << src.timeStamps().modified()
-           << kul::os::EOL();
+    if (!(*compilers.find(src.name().substr(src.name().rfind(".") + 1))).second->sourceIsBin())
+      srcW << src.mini() << " " << src.timeStamps().modified() << kul::os::EOL();
 }
 
 void maiken::Application::loadTimeStamps() KTHROW(kul::StringException) {
@@ -81,12 +75,10 @@ void maiken::Application::loadTimeStamps() KTHROW(kul::StringException) {
       const char *c = 0;
       while ((c = r.readLine())) {
         std::string s(c);
-        if (s.size() == 0)
-          continue;
+        if (s.size() == 0) continue;
         std::vector<std::string> bits;
         kul::String::SPLIT(s, ' ', bits);
-        if (bits.size() != 2)
-          KEXIT(1, "timestamp file invalid format\n" + src.full());
+        if (bits.size() != 2) KEXIT(1, "timestamp file invalid format\n" + src.full());
         try {
           stss.insert(bits[0], kul::String::UINT64(bits[1]));
         } catch (const kul::StringException &e) {
@@ -100,20 +92,17 @@ void maiken::Application::loadTimeStamps() KTHROW(kul::StringException) {
       const char *c = 0;
       while ((c = r.readLine())) {
         std::string s(c);
-        if (s.size() == 0)
-          continue;
+        if (s.size() == 0) continue;
         std::vector<std::string> bits;
         kul::String::SPLIT(s, ' ', bits);
-        if (bits.size() != 2)
-          KEXIT(1, "timestamp file invalid format\n" + inc.full());
+        if (bits.size() != 2) KEXIT(1, "timestamp file invalid format\n" + inc.full());
         itss.insert(bits[0], bits[1]);
       }
     }
     for (const auto &i : includes()) {
       kul::Dir inc(i.first);
       uint64_t includeStamp = inc.timeStamps().modified();
-      for (const auto fi : inc.files(1))
-        includeStamp += fi.timeStamps().modified();
+      for (const auto fi : inc.files(1)) includeStamp += fi.timeStamps().modified();
       std::ostringstream os;
       os << std::hex << includeStamp;
       includeStamps.insert(inc.mini(), os.str());

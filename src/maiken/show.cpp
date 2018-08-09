@@ -31,11 +31,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 void maiken::Application::showConfig(bool force) {
-  if (AppVars::INSTANCE().show() || AppVars::INSTANCE().dryRun())
-    return;
+  if (AppVars::INSTANCE().show() || AppVars::INSTANCE().dryRun()) return;
   if (kul::LogMan::INSTANCE().inf() || force) {
-    std::string repo =
-        (*AppVars::INSTANCE().properkeys().find("MKN_REPO")).second;
+    std::string repo = (*AppVars::INSTANCE().properkeys().find("MKN_REPO")).second;
     using namespace kul::cli;
     KOUT(NON) << "+++++++++ BUILD INFO ++++++++";
     KOUT(NON) << "REPO    : " << repo;
@@ -43,8 +41,7 @@ void maiken::Application::showConfig(bool force) {
     KOUT(NON) << "BINARIES";
     std::string path = kul::env::GET("PATH");
     for (const YAML::Node &c : Settings::INSTANCE().root()[STR_ENV]) {
-      if (c[STR_NAME].Scalar() != "PATH")
-        continue;
+      if (c[STR_NAME].Scalar() != "PATH") continue;
       EnvVarMode mode = EnvVarMode::PREP;
       if (c[STR_MODE]) {
         if (c[STR_MODE].Scalar().compare(STR_APPEND) == 0)
@@ -56,17 +53,14 @@ void maiken::Application::showConfig(bool force) {
         else
           KEXIT(1, "Unhandled EnvVar mode: " + c[STR_MODE].Scalar());
       }
-      path =
-          EnvVar(c[STR_NAME].Scalar(), c[STR_VALUE].Scalar(), mode).toString();
+      path = EnvVar(c[STR_NAME].Scalar(), c[STR_VALUE].Scalar(), mode).toString();
       break;
     }
     {
-      auto it(
-          std::find_if(evs.begin(), evs.end(), [](const kul::cli::EnvVar &ev) {
-            return strcmp(ev.name(), "PATH") == 0;
-          }));
-      if (it != evs.end())
-        path = (*it).toString();
+      auto it(std::find_if(evs.begin(), evs.end(), [](const kul::cli::EnvVar &ev) {
+        return strcmp(ev.name(), "PATH") == 0;
+      }));
+      if (it != evs.end()) path = (*it).toString();
     }
     for (const auto &c : Settings::INSTANCE().root()[STR_FILE]) {
       bool a = 0, g = 0, l = 0;
@@ -74,26 +68,21 @@ void maiken::Application::showConfig(bool force) {
       std::vector<std::string> ps;
       kul::String::SPLIT(path, kul::env::SEP(), ps);
       for (const auto &d : ps) {
-        if (a && g && l)
-          break;
+        if (a && g && l) break;
         kul::Dir dir(d);
-        if (!dir)
-          continue;
+        if (!dir) continue;
         for (const auto &f : dir.files()) {
-          std::string b = (f.name().size() > 3 &&
-                           f.name().substr(f.name().size() - 4) == ".exe")
+          std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe")
                               ? f.name().substr(0, f.name().size() - 4)
                               : f.name();
-          if (!a && c[STR_ARCHIVER] &&
-              b == kul::String::SPLIT(c[STR_ARCHIVER].Scalar(), " ")[0]) {
+          if (!a && c[STR_ARCHIVER] && b == kul::String::SPLIT(c[STR_ARCHIVER].Scalar(), " ")[0]) {
             KOUT(NON) << "ARCHIVER: " << f.full();
             a = 1;
             break;
           }
         }
         for (const auto &f : dir.files()) {
-          std::string b = (f.name().size() > 3 &&
-                           f.name().substr(f.name().size() - 4) == ".exe")
+          std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe")
                               ? f.name().substr(0, f.name().size() - 4)
                               : f.name();
           if (!g && c[STR_COMPILER])
@@ -105,12 +94,10 @@ void maiken::Application::showConfig(bool force) {
               }
         }
         for (const auto &f : dir.files()) {
-          std::string b = (f.name().size() > 3 &&
-                           f.name().substr(f.name().size() - 4) == ".exe")
+          std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe")
                               ? f.name().substr(0, f.name().size() - 4)
                               : f.name();
-          if (!l && c[STR_LINKER] &&
-              b == kul::String::SPLIT(c[STR_LINKER].Scalar(), " ")[0]) {
+          if (!l && c[STR_LINKER] && b == kul::String::SPLIT(c[STR_LINKER].Scalar(), " ")[0]) {
             KOUT(NON) << "LINKER  : " << f.full();
             l = 1;
             break;
@@ -182,8 +169,7 @@ void maiken::Application::showHelp() {
   ss.push_back(MKN_DEFS_EXMPL3);
   ss.push_back(MKN_DEFS_EXMPL4);
   ss.push_back("");
-  for (const auto &s : ss)
-    KOUT(NON) << s;
+  for (const auto &s : ss) KOUT(NON) << s;
 }
 
 void maiken::Application::showProfiles() {
@@ -197,18 +183,15 @@ void maiken::Application::showProfiles() {
     std::string s(n[STR_NAME].Scalar());
     kul::String::PAD(s, b);
     std::string os(n["os"] ? "(" + n["os"].Scalar() + ")" : "");
-    if (!os.empty())
-      kul::String::PAD(os, o);
+    if (!os.empty()) kul::String::PAD(os, o);
     std::stringstream s1;
     s1 << "\t" << s << os;
     if (n[STR_PARENT])
-      s1 << "\t" << MKN_PARENT << ": "
-         << Properties::RESOLVE(*this, n[STR_PARENT].Scalar());
+      s1 << "\t" << MKN_PARENT << ": " << Properties::RESOLVE(*this, n[STR_PARENT].Scalar());
     ss.push_back(s1.str());
   }
   KOUT(NON) << MKN_PROFILE;
-  for (const auto &s : ss)
-    KOUT(NON) << s;
+  for (const auto &s : ss) KOUT(NON) << s;
 }
 
 void maiken::Application::showTree() const {
@@ -222,10 +205,8 @@ void maiken::Application::showTree() const {
 void maiken::Application::showTreeRecursive(uint8_t i) const {
   for (auto *const d : deps) {
     std::stringstream ss;
-    for (size_t r = 0; r < i; r++)
-      ss << "+";
-    KOUT(NON) << " " << ss.str() << " "
-              << d->project().root()[STR_NAME].Scalar() << "["
+    for (size_t r = 0; r < i; r++) ss << "+";
+    KOUT(NON) << " " << ss.str() << " " << d->project().root()[STR_NAME].Scalar() << "["
               << (d->p.empty() ? "@" : d->p) << "]";
     d->showTreeRecursive((++i)--);
   }

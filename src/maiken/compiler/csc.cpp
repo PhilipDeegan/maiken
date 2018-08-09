@@ -32,11 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(
     const std::string &linker, const std::string &linkerEnd,
-    const std::vector<std::string> &objects,
-    const std::vector<std::string> &libs,
+    const std::vector<std::string> &objects, const std::vector<std::string> &libs,
     const std::vector<std::string> &libPaths, const std::string &out,
-    const maiken::compiler::Mode &mode, bool dryRun) const
-    KTHROW(kul::Exception) {
+    const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
   std::string exe = out + ".exe";
   std::string cmd = linker;
   std::vector<std::string> bits;
@@ -46,35 +44,29 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(
   }
   kul::Process p(cmd);
   CompilerProcessCapture pc(p);
-  for (unsigned int i = 1; i < bits.size(); i++)
-    p.arg(bits[i]);
+  for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("/NOLOGO").arg("/OUT:" + exe);
   if (libs.size()) {
     std::stringstream ss;
-    for (const std::string &path : libPaths)
-      ss << path << ",";
+    for (const std::string &path : libPaths) ss << path << ",";
     std::string s(ss.str());
     s.pop_back();
     p.arg("/LIB:" + s);
     ss.str(std::string());
-    for (const std::string &lib : libs)
-      ss << lib << ".dll,";
+    for (const std::string &lib : libs) ss << lib << ".dll,";
     s = ss.str();
     s.pop_back();
     p.arg("/REFERENCE:" + s);
   }
 
-  for (const std::string &o : objects)
-    p.arg(o);
+  for (const std::string &o : objects) p.arg(o);
   if (linkerEnd.find(" ") != std::string::npos)
-    for (const std::string &s : kul::String::SPLIT(linkerEnd, ' '))
-      p.arg(s);
+    for (const std::string &s : kul::String::SPLIT(linkerEnd, ' ')) p.arg(s);
   else
     p.arg(linkerEnd);
 
   try {
-    if (!dryRun)
-      p.start();
+    if (!dryRun) p.start();
   } catch (const kul::proc::Exception &e) {
     pc.exception(std::current_exception());
   }
@@ -85,11 +77,9 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(
 
 maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildLibrary(
     const std::string &linker, const std::string &linkerEnd,
-    const std::vector<std::string> &objects,
-    const std::vector<std::string> &libs,
+    const std::vector<std::string> &objects, const std::vector<std::string> &libs,
     const std::vector<std::string> &libPaths, const kul::File &out,
-    const maiken::compiler::Mode &mode, bool dryRun) const
-    KTHROW(kul::Exception) {
+    const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
   std::string dll = out.real() + ".dll";
   std::string cmd = linker;
   std::vector<std::string> bits;
@@ -100,15 +90,11 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildLibrary(
   kul::Process p(cmd);
   p.arg("/target:library").arg("/OUT:" + dll).arg("/nologo");
   CompilerProcessCapture pc(p);
-  for (unsigned int i = 1; i < bits.size(); i++)
-    p.arg(bits[i]);
-  for (const std::string &o : objects)
-    p.arg(o);
-  for (const std::string &s : kul::String::SPLIT(linkerEnd, ' '))
-    p.arg(s);
+  for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
+  for (const std::string &o : objects) p.arg(o);
+  for (const std::string &s : kul::String::SPLIT(linkerEnd, ' ')) p.arg(s);
   try {
-    if (!dryRun)
-      p.start();
+    if (!dryRun) p.start();
   } catch (const kul::proc::Exception &e) {
     pc.exception(std::current_exception());
   }

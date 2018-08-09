@@ -32,24 +32,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void maiken::Application::addCLIArgs(const kul::cli::Args &args) {
   auto addIncsOrPaths = [&args](Application &a) {
-    auto splitPathAndCheck = [](const std::string &path,
-                                const std::string &type) {
+    auto splitPathAndCheck = [](const std::string &path, const std::string &type) {
       const auto v(kul::String::SPLIT(path, kul::env::SEP()));
       for (const auto s : v) {
         kul::Dir d(s);
-        if (!d)
-          KEXIT(1, type + " directory does not exist: ") << s;
+        if (!d) KEXIT(1, type + " directory does not exist: ") << s;
       }
       return v;
     };
 
     if (args.has(STR_FINC))
-      for (const auto &s :
-           splitPathAndCheck(args.get(STR_FINC), "front include"))
+      for (const auto &s : splitPathAndCheck(args.get(STR_FINC), "front include"))
         a.incs.insert(a.incs.begin(), std::make_pair(s, true));
     if (args.has(STR_BINC))
-      for (const auto &s :
-           splitPathAndCheck(args.get(STR_BINC), "back include"))
+      for (const auto &s : splitPathAndCheck(args.get(STR_BINC), "back include"))
         a.incs.push_back(std::make_pair(s, true));
     if (args.has(STR_FPATH))
       for (const auto &s : splitPathAndCheck(args.get(STR_FPATH), "front path"))
@@ -60,6 +56,5 @@ void maiken::Application::addCLIArgs(const kul::cli::Args &args) {
   };
 
   addIncsOrPaths(*this);
-  for (auto *d : deps)
-    addIncsOrPaths(*d);
+  for (auto *d : deps) addIncsOrPaths(*d);
 }

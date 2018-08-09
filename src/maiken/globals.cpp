@@ -41,32 +41,25 @@ maiken::AppVars::AppVars() {
   pks["DATETIME"] = kul::DateTime::NOW();
   pks["TIMESTAMP"] = std::time(NULL);
 
-  if (Settings::INSTANCE().root()[STR_LOCAL] &&
-      Settings::INSTANCE().root()[STR_LOCAL][STR_REPO])
+  if (Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_REPO])
     pks["MKN_REPO"] = Settings::INSTANCE().root()[STR_LOCAL][STR_REPO].Scalar();
   else
-    pks["MKN_REPO"] =
-        kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
+    pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
 
   if (Settings::INSTANCE().root()[STR_LOCAL] &&
       Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO])
-    pks["MKN_MOD_REPO"] =
-        Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar();
+    pks["MKN_MOD_REPO"] = Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar();
   else
-    pks["MKN_MOD_REPO"] =
-        kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
+    pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 
-  if (Settings::INSTANCE().root()[STR_LOCAL] &&
-      Settings::INSTANCE().root()[STR_LOCAL][STR_BIN])
+  if (Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_BIN])
     pks["MKN_BIN"] = Settings::INSTANCE().root()[STR_LOCAL][STR_BIN].Scalar();
-  if (Settings::INSTANCE().root()[STR_LOCAL] &&
-      Settings::INSTANCE().root()[STR_LOCAL][STR_LIB])
+  if (Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_LIB])
     pks["MKN_LIB"] = Settings::INSTANCE().root()[STR_LOCAL][STR_LIB].Scalar();
 
   evs["MKN_OBJ"] = "o";
   std::string obj = kul::env::GET("MKN_OBJ");
-  if (!obj.empty())
-    evs["MKN_OBJ"] = obj;
+  if (!obj.empty()) evs["MKN_OBJ"] = obj;
 
 #ifdef _WIN32
   evs["MKN_LIB_EXT"] = "dll";
@@ -76,8 +69,7 @@ maiken::AppVars::AppVars() {
   evs["MKN_LIB_PRE"] = "lib";
 #endif
   std::string ext = kul::env::GET("MKN_LIB_EXT");
-  if (!ext.empty())
-    evs["MKN_LIB_EXT"] = ext;
+  if (!ext.empty()) evs["MKN_LIB_EXT"] = ext;
 
   if (kul::env::EXISTS("MKN_LIB_PRE")) {
     evs["MKN_LIB_PRE"] = kul::env::GET("MKN_LIB_PRE");

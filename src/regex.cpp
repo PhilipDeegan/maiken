@@ -29,19 +29,16 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/regex.hpp"
-#include "kul/log.hpp"
 #include <regex>
+#include "kul/log.hpp"
 
-std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
-    KTHROW(kul::Exception) {
+std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str) KTHROW(kul::Exception) {
   std::vector<std::string> v;
   auto posL = str.find("(");
   auto posR = str.find(")");
 
-  if (posL == std::string::npos || posR == std::string::npos)
-    return v;
-  if (str.size() > 1 && str.substr(0, 2) == "./")
-    str = str.substr(2);
+  if (posL == std::string::npos || posR == std::string::npos) return v;
+  if (str.size() > 1 && str.substr(0, 2) == "./") str = str.substr(2);
 
   kul::Dir d(str);
   std::string built, prnt;
@@ -95,8 +92,7 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
         std::smatch match;
         std::string subject(item.real());
         if (std::regex_search(subject, match, re) && match.size() > 1)
-          RESOLVE_REGEX_REC(item.real(), built, subject, rem, bits, bitsIndex,
-                            v);
+          RESOLVE_REGEX_REC(item.real(), built, subject, rem, bits, bitsIndex, v);
       } catch (std::regex_error &e) {
         KEXIT(1, "Regex Failure:\n") << e.what();
       }
@@ -106,10 +102,10 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str)
   return v;
 }
 
-void maiken::Regexer::RESOLVE_REGEX_REC(
-    const std::string &i, const std::string &b, const std::string &s,
-    const std::string &r, const std::vector<std::string> &bits,
-    const size_t &bitsIndex, std::vector<std::string> &v)
+void maiken::Regexer::RESOLVE_REGEX_REC(const std::string &i, const std::string &b,
+                                        const std::string &s, const std::string &r,
+                                        const std::vector<std::string> &bits,
+                                        const size_t &bitsIndex, std::vector<std::string> &v)
     KTHROW(kul::Exception) {
   if (kul::File(i).is() && !kul::Dir(i).is()) {
     v.push_back(i);

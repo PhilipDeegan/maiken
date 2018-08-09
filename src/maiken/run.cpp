@@ -32,13 +32,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken {
 class Runner : public Constants {
-public:
-  static void RUN(const Application &a, std::string bin,
-                  const std::string buildDir, compiler::Mode m, bool dbg = 0) {
-
+ public:
+  static void RUN(const Application &a, std::string bin, const std::string buildDir,
+                  compiler::Mode m, bool dbg = 0) {
     kul::File f(bin, buildDir);
-    if (!f)
-      KEXIT(1, "binary does not exist \n" + f.full());
+    if (!f) KEXIT(1, "binary does not exist \n" + f.full());
     std::unique_ptr<kul::Process> p;
     if (dbg) {
       std::string dbg = kul::env::GET("MKN_DBG");
@@ -56,30 +54,25 @@ public:
       } else {
         std::vector<std::string> bits(kul::cli::asArgs(dbg));
         p = std::make_unique<kul::Process>(bits[0]);
-        for (uint16_t i = 1; i < bits.size(); i++)
-          p->arg(bits[i]);
+        for (uint16_t i = 1; i < bits.size(); i++) p->arg(bits[i]);
       }
       p->arg(f.mini());
     } else
       p = std::make_unique<kul::Process>(f.escm());
 
     if (AppVars::INSTANCE().runArgs().size()) {
-      for (const auto &s : kul::cli::asArgs(AppVars::INSTANCE().runArgs()))
-        p->arg(s);
+      for (const auto &s : kul::cli::asArgs(AppVars::INSTANCE().runArgs())) p->arg(s);
     } else {
       const auto &cmds = AppVars::INSTANCE().commands();
       if (!cmds.count(STR_BUILD) && !cmds.count(STR_COMPILE)) {
-        for (const auto &s : kul::cli::asArgs(AppVars::INSTANCE().args()))
-          p->arg(s);
+        for (const auto &s : kul::cli::asArgs(AppVars::INSTANCE().args())) p->arg(s);
       }
     }
 
     if (m != compiler::Mode::STAT) {
       std::string arg;
-      for (const auto &s : a.libraryPaths())
-        arg += s + kul::env::SEP();
-      if (!arg.empty())
-        arg.pop_back();
+      for (const auto &s : a.libraryPaths()) arg += s + kul::env::SEP();
+      if (!arg.empty()) arg.pop_back();
 #ifdef _WIN32
       kul::cli::EnvVar pa("PATH", arg, kul::cli::EnvVarMode::PREP);
 #else
@@ -89,7 +82,7 @@ public:
       kul::cli::EnvVar dy("DYLD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
       KOUT(INF) << dy.name() << " : " << dy.toString();
       p->var(dy.name(), dy.toString());
-#endif // __APPLE__
+#endif  // __APPLE__
 
 #endif
       KOUT(INF) << pa.name() << " : " << pa.toString();
@@ -97,14 +90,12 @@ public:
     }
     for (const auto &ev : AppVars::INSTANCE().envVars())
       p->var(ev.first,
-             kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP)
-                 .toString());
+             kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
     KOUT(INF) << (*p);
-    if (!AppVars::INSTANCE().dryRun())
-      p->start();
+    if (!AppVars::INSTANCE().dryRun()) p->start();
   }
 };
-} // namespace maiken
+}  // namespace maiken
 
 void maiken::Application::test(void) {
   kul::os::PushDir pushd(this->project().dir());
@@ -113,13 +104,11 @@ void maiken::Application::test(void) {
     for (const auto &file : testsD.files()) {
       if (file) {
 #ifdef _WIN32
-        if (file.name().rfind(".exe") == std::string::npos)
-          continue;
+        if (file.name().rfind(".exe") == std::string::npos) continue;
 #endif
         Runner::RUN(*this, file.name(), testsD.real(), m);
       } else
-        Runner::RUN(*this, kul::File(file.full(), testsD).real(),
-                    buildDir().real(), m);
+        Runner::RUN(*this, kul::File(file.full(), testsD).real(), buildDir().real(), m);
     }
   }
 }
@@ -129,8 +118,7 @@ void maiken::Application::run(bool dbg) {
   for (const auto &file : buildDir().files(false)) {
     bin = file.name();
 #if defined(_WIN32)
-    if (bin.rfind(".exe") == std::string::npos)
-      continue;
+    if (bin.rfind(".exe") == std::string::npos) continue;
 #endif
     Runner::RUN(*this, bin, buildDir().real(), m, dbg);
   }

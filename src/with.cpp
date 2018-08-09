@@ -33,8 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void maiken::Application::withArgs(
     const std::string with_str, std::vector<YAML::Node> &with_nodes,
-    std::function<void(const YAML::Node &n, const bool mod)> getIfMissing,
-    bool add, bool dep) {
+    std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool add, bool dep) {
   if (add && with_str.size()) {
     kul::hash::set::String withs;
     try {
@@ -51,8 +50,7 @@ void maiken::Application::withArgs(
 
 void maiken::Application::with(
     kul::hash::set::String &withs, std::vector<YAML::Node> &with_nodes,
-    std::function<void(const YAML::Node &n, const bool mod)> getIfMissing,
-    bool dep) {
+    std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool dep) {
   for (const auto &with : withs) {
     YAML::Node node;
     std::string local, profiles, proj = with, version, scm;
@@ -60,8 +58,7 @@ void maiken::Application::with(
       auto lbrak = proj.find("(");
       auto rbrak = proj.find(")");
       if (lbrak != std::string::npos) {
-        if (rbrak == std::string::npos)
-          KEXIT(1, "Invalid -w - missing right bracket");
+        if (rbrak == std::string::npos) KEXIT(1, "Invalid -w - missing right bracket");
         scm = proj.substr(lbrak + 1, rbrak - lbrak - 1);
         proj = proj.substr(0, lbrak) + with.substr(rbrak + 1);
         node[STR_SCM] = scm;
@@ -69,26 +66,25 @@ void maiken::Application::with(
       lbrak = proj.find("[");
       rbrak = proj.find("]");
       if (lbrak != std::string::npos) {
-        if (rbrak == std::string::npos)
-          KEXIT(1, "Invalid -w - missing right bracket");
+        if (rbrak == std::string::npos) KEXIT(1, "Invalid -w - missing right bracket");
         profiles = proj.substr(lbrak + 1, rbrak - lbrak - 1);
         proj = proj.substr(0, lbrak);
         kul::String::REPLACE_ALL(profiles, ",", " ");
         node[STR_PROFILE] = profiles;
       }
     }
-    auto am = proj.find("&"); // local
-    auto ha = proj.find("#"); // version
+    auto am = proj.find("&");  // local
+    auto ha = proj.find("#");  // version
     if (proj == this->project().root()[STR_NAME].Scalar()) {
       node[STR_LOCAL] = ".";
       if (am != std::string::npos || ha != std::string::npos)
-        KEXIT(1, "-w invalid, current project may not specify version or "
-                 "location");
+        KEXIT(1,
+              "-w invalid, current project may not specify version or "
+              "location");
     }
 
     if (am != std::string::npos && ha != std::string::npos)
-      if (ha > am)
-        KEXIT(1, "-w invalid, version must before location");
+      if (ha > am) KEXIT(1, "-w invalid, version must before location");
 
     if (am != std::string::npos) {
       local = proj.substr(am + 1);
@@ -113,8 +109,7 @@ void maiken::Application::with(
       auto bits(kul::String::SPLIT(scm, "/"));
       proj = bits[bits.size() - 1];
     }
-    if (!proj.empty())
-      node[STR_NAME] = proj;
+    if (!proj.empty()) node[STR_NAME] = proj;
 
     with_nodes.push_back(node);
     if (!dep && !proj.empty()) {

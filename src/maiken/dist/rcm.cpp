@@ -33,8 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 #include "maiken/dist.hpp"
 
-std::unique_ptr<maiken::dist::SetupRequest>
-maiken::dist::RemoteCommandManager::build_setup_query(
+std::unique_ptr<maiken::dist::SetupRequest> maiken::dist::RemoteCommandManager::build_setup_query(
     const maiken::Application &a, const kul::cli::Args &args) {
   kul::os::PushDir pushd(a.project().dir());
   YAML::Node root;
@@ -60,8 +59,8 @@ maiken::dist::RemoteCommandManager::build_setup_query(
   }
   root["settings_file"] = maiken::Settings::INSTANCE().file();
 
-  return std::move(std::make_unique<maiken::dist::SetupRequest>(
-      project_string, settings_string, args));
+  return std::move(
+      std::make_unique<maiken::dist::SetupRequest>(project_string, settings_string, args));
 }
 
 std::unique_ptr<maiken::dist::CompileRequest>
@@ -69,8 +68,7 @@ maiken::dist::RemoteCommandManager::build_compile_request(
     const std::string &directory,
     const std::vector<std::pair<std::string, std::string>> &src_objs) {
   // kul::os::PushDir pushd(a.project().dir());
-  return std::move(
-      std::make_unique<maiken::dist::CompileRequest>(directory, src_objs));
+  return std::move(std::make_unique<maiken::dist::CompileRequest>(directory, src_objs));
 }
 
 std::unique_ptr<maiken::dist::DownloadRequest>
@@ -79,9 +77,9 @@ maiken::dist::RemoteCommandManager::build_download_request() {
   return std::move(std::make_unique<maiken::dist::DownloadRequest>());
 }
 
-std::unique_ptr<maiken::dist::LinkRequest>
-maiken::dist::RemoteCommandManager::build_link_request(const std::string &b) {
+std::unique_ptr<maiken::dist::LinkRequest> maiken::dist::RemoteCommandManager::build_link_request(
+    const std::string &b) {
   return std::move(std::make_unique<maiken::dist::LinkRequest>(b));
 }
 
-#endif // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_

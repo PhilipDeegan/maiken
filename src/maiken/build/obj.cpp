@@ -36,30 +36,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken {
 class CompilerPrinter {
-public:
+ public:
   static void print_for(const Application &app) {
     if (!AppVars::INSTANCE().dryRun()) {
       std::stringstream ss;
       ss << MKN_PROJECT << ": " << app.project().dir().path();
-      if (app.profile().size() > 0)
-        ss << " [" << app.profile() << "]";
+      if (app.profile().size() > 0) ss << " [" << app.profile() << "]";
       KOUT(NON) << ss.str();
     }
-    if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() &&
-        app.includes().size()) {
+    if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && app.includes().size()) {
       KOUT(NON) << "INCLUDES";
-      for (const auto &s : app.includes())
-        KOUT(NON) << "\t" << s.first;
+      for (const auto &s : app.includes()) KOUT(NON) << "\t" << s.first;
     }
 
     if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf()) {
-      if (!app.arg.empty())
-        KOUT(NON) << "ARGUMENTS\n\t" << app.arg;
+      if (!app.arg.empty()) KOUT(NON) << "ARGUMENTS\n\t" << app.arg;
       if (app.arguments().size()) {
         KOUT(NON) << "FILE ARGUMENTS";
         for (const auto &kv : app.arguments())
-          for (const std::string &s : kv.second)
-            KOUT(NON) << "\t" << kv.first << " : " << s;
+          for (const std::string &s : kv.second) KOUT(NON) << "\t" << kv.first << " : " << s;
       }
       if (!AppVars::INSTANCE().args().empty())
         KOUT(NON) << "ADDITIONAL ARGUMENTS: \n\t" << AppVars::INSTANCE().args();
@@ -69,14 +64,12 @@ public:
           KOUT(NON) << "\t" << kv.first << " : " << kv.second;
       }
     }
-    if (!AppVars::INSTANCE().envVars().count("MKN_OBJ"))
-      KEXCEPTION("INTERNAL BADNESS ERROR!");
+    if (!AppVars::INSTANCE().envVars().count("MKN_OBJ")) KEXCEPTION("INTERNAL BADNESS ERROR!");
   }
 };
-} // namespace maiken
+}  // namespace maiken
 
-void maiken::Application::compile(kul::hash::set::String &objects)
-    KTHROW(kul::Exception) {
+void maiken::Application::compile(kul::hash::set::String &objects) KTHROW(kul::Exception) {
   auto sources = sourceMap();
 
   showConfig();
@@ -90,20 +83,18 @@ void maiken::Application::compile(kul::hash::set::String &objects)
   compile(src_objs, objects, cacheFiles);
 }
 
-void maiken::Application::compile(
-    std::vector<std::pair<std::string, std::string>> &src_objs,
-    kul::hash::set::String &objects, std::vector<kul::File> &cacheFiles)
-    KTHROW(kul::Exception) {
+void maiken::Application::compile(std::vector<std::pair<std::string, std::string>> &src_objs,
+                                  kul::hash::set::String &objects,
+                                  std::vector<kul::File> &cacheFiles) KTHROW(kul::Exception) {
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   std::vector<std::shared_ptr<maiken::dist::Post>> posts;
-  auto compile_lambda = [](std::shared_ptr<maiken::dist::Post> post,
-                           const dist::Host &host) {
+  auto compile_lambda = [](std::shared_ptr<maiken::dist::Post> post, const dist::Host &host) {
     post->send(host);
     dist::FileWriter fw;
     dist::Blob b;
     do {
-      auto dowd = std::make_shared<maiken::dist::Post>(std::move(
-          maiken::dist::RemoteCommandManager::INST().build_download_request()));
+      auto dowd = std::make_shared<maiken::dist::Post>(
+          std::move(maiken::dist::RemoteCommandManager::INST().build_download_request()));
       dowd->send(host);
       std::string body(std::move(dowd->body()));
       std::istringstream iss(body);
@@ -115,23 +106,20 @@ void maiken::Application::compile(
       if (!b.file.empty()) {
         if (!fw.bw) {
           kul::File obj(b.file);
-          if (obj)
-            obj = kul::File(std::string(b.file + ".new"));
+          if (obj) obj = kul::File(std::string(b.file + ".new"));
           fw.bw = std::make_unique<kul::io::BinaryWriter>(obj);
         }
         fw.bw->write(b.c1, b.len);
       }
-      if (b.last_packet)
-        fw.bw.reset();
+      if (b.last_packet) fw.bw.reset();
     } while (b.files_left > 0);
   };
   size_t threads = 0;
 
   auto &hosts(maiken::dist::RemoteCommandManager::INST().hosts());
   if (AppVars::INSTANCE().nodes()) {
-    threads = (hosts.size() < AppVars::INSTANCE().nodes())
-                  ? hosts.size()
-                  : AppVars::INSTANCE().nodes();
+    threads =
+        (hosts.size() < AppVars::INSTANCE().nodes()) ? hosts.size() : AppVars::INSTANCE().nodes();
   }
   kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);
   auto compile_ex = [&](const kul::Exception &e) {
@@ -149,61 +137,53 @@ void maiken::Application::compile(
       }
 
       if (!remote_src_objs.empty()) {
-        posts.emplace_back(std::make_shared<maiken::dist::Post>(std::move(
-            maiken::dist::RemoteCommandManager::INST().build_compile_request(
+        posts.emplace_back(std::make_shared<maiken::dist::Post>(
+            std::move(maiken::dist::RemoteCommandManager::INST().build_compile_request(
                 this->project().dir().real(), remote_src_objs))));
-        ctp.async(std::bind(compile_lambda, posts[i], std::ref(hosts[i])),
-                  compile_ex);
+        ctp.async(std::bind(compile_lambda, posts[i], std::ref(hosts[i])), compile_ex);
       }
     }
   }
 
-#endif //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   std::queue<std::pair<std::string, std::string>> sourceQueue;
   for (auto &so : src_objs) {
     sourceQueue.push(std::make_pair(so.first, so.second));
     kul::File object_file(so.second);
-    if (!object_file.dir())
-      object_file.dir().mk();
+    if (!object_file.dir()) object_file.dir().mk();
   }
-  if (!src_objs.empty())
-    compile(sourceQueue, objects, cacheFiles);
+  if (!src_objs.empty()) compile(sourceQueue, objects, cacheFiles);
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-  ctp.finish(10000000); // 10 milliseconds
+  ctp.finish(10000000);  // 10 milliseconds
   ctp.rethrow();
-#endif //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
 
-  if (_MKN_TIMESTAMPS_)
-    writeTimeStamps(objects, cacheFiles);
+  if (_MKN_TIMESTAMPS_) writeTimeStamps(objects, cacheFiles);
 }
 
-void maiken::Application::compile(
-    std::queue<std::pair<std::string, std::string>> &sourceQueue,
-    kul::hash::set::String &objects, std::vector<kul::File> &cacheFiles)
-    KTHROW(kul::Exception) {
+void maiken::Application::compile(std::queue<std::pair<std::string, std::string>> &sourceQueue,
+                                  kul::hash::set::String &objects,
+                                  std::vector<kul::File> &cacheFiles) KTHROW(kul::Exception) {
   ThreadingCompiler tc(*this);
-  kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1,
-                                    1000000000, 1000);
+  kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
   std::vector<maiken::CompilationUnit> c_units;
   std::queue<std::pair<std::string, std::string>> cQueue;
 
   kul::File init;
   if (!main.empty()) {
-    const std::string oType(
-        "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
+    const std::string oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
     const kul::File source(main);
     init = source;
     std::stringstream ss, os;
     ss << std::hex << std::hash<std::string>()(source.real());
     os << ss.str() << "-" << source.name() << oType;
     kul::Dir tmpD(buildDir().join("tmp"));
-    if (!tmpD)
-      tmpD.mk();
+    if (!tmpD) tmpD.mk();
     kul::File object(os.str(), tmpD);
 
-    c_units.emplace_back(tc.compilationUnit(std::make_pair(
-        AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
-        AppVars::INSTANCE().dryRun() ? object.esc() : object.escm())));
+    c_units.emplace_back(tc.compilationUnit(
+        std::make_pair(AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
+                       AppVars::INSTANCE().dryRun() ? object.esc() : object.escm())));
   }
 
   while (sourceQueue.size() > 0) {
@@ -217,12 +197,10 @@ void maiken::Application::compile(
   }
 
   auto o = [](const std::string &s) {
-    if (s.size())
-      KOUT(NON) << s;
+    if (s.size()) KOUT(NON) << s;
   };
   auto e = [](const std::string &s) {
-    if (s.size())
-      KERR << s;
+    if (s.size()) KERR << s;
   };
 
   std::mutex mute;
@@ -233,22 +211,18 @@ void maiken::Application::compile(
     ctp.interrupt();
   };
 
-  auto lambda = [o, e, &ctp, &mute, &lambex,
-                 &cpcs](const maiken::CompilationUnit &c_unit) {
+  auto lambda = [o, e, &ctp, &mute, &lambex, &cpcs](const maiken::CompilationUnit &c_unit) {
     const CompilerProcessCapture cpc = c_unit.compile();
     if (!AppVars::INSTANCE().dryRun()) {
-      if (kul::LogMan::INSTANCE().inf() || cpc.exception())
-        o(cpc.outs());
-      if (kul::LogMan::INSTANCE().inf() || cpc.exception())
-        e(cpc.errs());
+      if (kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
+      if (kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
       KOUT(INF) << cpc.cmd();
     } else
       KOUT(NON) << cpc.cmd();
     std::lock_guard<std::mutex> lock(mute);
     cpcs.push_back(cpc);
     try {
-      if (cpc.exception())
-        std::rethrow_exception(cpc.exception());
+      if (cpc.exception()) std::rethrow_exception(cpc.exception());
     } catch (const kul::Exception &e) {
       lambex(e);
     } catch (const std::exception &e) {
@@ -257,19 +231,15 @@ void maiken::Application::compile(
   };
 
   for (const auto &unit : c_units) {
-    kul::this_thread::nSleep(
-        5000000); // dup appears to be overloaded with too many threads
-    ctp.async(std::bind(lambda, unit),
-              std::bind(lambex, std::placeholders::_1));
+    kul::this_thread::nSleep(5000000);  // dup appears to be overloaded with too many threads
+    ctp.async(std::bind(lambda, unit), std::bind(lambex, std::placeholders::_1));
   }
 
   ctp.finish(1000000 * 1000);
-  if (ctp.exception())
-    KEXIT(1, "Compile error detected");
+  if (ctp.exception()) KEXIT(1, "Compile error detected");
 
   for (auto &cpc : cpcs) {
-    if (cpc.exception())
-      std::rethrow_exception(cpc.exception());
+    if (cpc.exception()) std::rethrow_exception(cpc.exception());
   }
 
   while (cQueue.size()) {

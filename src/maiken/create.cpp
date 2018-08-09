@@ -34,51 +34,44 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 using namespace kul::cli;
 class CLIHandler : public Constants {
-private:
+ private:
   std::vector<kul::cli::Arg> argV {
     Arg('a', STR_ARG, ArgType::STRING), Arg('A', STR_ADD, ArgType::STRING),
-        Arg('b', STR_BINC, ArgType::STRING),
-        Arg('B', STR_BPATH, ArgType::STRING),
+        Arg('b', STR_BINC, ArgType::STRING), Arg('B', STR_BPATH, ArgType::STRING),
         Arg('C', STR_DIR, ArgType::STRING), Arg('d', STR_DEP, ArgType::MAYBE),
         Arg('R', STR_DRY_RUN), Arg('E', STR_ENV, ArgType::STRING),
-        Arg('f', STR_FINC, ArgType::STRING),
-        Arg('F', STR_FPATH, ArgType::STRING),
-        Arg('g', STR_DEBUG, ArgType::MAYBE), Arg('G', STR_GET, ArgType::STRING),
-        Arg('h', STR_HELP), Arg('j', STR_JARG, ArgType::STRING),
-        Arg('K', STR_STATIC), Arg('l', STR_LINKER, ArgType::STRING),
-        Arg('L', STR_ALINKER, ArgType::STRING),
+        Arg('f', STR_FINC, ArgType::STRING), Arg('F', STR_FPATH, ArgType::STRING),
+        Arg('g', STR_DEBUG, ArgType::MAYBE), Arg('G', STR_GET, ArgType::STRING), Arg('h', STR_HELP),
+        Arg('j', STR_JARG, ArgType::STRING), Arg('K', STR_STATIC),
+        Arg('l', STR_LINKER, ArgType::STRING), Arg('L', STR_ALINKER, ArgType::STRING),
         Arg('M', STR_MAIN, ArgType::STRING),
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
         Arg('n', STR_NODES, ArgType::MAYBE),
-#endif //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
-        Arg('o', STR_OUT, ArgType::STRING), Arg('O', STR_OPT, ArgType::MAYBE),
-        Arg('q', STR_QUIET), Arg('p', STR_PROFILE, ArgType::STRING),
-        Arg('P', STR_PROPERTY, ArgType::STRING),
-        Arg('r', STR_RUN_ARG, ArgType::STRING), Arg('s', STR_SCM_STATUS),
-        Arg('S', STR_SHARED), Arg('t', STR_THREADS, ArgType::MAYBE),
-        Arg('T', STR_WITHOUT, ArgType::STRING), Arg('u', STR_SCM_UPDATE),
-        Arg('U', STR_SCM_FUPDATE), Arg('v', STR_VERSION),
+#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+        Arg('o', STR_OUT, ArgType::STRING), Arg('O', STR_OPT, ArgType::MAYBE), Arg('q', STR_QUIET),
+        Arg('p', STR_PROFILE, ArgType::STRING), Arg('P', STR_PROPERTY, ArgType::STRING),
+        Arg('r', STR_RUN_ARG, ArgType::STRING), Arg('s', STR_SCM_STATUS), Arg('S', STR_SHARED),
+        Arg('t', STR_THREADS, ArgType::MAYBE), Arg('T', STR_WITHOUT, ArgType::STRING),
+        Arg('u', STR_SCM_UPDATE), Arg('U', STR_SCM_FUPDATE), Arg('v', STR_VERSION),
         Arg('w', STR_WITH, ArgType::STRING), Arg('W', STR_WARN, ArgType::MAYBE),
         Arg('x', STR_SETTINGS, ArgType::STRING)
   };
-  std::vector<kul::cli::Cmd> cmdV{
-      Cmd(STR_INIT),    Cmd(STR_INC),  Cmd(STR_SRC),
+  std::vector<kul::cli::Cmd> cmdV{Cmd(STR_INIT),    Cmd(STR_INC),  Cmd(STR_SRC),
 #ifndef _MKN_DISABLE_MODULES_
-      Cmd(STR_MODS),
-#endif //_MKN_DISABLE_MODULES_
-      Cmd(STR_CLEAN),   Cmd(STR_DEPS), Cmd(STR_BUILD),    Cmd(STR_RUN),
-      Cmd(STR_COMPILE), Cmd(STR_LINK), Cmd(STR_PROFILES), Cmd(STR_DBG),
-      Cmd(STR_PACK),    Cmd(STR_INFO), Cmd(STR_TRIM),     Cmd(STR_TREE),
-      Cmd(STR_TEST)};
+                                  Cmd(STR_MODS),
+#endif  //_MKN_DISABLE_MODULES_
+                                  Cmd(STR_CLEAN),   Cmd(STR_DEPS), Cmd(STR_BUILD),    Cmd(STR_RUN),
+                                  Cmd(STR_COMPILE), Cmd(STR_LINK), Cmd(STR_PROFILES), Cmd(STR_DBG),
+                                  Cmd(STR_PACK),    Cmd(STR_INFO), Cmd(STR_TRIM),     Cmd(STR_TREE),
+                                  Cmd(STR_TEST)};
 
-public:
+ public:
   std::vector<kul::cli::Arg> args() { return argV; }
   std::vector<kul::cli::Cmd> cmds() { return cmdV; }
 };
-} // namespace maiken
+}  // namespace maiken
 
-std::vector<maiken::Application *> maiken::Application::CREATE(int16_t argc,
-                                                               char *argv[])
+std::vector<maiken::Application *> maiken::Application::CREATE(int16_t argc, char *argv[])
     KTHROW(kul::Exception) {
   using namespace kul::cli;
   CLIHandler cli;
@@ -90,15 +83,14 @@ std::vector<maiken::Application *> maiken::Application::CREATE(int16_t argc,
   }
   return CREATE(args);
 }
-std::vector<maiken::Application *>
-maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
+std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::Args &args)
+    KTHROW(kul::Exception) {
   using namespace kul::cli;
 
   if (args.empty() || (args.size() == 1 && args.has(STR_DIR))) {
     if (args.size() == 1 && args.has(STR_DIR)) {
       kul::Dir d(args.get(STR_DIR));
-      if (!d)
-        KEXIT(1, "STR_DIR DOES NOT EXIST: " + args.get(STR_DIR));
+      if (!d) KEXIT(1, "STR_DIR DOES NOT EXIST: " + args.get(STR_DIR));
       kul::env::CWD(d);
     }
     kul::File yml("mkn.yaml");
@@ -112,8 +104,7 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
           std::vector<std::string> lineArgs(kul::cli::asArgs(line));
           std::vector<char *> lineV;
           lineV.push_back(const_cast<char *>(maiken::PROGRAM.c_str()));
-          for (size_t i = 0; i < lineArgs.size(); i++)
-            lineV.push_back(&lineArgs[i][0]);
+          for (size_t i = 0; i < lineArgs.size(); i++) lineV.push_back(&lineArgs[i][0]);
           return CREATE(lineV.size(), &lineV[0]);
         }
       }
@@ -128,25 +119,22 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
   if (args.has(STR_VERSION)) {
     std::stringstream ss, mod;
     ss << KTOSTRING(_MKN_VERSION_) << " (" << KTOSTRING(__KUL_OS__) << ") w/[";
-    if (_MKN_REMOTE_EXEC_)
-      mod << "exec,";
+    if (_MKN_REMOTE_EXEC_) mod << "exec,";
 #ifndef _MKN_DISABLE_MODULES_
     mod << "mod,";
-#endif //_MKN_DISABLE_MODULES_
+#endif  //_MKN_DISABLE_MODULES_
 #ifdef _MKN_WITH_MKN_RAM_
 #if defined(_MKN_WITH_IO_CEREAL_)
     mod << "dist,";
-#endif //_MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+#endif  //_MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
     mod << "ram,";
-#endif //_MKN_WITH_MKN_RAM_
+#endif  //_MKN_WITH_MKN_RAM_
 #ifdef _MKN_WITH_GOOGLE_SPARSEHASH_
     mod << "sparsehash,";
-#endif //_MKN_WITH_GOOGLE_SPARSEHASH_
+#endif  //_MKN_WITH_GOOGLE_SPARSEHASH_
 
-    if (_MKN_TIMESTAMPS_)
-      mod << "ts,";
-    if (mod.str().size())
-      mod.seekp(-1, mod.cur);
+    if (_MKN_TIMESTAMPS_) mod << "ts,";
+    if (mod.str().size()) mod.seekp(-1, mod.cur);
     mod << "]";
     ss << mod.str();
     KOUT(NON) << ss.str();
@@ -158,8 +146,7 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
   }
   if (args.has(STR_DIR)) {
     kul::Dir d(args.get(STR_DIR));
-    if (!d)
-      KEXIT(1, "STR_DIR DOES NOT EXIST: " + args.get(STR_DIR));
+    if (!d) KEXIT(1, "STR_DIR DOES NOT EXIST: " + args.get(STR_DIR));
     kul::env::CWD(args.get(STR_DIR));
   }
   const Project &project(*Projects::INSTANCE().getOrCreate(kul::env::CWD()));
@@ -174,36 +161,27 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
       }
       for (const auto &n : project.root()[STR_PROFILE]) {
         f = n[STR_NAME].Scalar() == profile;
-        if (f)
-          break;
+        if (f) break;
       }
-      if (!f)
-        KEXIT(1, "profile does not exist");
+      if (!f) KEXIT(1, "profile does not exist");
       profiles.emplace_back(profile);
     }
   }
-  if (profiles.empty())
-    profiles.emplace_back("");
+  if (profiles.empty()) profiles.emplace_back("");
 
   if (args.has(STR_SETTINGS) && !Settings::SET(args.get(STR_SETTINGS)))
     KEXIT(1, "Unable to set specific settings xml");
   else
     Settings::INSTANCE();
 
-  if (args.has(STR_DRY_RUN))
-    AppVars::INSTANCE().dryRun(true);
-  if (args.has(STR_SHARED))
-    AppVars::INSTANCE().shar(true);
-  if (args.has(STR_STATIC))
-    AppVars::INSTANCE().stat(true);
+  if (args.has(STR_DRY_RUN)) AppVars::INSTANCE().dryRun(true);
+  if (args.has(STR_SHARED)) AppVars::INSTANCE().shar(true);
+  if (args.has(STR_STATIC)) AppVars::INSTANCE().stat(true);
   if (AppVars::INSTANCE().shar() && AppVars::INSTANCE().stat())
     KEXIT(1, "Cannot specify shared and static simultaneously");
-  if (args.has(STR_SCM_FUPDATE))
-    AppVars::INSTANCE().fupdate(true);
-  if (args.has(STR_SCM_UPDATE))
-    AppVars::INSTANCE().update(true);
-  if (args.has(STR_DEP))
-    AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
+  if (args.has(STR_SCM_FUPDATE)) AppVars::INSTANCE().fupdate(true);
+  if (args.has(STR_SCM_UPDATE)) AppVars::INSTANCE().update(true);
+  if (args.has(STR_DEP)) AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   if (args.has(STR_NODES)) {
@@ -217,18 +195,15 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
       KEXIT(1, e.stack());
     }
   }
-#endif //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
 
   {
-    auto getSet = [args](const std::string &a, const std::string &e,
-                         const uint16_t &default_value,
+    auto getSet = [args](const std::string &a, const std::string &e, const uint16_t &default_value,
                          const std::function<void(const uint16_t &)> &func) {
-      if (args.has(a))
-        try {
+      if (args.has(a)) try {
           if (args.get(a).size()) {
             auto val(kul::String::UINT16(args.get(a)));
-            if (val > 9)
-              KEXIT(1, e) << " argument is invalid";
+            if (val > 9) KEXIT(1, e) << " argument is invalid";
             func(val);
           } else
             func(default_value);
@@ -251,36 +226,30 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
   }
   {
     auto splitArgs = [](const std::string &s, const std::string &t,
-                        const std::function<void(const std::string &,
-                                                 const std::string &)> &f) {
+                        const std::function<void(const std::string &, const std::string &)> &f) {
       for (const auto &p : kul::String::ESC_SPLIT(s, ',')) {
-        if (p.find("=") == std::string::npos)
-          KEXIT(1, t + " override invalid, = missing");
+        if (p.find("=") == std::string::npos) KEXIT(1, t + " override invalid, = missing");
         std::vector<std::string> ps = kul::String::ESC_SPLIT(p, '=');
-        if (ps.size() > 2)
-          KEXIT(1, t + " override invalid, escape extra \"=\"");
+        if (ps.size() > 2) KEXIT(1, t + " override invalid, escape extra \"=\"");
         f(ps[0], ps[1]);
       }
     };
 
     if (args.has(STR_PROPERTY))
-      splitArgs(args.get(STR_PROPERTY), "property",
-                std::bind((void (AppVars::*)(const std::string &,
-                                             const std::string &)) &
-                              AppVars::properkeys,
-                          std::ref(AppVars::INSTANCE()), std::placeholders::_1,
-                          std::placeholders::_2));
+      splitArgs(
+          args.get(STR_PROPERTY), "property",
+          std::bind(
+              (void (AppVars::*)(const std::string &, const std::string &)) & AppVars::properkeys,
+              std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
     if (args.has(STR_ENV))
-      splitArgs(args.get(STR_ENV), "environment",
-                std::bind((void (AppVars::*)(const std::string &,
-                                             const std::string &)) &
-                              AppVars::envVars,
-                          std::ref(AppVars::INSTANCE()), std::placeholders::_1,
-                          std::placeholders::_2));
+      splitArgs(
+          args.get(STR_ENV), "environment",
+          std::bind(
+              (void (AppVars::*)(const std::string &, const std::string &)) & AppVars::envVars,
+              std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
   }
 
-  if (args.has(STR_WITH))
-    AppVars::INSTANCE().with(args.get(STR_WITH));
+  if (args.has(STR_WITH)) AppVars::INSTANCE().with(args.get(STR_WITH));
 
   if (args.has(STR_WITHOUT)) {
     AppVars::INSTANCE().without(args.get(STR_WITHOUT));
@@ -293,8 +262,7 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
     AppVars::INSTANCE().withoutParsed(wop);
   }
 
-  AppVars::INSTANCE().dependencyString(args.has(STR_DEP) ? args.get(STR_DEP)
-                                                         : "");
+  AppVars::INSTANCE().dependencyString(args.has(STR_DEP) ? args.get(STR_DEP) : "");
   std::vector<Application *> apps;
   for (auto profile : profiles) {
     auto *app = Applications::INSTANCE().getOrCreateRoot(project, profile);
@@ -311,10 +279,8 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
       apps[0]->showProfiles();
       KEXIT(0, "");
     }
-    if (args.has(STR_INFO))
-      apps[0]->showConfig(1);
-    if (args.has(STR_TREE))
-      apps[0]->showTree();
+    if (args.has(STR_INFO)) apps[0]->showConfig(1);
+    if (args.has(STR_TREE)) apps[0]->showTree();
     if (args.has(STR_GET)) {
       const auto &get(args.get(STR_GET));
       if (apps[0]->properties().count(get)) {
@@ -327,14 +293,10 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
     }
   }
 
-  if (args.has(STR_ARG))
-    AppVars::INSTANCE().args(args.get(STR_ARG));
-  if (args.has(STR_RUN_ARG))
-    AppVars::INSTANCE().runArgs(args.get(STR_RUN_ARG));
-  if (args.has(STR_LINKER))
-    AppVars::INSTANCE().linker(args.get(STR_LINKER));
-  if (args.has(STR_ALINKER))
-    AppVars::INSTANCE().allinker(args.get(STR_ALINKER));
+  if (args.has(STR_ARG)) AppVars::INSTANCE().args(args.get(STR_ARG));
+  if (args.has(STR_RUN_ARG)) AppVars::INSTANCE().runArgs(args.get(STR_RUN_ARG));
+  if (args.has(STR_LINKER)) AppVars::INSTANCE().linker(args.get(STR_LINKER));
+  if (args.has(STR_ALINKER)) AppVars::INSTANCE().allinker(args.get(STR_ALINKER));
   if (args.has(STR_THREADS)) {
     try {
       AppVars::INSTANCE().threads(kul::cpu::threads());
@@ -348,8 +310,7 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
   }
   if (kul::env::EXISTS("MKN_COMPILE_THREADS")) {
     try {
-      AppVars::INSTANCE().threads(
-          kul::String::UINT16(kul::env::GET("MKN_COMPILE_THREADS")));
+      AppVars::INSTANCE().threads(kul::String::UINT16(kul::env::GET("MKN_COMPILE_THREADS")));
     } catch (const kul::StringException &e) {
       KEXIT(1, "MKN_COMPILE_THREADS is invalid");
     } catch (const kul::Exception &e) {
@@ -371,48 +332,39 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
     std::vector<const Application *> v;
     for (auto app = vec.rbegin(); app != vec.rend(); ++app) {
       const std::string &s((*app)->project().dir().real());
-      auto it = std::find_if(v.begin(), v.end(), [&s](const Application *a) {
-        return a->project().dir().real() == s;
-      });
-      if (it == v.end())
-        v.push_back(*app);
+      auto it = std::find_if(v.begin(), v.end(),
+                             [&s](const Application *a) { return a->project().dir().real() == s; });
+      if (it == v.end()) v.push_back(*app);
     }
-    for (auto *app : v)
-      KOUT(NON) << app->project().dir();
+    for (auto *app : v) KOUT(NON) << app->project().dir();
     KEXIT(0, "");
   };
 
   if (args.has(STR_DEPS))
-    for (auto a : apps)
-      printDeps(a->deps);
+    for (auto a : apps) printDeps(a->deps);
   if (args.has(STR_MODS))
-    for (auto a : apps)
-      printDeps(a->modDeps);
+    for (auto a : apps) printDeps(a->modDeps);
 
   if (args.has(STR_INC)) {
     for (auto a : apps)
-      for (const auto &p : a->includes())
-        KOUT(NON) << p.first;
+      for (const auto &p : a->includes()) KOUT(NON) << p.first;
     KEXIT(0, "");
   }
   if (args.has(STR_SRC)) {
     for (auto a : apps) {
       for (const auto &p1 : a->sourceMap())
         for (const auto &p2 : p1.second)
-          for (const auto &p3 : p2.second)
-            KOUT(NON) << kul::File(p3).full();
+          for (const auto &p3 : p2.second) KOUT(NON) << kul::File(p3).full();
       for (auto app = a->deps.rbegin(); app != a->deps.rend(); ++app)
         for (const auto &p1 : (*app)->sourceMap())
           if (!(*app)->ig)
             for (const auto &p2 : p1.second)
-              for (const auto &p3 : p2.second)
-                KOUT(NON) << kul::File(p3).full();
+              for (const auto &p3 : p2.second) KOUT(NON) << kul::File(p3).full();
     }
     KEXIT(0, "");
   }
   if (args.has(STR_SCM_STATUS)) {
-    for (auto a : apps)
-      a->scmStatus(args.has(STR_DEP));
+    for (auto a : apps) a->scmStatus(args.has(STR_DEP));
     KEXIT(0, "");
   }
 
@@ -420,34 +372,26 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
     if (args.has(STR_ADD))
       for (const auto &s : kul::String::ESC_SPLIT(args.get(STR_ADD), ','))
         apps[0]->addSourceLine(s);
-    if (args.has(STR_MAIN))
-      apps[0]->main = args.get(STR_MAIN);
-    if (args.has(STR_OUT))
-      apps[0]->out = args.get(STR_OUT);
+    if (args.has(STR_MAIN)) apps[0]->main = args.get(STR_MAIN);
+    if (args.has(STR_OUT)) apps[0]->out = args.get(STR_OUT);
   }
 
-  std::vector<std::string> cmds = {{STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK,
-                                    STR_RUN, STR_TEST, STR_DBG, STR_TRIM,
-                                    STR_PACK}};
+  std::vector<std::string> cmds = {{STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK, STR_RUN, STR_TEST,
+                                    STR_DBG, STR_TRIM, STR_PACK}};
   for (const auto &cmd : cmds)
-    if (args.has(cmd))
-      AppVars::INSTANCE().command(cmd);
+    if (args.has(cmd)) AppVars::INSTANCE().command(cmd);
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   if (AppVars::INSTANCE().nodes()) {
-    maiken::dist::RemoteCommandManager::INST().build_hosts(
-        Settings::INSTANCE());
+    maiken::dist::RemoteCommandManager::INST().build_hosts(Settings::INSTANCE());
     auto &hosts(maiken::dist::RemoteCommandManager::INST().hosts());
-    if (hosts.empty())
-      KEXCEPTION("Settings file has no hosts configured");
-    size_t threads = (hosts.size() < AppVars::INSTANCE().nodes())
-                         ? hosts.size()
-                         : AppVars::INSTANCE().nodes();
+    if (hosts.empty()) KEXCEPTION("Settings file has no hosts configured");
+    size_t threads =
+        (hosts.size() < AppVars::INSTANCE().nodes()) ? hosts.size() : AppVars::INSTANCE().nodes();
     // ping nodes and set active
     auto ping = [&](const maiken::dist::Host &host) {
-      auto post = std::make_unique<maiken::dist::Post>(std::move(
-          maiken::dist::RemoteCommandManager::INST().build_setup_query(*apps[0],
-                                                                       args)));
+      auto post = std::make_unique<maiken::dist::Post>(
+          std::move(maiken::dist::RemoteCommandManager::INST().build_setup_query(*apps[0], args)));
       post->send(host);
     };
     kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);
@@ -456,11 +400,10 @@ maiken::Application::CREATE(const kul::cli::Args &args) KTHROW(kul::Exception) {
       ctp.stop().interrupt();
       throw e;
     };
-    for (size_t i = 0; i < threads; i++)
-      ctp.async(std::bind(ping, std::ref(hosts[i])), pingex);
-    ctp.finish(10000000); // 10 milliseconds
+    for (size_t i = 0; i < threads; i++) ctp.async(std::bind(ping, std::ref(hosts[i])), pingex);
+    ctp.finish(10000000);  // 10 milliseconds
     ctp.rethrow();
   }
-#endif //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   return apps;
 }

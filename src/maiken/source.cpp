@@ -32,8 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 #include "maiken/regex.hpp"
 
-void maiken::Application::addSourceLine(const std::string &s)
-    KTHROW(kul::Exception) {
+void maiken::Application::addSourceLine(const std::string &s) KTHROW(kul::Exception) {
   std::string o = s;
   kul::String::TRIM(o);
   if (o.find(',') == std::string::npos) {
@@ -49,42 +48,36 @@ void maiken::Application::addSourceLine(const std::string &s)
         else {
           auto regexResolved(Regexer::RESOLVE_REGEX(pResolved));
           if (regexResolved.empty())
-            KEXIT(1, "source does not exist\n" + s + "\n" +
-                         project().dir().path());
-          for (const auto &item : regexResolved)
-            srcs.push_back(std::make_pair(item, false));
+            KEXIT(1, "source does not exist\n" + s + "\n" + project().dir().path());
+          for (const auto &item : regexResolved) srcs.push_back(std::make_pair(item, false));
         }
       }
     }
   } else {
     std::vector<std::string> v;
     kul::String::SPLIT(o, ",", v);
-    if (v.size() == 0 || v.size() > 2)
-      KEXIT(1, "source invalid format\n" + project().dir().path());
+    if (v.size() == 0 || v.size() > 2) KEXIT(1, "source invalid format\n" + project().dir().path());
     kul::Dir d(Properties::RESOLVE(*this, v[0]));
     if (d)
       srcs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
     else
-      KEXIT(1,
-            "source does not exist\n" + v[0] + "\n" + project().dir().path());
+      KEXIT(1, "source does not exist\n" + v[0] + "\n" + project().dir().path());
   }
 }
 
-kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>>
-maiken::Application::sourceMap() const {
+kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> maiken::Application::sourceMap()
+    const {
   const kul::hash::set::String iMs = inactiveMains();
   kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> sm;
 
   if (!main.empty()) {
     kul::File f(kul::Dir(main).locl());
-    if (!f)
-      f = kul::File(main, project().dir());
+    if (!f) f = kul::File(main, project().dir());
     if (f.is()) {
     } else if (!AppVars::INSTANCE().dryRun() && !f.is())
       KEXIT(1, "") << "ERROR : main does not exist: " << f;
     if (f.is())
-      sm[f.name().substr(f.name().rfind(".") + 1)][f.dir().real()].insert(
-          f.real());
+      sm[f.name().substr(f.name().rfind(".") + 1)][f.dir().real()].insert(f.real());
     else if (!AppVars::INSTANCE().dryRun() && !f.is())
       KEXIT(1, "") << "ERROR : main does not exist: " << f;
   }
@@ -93,13 +86,11 @@ maiken::Application::sourceMap() const {
     std::vector<kul::File> files;
     kul::Dir d(sourceDir.first);
     if (d)
-      for (const auto &f : d.files(sourceDir.second))
-        files.push_back(f);
+      for (const auto &f : d.files(sourceDir.second)) files.push_back(f);
     else
       files.push_back(sourceDir.first);
     for (const kul::File &file : files) {
-      if (file.name().find(".") == std::string::npos ||
-          file.name().substr(0, 1).compare(".") == 0)
+      if (file.name().find(".") == std::string::npos || file.name().substr(0, 1).compare(".") == 0)
         continue;
       const std::string ft = file.name().substr(file.name().rfind(".") + 1);
       if (fs.count(ft) > 0) {
@@ -107,11 +98,9 @@ maiken::Application::sourceMap() const {
         bool a = false;
         for (const std::string &s : iMs) {
           a = rl.compare(s) == 0;
-          if (a)
-            break;
+          if (a) break;
         }
-        if (!a)
-          sm[ft][sourceDir.first].insert(rl);
+        if (!a) sm[ft][sourceDir.first].insert(rl);
       }
     }
   }
@@ -129,13 +118,10 @@ bool maiken::Application::incSrc(const kul::File &file) const {
         for (const auto &i : includes()) {
           kul::Dir inc(i.first);
           if (itss.count(inc.mini()) && includeStamps.count(inc.mini())) {
-            if ((*includeStamps.find(inc.mini())).second !=
-                (*itss.find(inc.mini())).second)
-              c = 1;
+            if ((*includeStamps.find(inc.mini())).second != (*itss.find(inc.mini())).second) c = 1;
           } else
             c = 1;
-          if (c)
-            break;
+          if (c) break;
         }
       } else
         c = 1;
@@ -144,17 +130,13 @@ bool maiken::Application::incSrc(const kul::File &file) const {
   return c;
 }
 
-std::vector<std::pair<std::string, std::string>>
-maiken::SourceFinder::all_sources_from(
-    const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>>
-        &sources,
+std::vector<std::pair<std::string, std::string>> maiken::SourceFinder::all_sources_from(
+    const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> &sources,
     kul::hash::set::String &objects, std::vector<kul::File> &cacheFiles) {
-  const std::string oType(
-      "." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
+  const std::string oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
   kul::Dir objD(app.buildDir().join("obj"));
   std::vector<std::pair<std::string, std::string>> source_objects;
-  for (const std::pair<std::string, kul::hash::map::S2T<kul::hash::set::String>>
-           &ft : sources) {
+  for (const std::pair<std::string, kul::hash::map::S2T<kul::hash::set::String>> &ft : sources) {
     const maiken::Compiler *compiler = maiken::Compilers::INSTANCE().get(
         (*(*app.files().find(ft.first)).second.find(STR_COMPILER)).second);
     if (compiler->sourceIsBin()) {
@@ -166,19 +148,17 @@ maiken::SourceFinder::all_sources_from(
         }
     } else {
       objD.mk();
-      for (const std::pair<std::string, kul::hash::set::String> &kv :
-           ft.second) {
+      for (const std::pair<std::string, kul::hash::set::String> &kv : ft.second) {
         for (const std::string &s : kv.second) {
           const kul::File source(s);
-          if (!app.incSrc(source))
-            continue;
+          if (!app.incSrc(source)) continue;
           std::stringstream ss, os;
           ss << std::hex << std::hash<std::string>()(source.real());
           os << ss.str() << "-" << source.name() << oType;
           kul::File object(os.str(), objD);
-          source_objects.emplace_back(std::make_pair(
-              AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
-              AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
+          source_objects.emplace_back(
+              std::make_pair(AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
+                             AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
         }
       }
     }
@@ -188,15 +168,12 @@ maiken::SourceFinder::all_sources_from(
 
 void maiken::CompilerValidation::check_compiler_for(
     const maiken::Application &app,
-    const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>>
-        &sources) {
-  for (const std::pair<std::string, kul::hash::map::S2T<kul::hash::set::String>>
-           &ft : sources) {
+    const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> &sources) {
+  for (const std::pair<std::string, kul::hash::map::S2T<kul::hash::set::String>> &ft : sources) {
     try {
       if (!(*app.files().find(ft.first)).second.count(STR_COMPILER))
         KEXIT(1, "No compiler found for filetype " + ft.first);
-      Compilers::INSTANCE().get(
-          (*(*app.files().find(ft.first)).second.find(STR_COMPILER)).second);
+      Compilers::INSTANCE().get((*(*app.files().find(ft.first)).second.find(STR_COMPILER)).second);
     } catch (const CompilerNotFoundException &e) {
       KEXIT(1, e.what());
     }

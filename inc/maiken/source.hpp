@@ -36,16 +36,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 
 class SourceFinder : public Constants {
-private:
+ private:
   const maiken::Application &app;
 
-public:
+ public:
   SourceFinder(const maiken::Application &_app) : app(_app) {}
   std::vector<std::pair<std::string, std::string>> all_sources_from(
-      const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>>
-          &sources,
+      const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> &sources,
       kul::hash::set::String &objects, std::vector<kul::File> &cacheFiles);
 };
-} // end namespace maiken
+}  // end namespace maiken
 
-#endif // _MAIKEN_SOURCE_HPP_
+#endif  // _MAIKEN_SOURCE_HPP_

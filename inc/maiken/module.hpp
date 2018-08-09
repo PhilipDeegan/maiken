@@ -36,7 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef _MKN_DISABLE_MODULES_
 #include "kul/sys.hpp"
-#endif //_MKN_DISABLE_MODULES_
+#endif  //_MKN_DISABLE_MODULES_
 
 #include "maiken/defs.hpp"
 
@@ -54,7 +54,7 @@ void maiken_module_destruct(maiken::Plugin* p);
 namespace maiken {
 
 class ModuleException : public kul::Exception {
-public:
+ public:
   ModuleException(const char *f, const uint16_t &l, const std::string &s)
       : kul::Exception(f, l, s) {}
 };
@@ -66,43 +66,39 @@ class ModuleLoader;
 class Module {
   friend class ModuleLoader;
 
-private:
+ private:
   const Application *app = nullptr;
   void application(const Application *_app) { app = _app; }
 
-public:
+ public:
   virtual ~Module() {}
   Module() KTHROW(ModuleException) {}
 
-  virtual void init(Application &app, const YAML::Node &arg)
-      KTHROW(std::exception) {}
-  virtual void compile(Application &app, const YAML::Node &arg)
-      KTHROW(std::exception) {}
-  virtual void link(Application &app, const YAML::Node &arg)
-      KTHROW(std::exception) {}
-  virtual void pack(Application &app, const YAML::Node &arg)
-      KTHROW(std::exception) {}
+  virtual void init(Application &app, const YAML::Node &arg) KTHROW(std::exception) {}
+  virtual void compile(Application &app, const YAML::Node &arg) KTHROW(std::exception) {}
+  virtual void link(Application &app, const YAML::Node &arg) KTHROW(std::exception) {}
+  virtual void pack(Application &app, const YAML::Node &arg) KTHROW(std::exception) {}
 };
 
 class GlobalModules;
 class KUL_PUBLISH ModuleLoader
 #ifndef _MKN_DISABLE_MODULES_
     : public kul::sys::SharedClass<maiken::Module>
-#endif //_MKN_DISABLE_MODULES_
+#endif  //_MKN_DISABLE_MODULES_
 {
   friend class GlobalModules;
 
-private:
+ private:
   bool loaded = 0;
   Module *p = nullptr;
 
   static kul::File FIND(const Application &a)
 #ifndef _MKN_DISABLE_MODULES_
       KTHROW(kul::sys::Exception)
-#endif //_MKN_DISABLE_MODULES_
+#endif  //_MKN_DISABLE_MODULES_
           ;
 
-public:
+ public:
   ModuleLoader(const Application &ap, const kul::File &f)
 #ifndef _MKN_DISABLE_MODULES_
       KTHROW(kul::sys::Exception)
@@ -112,18 +108,16 @@ public:
     p->application(&ap);
 #else
   {
-#endif //_MKN_DISABLE_MODULES_
+#endif  //_MKN_DISABLE_MODULES_
     loaded = 1;
   }
   ~ModuleLoader() {
-    if (loaded)
-      KERR << "WARNING: ModuleLoader not unloaded, possible memory leak";
+    if (loaded) KERR << "WARNING: ModuleLoader not unloaded, possible memory leak";
   }
   void unload() {
 #ifndef _MKN_DISABLE_MODULES_
-    if (loaded)
-      destruct(p);
-#endif //_MKN_DISABLE_MODULES_
+    if (loaded) destruct(p);
+#endif  //_MKN_DISABLE_MODULES_
     loaded = 0;
   }
   Module *module() { return p; }
@@ -132,14 +126,14 @@ public:
   static std::shared_ptr<ModuleLoader> LOAD(const Application &ap)
 #ifndef _MKN_DISABLE_MODULES_
       KTHROW(kul::sys::Exception)
-#endif //_MKN_DISABLE_MODULES_
+#endif  //_MKN_DISABLE_MODULES_
           ;
 };
 
 class GlobalModules {
   friend class ModuleLoader;
 
-private:
+ private:
   static GlobalModules &INSTANCE() {
     static GlobalModules i;
     return i;
@@ -151,13 +145,12 @@ private:
   void load(const Application &ap) KTHROW(kul::sys::Exception) {
     if (!libs.count(ap.buildDir().real())) {
       libs.insert(std::make_pair(
-          ap.buildDir().real(),
-          std::make_shared<kul::sys::SharedLibrary>(ModuleLoader::FIND(ap))));
+          ap.buildDir().real(), std::make_shared<kul::sys::SharedLibrary>(ModuleLoader::FIND(ap))));
     }
   }
 #else
   void load(const Application &ap) {}
-#endif //_MKN_DISABLE_MODULES_
+#endif  //_MKN_DISABLE_MODULES_
 };
-} // namespace maiken
+}  // namespace maiken
 #endif /* _MAIKEN_MODULE_HPP_ */

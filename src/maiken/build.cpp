@@ -30,8 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::link(const kul::hash::set::String &objects)
-    KTHROW(kul::Exception) {
+void maiken::Application::link(const kul::hash::set::String &objects) KTHROW(kul::Exception) {
   showConfig();
   if (objects.size() > 0) {
     buildDir().mk();
@@ -39,15 +38,13 @@ void maiken::Application::link(const kul::hash::set::String &objects)
       buildExecutable(objects);
     else
       buildLibrary(objects);
-    if (CommandStateMachine::INSTANCE().commands().count(STR_TEST) &&
-        !tests.empty())
+    if (CommandStateMachine::INSTANCE().commands().count(STR_TEST) && !tests.empty())
       buildTest(objects);
     kul::os::PushDir pushd(this->project().dir());
     kul::Dir build(".mkn/build");
     build.mk();
     kul::File ts("timestamp", build);
-    if (ts)
-      ts.rm();
+    if (ts) ts.rm();
     {
       kul::io::Writer w(ts);
       w << kul::Now::MILLIS();
@@ -56,22 +53,16 @@ void maiken::Application::link(const kul::hash::set::String &objects)
     KEXIT(1, "No link objects found, try compile or build.");
 }
 
-void maiken::Application::checkErrors(const CompilerProcessCapture &cpc)
-    KTHROW(kul::Exception) {
+void maiken::Application::checkErrors(const CompilerProcessCapture &cpc) KTHROW(kul::Exception) {
   auto o = [](const std::string &s) {
-    if (s.size())
-      KOUT(NON) << s;
+    if (s.size()) KOUT(NON) << s;
   };
   auto e = [](const std::string &s) {
-    if (s.size())
-      KERR << s;
+    if (s.size()) KERR << s;
   };
-  if (kul::LogMan::INSTANCE().inf() || cpc.exception())
-    o(cpc.outs());
-  if (kul::LogMan::INSTANCE().err() || cpc.exception())
-    e(cpc.errs());
-  if (cpc.exception())
-    std::rethrow_exception(cpc.exception());
+  if (kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
+  if (kul::LogMan::INSTANCE().err() || cpc.exception()) e(cpc.errs());
+  if (cpc.exception()) std::rethrow_exception(cpc.exception());
 }
 
 bool maiken::Application::is_build_required() {
@@ -85,8 +76,7 @@ bool maiken::Application::is_build_stale() {
   kul::os::PushDir pushd(this->project().dir());
   kul::Dir d(".mkn/build");
   kul::File f("timestamp", d);
-  if (!d || !f)
-    return true;
+  if (!d || !f) return true;
   kul::io::Reader r(f);
   try {
     size_t then = (size_t)43200 * ((size_t)60 * (size_t)1000);
@@ -94,8 +84,7 @@ bool maiken::Application::is_build_stale() {
     size_t _MKN_BUILD_IS_STALE_MINUTES = now - then;
     const char *c = r.readLine();
     size_t timestamp = kul::String::UINT64(std::string(c));
-    if (_MKN_BUILD_IS_STALE_MINUTES > timestamp)
-      return true;
+    if (_MKN_BUILD_IS_STALE_MINUTES > timestamp) return true;
   } catch (const kul::Exception &e) {
     KERR << e.stack();
   } catch (const std::exception &e) {

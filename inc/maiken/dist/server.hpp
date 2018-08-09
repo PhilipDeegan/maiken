@@ -35,7 +35,7 @@ namespace maiken {
 namespace dist {
 
 class FileWriter {
-public:
+ public:
   std::unique_ptr<kul::io::BinaryWriter> bw;
 };
 
@@ -45,22 +45,20 @@ class Server;
 class ServerSession {
   friend class Server;
 
-public:
+ public:
   ServerSession() : start_time(kul::Now::MILLIS()) {}
   void reset_setup(SetupRequest *request) { setup.reset(request); }
   SetupRequest *setup_ptr() { return setup.get(); }
-  void set_apps(const std::vector<Application *> &_apps) {
-    this->apps = std::move(_apps);
-  }
+  void set_apps(const std::vector<Application *> &_apps) { this->apps = std::move(_apps); }
   std::vector<Application *> apps_vector() { return apps; };
 
-public:
+ public:
   std::unique_ptr<kul::io::BinaryReader> binary_reader;
   std::unique_ptr<kul::io::BinaryWriter> binary_writer;
   std::vector<std::pair<std::string, std::string>> m_src_obj;
   kul::hash::set::String objects;
 
-private:
+ private:
   uint64_t start_time;
   std::unique_ptr<SetupRequest> setup = nullptr;
   std::vector<Application *> apps;
@@ -70,13 +68,13 @@ private:
 class Server : public kul::http::MultiServer, public Constants {
   friend class kul::Thread;
 
-public:
+ public:
   Server(const uint16_t port, const kul::Dir &_home, uint16_t threads)
       : busy(false), kul::http::MultiServer(port, 2, 3), m_home(_home) {}
   virtual ~Server() {}
   kul::http::_1_1Response respond(const kul::http::A1_1Request &req);
 
-private:
+ private:
   void operator()();
 
   Server(const Server &) = delete;
@@ -84,11 +82,10 @@ private:
   Server &operator=(const Server &) = delete;
   Server &operator=(const Server &&) = delete;
 
-protected:
+ protected:
   void onConnect(const char *cip, const uint16_t &port) override {
     std::string ip(cip);
-    if (!sessions.count(std::string(ip)))
-      sessions.emplace();
+    if (!sessions.count(std::string(ip))) sessions.emplace();
     ServerSession &sesh = sessions[ip];
     if (sesh.state != SessionState::NON && sesh.setup == nullptr) {
       KLOG(ERR) << "Incoming connection has invalid session state - resetting";
@@ -97,13 +94,13 @@ protected:
     }
   }
 
-private:
+ private:
   std::unordered_map<std::string, ServerSession> sessions;
   std::atomic<bool> busy;
   kul::Dir m_home;
   FileWriter fw;
 };
-} // end namespace dist
-} // end namespace maiken
+}  // end namespace dist
+}  // end namespace maiken
 
-#endif // _MAIKEN_DIST_SERVER_HPP_
+#endif  // _MAIKEN_DIST_SERVER_HPP_

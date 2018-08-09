@@ -35,39 +35,31 @@ maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
   const std::string src(p.first);
   const std::string obj(p.second);
   const std::string &fileType = src.substr(src.rfind(".") + 1);
-  if (!(app.files().count(fileType)))
-    KEXCEPTION("NOOOOOOO ") << fileType;
-  const std::string &compiler =
-      (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
+  if (!(app.files().count(fileType))) KEXCEPTION("NOOOOOOO ") << fileType;
+  const std::string &compiler = (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
   const std::string &base = maiken::Compilers::INSTANCE().base(compiler);
   std::vector<std::string> args;
   if (app.arguments().count(fileType) > 0)
     for (const std::string &o : (*app.arguments().find(fileType)).second)
-      for (const auto &s : kul::cli::asArgs(o))
-        args.push_back(s);
-  for (const auto &s : kul::cli::asArgs(app.arg))
-    args.push_back(s);
+      for (const auto &s : kul::cli::asArgs(o)) args.push_back(s);
+  for (const auto &s : kul::cli::asArgs(app.arg)) args.push_back(s);
   if (app.cArg.count(base))
-    for (const auto &s : kul::cli::asArgs(app.cArg[base]))
-      args.push_back(s);
+    for (const auto &s : kul::cli::asArgs(app.cArg[base])) args.push_back(s);
   std::string cmd = compiler + " " + AppVars::INSTANCE().args();
   if (AppVars::INSTANCE().jargs().count(fileType) > 0)
     cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;
   // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
   auto compilerFlags = [&args](const std::string &&as) {
-    for (const auto &s : kul::cli::asArgs(as))
-      args.push_back(s);
+    for (const auto &s : kul::cli::asArgs(as)) args.push_back(s);
   };
   auto comp = Compilers::INSTANCE().get(compiler);
   compilerFlags(comp->compilerDebug(AppVars::INSTANCE().debug()));
   compilerFlags(comp->compilerOptimization(AppVars::INSTANCE().optimise()));
   compilerFlags(comp->compilerWarning(AppVars::INSTANCE().warn()));
-  return CompilationUnit(comp, cmd, args, incs, src, obj, app.m,
-                         AppVars::INSTANCE().dryRun());
+  return CompilationUnit(comp, cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
 }
 
-maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const
-    KTHROW(kul::Exception) {
+maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const KTHROW(kul::Exception) {
   try {
     return comp->compileSource(compiler, args, incs, in, out, mode, dryRun);
   } catch (const kul::Exception &e) {

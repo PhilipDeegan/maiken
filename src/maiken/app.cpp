@@ -30,9 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/app.hpp"
 
-maiken::Application *
-maiken::Applications::getOrCreate(const maiken::Project &proj,
-                                  const std::string &_profile, bool setup)
+maiken::Application *maiken::Applications::getOrCreate(const maiken::Project &proj,
+                                                       const std::string &_profile, bool setup)
     KTHROW(kul::Exception) {
   std::string pDir(proj.dir().real());
   std::string profile = _profile.empty() ? "@" : _profile;
@@ -51,9 +50,8 @@ maiken::Applications::getOrCreate(const maiken::Project &proj,
   return m_apps[pDir][profile];
 }
 
-maiken::Application *
-maiken::Applications::getOrCreateRoot(const maiken::Project &proj,
-                                      const std::string &_profile, bool setup)
+maiken::Application *maiken::Applications::getOrCreateRoot(const maiken::Project &proj,
+                                                           const std::string &_profile, bool setup)
     KTHROW(kul::Exception) {
   std::string pDir(proj.dir().real());
   std::string profile = _profile.empty() ? "@" : _profile;
@@ -73,8 +71,7 @@ maiken::Applications::getOrCreateRoot(const maiken::Project &proj,
   return m_apps[pDir][profile];
 }
 
-maiken::Application *
-maiken::Applications::getOrNullptr(const std::string &project) {
+maiken::Application *maiken::Applications::getOrNullptr(const std::string &project) {
   uint8_t count = 0;
   Application *app = nullptr;
   for (const auto p1 : m_apps)

@@ -37,24 +37,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 
 class SCMGetter {
-public:
+ public:
   static SCMGetter &INSTANCE() {
     static SCMGetter s;
     return s;
   }
   static bool HAS(const kul::Dir &d);
   static std::string REPO(const kul::Dir &d, const std::string &r, bool module);
-  static const kul::SCM *GET(const kul::Dir &d, const std::string &r,
-                             bool module);
+  static const kul::SCM *GET(const kul::Dir &d, const std::string &r, bool module);
 
-private:
+ private:
   static bool IS_SOLID(const std::string &r);
-  static const kul::SCM *GET_SCM(const kul::Dir &d, const std::string &r,
-                                 bool module);
+  static const kul::SCM *GET_SCM(const kul::Dir &d, const std::string &r, bool module);
 
-private:
+ private:
   kul::hash::map::S2S valids;
 };
-} // end namespace maiken
+}  // end namespace maiken
 
-#endif // _MAIKEN_SCM_HPP_
+#endif  // _MAIKEN_SCM_HPP_

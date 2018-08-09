@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cereal/types/vector.hpp>
 
 #include <cereal/archives/portable_binary.hpp>
-#endif //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
 
 namespace maiken {
 
@@ -52,16 +52,16 @@ namespace maiken {
 namespace dist {
 class Post;
 class RemoteCommandManager;
-} // namespace dist
-#endif //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+}  // namespace dist
+#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
 
 class AppVars : public Constants {
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   friend class dist::RemoteCommandManager;
   friend class dist::Post;
   friend class ::cereal::access;
-#endif //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
-private:
+#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+ private:
   bool dr = 0, f = 0, q = 0, s = 0, sh = 0, st = 0, u = 0;
   uint16_t de = -1, dl = 0, op = -1, ts = 1, wa = -1;
   std::string aa, al, dep, la, ra, wi, wo;
@@ -72,11 +72,11 @@ private:
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   uint16_t no = 0;
-#endif //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
 
   AppVars();
 
-public:
+ public:
   const std::string &args() const { return aa; }
   void args(const std::string &aa) { this->aa = aa; }
 
@@ -135,9 +135,7 @@ public:
   void properkeys(const std::string &k, const std::string &v) { pks[k] = v; }
 
   const kul::hash::map::S2S &envVars() const { return evs; }
-  std::string envVar(const std::string &&k) const {
-    return (*evs.find(k)).second;
-  }
+  std::string envVar(const std::string &&k) const { return (*evs.find(k)).second; }
   void envVars(const std::string &k, const std::string &v) { evs[k] = v; }
 
   void command(const std::string &s) { cmds.insert(s); }
@@ -157,12 +155,12 @@ public:
   void nodes(const uint16_t &no) { this->no = no; }
 
   static AppVars &SET(std::shared_ptr<AppVars> update) {
-    if (instance == nullptr)
-      instance = std::move(update);
+    if (instance == nullptr) instance = std::move(update);
     return *instance;
   }
 
-  template <class Archive> void save(Archive &ar) const {
+  template <class Archive>
+  void save(Archive &ar) const {
     ar(dr, f, q, s, sh, st, u);
 
     ar(de, dl, op, ts, wa);
@@ -173,23 +171,21 @@ public:
     auto convert_to_std_set =
         [](const kul::hash::set::String &s) -> std::unordered_set<std::string> {
       std::unordered_set<std::string> ret;
-      for (const auto &p : s)
-        ret.emplace(p);
+      for (const auto &p : s) ret.emplace(p);
       return ret;
     };
-    auto convert_to_std_map = [](const kul::hash::map::S2S &s)
-        -> std::unordered_map<std::string, std::string> {
-          std::unordered_map<std::string, std::string> ret;
-          for (const auto &p : s)
-            ret.emplace(p.first, p.second);
-          return ret;
-        };
+    auto convert_to_std_map =
+        [](const kul::hash::map::S2S &s) -> std::unordered_map<std::string, std::string> {
+      std::unordered_map<std::string, std::string> ret;
+      for (const auto &p : s) ret.emplace(p.first, p.second);
+      return ret;
+    };
 
     ar(convert_to_std_set(cmds), convert_to_std_set(wop));
-    ar(convert_to_std_map(evs), convert_to_std_map(jas),
-       convert_to_std_map(pks));
+    ar(convert_to_std_map(evs), convert_to_std_map(jas), convert_to_std_map(pks));
   }
-  template <class Archive> void load(Archive &ar) {
+  template <class Archive>
+  void load(Archive &ar) {
     ar(dr, f, q, s, sh, st, u);
 
     ar(de, dl, op, ts, wa);
@@ -200,18 +196,15 @@ public:
     auto convert_to_kul_set =
         [](const std::unordered_set<std::string> &s) -> kul::hash::set::String {
       kul::hash::set::String ret;
-      for (const auto &p : s)
-        ret.insert(p);
+      for (const auto &p : s) ret.insert(p);
       return ret;
     };
     auto convert_to_kul_map =
-        [](const std::unordered_map<std::string, std::string> &s)
-        -> kul::hash::map::S2S {
-          kul::hash::map::S2S ret;
-          for (const auto &p : s)
-            ret.insert(p.first, p.second);
-          return ret;
-        };
+        [](const std::unordered_map<std::string, std::string> &s) -> kul::hash::map::S2S {
+      kul::hash::map::S2S ret;
+      for (const auto &p : s) ret.insert(p.first, p.second);
+      return ret;
+    };
     std::unordered_set<std::string> _cmds, _wop;
     ar(cmds, _wop);
     cmds = convert_to_kul_set(_cmds);
@@ -225,21 +218,19 @@ public:
     pks = convert_to_kul_map(_pks);
   }
 
-#endif //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
 
   static AppVars &INSTANCE() {
-    if (instance == nullptr)
-      instance.reset(new AppVars);
+    if (instance == nullptr) instance.reset(new AppVars);
     return *instance;
   }
 };
-} // namespace maiken
+}  // namespace maiken
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
 
-CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::AppVars,
-                                   cereal::specialization::member_load_save)
+CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::AppVars, cereal::specialization::member_load_save)
 
-#endif //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
 
 #endif /* _MAIKEN_GLOBALS_HPP_ */

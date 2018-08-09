@@ -38,16 +38,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 namespace compiler {
 class Exception : public kul::Exception {
-public:
-  Exception(const char *f, const int l, std::string s)
-      : kul::Exception(f, l, s) {}
+ public:
+  Exception(const char *f, const int l, std::string s) : kul::Exception(f, l, s) {}
 };
-} // namespace compiler
+}  // namespace compiler
 
 class CompilerNotFoundException : public kul::Exception {
-public:
-  CompilerNotFoundException(const char *f, const int l, std::string s)
-      : kul::Exception(f, l, s) {}
+ public:
+  CompilerNotFoundException(const char *f, const int l, std::string s) : kul::Exception(f, l, s) {}
 };
 
 template <typename T, typename... Args>
@@ -56,32 +54,26 @@ std::unique_ptr<T> make_unique(Args &&... args) {
 }
 
 class Compilers {
-public:
+ public:
   static Compilers &INSTANCE() {
     static Compilers instance;
     return instance;
   }
   std::vector<std::string> keys() {
     std::vector<std::string> ks;
-    for (const auto &p : cs)
-      ks.push_back(p.first);
+    for (const auto &p : cs) ks.push_back(p.first);
     return ks;
   }
-  void addMask(const std::string &m, const std::string &c)
-      KTHROW(CompilerNotFoundException) {
+  void addMask(const std::string &m, const std::string &c) KTHROW(CompilerNotFoundException) {
     const std::string k(key(c, cs));
-    if (cs.count(m))
-      KEXCEPT(compiler::Exception, "Mask cannot replace compiler");
+    if (cs.count(m)) KEXCEPT(compiler::Exception, "Mask cannot replace compiler");
     masks[m] = cs[k];
   }
-  const Compiler *get(const std::string &comp)
-      KTHROW(CompilerNotFoundException) {
+  const Compiler *get(const std::string &comp) KTHROW(CompilerNotFoundException) {
     auto k = key(comp, cs);
-    if (cs.count(k))
-      return cs[k];
+    if (cs.count(k)) return cs[k];
     k = key(comp, masks);
-    if (masks.count(k))
-      return masks[k];
+    if (masks.count(k)) return masks[k];
     KEXCEPT(CompilerNotFoundException, "Key not found ") << comp;
   }
   std::string base(const std::string &comp) {
@@ -92,7 +84,7 @@ public:
     return key(comp, masks);
   }
 
-private:
+ private:
   std::unique_ptr<Compiler> hcc;
   std::unique_ptr<Compiler> gcc;
   std::unique_ptr<Compiler> clang;
@@ -102,9 +94,9 @@ private:
 
   kul::hash::map::S2T<Compiler *> cs, masks;
 
-private:
+ private:
   Compilers();
   std::string key(std::string comp, const kul::hash::map::S2T<Compiler *> &map);
 };
-} // namespace maiken
+}  // namespace maiken
 #endif /* _MAIKEN_CODE_COMPILERS_HPP_ */

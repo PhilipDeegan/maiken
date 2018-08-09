@@ -36,7 +36,7 @@ namespace maiken {
 class SuperSettings {
   friend class maiken::Settings;
 
-private:
+ private:
   kul::hash::set::String files;
   static SuperSettings &INSTANCE() {
     static SuperSettings instance;
@@ -44,58 +44,48 @@ private:
   }
   void cycleCheck(const std::string &file) KTHROW(maiken::SettingsException) {
     if (files.count(file))
-      KEXCEPT(maiken::SettingsException,
-              "Super cycle detected in file: " + file);
+      KEXCEPT(maiken::SettingsException, "Super cycle detected in file: " + file);
     files.insert(file);
   }
 };
-} // namespace maiken
+}  // namespace maiken
 
 maiken::Settings::Settings(const std::string &s) : kul::yaml::File(s) {
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_REPO]) {
     kul::Dir d(root()[STR_LOCAL][STR_REPO].Scalar());
     if (!d.is() && !d.mk())
-      KEXCEPT(SettingsException,
-              "settings.yaml local/repo is not a valid directory");
+      KEXCEPT(SettingsException, "settings.yaml local/repo is not a valid directory");
   }
   if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_REPO])
-    for (const auto &s :
-         kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
+    for (const auto &s : kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
       rrs.push_back(s);
   {
     const std::string &rr = _MKN_REMOTE_REPO_;
-    for (const auto &s : kul::String::SPLIT(rr, ' '))
-      rrs.push_back(s);
+    for (const auto &s : kul::String::SPLIT(rr, ' ')) rrs.push_back(s);
   }
 
   if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_MOD_REPO])
-    for (const auto &s :
-         kul::String::SPLIT(root()[STR_REMOTE][STR_MOD_REPO].Scalar(), ' '))
+    for (const auto &s : kul::String::SPLIT(root()[STR_REMOTE][STR_MOD_REPO].Scalar(), ' '))
       rms.push_back(s);
   {
     const std::string &rr = _MKN_REMOTE_MOD_;
-    for (const auto &s : kul::String::SPLIT(rr, ' '))
-      rms.push_back(s);
+    for (const auto &s : kul::String::SPLIT(rr, ' ')) rms.push_back(s);
   }
 
   if (root()[STR_SUPER]) {
     kul::File f(RESOLVE(root()[STR_SUPER].Scalar()));
-    if (!f)
-      KEXCEPT(SettingsException, "super file not found\n" + file());
+    if (!f) KEXCEPT(SettingsException, "super file not found\n" + file());
     if (f.real() == kul::File(file()).real())
       KEXCEPT(SettingsException, "super cannot reference itself\n" + file());
     SuperSettings::INSTANCE().cycleCheck(f.real());
-    sup =
-        std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
+    sup = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
     for (const auto &p : sup->properties())
-      if (!ps.count(p.first))
-        ps.insert(p.first, p.second);
+      if (!ps.count(p.first)) ps.insert(p.first, p.second);
   }
   if (root()[STR_COMPILER] && root()[STR_COMPILER][STR_MASK])
     for (const auto &k : Compilers::INSTANCE().keys())
       if (root()[STR_COMPILER][STR_MASK][k])
-        for (const auto &s : kul::String::SPLIT(
-                 root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
+        for (const auto &s : kul::String::SPLIT(root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
           Compilers::INSTANCE().addMask(s, k);
 
   resolveProperties();
@@ -104,39 +94,34 @@ maiken::Settings::Settings(const std::string &s) : kul::yaml::File(s) {
 maiken::Settings &maiken::Settings::INSTANCE() KTHROW(kul::Exit) {
   if (!instance.get()) {
     const kul::File f("settings.yaml", kul::user::home("maiken"));
-    if (!f.dir().is())
-      f.dir().mk();
+    if (!f.dir().is()) f.dir().mk();
     if (!f.is()) {
       write(f);
     }
-    instance =
-        std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
+    instance = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
   }
   return *instance.get();
 }
 
 void maiken::Settings::resolveProperties() KTHROW(SettingsException) {
   ps.setDeletedKey("--DELETED--");
-  for (YAML::const_iterator it = root()[STR_PROPERTY].begin();
-       it != root()[STR_PROPERTY].end(); ++it)
+  for (YAML::const_iterator it = root()[STR_PROPERTY].begin(); it != root()[STR_PROPERTY].end();
+       ++it)
     ps[it->first.as<std::string>()] = it->second.as<std::string>();
-  for (YAML::const_iterator it = root()[STR_PROPERTY].begin();
-       it != root()[STR_PROPERTY].end(); ++it) {
+  for (YAML::const_iterator it = root()[STR_PROPERTY].begin(); it != root()[STR_PROPERTY].end();
+       ++it) {
     std::string s = Properties::RESOLVE(*this, it->second.as<std::string>());
-    if (ps.count(it->first.as<std::string>()))
-      ps.erase(it->first.as<std::string>());
+    if (ps.count(it->first.as<std::string>())) ps.erase(it->first.as<std::string>());
     ps[it->first.as<std::string>()] = s;
   }
 }
 
-std::string maiken::Settings::RESOLVE(const std::string &s)
-    KTHROW(SettingsException) {
+std::string maiken::Settings::RESOLVE(const std::string &s) KTHROW(SettingsException) {
   std::vector<kul::File> pos{kul::File(s), kul::File(s + ".yaml"),
                              kul::File(s, kul::user::home("maiken")),
                              kul::File(s + ".yaml", kul::user::home("maiken"))};
   for (const auto &f : pos)
-    if (f.is())
-      return f.real();
+    if (f.is()) return f.real();
 
   return "";
 }
@@ -144,8 +129,7 @@ std::string maiken::Settings::RESOLVE(const std::string &s)
 bool maiken::Settings::SET(const std::string &s) {
   std::string file(RESOLVE(s));
   if (file.size()) {
-    instance =
-        std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(file));
+    instance = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(file));
     return 1;
   }
   return 0;
@@ -159,36 +143,31 @@ const kul::yaml::Validator maiken::Settings::validator() const {
     masks.push_back(NodeValidator(s, {}, 0, NodeType::STRING));
 
   return Validator({
-    NodeValidator("super"),
-        NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP),
+    NodeValidator("super"), NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP),
         NodeValidator("inc"), NodeValidator("path"),
         NodeValidator("local",
-                      {NodeValidator("repo"), NodeValidator("mod-repo"),
-                       NodeValidator("debugger"), NodeValidator("lib"),
-                       NodeValidator("bin")},
+                      {NodeValidator("repo"), NodeValidator("mod-repo"), NodeValidator("debugger"),
+                       NodeValidator("lib"), NodeValidator("bin")},
                       0, NodeType::MAP),
-        NodeValidator("remote",
-                      {NodeValidator("repo"), NodeValidator("mod-repo")}, 0,
+        NodeValidator("remote", {NodeValidator("repo"), NodeValidator("mod-repo")}, 0,
                       NodeType::MAP),
-        NodeValidator("env", {NodeValidator("name", 1),
-                              NodeValidator("value", 1), NodeValidator("mode")},
+        NodeValidator("env",
+                      {NodeValidator("name", 1), NodeValidator("value", 1), NodeValidator("mode")},
                       0, NodeType::LIST),
         NodeValidator("file",
                       {NodeValidator("type", 1), NodeValidator("compiler", 1),
                        NodeValidator("linker"), NodeValidator("archiver")},
                       1, NodeType::LIST),
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-        NodeValidator(
-            "dist",
-            {NodeValidator("port"),
-             NodeValidator("nodes",
-                           {NodeValidator("host", 1), NodeValidator("port", 1),
-                            NodeValidator("user"), NodeValidator("pass")},
-                           0, NodeType::LIST)},
-            0, NodeType::MAP),
-#endif // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
-        NodeValidator("compiler",
-                      {NodeValidator("mask", masks, 0, NodeType::MAP)}, 0,
+        NodeValidator("dist",
+                      {NodeValidator("port"),
+                       NodeValidator("nodes",
+                                     {NodeValidator("host", 1), NodeValidator("port", 1),
+                                      NodeValidator("user"), NodeValidator("pass")},
+                                     0, NodeType::LIST)},
+                      0, NodeType::MAP),
+#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+        NodeValidator("compiler", {NodeValidator("mask", masks, 0, NodeType::MAP)}, 0,
                       NodeType::MAP)
   });
 }

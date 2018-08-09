@@ -38,8 +38,7 @@ int main(int argc, char *argv[]) {
   int exit_code = 0;
   try {
     using namespace kul::cli;
-    kul::Dir d = kul::user::home(
-        kul::Dir::JOIN(maiken::Constants::STR_MAIKEN, "server"));
+    kul::Dir d = kul::user::home(kul::Dir::JOIN(maiken::Constants::STR_MAIKEN, "server"));
     Args args({}, {Arg('d', maiken::Constants::STR_DIR, ArgType::STRING)});
     try {
       args.process(argc, argv);
@@ -49,8 +48,7 @@ int main(int argc, char *argv[]) {
     if (args.has(maiken::Constants::STR_DIR)) {
       d = kul::Dir(args.get(maiken::Constants::STR_DIR));
       if (!d && !d.mk())
-        KEXCEPT(kul::Exception,
-                "diretory provided does not exist or cannot be created");
+        KEXCEPT(kul::Exception, "diretory provided does not exist or cannot be created");
     }
     maiken::dist::Server serv(8888, d, 3);
     kul::Thread thread(std::ref(serv));
@@ -62,8 +60,7 @@ int main(int argc, char *argv[]) {
     thread.join();
     KLOG(INF);
   } catch (const kul::Exit &e) {
-    if (e.code() != 0)
-      KERR << kul::os::EOL() << "ERROR: " << e;
+    if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e;
     exit_code = e.code();
   } catch (const kul::proc::ExitException &e) {
     exit_code = e.code();

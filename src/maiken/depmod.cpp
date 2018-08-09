@@ -31,13 +31,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/github.hpp"
 #include "maiken/scm.hpp"
 
-void maiken::Application::loadDepOrMod(const YAML::Node &node,
-                                       const kul::Dir &depOrMod, bool module)
-    KTHROW(kul::Exception) {
+void maiken::Application::loadDepOrMod(const YAML::Node &node, const kul::Dir &depOrMod,
+                                       bool module) KTHROW(kul::Exception) {
   KOUT(NON) << MKN_PROJECT_NOT_FOUND << depOrMod;
 #ifdef _MKN_DISABLE_SCM_
-  KEXIT(1, "dep does not exist and remote retrieval is disabled - path: " +
-               depOrMod.path());
+  KEXIT(1, "dep does not exist and remote retrieval is disabled - path: " + depOrMod.path());
 #endif
   if (!node[STR_SCM] && !node[STR_NAME])
     KEXIT(1,
@@ -45,21 +43,17 @@ void maiken::Application::loadDepOrMod(const YAML::Node &node,
           "remote repositories - path: " +
               depOrMod.path());
   kul::env::CWD(this->project().dir());
-  const std::string &tscr(
-      node[STR_SCM] ? Properties::RESOLVE(*this, node[STR_SCM].Scalar())
-                    : node[STR_NAME].Scalar());
-  const std::string &v(
-      node[STR_VERSION] ? Properties::RESOLVE(*this, node[STR_VERSION].Scalar())
-                        : "");
+  const std::string &tscr(node[STR_SCM] ? Properties::RESOLVE(*this, node[STR_SCM].Scalar())
+                                        : node[STR_NAME].Scalar());
+  const std::string &v(node[STR_VERSION] ? Properties::RESOLVE(*this, node[STR_VERSION].Scalar())
+                                         : "");
   try {
     KOUT(NON) << SCMGetter::GET(depOrMod, tscr, module)
-                     ->co(depOrMod.path(),
-                          SCMGetter::REPO(depOrMod, tscr, module), v);
+                     ->co(depOrMod.path(), SCMGetter::REPO(depOrMod, tscr, module), v);
   } catch (const kul::scm::Exception &e) {
     if (node[STR_NAME]) {
       kul::File version(".mkn/dep/ver/" + node[STR_NAME].Scalar());
-      if (version)
-        version.rm();
+      if (version) version.rm();
     }
     std::rethrow_exception(std::current_exception());
   }
@@ -75,8 +69,7 @@ void maiken::Application::loadDepOrMod(const YAML::Node &node,
         kul::proc::Call("./mkn." + std::string(KTOSTRING(__KUL_OS__)) + ".sh",
                         AppVars::INSTANCE().envVars())
             .run())
-      KEXIT(1, "ERROR in " + depOrMod.path() + "mkn." +
-                   std::string(KTOSTRING(__KUL_OS__)) + ".sh");
+      KEXIT(1, "ERROR in " + depOrMod.path() + "mkn." + std::string(KTOSTRING(__KUL_OS__)) + ".sh");
     else if (kul::File("mkn.sh").is() &&
              kul::proc::Call("./mkn.sh", AppVars::INSTANCE().envVars()).run())
       KEXIT(1, "ERROR in " + depOrMod.path() + "/mkn.sh");
@@ -85,35 +78,26 @@ void maiken::Application::loadDepOrMod(const YAML::Node &node,
   kul::env::CWD(this->project().dir());
 }
 
-kul::Dir maiken::Application::resolveDepOrModDirectory(const YAML::Node &n,
-                                                       bool module) {
+kul::Dir maiken::Application::resolveDepOrModDirectory(const YAML::Node &n, bool module) {
   std::string d;
   if (n[STR_LOCAL])
     d = Properties::RESOLVE(*this, n[STR_LOCAL].Scalar());
   else {
-    d = (*AppVars::INSTANCE().properkeys().find(module ? "MKN_MOD_REPO"
-                                                       : "MKN_REPO"))
-            .second;
+    d = (*AppVars::INSTANCE().properkeys().find(module ? "MKN_MOD_REPO" : "MKN_REPO")).second;
     try {
       kul::File verFile(n[STR_NAME].Scalar(), ".mkn/dep/ver");
       auto resolveSCMBranch = [=]() -> std::string {
-        if (n[STR_VERSION])
-          return Properties::RESOLVE(*this, n[STR_VERSION].Scalar());
-        if (verFile)
-          return kul::io::Reader(verFile).readLine();
+        if (n[STR_VERSION]) return Properties::RESOLVE(*this, n[STR_VERSION].Scalar());
+        if (verFile) return kul::io::Reader(verFile).readLine();
         {
-          auto app =
-              Applications::INSTANCE().getOrNullptr(n[STR_NAME].Scalar());
-          if (app)
-            return app->project().dir().name();
+          auto app = Applications::INSTANCE().getOrNullptr(n[STR_NAME].Scalar());
+          if (app) return app->project().dir().name();
         }
 #ifdef _MKN_WITH_MKN_RAM_
-        KOUT(NON) << "Attempting branch deduction resolution for: "
-                  << n[STR_NAME].Scalar();
+        KOUT(NON) << "Attempting branch deduction resolution for: " << n[STR_NAME].Scalar();
         std::string version;
-        if (Github::GET_LATEST(n[STR_NAME].Scalar(), version))
-          return version;
-#endif //_MKN_WITH_MKN_RAM_
+        if (Github::GET_LATEST(n[STR_NAME].Scalar(), version)) return version;
+#endif  //_MKN_WITH_MKN_RAM_
         return "master";
       };
       std::string version(resolveSCMBranch());
@@ -125,11 +109,9 @@ kul::Dir maiken::Application::resolveDepOrModDirectory(const YAML::Node &n,
         verFile.dir().mk();
         kul::io::Writer(verFile) << version;
       }
-      if (_MKN_REP_VERS_DOT_)
-        kul::String::REPLACE_ALL(version, ".", kul::Dir::SEP());
+      if (_MKN_REP_VERS_DOT_) kul::String::REPLACE_ALL(version, ".", kul::Dir::SEP());
       std::string name(Properties::RESOLVE(*this, n[STR_NAME].Scalar()));
-      if (_MKN_REP_NAME_DOT_)
-        kul::String::REPLACE_ALL(name, ".", kul::Dir::SEP());
+      if (_MKN_REP_NAME_DOT_) kul::String::REPLACE_ALL(name, ".", kul::Dir::SEP());
       d = kul::Dir::JOIN(d, kul::Dir::JOIN(name, version));
     } catch (const kul::Exception &e) {
       KERR << e.debug();
@@ -138,24 +120,17 @@ kul::Dir maiken::Application::resolveDepOrModDirectory(const YAML::Node &n,
   return kul::Dir(d);
 }
 
-void maiken::Application::popDepOrMod(const YAML::Node &n,
-                                      std::vector<Application *> &vec,
-                                      const std::string &s, bool module,
-                                      bool with) KTHROW(kul::Exception) {
+void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Application *> &vec,
+                                      const std::string &s, bool module, bool with)
+    KTHROW(kul::Exception) {
   auto setApp = [&](Application &app, const YAML::Node &node) {
-    if (node[STR_SCM])
-      app.scr = Properties::RESOLVE(*this, node[STR_SCM].Scalar());
-    if (node[STR_VERSION])
-      app.scv = Properties::RESOLVE(*this, node[STR_VERSION].Scalar());
+    if (node[STR_SCM]) app.scr = Properties::RESOLVE(*this, node[STR_SCM].Scalar());
+    if (node[STR_VERSION]) app.scv = Properties::RESOLVE(*this, node[STR_VERSION].Scalar());
     if (module && node) {
-      if (node[STR_INIT])
-        app.modInit(node[STR_INIT]);
-      if (node[STR_COMPILE])
-        app.modCompile(node[STR_COMPILE]);
-      if (node[STR_LINK])
-        app.modLink(node[STR_LINK]);
-      if (node[STR_PACK])
-        app.modPack(node[STR_PACK]);
+      if (node[STR_INIT]) app.modInit(node[STR_INIT]);
+      if (node[STR_COMPILE]) app.modCompile(node[STR_COMPILE]);
+      if (node[STR_LINK]) app.modLink(node[STR_LINK]);
+      if (node[STR_PACK]) app.modPack(node[STR_PACK]);
       app.isMod = 1;
     }
   };
@@ -168,10 +143,8 @@ void maiken::Application::popDepOrMod(const YAML::Node &n,
         f = true;
         break;
       }
-    if (f)
-      return;
-    const maiken::Project &c(
-        *maiken::Projects::INSTANCE().getOrCreate(projectDir));
+    if (f) return;
+    const maiken::Project &c(*maiken::Projects::INSTANCE().getOrCreate(projectDir));
 
     auto withoutThis = [=](const std::string &name, const std::string &pro) {
       for (const auto &wo : AppVars::INSTANCE().withoutParsed()) {
@@ -180,29 +153,23 @@ void maiken::Application::popDepOrMod(const YAML::Node &n,
         auto lb(wo.find("["));
         auto rb(wo.find("]"));
         if (lb != std::string::npos) {
-          if (rb == std::string::npos || rb < lb)
-            KEXIT(1, "Invalid -t argument format provided");
+          if (rb == std::string::npos || rb < lb) KEXIT(1, "Invalid -t argument format provided");
           std::string profile = proName.substr(lb + 1, rb - lb - 1);
-          for (const auto &pr : kul::String::SPLIT(profile, ","))
-            profiles.insert(pr);
+          for (const auto &pr : kul::String::SPLIT(profile, ",")) profiles.insert(pr);
           proName = proName.substr(0, lb);
         }
         if (name == proName) {
-          if (pro.empty() && profiles.count("@"))
-            return true;
-          if (profiles.count(pro))
-            return true;
+          if (pro.empty() && profiles.count("@")) return true;
+          if (profiles.count(pro)) return true;
         }
       }
       return false;
     };
 
     if (depOrMod[STR_PROFILE]) {
-      for (auto p : kul::String::SPLIT(
-               Properties::RESOLVE(*this, depOrMod[STR_PROFILE].Scalar()),
-               ' ')) {
-        if (p.empty())
-          continue;
+      for (auto p :
+           kul::String::SPLIT(Properties::RESOLVE(*this, depOrMod[STR_PROFILE].Scalar()), ' ')) {
+        if (p.empty()) continue;
         f = 0;
         if (p == "@")
           p = "";
@@ -214,25 +181,20 @@ void maiken::Application::popDepOrMod(const YAML::Node &n,
             }
 
         if (!f && !p.empty())
-          KEXIT(1,
-                "profile does not exist\n" + p + "\n" + project().dir().path());
+          KEXIT(1, "profile does not exist\n" + p + "\n" + project().dir().path());
 
-        if (!module && withoutThis(depOrMod[STR_NAME].Scalar(), p))
-          continue;
+        if (!module && withoutThis(depOrMod[STR_NAME].Scalar(), p)) continue;
         auto *app = Applications::INSTANCE().getOrCreate(c, p, 0);
-        if (!with)
-          app->par = this;
+        if (!with) app->par = this;
         setApp(*app, depOrMod);
         vec.push_back(app);
         app->addRDep(this);
         apps.push_back(std::make_pair(app->project().dir().path(), app->p));
       }
     } else {
-      if (!module && withoutThis(depOrMod[STR_NAME].Scalar(), ""))
-        return;
+      if (!module && withoutThis(depOrMod[STR_NAME].Scalar(), "")) return;
       auto *app = Applications::INSTANCE().getOrCreate(c, "", 0);
-      if (!with)
-        app->par = this;
+      if (!with) app->par = this;
       setApp(*app, depOrMod);
       vec.push_back(app);
       app->addRDep(this);
@@ -240,12 +202,11 @@ void maiken::Application::popDepOrMod(const YAML::Node &n,
     }
   };
 
-  for (const auto &depOrMod : n[s])
-    lam(depOrMod);
+  for (const auto &depOrMod : n[s]) lam(depOrMod);
 
   if (!module && n[STR_SELF])
-    for (const auto &s : kul::String::SPLIT(
-             Properties::RESOLVE(*this, n[STR_SELF].Scalar()), ' ')) {
+    for (const auto &s :
+         kul::String::SPLIT(Properties::RESOLVE(*this, n[STR_SELF].Scalar()), ' ')) {
       auto *app = Applications::INSTANCE().getOrCreate(project(), s);
       app->par = this;
       app->scr = scr;
@@ -259,13 +220,10 @@ void maiken::Application::popDepOrMod(const YAML::Node &n,
     if (app.buildDir().path().empty()) {
       kul::env::CWD(app.project().dir());
       if (app.project().root()[STR_SCM])
-        app.scr =
-            Properties::RESOLVE(app, app.project().root()[STR_SCM].Scalar());
-      if (module)
-        app.ro = false;
+        app.scr = Properties::RESOLVE(app, app.project().root()[STR_SCM].Scalar());
+      if (module) app.ro = false;
       app.setup();
-      if (app.sources().size())
-        app.buildDir().mk();
+      if (app.sources().size()) app.buildDir().mk();
       kul::env::CWD(this->project().dir());
     }
     std::string _path(app.inst ? app.inst.escr() : app.buildDir().escr());
