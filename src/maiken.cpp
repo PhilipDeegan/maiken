@@ -128,29 +128,32 @@ void maiken::Application::trim(const kul::File &f) {
 
 void maiken::Application::populateMaps(const YAML::Node &n)
     KTHROW(kul::Exception) {  // IS EITHER ROOT OR PROFILE NODE!
-  using namespace kul::cli;
-  for (const auto &c : n[STR_ENV]) {
-    EnvVarMode mode = EnvVarMode::PREP;
-    if (c[STR_MODE]) {
-      if (c[STR_MODE].Scalar().compare(STR_APPEND) == 0)
-        mode = EnvVarMode::APPE;
-      else if (c[STR_MODE].Scalar().compare(STR_PREPEND) == 0)
-        mode = EnvVarMode::PREP;
-      else if (c[STR_MODE].Scalar().compare(STR_REPLACE) == 0)
-        mode = EnvVarMode::REPL;
-      else
-        KEXIT(1, "Unhandled EnvVar mode: " + c[STR_MODE].Scalar());
+
+  {
+    using namespace kul::cli;
+    for (const auto &p : AppVars::INSTANCE().envVars()) {
+      evs.erase(std::remove_if(evs.begin(), evs.end(),
+                               [&p](const EnvVar &ev) { return ev.name() == p.first; }),
+                evs.end());
+      evs.push_back(EnvVar(p.first, p.second, EnvVarMode::REPL));
     }
-    evs.erase(std::remove_if(evs.begin(), evs.end(),
-                             [&c](const EnvVar &ev) { return ev.name() == c[STR_NAME].Scalar(); }),
-              evs.end());
-    evs.emplace_back(c[STR_NAME].Scalar(), Properties::RESOLVE(*this, c[STR_VALUE].Scalar()), mode);
-  }
-  for (const auto &p : AppVars::INSTANCE().envVars()) {
-    evs.erase(std::remove_if(evs.begin(), evs.end(),
-                             [&p](const EnvVar &ev) { return ev.name() == p.first; }),
-              evs.end());
-    evs.push_back(EnvVar(p.first, p.second, EnvVarMode::PREP));
+    for (const auto &c : n[STR_ENV]) {
+      EnvVarMode mode = EnvVarMode::REPL;
+      if (c[STR_MODE]) {
+        if (c[STR_MODE].Scalar().compare(STR_APPEND) == 0)
+          mode = EnvVarMode::APPE;
+        else if (c[STR_MODE].Scalar().compare(STR_PREPEND) == 0)
+          mode = EnvVarMode::PREP;
+        else if (c[STR_MODE].Scalar().compare(STR_REPLACE) == 0)
+          mode = EnvVarMode::REPL;
+      }
+      evs.erase(
+          std::remove_if(evs.begin(), evs.end(),
+                         [&c](const EnvVar &ev) { return ev.name() == c[STR_NAME].Scalar(); }),
+          evs.end());
+      evs.emplace_back(c[STR_NAME].Scalar(), Properties::RESOLVE(*this, c[STR_VALUE].Scalar()),
+                       mode);
+    }
   }
 
   if (n[STR_ARG])

@@ -33,6 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 void maiken::Application::process() KTHROW(kul::Exception) {
   const kul::hash::set::String &cmds(CommandStateMachine::INSTANCE().commands());
 
+  const auto gEnvVars = maiken::AppVars::INSTANCE().envVars();
+
   auto loadModules = [&](Application &app) {
 #ifndef _MKN_DISABLE_MODULES_
     for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod) {
@@ -52,10 +54,11 @@ void maiken::Application::process() KTHROW(kul::Exception) {
 
     kul::Dir mkn(app.buildDir().join(".mkn"));
     std::vector<std::pair<std::string, std::string>> oldEvs;
-    for (const kul::cli::EnvVar &ev : app.envVars()) {
+    for (const auto &ev : app.envVars()) {
       const std::string v = kul::env::GET(ev.name());
       oldEvs.push_back(std::pair<std::string, std::string>(ev.name(), v));
       kul::env::SET(ev.name(), ev.toString().c_str());
+      maiken::AppVars::INSTANCE().envVar(ev.name(), ev.toString());
     }
     if (cmds.count(STR_CLEAN) && app.buildDir().is()) {
       app.buildDir().rm();
@@ -76,8 +79,8 @@ void maiken::Application::process() KTHROW(kul::Exception) {
         app.link(objects);
       }
     }
-    for (const std::pair<std::string, std::string> &oldEv : oldEvs)
-      kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
+    for (const auto &oldEv : oldEvs) kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
+    for (const auto e : gEnvVars) maiken::AppVars::INSTANCE().envVar(e.first, e.second);
   };
 
   auto _mods = ModuleMinimiser::modules(*this);

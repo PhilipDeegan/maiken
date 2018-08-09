@@ -136,7 +136,7 @@ class AppVars : public Constants {
 
   const kul::hash::map::S2S &envVars() const { return evs; }
   std::string envVar(const std::string &&k) const { return (*evs.find(k)).second; }
-  void envVars(const std::string &k, const std::string &v) { evs[k] = v; }
+  void envVar(const std::string &k, const std::string &v) { evs[k] = v; }
 
   void command(const std::string &s) { cmds.insert(s); }
   const kul::hash::set::String &commands() const { return cmds; }

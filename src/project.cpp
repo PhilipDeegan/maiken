@@ -58,8 +58,8 @@ const kul::yaml::Validator maiken::Project::validator() const {
                        NodeType::MAP);
 
   NodeValidator env("env",
-                    {NodeValidator("name", 1), NodeValidator("mode", 1), NodeValidator("value", 1)},
-                    0, NodeType::LIST);
+                    {NodeValidator("name", 1), NodeValidator("mode"), NodeValidator("value", 1)}, 0,
+                    NodeType::LIST);
 
   NodeValidator if_arg("if_arg", {NodeValidator("*")}, 0, NodeType::MAP);
   NodeValidator if_inc("if_inc", {NodeValidator("*")}, 0, NodeType::MAP);
