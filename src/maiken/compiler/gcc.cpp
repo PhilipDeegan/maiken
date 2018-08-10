@@ -217,6 +217,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::compileSource(
     const std::string &compiler, const std::vector<std::string> &args,
     const std::vector<std::string> &incs, const std::string &in, const std::string &out,
     const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
+  (void)mode;
   std::string cmd = compiler;
   std::vector<std::string> bits;
   if (compiler.find(" ") != std::string::npos) {
@@ -266,5 +267,5 @@ void maiken::cpp::GccCompiler::preCompileHeader(const std::vector<std::string> &
   for (const std::string &s : incs) cmd += "-I" + s + " ";
 
   cmd += " -o " + out;
-  if (kul::os::exec(cmd) != 0) KEXCEPT(Exception, "Failed to pre-compile header");
+  if (!dryRun && kul::os::exec(cmd) != 0) KEXCEPT(Exception, "Failed to pre-compile header");
 }

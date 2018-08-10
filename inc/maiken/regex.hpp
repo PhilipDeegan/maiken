@@ -39,9 +39,7 @@ class Regexer {
  public:
   static std::vector<std::string> RESOLVE_REGEX(std::string str) KTHROW(kul::Exception);
 
-  static void RESOLVE_REGEX_REC(const std::string &i, const std::string &b, const std::string &s,
-                                const std::string &r, const std::vector<std::string> &bits,
-                                const size_t &bitsIndex, std::vector<std::string> &v)
+  static void RESOLVE_REGEX_REC(const std::string &i, std::vector<std::string> &v)
       KTHROW(kul::Exception);
 };
 }  // end namespace maiken

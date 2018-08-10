@@ -89,6 +89,7 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(
     const std::vector<std::string> &objects, const std::vector<std::string> &libs,
     const std::vector<std::string> &libPaths, const std::string &out,
     const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
+  (void)mode;
   std::string exe = out + ".exe";
 
   kul::hash::set::String dirs;
@@ -163,6 +164,7 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(
     const std::string &compiler, const std::vector<std::string> &args,
     const std::vector<std::string> &incs, const std::string &in, const std::string &out,
     const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
+  (void)mode;
   std::string cmd = compiler;
   std::vector<std::string> bits;
   if (compiler.find(" ") != std::string::npos) {

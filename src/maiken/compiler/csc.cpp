@@ -35,6 +35,7 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(
     const std::vector<std::string> &objects, const std::vector<std::string> &libs,
     const std::vector<std::string> &libPaths, const std::string &out,
     const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
+  (void)mode;
   std::string exe = out + ".exe";
   std::string cmd = linker;
   std::vector<std::string> bits;
@@ -80,6 +81,9 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildLibrary(
     const std::vector<std::string> &objects, const std::vector<std::string> &libs,
     const std::vector<std::string> &libPaths, const kul::File &out,
     const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
+  (void)libs;
+  (void)libPaths;
+  (void)mode;
   std::string dll = out.real() + ".dll";
   std::string cmd = linker;
   std::vector<std::string> bits;

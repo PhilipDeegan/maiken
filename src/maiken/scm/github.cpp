@@ -83,11 +83,9 @@ bool maiken::Github::GET_LATEST_TAG(const std::string &owner, const std::string 
         if (r.status() == 200) {
           kul::yaml::String yaml(r.body());
           if (yaml.root().Type() == 3) {
-            for (const auto &node : yaml.root()) {
-              if (yaml.root()["ref"]) {
-                branch = yaml.root()["ref"].Scalar();
-                b = 1;
-              }
+            if (yaml.root()["ref"]) {
+              branch = yaml.root()["ref"].Scalar();
+              b = 1;
             }
           }
         }

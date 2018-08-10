@@ -46,7 +46,7 @@ kul::http::_1_1Response maiken::dist::Server::respond(const kul::http::A1_1Reque
     cereal::PortableBinaryInputArchive iarchive(iss);
     iarchive(p);
   }
-  p.message()->do_response_for(req, p, sessions, r);
+  p.message()->do_response_for(req, sessions, r);
   return r.withDefaultHeaders();
 }
 

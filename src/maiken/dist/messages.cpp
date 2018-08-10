@@ -32,15 +32,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/dist.hpp"
 
-void maiken::dist::SetupRequest::do_response_for(const kul::http::A1_1Request &req, Post &p,
+void maiken::dist::SetupRequest::do_response_for(const kul::http::A1_1Request &req,
                                                  Sessions &sessions,
                                                  kul::http::_1_1Response &resp) {
   if (!req.header("session")) KEXCEPTION("BAD 41");  // resp.withBody("FAILUIRE");
   auto session_id = (*req.headers().find("session")).second;
 
   YAML::Node root;
-  bool expected = false;
-  bool success = 1;  // std::atomic_compare_exchange_strong(&busy, &expected, true);
+  bool success = 1;
   if (success)
     root["status"] = 0;
   else {
@@ -49,7 +48,6 @@ void maiken::dist::SetupRequest::do_response_for(const kul::http::A1_1Request &r
   }
   YAML::Emitter out;
   out << root;
-  p.release();
   sessions[session_id].reset_setup(this);
   sessions[session_id].setup_ptr()->m_args.erase(STR_NODES);
   sessions[session_id].set_apps(
@@ -58,7 +56,7 @@ void maiken::dist::SetupRequest::do_response_for(const kul::http::A1_1Request &r
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::CompileRequest::do_response_for(const kul::http::A1_1Request &req, Post &p,
+void maiken::dist::CompileRequest::do_response_for(const kul::http::A1_1Request &req,
                                                    Sessions &sessions,
                                                    kul::http::_1_1Response &resp) {
   if (!req.header("session")) KEXCEPTION("BAD CompileRequest");
@@ -71,7 +69,6 @@ void maiken::dist::CompileRequest::do_response_for(const kul::http::A1_1Request 
                                                  cacheFiles);
 
   YAML::Node root;
-  bool expected = false;
   bool success = 1;
   if (success)
     root["status"] = 0;
@@ -86,7 +83,7 @@ void maiken::dist::CompileRequest::do_response_for(const kul::http::A1_1Request 
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::LinkRequest::do_response_for(const kul::http::A1_1Request &req, Post &p,
+void maiken::dist::LinkRequest::do_response_for(const kul::http::A1_1Request &req,
                                                 Sessions &sessions, kul::http::_1_1Response &resp) {
   if (!req.header("session")) KEXCEPTION("BAD LinkRequest");
   auto session_id = (*req.headers().find("session")).second;
@@ -109,7 +106,6 @@ void maiken::dist::LinkRequest::do_response_for(const kul::http::A1_1Request &re
   if (b.last_packet) sessions[session_id].binary_writer.reset();
 
   YAML::Node root;
-  bool expected = false;
   bool success = 1;
   if (success)
     root["status"] = 0;
@@ -122,7 +118,7 @@ void maiken::dist::LinkRequest::do_response_for(const kul::http::A1_1Request &re
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::DownloadRequest::do_response_for(const kul::http::A1_1Request &req, Post &p,
+void maiken::dist::DownloadRequest::do_response_for(const kul::http::A1_1Request &req,
                                                     Sessions &sessions,
                                                     kul::http::_1_1Response &resp) {
   if (!req.header("session")) KEXCEPTION("BAD DownloadRequest");

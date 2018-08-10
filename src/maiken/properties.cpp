@@ -45,6 +45,7 @@ void maiken::Application::resolveProperties() KTHROW(maiken::Exception) {
 
 std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(
     const kul::hash::map::S2S &ps, const std::string &s) KTHROW(kul::Exception) {
+  (void)ps;
   std::string r = s;
   int lb = s.find("${");
   int clb = s.find("\\${");
@@ -61,7 +62,8 @@ std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(
   if (lb != -1 && clb == -1 && rb != -1 && crb == -1)
     return std::make_shared<std::tuple<std::string, int, int>>(r.substr(lb + 2, rb - 2 - lb), lb,
                                                                rb);
-  return std::shared_ptr<std::tuple<std::string, int, int>>(0);
+  return 0;
+  std::shared_ptr<std::tuple<std::string, int, int>>(0);
 }
 
 std::string maiken::Properties::RESOLVE(const Application &app, const std::string &s)

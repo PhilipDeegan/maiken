@@ -57,7 +57,7 @@ class DistLinker {
           oarchive(b);
         }
         auto link = std::make_shared<maiken::dist::Post>(
-            std::move(maiken::dist::RemoteCommandManager::INST().build_link_request(ss.str())));
+            maiken::dist::RemoteCommandManager::INST().build_link_request(ss.str()));
         link->send(host);
       } while (red > 0);
     };

@@ -174,6 +174,11 @@ class WINCompiler : public CCompiler {
                                 const std::vector<std::string> &args, const std::string &in,
                                 const std::string &out, bool dryRun = false) const
       KTHROW(kul::Exception) override {
+    (void)incs;
+    (void)args;
+    (void)in;
+    (void)out;
+    (void)dryRun;
     KEXCEPTION("Method is not implemented");
   }
   CCompiler_Type type() const override { return CCompiler_Type::WIN; }

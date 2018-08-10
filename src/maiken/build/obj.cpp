@@ -94,7 +94,7 @@ void maiken::Application::compile(std::vector<std::pair<std::string, std::string
     dist::Blob b;
     do {
       auto dowd = std::make_shared<maiken::dist::Post>(
-          std::move(maiken::dist::RemoteCommandManager::INST().build_download_request()));
+          maiken::dist::RemoteCommandManager::INST().build_download_request());
       dowd->send(host);
       std::string body(std::move(dowd->body()));
       std::istringstream iss(body);
@@ -102,7 +102,6 @@ void maiken::Application::compile(std::vector<std::pair<std::string, std::string
         cereal::PortableBinaryInputArchive iarchive(iss);
         iarchive(b);
       }
-      size_t size = b.len;
       if (!b.file.empty()) {
         if (!fw.bw) {
           kul::File obj(b.file);
@@ -138,8 +137,8 @@ void maiken::Application::compile(std::vector<std::pair<std::string, std::string
 
       if (!remote_src_objs.empty()) {
         posts.emplace_back(std::make_shared<maiken::dist::Post>(
-            std::move(maiken::dist::RemoteCommandManager::INST().build_compile_request(
-                this->project().dir().real(), remote_src_objs))));
+            maiken::dist::RemoteCommandManager::INST().build_compile_request(
+                this->project().dir().real(), remote_src_objs)));
         ctp.async(std::bind(compile_lambda, posts[i], std::ref(hosts[i])), compile_ex);
       }
     }
@@ -207,11 +206,12 @@ void maiken::Application::compile(std::queue<std::pair<std::string, std::string>
   std::vector<CompilerProcessCapture> cpcs;
 
   auto lambex = [&](const kul::Exception &e) {
+    (void)e;
     ctp.stop();
     ctp.interrupt();
   };
 
-  auto lambda = [o, e, &ctp, &mute, &lambex, &cpcs](const maiken::CompilationUnit &c_unit) {
+  auto lambda = [o, e, &mute, &lambex, &cpcs](const maiken::CompilationUnit &c_unit) {
     const CompilerProcessCapture cpc = c_unit.compile();
     if (!AppVars::INSTANCE().dryRun()) {
       if (kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());

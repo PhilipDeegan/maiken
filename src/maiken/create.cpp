@@ -391,7 +391,7 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
     // ping nodes and set active
     auto ping = [&](const maiken::dist::Host &host) {
       auto post = std::make_unique<maiken::dist::Post>(
-          std::move(maiken::dist::RemoteCommandManager::INST().build_setup_query(*apps[0], args)));
+          maiken::dist::RemoteCommandManager::INST().build_setup_query(*apps[0], args));
       post->send(host);
     };
     kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);

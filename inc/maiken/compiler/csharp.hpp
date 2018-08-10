@@ -65,12 +65,24 @@ class WINCompiler : public Compiler {
                                        const std::vector<std::string> &incs, const std::string &in,
                                        const std::string &out, const compiler::Mode &mode,
                                        bool dryRun = false) const KTHROW(kul::Exception) override {
+    (void)compiler;
+    (void)args;
+    (void)incs;
+    (void)in;
+    (void)out;
+    (void)mode;
+    (void)dryRun;
     KEXCEPTION("Method compileSource is not implemented in C Sharp");
   }
   virtual void preCompileHeader(const std::vector<std::string> &incs,
                                 const std::vector<std::string> &args, const std::string &in,
                                 const std::string &out, bool dryRun = false) const
       KTHROW(kul::Exception) override {
+    (void)incs;
+    (void)args;
+    (void)in;
+    (void)out;
+    (void)dryRun;
     KEXCEPTION("Method preCompileHeader is not implemented in C Sharp");
   }
 };

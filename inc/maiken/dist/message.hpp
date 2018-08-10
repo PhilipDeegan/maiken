@@ -48,17 +48,10 @@ class AMessage : public Constants {
   std::string clazz_name() const { return std::string(typeid(*this).name()); }
 
  protected:
-  virtual kul::yaml::Validator validater() const = 0;
-
   void build_from(const YAML::Node &&node) {
     YAML::Emitter out;
     out << node;
     str = out.c_str();
-  }
-
-  YAML::Node validate() {
-    kul::yaml::String s(str);
-    return s.validate(validater());
   }
 
  protected:
@@ -81,7 +74,7 @@ class ARequest : public AMessage {
     ar(::cereal::make_nvp("AMessage", ::cereal::base_class<AMessage>(this)));
   }
 
-  virtual void do_response_for(const kul::http::A1_1Request &req, Post &p, Sessions &sessions,
+  virtual void do_response_for(const kul::http::A1_1Request &req, Sessions &sessions,
                                kul::http::_1_1Response &resp) = 0;
 };
 
@@ -94,13 +87,9 @@ class SetupRequest : public ARequest {
   SetupRequest() {}
   SetupRequest(const std::string &project, const std::string &settings, const kul::cli::Args &args)
       : m_project_yaml(project), m_settings_yaml(settings), m_args(args) {}
-  kul::yaml::Validator validater() const override { return kul::yaml::Validator({}); };
 
-  void do_response_for(const kul::http::A1_1Request &req, Post &p, Sessions &sessions,
+  void do_response_for(const kul::http::A1_1Request &req, Sessions &sessions,
                        kul::http::_1_1Response &resp) override;
-
- public:
-  kul::cli::Args m_args;
 
  private:
   SetupRequest(const SetupRequest &) = delete;
@@ -117,6 +106,7 @@ class SetupRequest : public ARequest {
 
  private:
   std::string m_project_yaml, m_settings_yaml;
+  kul::cli::Args m_args;
 };
 
 class CompileRequest : public ARequest {
@@ -130,7 +120,7 @@ class CompileRequest : public ARequest {
                  const std::vector<std::pair<std::string, std::string>> &src_obj)
       : m_directory(directory), m_src_obj(src_obj) {}
 
-  void do_response_for(const kul::http::A1_1Request &req, Post &p, Sessions &sessions,
+  void do_response_for(const kul::http::A1_1Request &req, Sessions &sessions,
                        kul::http::_1_1Response &resp) override;
 
  private:
@@ -139,7 +129,6 @@ class CompileRequest : public ARequest {
   CompileRequest &operator=(const CompileRequest &) = delete;
   CompileRequest &operator=(const CompileRequest &&) = delete;
 
-  virtual kul::yaml::Validator validater() const override { return kul::yaml::Validator({}); };
   template <class Archive>
   void serialize(Archive &ar) {
     ar(::cereal::make_nvp("ARequest", ::cereal::base_class<ARequest>(this)));
@@ -159,7 +148,7 @@ class DownloadRequest : public ARequest {
 
  public:
   DownloadRequest() {}
-  void do_response_for(const kul::http::A1_1Request &req, Post &p, Sessions &sessions,
+  void do_response_for(const kul::http::A1_1Request &req, Sessions &sessions,
                        kul::http::_1_1Response &resp) override;
 
  private:
@@ -168,7 +157,6 @@ class DownloadRequest : public ARequest {
   DownloadRequest &operator=(const DownloadRequest &) = delete;
   DownloadRequest &operator=(const DownloadRequest &&) = delete;
 
-  virtual kul::yaml::Validator validater() const override { return kul::yaml::Validator({}); };
   template <class Archive>
   void serialize(Archive &ar) {
     ar(::cereal::make_nvp("ARequest", ::cereal::base_class<ARequest>(this)));
@@ -183,7 +171,7 @@ class LinkRequest : public ARequest {
  public:
   LinkRequest() {}
   LinkRequest(const std::string &b) { str = b; }
-  void do_response_for(const kul::http::A1_1Request &req, Post &p, Sessions &sessions,
+  void do_response_for(const kul::http::A1_1Request &req, Sessions &sessions,
                        kul::http::_1_1Response &resp) override;
 
  private:
@@ -192,7 +180,6 @@ class LinkRequest : public ARequest {
   LinkRequest &operator=(const LinkRequest &) = delete;
   LinkRequest &operator=(const LinkRequest &&) = delete;
 
-  virtual kul::yaml::Validator validater() const override { return kul::yaml::Validator({}); };
   template <class Archive>
   void serialize(Archive &ar) {
     ar(::cereal::make_nvp("ARequest", ::cereal::base_class<ARequest>(this)));

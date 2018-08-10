@@ -70,12 +70,9 @@ class Server : public kul::http::MultiServer, public Constants {
 
  public:
   Server(const uint16_t port, const kul::Dir &_home, uint16_t threads)
-      : busy(false), kul::http::MultiServer(port, 2, 3), m_home(_home) {}
+      : kul::http::MultiServer(port, 1, threads), busy(false), m_home(_home) {}
   virtual ~Server() {}
-  kul::http::_1_1Response respond(const kul::http::A1_1Request &req);
-
- private:
-  void operator()();
+  kul::http::_1_1Response respond(const kul::http::A1_1Request &req) override;
 
   Server(const Server &) = delete;
   Server(const Server &&) = delete;
@@ -95,10 +92,13 @@ class Server : public kul::http::MultiServer, public Constants {
   }
 
  private:
-  std::unordered_map<std::string, ServerSession> sessions;
+  void operator()();
+
+ private:
   std::atomic<bool> busy;
   kul::Dir m_home;
   FileWriter fw;
+  std::unordered_map<std::string, ServerSession> sessions;
 };
 }  // end namespace dist
 }  // end namespace maiken

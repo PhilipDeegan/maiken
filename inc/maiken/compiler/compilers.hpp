@@ -85,13 +85,7 @@ class Compilers {
   }
 
  private:
-  std::unique_ptr<Compiler> hcc;
-  std::unique_ptr<Compiler> gcc;
-  std::unique_ptr<Compiler> clang;
-  std::unique_ptr<Compiler> intel;
-  std::unique_ptr<Compiler> winc;
-  std::unique_ptr<Compiler> wincs;
-
+  std::unique_ptr<Compiler> hcc, gcc, clang, intel, winc, wincs;
   kul::hash::map::S2T<Compiler *> cs, masks;
 
  private:

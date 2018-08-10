@@ -190,7 +190,7 @@ class KUL_PUBLISH Application : public Constants {
   Application(const Application &a) = delete;
   Application(const Application &&a) = delete;
   Application &operator=(const Application &a) = delete;
-  ~Application();
+  virtual ~Application();
 
   virtual void process() KTHROW(kul::Exception);
   const kul::Dir &buildDir() const { return bd; }
