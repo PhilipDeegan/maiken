@@ -69,6 +69,7 @@ class Runner : public Constants {
       }
     }
 
+    std::vector<std::pair<std::string, std::string> > envies;
     if (m != compiler::Mode::STAT) {
       std::string arg;
       for (const auto &s : a.libraryPaths()) arg += s + kul::env::SEP();
@@ -81,16 +82,23 @@ class Runner : public Constants {
 #if defined(__APPLE__)
       kul::cli::EnvVar dy("DYLD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
       KOUT(INF) << dy.name() << " : " << dy.toString();
-      p->var(dy.name(), dy.toString());
+      envies.push_back(std::make_pair(dy.name(), dy.toString()));
 #endif  // __APPLE__
 
 #endif
       KOUT(INF) << pa.name() << " : " << pa.toString();
-      p->var(pa.name(), pa.toString());
+      envies.push_back(std::make_pair(pa.name(), pa.toString()));
     }
-    for (const auto &ev : AppVars::INSTANCE().envVars())
+    for(const auto &ev : envies) {
       p->var(ev.first,
              kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
+    }
+    for (const auto &ev : AppVars::INSTANCE().envVars()) {
+      auto it = std::find_if( envies.begin(), envies.end(),
+        [&ev](const std::pair<std::string, std::string>& element){ return element.first == ev.first;} );
+      if(it == envies.end())
+        p->var(ev.first, kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
+    }
     KOUT(INF) << (*p);
     if (!AppVars::INSTANCE().dryRun()) p->start();
   }
