@@ -209,7 +209,11 @@ class KUL_PUBLISH Application : public Constants {
   const kul::hash::map::S2S &properties() const { return ps; }
   const kul::hash::map::S2T<kul::hash::set::String> &arguments() const { return args; }
 
-  void addInclude(const std::string &s, bool p = 1) { incs.push_back(std::make_pair(s, p)); }
+  void addInclude(const std::string &s, bool p = 1) {
+    auto it = std::find_if( incs.begin(), incs.end(),
+      [&](const std::pair<std::string, bool>& element){ return element.first == s; } );
+    if(it == incs.end()) incs.push_back(std::make_pair(s, p));
+  }
   void addLibpath(const std::string &s) { paths.push_back(s); }
 
   void prependCompileString(const std::string &s) { arg = s + " " + arg; }

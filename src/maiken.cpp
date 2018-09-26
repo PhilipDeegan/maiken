@@ -201,6 +201,11 @@ void maiken::Application::cyclicCheck(
 }
 
 void maiken::Application::addIncludeLine(const std::string &o) KTHROW(kul::Exception) {
+  auto add_if_missing = [&](std::pair<std::string, bool> p){
+    auto it = std::find_if( incs.begin(), incs.end(),
+      [&](const std::pair<std::string, bool>& element){ return element.first == p.first; } );
+    if(it == incs.end()) incs.emplace_back(p);
+  };
   if (o.find(',') == std::string::npos) {
     for (const auto &s : kul::cli::asArgs(o))
       if (s.size()) {
@@ -208,9 +213,9 @@ void maiken::Application::addIncludeLine(const std::string &o) KTHROW(kul::Excep
         kul::Dir d(str);
         kul::File f(str);
         if (d)
-          incs.push_back(std::make_pair(d.real(), true));
+          add_if_missing(std::make_pair(d.real(), true));
         else if (f)
-          incs.push_back(std::make_pair(f.real(), false));
+          add_if_missing(std::make_pair(f.real(), false));
         else {
           KEXIT(1, "include does not exist\n" + str + "\n" + project().dir().path());
         }
@@ -224,7 +229,7 @@ void maiken::Application::addIncludeLine(const std::string &o) KTHROW(kul::Excep
     kul::Dir d(str);
     kul::File f(str);
     if (d)
-      incs.push_back(std::make_pair(d.real(), kul::String::BOOL(v[1])));
+      add_if_missing(std::make_pair(d.real(), kul::String::BOOL(v[1])));
     else if (f)
       KEXIT(1,
             "include file does not support CSV syntax\n\t" + str + "\n" + project().dir().path());
