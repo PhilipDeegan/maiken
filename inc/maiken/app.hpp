@@ -160,13 +160,13 @@ class KUL_PUBLISH Application : public Constants {
   void addSourceLine(const std::string &o) KTHROW(kul::Exception);
   void addIncludeLine(const std::string &o) KTHROW(kul::Exception);
 
-  void modInit(const YAML::Node &modArg) { modIArg = modArg; }
+  void modInit(const YAML::Node &modArg) { if(modIArg.IsNull()) modIArg = modArg; }
   const YAML::Node &modInit() { return modIArg; }
-  void modCompile(const YAML::Node &modArg) { modCArg = modArg; }
+  void modCompile(const YAML::Node &modArg) { if(modCArg.IsNull()) modCArg = modArg; }
   const YAML::Node &modCompile() { return modCArg; }
-  void modLink(const YAML::Node &modArg) { modLArg = modArg; }
+  void modLink(const YAML::Node &modArg) { if(modLArg.IsNull()) modLArg = modArg; }
   const YAML::Node &modLink() { return modLArg; }
-  void modPack(const YAML::Node &modArg) { modPArg = modArg; }
+  void modPack(const YAML::Node &modArg) { if(modPArg.IsNull()) modPArg = modArg; }
   const YAML::Node &modPack() { return modPArg; }
 
   void addRDep(Application *app) {
