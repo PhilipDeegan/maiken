@@ -40,7 +40,8 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod) {
       app.mods.push_back(ModuleLoader::LOAD(**mod));
     }
-    for (auto &modLoader : app.mods) modLoader->module()->init(app, modLoader->app()->modIArg);
+    for (auto &modLoader : app.mods)
+      modLoader->module()->init(app, app.modInit(modLoader->app()));
 #endif  //_MKN_DISABLE_MODULES_
   };
   auto proc = [&](Application &app, bool work) {
@@ -69,11 +70,13 @@ void maiken::Application::process() KTHROW(kul::Exception) {
 
     kul::hash::set::String objects;
     if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE)) {
-      for (auto &modLoader : app.mods) modLoader->module()->compile(app, modLoader->app()->modCArg);
+      for (auto &modLoader : app.mods)
+        modLoader->module()->compile(app, app.modCompile(modLoader->app()));
       if (work) app.compile(objects);
     }
     if (cmds.count(STR_BUILD) || cmds.count(STR_LINK)) {
-      for (auto &modLoader : app.mods) modLoader->module()->link(app, modLoader->app()->modLArg);
+      for (auto &modLoader : app.mods)
+        modLoader->module()->link(app, app.modLink(modLoader->app()));
       if (work) {
         app.findObjects(objects);
         app.link(objects);
@@ -117,7 +120,8 @@ void maiken::Application::process() KTHROW(kul::Exception) {
 
   if (cmds.count(STR_PACK)) {
     pack();
-    for (auto &modLoader : mods) modLoader->module()->pack(*this, modLoader->app()->modPArg);
+    for (auto &modLoader : mods)
+      modLoader->module()->pack(*this, this->modPack(modLoader->app()));
   }
   if (CommandStateMachine::INSTANCE().main() && (cmds.count(STR_RUN) || cmds.count(STR_DBG)))
     run(cmds.count(STR_DBG));

@@ -81,7 +81,7 @@ class KUL_PUBLISH Application : public Constants {
   std::string arg, lang, lnk, main, out, scr, scv;
   const std::string p;
   kul::Dir bd, inst;
-  YAML::Node modIArg, modCArg, modLArg, modPArg;
+  std::unordered_map<const Application*, YAML::Node> modIArgs, modCArgs, modLArgs, modPArgs;
   const maiken::Project &proj;
   kul::hash::map::S2T<kul::hash::map::S2S> fs;
   kul::hash::map::S2S includeStamps, itss, ps, tests;
@@ -160,14 +160,37 @@ class KUL_PUBLISH Application : public Constants {
   void addSourceLine(const std::string &o) KTHROW(kul::Exception);
   void addIncludeLine(const std::string &o) KTHROW(kul::Exception);
 
-  void modInit(const YAML::Node &modArg) { if(modIArg.IsNull()) modIArg = modArg; }
-  const YAML::Node &modInit() { return modIArg; }
-  void modCompile(const YAML::Node &modArg) { if(modCArg.IsNull()) modCArg = modArg; }
-  const YAML::Node &modCompile() { return modCArg; }
-  void modLink(const YAML::Node &modArg) { if(modLArg.IsNull()) modLArg = modArg; }
-  const YAML::Node &modLink() { return modLArg; }
-  void modPack(const YAML::Node &modArg) { if(modPArg.IsNull()) modPArg = modArg; }
-  const YAML::Node &modPack() { return modPArg; }
+  void modInit(const Application * const other, const YAML::Node &modArg) {
+    modIArgs.emplace(std::make_pair(other, modArg));
+  }
+  const YAML::Node modInit(const Application * const other) const {
+    if(modIArgs.count(other)) return (*modIArgs.find(other)).second;
+    return YAML::Node();
+  }
+
+  void modCompile(const Application * const other, const YAML::Node &modArg) {
+    modCArgs.emplace(std::make_pair(other, modArg));
+  }
+  const YAML::Node modCompile(const Application * const  other) const {
+    if(modCArgs.count(other)) return (*modCArgs.find(other)).second;
+    return YAML::Node();
+  }
+
+  void modLink(const Application * const other, const YAML::Node &modArg) {
+    modLArgs.emplace(std::make_pair(other, modArg));
+  }
+  const YAML::Node modLink(const Application * const other) const {
+    if(modLArgs.count(other)) return (*modLArgs.find(other)).second;
+    return YAML::Node();
+  }
+
+  void modPack(const Application * const other, const YAML::Node &modArg) {
+    modPArgs.emplace(std::make_pair(other, modArg));
+  }
+  const YAML::Node modPack(const Application * const other) const {
+    if(modPArgs.count(other)) return (*modPArgs.find(other)).second;
+    return YAML::Node();
+  }
 
   void addRDep(Application *app) {
     if (std::find(rdeps.begin(), rdeps.end(), app) == rdeps.end()) rdeps.push_back(app);
