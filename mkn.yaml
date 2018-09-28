@@ -1,11 +1,10 @@
 #! clean build -dtKOWg 0
 
 name: mkn
-version: exp
-scm: https://github.com/dekken/maiken
+version: master
 
 property:
-    DATE: 26-SEP-2018
+    DATE: 28-SEP-2018
 
 parent: base
 mode: none
