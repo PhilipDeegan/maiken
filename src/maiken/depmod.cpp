@@ -183,7 +183,7 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
         if (!f && !p.empty())
           KEXIT(1, "profile does not exist\n" + p + "\n" + project().dir().path());
 
-        if (!module && (!depOrMod[STR_NAME] || withoutThis(depOrMod[STR_NAME].Scalar(), p))) continue;
+        if (!module && (depOrMod[STR_NAME] && withoutThis(depOrMod[STR_NAME].Scalar(), p))) continue;
         auto *app = Applications::INSTANCE().getOrCreate(c, p, 0);
         if (!with) app->par = this;
         setApp(*app, depOrMod);
@@ -192,7 +192,7 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
         apps.push_back(std::make_pair(app->project().dir().path(), app->p));
       }
     } else {
-      if (!module && (!depOrMod[STR_NAME] || withoutThis(depOrMod[STR_NAME].Scalar(), ""))) return;
+      if (!module && (depOrMod[STR_NAME] && withoutThis(depOrMod[STR_NAME].Scalar(), ""))) return;
       auto *app = Applications::INSTANCE().getOrCreate(c, "", 0);
       if (!with) app->par = this;
       setApp(*app, depOrMod);
