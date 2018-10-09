@@ -133,7 +133,7 @@ class KUL_PUBLISH ModuleLoader
     loaded = 0;
   }
   Module *module() { return p; }
-  const Application * const app() const { return p->app; }
+  const Application * app() const { return p->app; }
 
   static std::shared_ptr<ModuleLoader> LOAD(const Application &ap)
 #ifndef _MKN_DISABLE_MODULES_
