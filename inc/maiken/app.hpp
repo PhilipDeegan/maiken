@@ -78,14 +78,13 @@ class KUL_PUBLISH Application : public Constants {
   const Application *par = nullptr;
   Application *sup = nullptr;
   compiler::Mode m;
-  std::string arg, lang, lnk, main, out, scr, scv;
+  std::string arg, bin, lang, lnk, main, out, scr, scv;
   const std::string p;
   kul::Dir bd, inst;
   std::unordered_map<const Application*, YAML::Node> modIArgs, modCArgs, modLArgs, modPArgs;
   const maiken::Project &proj;
   kul::hash::map::S2T<kul::hash::map::S2S> fs;
-  kul::hash::map::S2S includeStamps, itss, ps, tests;
-  kul::hash::map::S2S cArg, cLnk;
+  kul::hash::map::S2S cArg, cLnk, includeStamps, itss, ps, tests;
   kul::hash::map::S2T<kul::hash::set::String> args;
   kul::hash::map::S2T<uint64_t> stss;
   std::vector<Application *> deps, modDeps, rdeps;
@@ -163,7 +162,7 @@ class KUL_PUBLISH Application : public Constants {
   void modInit(const Application * const other, const YAML::Node &modArg) {
     modIArgs.emplace(std::make_pair(other, modArg));
   }
-  const YAML::Node modInit(const Application * const other) const {
+  YAML::Node modInit(const Application * const other) const {
     if(modIArgs.count(other)) return (*modIArgs.find(other)).second;
     return YAML::Node();
   }
@@ -171,7 +170,7 @@ class KUL_PUBLISH Application : public Constants {
   void modCompile(const Application * const other, const YAML::Node &modArg) {
     modCArgs.emplace(std::make_pair(other, modArg));
   }
-  const YAML::Node modCompile(const Application * const  other) const {
+  YAML::Node modCompile(const Application * const  other) const {
     if(modCArgs.count(other)) return (*modCArgs.find(other)).second;
     return YAML::Node();
   }
@@ -179,7 +178,7 @@ class KUL_PUBLISH Application : public Constants {
   void modLink(const Application * const other, const YAML::Node &modArg) {
     modLArgs.emplace(std::make_pair(other, modArg));
   }
-  const YAML::Node modLink(const Application * const other) const {
+  YAML::Node modLink(const Application * const other) const {
     if(modLArgs.count(other)) return (*modLArgs.find(other)).second;
     return YAML::Node();
   }
@@ -187,7 +186,7 @@ class KUL_PUBLISH Application : public Constants {
   void modPack(const Application * const other, const YAML::Node &modArg) {
     modPArgs.emplace(std::make_pair(other, modArg));
   }
-  const YAML::Node modPack(const Application * const other) const {
+  YAML::Node modPack(const Application * const other) const {
     if(modPArgs.count(other)) return (*modPArgs.find(other)).second;
     return YAML::Node();
   }
@@ -208,8 +207,7 @@ class KUL_PUBLISH Application : public Constants {
   static void showHelp();
 
  public:
-  Application(const maiken::Project &proj,
-              const std::string &profile = "");  // : m(Mode::NONE), p(profile), proj(proj){}
+  Application(const maiken::Project &proj, const std::string &profile = ""); 
   Application(const Application &a) = delete;
   Application(const Application &&a) = delete;
   Application &operator=(const Application &a) = delete;
@@ -217,6 +215,7 @@ class KUL_PUBLISH Application : public Constants {
 
   virtual void process() KTHROW(kul::Exception);
   const kul::Dir &buildDir() const { return bd; }
+  const std::string &binary() const { return bin; }
   const std::string &profile() const { return p; }
   const maiken::Project &project() const { return proj; }
   const std::vector<Application *> &dependencies() const { return deps; }
@@ -231,6 +230,10 @@ class KUL_PUBLISH Application : public Constants {
   const std::vector<std::string> &libraryPaths() const { return paths; }
   const kul::hash::map::S2S &properties() const { return ps; }
   const kul::hash::map::S2T<kul::hash::set::String> &arguments() const { return args; }
+
+#ifdef _MKN_WITH_MKN_RAM_
+  bool get_binaries();
+#endif
 
   void addInclude(const std::string &s, bool p = 1) {
     auto it = std::find_if( incs.begin(), incs.end(),

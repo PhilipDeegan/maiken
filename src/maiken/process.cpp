@@ -30,6 +30,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
+#ifdef _MKN_WITH_MKN_RAM_
+#include "maiken/github.hpp"
+bool maiken::Application::get_binaries() {
+  size_t suxcess = 0;
+  kul::Dir outD(inst ? inst.real() : buildDir());
+  const auto files = kul::String::SPLIT(this->binary(), " ");
+  for(const std::string &file : files) {
+    std::string fn = file.substr(file.rfind("/") + 1);
+    kul::https::Get(file)
+      .withHeaders({
+        {"User-Agent", "Mozilla not a virus"},
+        {"Accept", "application/octet-stream"},
+        {"Content-Disposition", "attachment; filename="+fn}
+      })
+      .withResponse([&](const kul::http::Response &r) {
+        if (r.status() == 200) {
+          kul::File dl(fn);
+          if(dl.is()) {
+            suxcess++;
+            dl.mv(outD);
+          }
+        }
+      })
+      .send();
+  }
+  return suxcess == files.size();
+}
+#endif
+
 void maiken::Application::process() KTHROW(kul::Exception) {
   const kul::hash::set::String &cmds(CommandStateMachine::INSTANCE().commands());
 
@@ -52,7 +81,6 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       if (BuildRecorder::INSTANCE().has(app.buildDir().real())) return;
       BuildRecorder::INSTANCE().add(app.buildDir().real());
     }
-
     kul::Dir mkn(app.buildDir().join(".mkn"));
     std::vector<std::pair<std::string, std::string>> oldEvs;
     for (const auto &ev : app.envVars()) {
@@ -65,8 +93,12 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       app.buildDir().rm();
       mkn.rm();
     }
+#ifdef _MKN_WITH_MKN_RAM_
+    if(work && !app.bin.empty() && app.get_binaries()) {
+      work = false;
+    }
+#endif
     app.loadTimeStamps();
-    if (cmds.count(STR_TRIM)) app.trim();
 
     kul::hash::set::String objects;
     if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE)) {

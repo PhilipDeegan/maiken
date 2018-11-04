@@ -58,7 +58,7 @@ void maiken::Application::loadDepOrMod(const YAML::Node &node, const kul::Dir &d
     std::rethrow_exception(std::current_exception());
   }
   kul::env::CWD(depOrMod);
-
+  
   if (_MKN_REMOTE_EXEC_) {
 #ifdef _WIN32
     if (kul::File("mkn.bat").is() &&
@@ -221,6 +221,8 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
       kul::env::CWD(app.project().dir());
       if (app.project().root()[STR_SCM])
         app.scr = Properties::RESOLVE(app, app.project().root()[STR_SCM].Scalar());
+      if (app.project().root()[STR_BIN])
+        app.bin = Properties::RESOLVE(app, app.project().root()[STR_BIN].Scalar());
       if (module) app.ro = false;
       app.setup();
       if (app.sources().size()) app.buildDir().mk();
