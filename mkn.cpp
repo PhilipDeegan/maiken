@@ -29,10 +29,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "kul/log.hpp"
+#include "kul/signal.hpp"
 #include "maiken.hpp"
 
 int main(int argc, char *argv[]) {
   maiken::PROGRAM = argv[0];
+  kul::Signal sig;
   uint8_t ret = 0;
   const auto s = kul::Now::MILLIS();
   try {

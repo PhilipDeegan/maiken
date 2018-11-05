@@ -11,14 +11,13 @@ OS =
 CXX=g++
 CXXFLAGS=-std=c++14 -Os -Wall -fmessage-length=0 -fPIC -g3
 INCS =  -Iinc \
-		-Iext/yaml/$(YAML_GIT)/p/include \
-		-Iext/kul/$(KUL_GIT)/inc \
-		-Iext/kul/$(KUL_GIT)/os/$(OS)/inc \
-		-Iext/kul/$(KUL_GIT)/os/nixish/inc
+		-Iext/parse/yaml/$(YAML_GIT)/p/include \
+		-Iext/mkn/kul/$(KUL_GIT)/inc \
+		-Iext/mkn/kul/$(KUL_GIT)/os/$(OS)/inc \
+		-Iext/mkn/kul/$(KUL_GIT)/os/nixish/inc
 
-YAML = ext/yaml/$(YAML_GIT)/p/bin/libyaml.a
+YAML = ext/parse/yaml/$(YAML_GIT)/p/bin/libyaml.a
 LDFLAGS = -pthread -ldl
-LINKP= -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 
 EXE=mkn
 WHICH=which
@@ -50,20 +49,20 @@ prechecks:
 general:
 	$(MAKE) prechecks
 
-	@if [ ! -d "./ext/kul/$(KUL_GIT)" ]; then \
-		git clone --depth 1 https://github.com/mkn/mkn.kul.git --branch $(KUL_GIT) ext/kul/$(KUL_GIT); \
+	@if [ ! -d "./ext/mkn/kul/$(KUL_GIT)" ]; then \
+		git clone --depth 1 https://github.com/mkn/mkn.kul.git --branch $(KUL_GIT) ext/mkn/kul/$(KUL_GIT); \
 	fi;
 
-	@if [ ! -d "ext/yaml/$(YAML_GIT)" ]; then \
-		git clone --depth 1 https://github.com/mkn/parse.yaml.git --branch $(YAML_GIT) ext/yaml/$(YAML_GIT); \
-		cd ext/yaml/$(YAML_GIT) 2>&1 /dev/null; \
+	@if [ ! -d "ext/parse/yaml/$(YAML_GIT)" ]; then \
+		git clone --depth 1 https://github.com/mkn/parse.yaml.git --branch $(YAML_GIT) ext/parse/yaml/$(YAML_GIT); \
+		cd ext/parse/yaml/$(YAML_GIT) 2>&1 /dev/null; \
 		./mkn.sh;  \
 		cd ../../.. 2>&1 /dev/null; \
 	fi;
-	@if [ ! -d "ext/yaml/$(YAML_GIT)/p/bin" ]; then \
-		mkdir ext/yaml/$(YAML_GIT)/p/bin; \
+	@if [ ! -d "ext/parse/yaml/$(YAML_GIT)/p/bin" ]; then \
+		mkdir ext/parse/yaml/$(YAML_GIT)/p/bin; \
 	fi;
-	@if [ ! -f "ext/yaml/$(YAML_GIT)/p/bin/libyaml.a" ]; then \
+	@if [ ! -f "ext/parse/yaml/$(YAML_GIT)/p/bin/libyaml.a" ]; then \
 		$(MAKE) caml; \
 		$(MAKE) yaml; \
 	fi;
@@ -83,14 +82,14 @@ link:
 	$(CXX) -o "$(EXE)" $(FILES) $(YAML) $(LDFLAGS)
 
 caml:
-	@for f in $(shell find ext/yaml/$(YAML_GIT)/p/src -type f -name '*.cpp'); do \
-		echo $(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/p/include -o "ext/yaml/$(YAML_GIT)/p/bin/$$(basename $$f).o" -c "$$f"; \
-		$(CXX) $(CXXFLAGS) -Iext/yaml/$(YAML_GIT)/p/include -o "ext/yaml/$(YAML_GIT)/p/bin/$$(basename $$f).o" -c "$$f" || exit 1 ; \
+	@for f in $(shell find ext/parse/yaml/$(YAML_GIT)/p/src -type f -name '*.cpp'); do \
+		echo $(CXX) $(CXXFLAGS) -Iext/parse/yaml/$(YAML_GIT)/p/include -o "ext/parse/yaml/$(YAML_GIT)/p/bin/$$(basename $$f).o" -c "$$f"; \
+		$(CXX) $(CXXFLAGS) -Iext/parse/yaml/$(YAML_GIT)/p/include -o "ext/parse/yaml/$(YAML_GIT)/p/bin/$$(basename $$f).o" -c "$$f" || exit 1 ; \
 	done;
 
 yaml:
-	$(eval FILES := $(foreach dir,$(shell find ext/yaml/$(YAML_GIT)/p/bin -type f -name *.o),$(dir)))
-	ar -r ext/yaml/$(YAML_GIT)/p/bin/libyaml.a $(FILES)
+	$(eval FILES := $(foreach dir,$(shell find ext/parse/yaml/$(YAML_GIT)/p/bin -type f -name *.o),$(dir)))
+	ar -r ext/parse/yaml/$(YAML_GIT)/p/bin/libyaml.a $(FILES)
 
 clean:
 	rm -rf bin ext

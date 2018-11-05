@@ -24,9 +24,9 @@
     },
     "files":
     [
-        {"includePattern": "/Users/travis/build/Dekken/maiken/bin/build/mkn", "uploadPattern": "osx/master/mkn",
+        {"includePattern": "/home/travis/build/Dekken/maiken/bin/build/mkn", "uploadPattern": "nix/master/mkn",
           "matrixParams": { "override": 1 } },
-        {"includePattern": "/Users/travis/build/Dekken/maiken/bin/lib/libmkn.so", "uploadPattern": "osx/master/libmkn.so",
+        {"includePattern": "/home/travis/build/Dekken/maiken/bin/lib/libmkn.so", "uploadPattern": "nix/master/libmkn.so",
           "matrixParams": { "override": 1 } }
     ],
     "publish": true

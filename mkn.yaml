@@ -4,9 +4,9 @@ name: mkn
 version: master
 
 property:
-    DATE: 09-OCT-2018
+    DATE: 06-NOV-2018
 
-parent: base
+parent: bin
 mode: none
 
 profile:
@@ -14,7 +14,6 @@ profile:
     inc: ./inc
     dep: mkn.kul parse.yaml
     src: ./src
-    main: mkn.cpp
     test: test/cpp.cpp test/py.py
     arg: -D_MKN_VERSION_=${version}_${DATE}
     if_arg:
@@ -22,12 +21,16 @@ profile:
     if_link:
       win_cl: -nodefaultlib:libucrt.lib ucrt.lib
 
-  - name: static
+  - name: bin
     parent: base
+    main: mkn.cpp
+
+  - name: static
+    parent: bin
     mode: static
 
   - name: shared
-    parent: base
+    parent: bin
     mode: shared
 
   - name: mod

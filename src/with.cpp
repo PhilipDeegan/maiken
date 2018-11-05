@@ -1,4 +1,3 @@
-
 /**
 Copyright (c) 2017, Philip Deegan.
 All rights reserved.
