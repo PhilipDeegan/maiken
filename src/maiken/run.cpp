@@ -105,7 +105,7 @@ class Runner : public Constants {
 };
 }  // namespace maiken
 
-void maiken::Application::test(void) {
+void maiken::Application::test() {
   kul::os::PushDir pushd(this->project().dir());
   kul::Dir testsD(buildDir().join("test"));
   if (testsD) {

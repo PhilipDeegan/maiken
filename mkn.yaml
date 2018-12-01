@@ -4,7 +4,7 @@ name: mkn
 version: master
 
 property:
-    DATE: 06-NOV-2018
+    DATE: 01-DEC-2018
 
 parent: bin
 mode: none

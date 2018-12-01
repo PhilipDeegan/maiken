@@ -60,8 +60,8 @@ bool maiken::Application::get_binaries() {
 #endif
 
 void maiken::Application::process() KTHROW(kul::Exception) {
-  const kul::hash::set::String &cmds(CommandStateMachine::INSTANCE().commands());
 
+  const kul::hash::set::String &cmds(CommandStateMachine::INSTANCE().commands());
   const auto gEnvVars = maiken::AppVars::INSTANCE().envVars();
 
   auto loadModules = [&](Application &app) {
@@ -107,12 +107,11 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       if (work) app.compile(objects);
     }
     if (cmds.count(STR_BUILD) || cmds.count(STR_LINK)) {
-      for (auto &modLoader : app.mods)
-        modLoader->module()->link(app, app.modLink(modLoader->app()));
-      if (work) {
-        app.findObjects(objects);
-        app.link(objects);
-      }
+      if (work)
+        for (auto &modLoader : app.mods)
+          modLoader->module()->link(app, app.modLink(modLoader->app()));
+      app.findObjects(objects);
+      app.link(objects);
     }
     for (const auto &oldEv : oldEvs) kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
     for (const auto e : gEnvVars) maiken::AppVars::INSTANCE().envVar(e.first, e.second);
@@ -148,13 +147,14 @@ void maiken::Application::process() KTHROW(kul::Exception) {
   }
   if (!this->ig) proc(*this, (!this->srcs.empty() || !this->main.empty()));
 
-  if (cmds.count(STR_TEST) && !this->ig) test();
+  if (cmds.count(STR_TEST)) test();
 
   if (cmds.count(STR_PACK)) {
     pack();
     for (auto &modLoader : mods)
       modLoader->module()->pack(*this, this->modPack(modLoader->app()));
   }
+
   if (CommandStateMachine::INSTANCE().main() && (cmds.count(STR_RUN) || cmds.count(STR_DBG)))
     run(cmds.count(STR_DBG));
   CommandStateMachine::INSTANCE().reset();

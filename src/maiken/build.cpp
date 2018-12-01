@@ -38,8 +38,6 @@ void maiken::Application::link(const kul::hash::set::String &objects) KTHROW(kul
       buildExecutable(objects);
     else
       buildLibrary(objects);
-    if (CommandStateMachine::INSTANCE().commands().count(STR_TEST) && !tests.empty())
-      buildTest(objects);
     kul::os::PushDir pushd(this->project().dir());
     kul::Dir build(".mkn/build");
     build.mk();
@@ -49,8 +47,9 @@ void maiken::Application::link(const kul::hash::set::String &objects) KTHROW(kul
       kul::io::Writer w(ts);
       w << kul::Now::MILLIS();
     }
-  } else
-    KEXIT(1, "No link objects found, try compile or build.");
+  }
+  if (CommandStateMachine::INSTANCE().commands().count(STR_TEST) && !tests.empty())
+    buildTest(objects);
 }
 
 void maiken::Application::checkErrors(const CompilerProcessCapture &cpc) KTHROW(kul::Exception) {
