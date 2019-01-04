@@ -40,50 +40,12 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str) KTHROW(
   if (posL == std::string::npos || posR == std::string::npos) return v;
   if (str.size() > 1 && str.substr(0, 2) == "./") str = str.substr(2);
 
-  kul::Dir d(str);
-  std::string built, prnt;
-  std::vector<std::string> bits;
-  bits.insert(bits.begin(), d.name());
-  while (d.parent().name() != prnt && !d.parent().root()) {
-    bits.insert(bits.begin(), d.parent().name());
-    prnt = d.parent().name();
-    d = d.parent();
-  }
-  if (d.parent().root()) {
-    bits.insert(bits.begin(), d.parent().name());
-  } else {
-    d = kul::env::CWD();
-    bits.insert(bits.begin(), d.name());
-    while (d.parent().name() != prnt && !d.parent().root()) {
-      bits.insert(bits.begin(), d.parent().name());
-      prnt = d.parent().name();
-      d = d.parent();
-    }
-    str = kul::env::CWD() + kul::Dir::SEP() + str;
-  }
+  auto bits = kul::String::SPLIT(str, "/");
+  str = bits[bits.size() - 1];
+  kul::Dir d(kul::env::CWD());
 
-  std::string rem, rule;
-  size_t bitsIndex = 0;
-  for (const auto &s : bits) {
-    auto posL = s.find("(");
-    auto posR = s.find(")");
-    if (posL != std::string::npos && posR != std::string::npos) {
-      if (built.size() + s.size() + 2 > str.size()) {
-        rem = str.substr(built.size() + s.size() + 1);
-      } else
-        rem = str.substr(built.size() + s.size() + 2);
-      rule = s;
-      break;
-    }
-    if (kul::Dir(s).root())
-      built = s;
-    else if (kul::Dir(built).root())
-      built = built + s;
-    else
-      built = built + kul::Dir::SEP() + s;
-    bitsIndex++;
-  }
-  d = built;
+  if(bits.size() > 1) d = kul::Dir(bits[0]);
+  for(size_t i = 1; i < bits.size() - 1; i++) d = d.join(bits[i]);
 
   auto regexer = [&](auto items) {
     for (const auto &item : items) {

@@ -171,6 +171,7 @@ void maiken::Application::buildTest(const kul::hash::set::String &objects) KTHRO
   std::vector<std::pair<std::string, std::string>> test_objects, source_objects;
   kul::Dir objD(buildDir().join("obj")), testsD(buildDir().join("test")),
       tmpD(buildDir().join("tmp"));
+  objD.mk();
   for (const auto &p : tests) {
     const std::string &file = p.first;
     const std::string &fileType = file.substr(file.rfind(".") + 1);
