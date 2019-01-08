@@ -207,7 +207,7 @@ class KUL_PUBLISH Application : public Constants {
   static void showHelp();
 
  public:
-  Application(const maiken::Project &proj, const std::string &profile = ""); 
+  Application(const maiken::Project &proj, const std::string &profile = "");
   Application(const Application &a) = delete;
   Application(const Application &&a) = delete;
   Application &operator=(const Application &a) = delete;
@@ -222,7 +222,6 @@ class KUL_PUBLISH Application : public Constants {
   const std::vector<Application *> &revendencies() const { return rdeps; }
   const std::vector<Application *> &moduleDependencies() const { return modDeps; }
   const std::vector<std::shared_ptr<ModuleLoader>> &modules() const { return mods; }
-  const std::vector<kul::cli::EnvVar> &envVars() const { return evs; }
   const kul::hash::map::S2T<kul::hash::map::S2S> &files() const { return fs; }
   const std::vector<std::string> &libraries() const { return libs; }
   const std::vector<std::pair<std::string, bool>> &sources() const { return srcs; }
@@ -230,6 +229,8 @@ class KUL_PUBLISH Application : public Constants {
   const std::vector<std::string> &libraryPaths() const { return paths; }
   const kul::hash::map::S2S &properties() const { return ps; }
   const kul::hash::map::S2T<kul::hash::set::String> &arguments() const { return args; }
+
+  std::vector<kul::cli::EnvVar> &envVars() { return evs; }
 
 #ifdef _MKN_WITH_MKN_RAM_
   bool get_binaries();

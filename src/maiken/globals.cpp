@@ -61,10 +61,10 @@ maiken::AppVars::AppVars() {
   if (kul::env::EXISTS("MKN_OBJ")) evs["MKN_OBJ"] = kul::env::GET("MKN_OBJ");
 
 #ifdef _WIN32
-  evs["MKN_LIB_EXT"] = "dll";
+  evs["MKN_LIB_EXT"] = ".dll";
   evs["MKN_LIB_PRE"] = "";
 #else
-  evs["MKN_LIB_EXT"] = "so";
+  evs["MKN_LIB_EXT"] = ".so";
   evs["MKN_LIB_PRE"] = "lib";
 #endif
   if (kul::env::EXISTS("MKN_LIB_EXT")) evs["MKN_LIB_EXT"] = kul::env::GET("MKN_LIB_EXT");

@@ -132,9 +132,9 @@ void maiken::Application::populateMaps(const YAML::Node &n)
   {
     using namespace kul::cli;
     for (const auto &p : AppVars::INSTANCE().envVars()) {
-      evs.erase(std::remove_if(evs.begin(), evs.end(),
-                               [&p](const EnvVar &ev) { return ev.name() == p.first; }),
-                evs.end());
+      if(std::find_if(evs.begin(), evs.end(),
+                               [&p](const EnvVar &ev) { return ev.name() == p.first; }) != evs.end())
+        continue;
       evs.push_back(EnvVar(p.first, p.second, EnvVarMode::REPL));
     }
     for (const auto &c : n[STR_ENV]) {
