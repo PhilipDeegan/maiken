@@ -132,8 +132,8 @@ void maiken::Application::populateMaps(const YAML::Node &n)
   {
     using namespace kul::cli;
     for (const auto &p : AppVars::INSTANCE().envVars()) {
-      if(std::find_if(evs.begin(), evs.end(),
-                               [&p](const EnvVar &ev) { return ev.name() == p.first; }) != evs.end())
+      if (std::find_if(evs.begin(), evs.end(),
+                       [&p](const EnvVar &ev) { return ev.name() == p.first; }) != evs.end())
         continue;
       evs.push_back(EnvVar(p.first, p.second, EnvVarMode::REPL));
     }
@@ -201,10 +201,11 @@ void maiken::Application::cyclicCheck(
 }
 
 void maiken::Application::addIncludeLine(const std::string &o) KTHROW(kul::Exception) {
-  auto add_if_missing = [&](std::pair<std::string, bool> p){
-    auto it = std::find_if( incs.begin(), incs.end(),
-      [&](const std::pair<std::string, bool>& element){ return element.first == p.first; } );
-    if(it == incs.end()) incs.emplace_back(p);
+  auto add_if_missing = [&](std::pair<std::string, bool> p) {
+    auto it = std::find_if(
+        incs.begin(), incs.end(),
+        [&](const std::pair<std::string, bool> &element) { return element.first == p.first; });
+    if (it == incs.end()) incs.emplace_back(p);
   };
   if (o.find(',') == std::string::npos) {
     for (const auto &s : kul::cli::asArgs(o))

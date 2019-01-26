@@ -104,7 +104,7 @@ class KUL_PUBLISH ModuleLoader
   bool loaded = 0;
   Module *p = nullptr;
 
-  static kul::File FIND(const Application &a)
+  static kul::File FIND(Application &a)
 #ifndef _MKN_DISABLE_MODULES_
       KTHROW(kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_
@@ -133,9 +133,9 @@ class KUL_PUBLISH ModuleLoader
     loaded = 0;
   }
   Module *module() { return p; }
-  const Application * app() const { return p->app; }
+  const Application *app() const { return p->app; }
 
-  static std::shared_ptr<ModuleLoader> LOAD(const Application &ap)
+  static std::shared_ptr<ModuleLoader> LOAD(Application &ap)
 #ifndef _MKN_DISABLE_MODULES_
       KTHROW(kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_
@@ -154,14 +154,14 @@ class GlobalModules {
   kul::hash::map::S2T<std::shared_ptr<kul::sys::SharedLibrary>> libs;
 
   ~GlobalModules() { libs.clear(); }
-  void load(const Application &ap) KTHROW(kul::sys::Exception) {
+  void load(Application &ap) KTHROW(kul::sys::Exception) {
     if (!libs.count(ap.buildDir().real())) {
       libs.insert(std::make_pair(
           ap.buildDir().real(), std::make_shared<kul::sys::SharedLibrary>(ModuleLoader::FIND(ap))));
     }
   }
 #else
-  void load(const Application &ap) {}
+  void load(Application &ap) {}
 #endif  //_MKN_DISABLE_MODULES_
 };
 }  // namespace maiken

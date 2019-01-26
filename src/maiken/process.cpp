@@ -36,31 +36,28 @@ bool maiken::Application::get_binaries() {
   size_t suxcess = 0;
   kul::Dir outD(inst ? inst.real() : buildDir());
   const auto files = kul::String::SPLIT(this->binary(), " ");
-  for(const std::string &file : files) {
+  for (const std::string &file : files) {
     std::string fn = file.substr(file.rfind("/") + 1);
     kul::https::Get(file)
-      .withHeaders({
-        {"User-Agent", "Mozilla not a virus"},
-        {"Accept", "application/octet-stream"},
-        {"Content-Disposition", "attachment; filename="+fn}
-      })
-      .withResponse([&](const kul::http::Response &r) {
-        if (r.status() == 200) {
-          kul::File dl(fn);
-          if(dl.is()) {
-            suxcess++;
-            dl.mv(outD);
+        .withHeaders({{"User-Agent", "Mozilla not a virus"},
+                      {"Accept", "application/octet-stream"},
+                      {"Content-Disposition", "attachment; filename=" + fn}})
+        .withResponse([&](const kul::http::Response &r) {
+          if (r.status() == 200) {
+            kul::File dl(fn);
+            if (dl.is()) {
+              suxcess++;
+              dl.mv(outD);
+            }
           }
-        }
-      })
-      .send();
+        })
+        .send();
   }
   return suxcess == files.size();
 }
 #endif
 
 void maiken::Application::process() KTHROW(kul::Exception) {
-
   const kul::hash::set::String &cmds(CommandStateMachine::INSTANCE().commands());
   const auto gEnvVars = maiken::AppVars::INSTANCE().envVars();
 
@@ -69,8 +66,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod) {
       app.mods.push_back(ModuleLoader::LOAD(**mod));
     }
-    for (auto &modLoader : app.mods)
-      modLoader->module()->init(app, app.modInit(modLoader->app()));
+    for (auto &modLoader : app.mods) modLoader->module()->init(app, app.modInit(modLoader->app()));
 #endif  //_MKN_DISABLE_MODULES_
   };
   auto proc = [&](Application &app, bool work) {
@@ -94,7 +90,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       mkn.rm();
     }
 #ifdef _MKN_WITH_MKN_RAM_
-    if(work && !app.bin.empty() && app.get_binaries()) {
+    if (work && !app.bin.empty() && app.get_binaries()) {
       work = false;
     }
 #endif
@@ -151,8 +147,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
 
   if (cmds.count(STR_PACK)) {
     pack();
-    for (auto &modLoader : mods)
-      modLoader->module()->pack(*this, this->modPack(modLoader->app()));
+    for (auto &modLoader : mods) modLoader->module()->pack(*this, this->modPack(modLoader->app()));
   }
 
   if (CommandStateMachine::INSTANCE().main() && (cmds.count(STR_RUN) || cmds.count(STR_DBG)))

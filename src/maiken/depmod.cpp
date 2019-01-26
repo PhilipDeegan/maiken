@@ -58,7 +58,7 @@ void maiken::Application::loadDepOrMod(const YAML::Node &node, const kul::Dir &d
     std::rethrow_exception(std::current_exception());
   }
   kul::env::CWD(depOrMod);
-  
+
   if (_MKN_REMOTE_EXEC_) {
 #ifdef _WIN32
     if (kul::File("mkn.bat").is() &&
@@ -183,7 +183,8 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
         if (!f && !p.empty())
           KEXIT(1, "profile does not exist\n" + p + "\n" + project().dir().path());
 
-        if (!module && (depOrMod[STR_NAME] && withoutThis(depOrMod[STR_NAME].Scalar(), p))) continue;
+        if (!module && (depOrMod[STR_NAME] && withoutThis(depOrMod[STR_NAME].Scalar(), p)))
+          continue;
         auto *app = Applications::INSTANCE().getOrCreate(c, p, 0);
         if (!with) app->par = this;
         setApp(*app, depOrMod);

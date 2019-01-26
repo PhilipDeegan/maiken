@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-kul::File maiken::ModuleLoader::FIND(const Application &ap)
+kul::File maiken::ModuleLoader::FIND(Application &ap)
 #ifndef _MKN_DISABLE_MODULES_
     KTHROW(kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_
@@ -40,7 +40,10 @@ kul::File maiken::ModuleLoader::FIND(const Application &ap)
 #endif  //_MKN_DISABLE_MODULES_
 
   std::string file;
-  for (const auto &f : ap.buildDir().files(0)) {
+  auto files = ap.buildDir().files(0);
+  if (files.empty()) ap.process();
+  files = ap.buildDir().files(0);
+  for (const auto &f : files) {
     const auto &name(f.name());
     if (name.find(".") != std::string::npos &&
         name.find(ap.project().root()["name"].Scalar()) != std::string::npos
@@ -61,7 +64,7 @@ kul::File maiken::ModuleLoader::FIND(const Application &ap)
   return lib;
 }
 
-std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(const Application &ap)
+std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(Application &ap)
 #ifndef _MKN_DISABLE_MODULES_
     KTHROW(kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_

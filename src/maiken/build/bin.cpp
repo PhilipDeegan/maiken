@@ -36,7 +36,7 @@ namespace maiken {
 class DistLinker {
  public:
   static void send(const kul::File &bin) {
-    (void) bin;
+    (void)bin;
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
     std::vector<std::shared_ptr<maiken::dist::Post>> posts;
     auto post_lambda = [](const dist::Host &host, const kul::File &bin) {

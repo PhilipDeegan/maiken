@@ -89,15 +89,18 @@ class Runner : public Constants {
       KOUT(INF) << pa.name() << " : " << pa.toString();
       envies.push_back(std::make_pair(pa.name(), pa.toString()));
     }
-    for(const auto &ev : envies) {
+    for (const auto &ev : envies) {
       p->var(ev.first,
              kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
     }
     for (const auto &ev : AppVars::INSTANCE().envVars()) {
-      auto it = std::find_if( envies.begin(), envies.end(),
-        [&ev](const std::pair<std::string, std::string>& element){ return element.first == ev.first;} );
-      if(it == envies.end())
-        p->var(ev.first, kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
+      auto it = std::find_if(envies.begin(), envies.end(),
+                             [&ev](const std::pair<std::string, std::string> &element) {
+                               return element.first == ev.first;
+                             });
+      if (it == envies.end())
+        p->var(ev.first,
+               kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
     }
     KOUT(INF) << (*p);
     if (!AppVars::INSTANCE().dryRun()) p->start();

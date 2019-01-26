@@ -81,7 +81,7 @@ class KUL_PUBLISH Application : public Constants {
   std::string arg, bin, lang, lnk, main, out, scr, scv;
   const std::string p;
   kul::Dir bd, inst;
-  std::unordered_map<const Application*, YAML::Node> modIArgs, modCArgs, modLArgs, modPArgs;
+  std::unordered_map<const Application *, YAML::Node> modIArgs, modCArgs, modLArgs, modPArgs;
   const maiken::Project &proj;
   kul::hash::map::S2T<kul::hash::map::S2S> fs;
   kul::hash::map::S2S cArg, cLnk, includeStamps, itss, ps, tests;
@@ -159,35 +159,35 @@ class KUL_PUBLISH Application : public Constants {
   void addSourceLine(const std::string &o) KTHROW(kul::Exception);
   void addIncludeLine(const std::string &o) KTHROW(kul::Exception);
 
-  void modInit(const Application * const other, const YAML::Node &modArg) {
+  void modInit(const Application *const other, const YAML::Node &modArg) {
     modIArgs.emplace(std::make_pair(other, modArg));
   }
-  YAML::Node modInit(const Application * const other) const {
-    if(modIArgs.count(other)) return (*modIArgs.find(other)).second;
+  YAML::Node modInit(const Application *const other) const {
+    if (modIArgs.count(other)) return (*modIArgs.find(other)).second;
     return YAML::Node();
   }
 
-  void modCompile(const Application * const other, const YAML::Node &modArg) {
+  void modCompile(const Application *const other, const YAML::Node &modArg) {
     modCArgs.emplace(std::make_pair(other, modArg));
   }
-  YAML::Node modCompile(const Application * const  other) const {
-    if(modCArgs.count(other)) return (*modCArgs.find(other)).second;
+  YAML::Node modCompile(const Application *const other) const {
+    if (modCArgs.count(other)) return (*modCArgs.find(other)).second;
     return YAML::Node();
   }
 
-  void modLink(const Application * const other, const YAML::Node &modArg) {
+  void modLink(const Application *const other, const YAML::Node &modArg) {
     modLArgs.emplace(std::make_pair(other, modArg));
   }
-  YAML::Node modLink(const Application * const other) const {
-    if(modLArgs.count(other)) return (*modLArgs.find(other)).second;
+  YAML::Node modLink(const Application *const other) const {
+    if (modLArgs.count(other)) return (*modLArgs.find(other)).second;
     return YAML::Node();
   }
 
-  void modPack(const Application * const other, const YAML::Node &modArg) {
+  void modPack(const Application *const other, const YAML::Node &modArg) {
     modPArgs.emplace(std::make_pair(other, modArg));
   }
-  YAML::Node modPack(const Application * const other) const {
-    if(modPArgs.count(other)) return (*modPArgs.find(other)).second;
+  YAML::Node modPack(const Application *const other) const {
+    if (modPArgs.count(other)) return (*modPArgs.find(other)).second;
     return YAML::Node();
   }
 
@@ -237,9 +237,10 @@ class KUL_PUBLISH Application : public Constants {
 #endif
 
   void addInclude(const std::string &s, bool p = 1) {
-    auto it = std::find_if( incs.begin(), incs.end(),
-      [&](const std::pair<std::string, bool>& element){ return element.first == s; } );
-    if(it == incs.end()) incs.push_back(std::make_pair(s, p));
+    auto it = std::find_if(
+        incs.begin(), incs.end(),
+        [&](const std::pair<std::string, bool> &element) { return element.first == s; });
+    if (it == incs.end()) incs.push_back(std::make_pair(s, p));
   }
   void addLibpath(const std::string &s) { paths.push_back(s); }
 

@@ -44,8 +44,8 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str) KTHROW(
   str = bits[bits.size() - 1];
   kul::Dir d(kul::env::CWD());
 
-  if(bits.size() > 1) d = kul::Dir(bits[0]);
-  for(size_t i = 1; i < bits.size() - 1; i++) d = d.join(bits[i]);
+  if (bits.size() > 1) d = kul::Dir(bits[0]);
+  for (size_t i = 1; i < bits.size() - 1; i++) d = d.join(bits[i]);
 
   auto regexer = [&](auto items) {
     for (const auto &item : items) {

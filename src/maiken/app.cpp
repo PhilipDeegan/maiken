@@ -33,7 +33,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 maiken::Application *maiken::Applications::getOrCreate(const maiken::Project &proj,
                                                        const std::string &_profile, bool setup)
     KTHROW(kul::Exception) {
-
   std::string pDir(proj.dir().real());
   std::string profile = _profile.empty() ? "@" : _profile;
   if (!m_apps.count(pDir) || !m_apps[pDir].count(profile)) {
