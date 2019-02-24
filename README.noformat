@@ -489,8 +489,6 @@ main: cpp.cpp
 
 Available commands
     - build     - Compiles all supported files to the profile binary (./bin/profile) directory, and creates library/executable depending
-    - build-mod - Compile/link modules
-    - build-all - Compile/link modules and projects
     - clean     - deletes all files from the profile directory recursively.
     - compile   - Compiles all supported file to the profile binary directory
     - link      - Creates a library/executable from found compiled files
@@ -501,7 +499,8 @@ Available commands
     - pack      - Copy binary files & library files into bin/$profile/pack
     - run       - Starts the application automatically linking libraries for dependencies on dynamic libraries, supports -a and -p/-D
     - dbg       - Same as run but uses debugger - see 4.6
-    - trim      - Removes trailing whitespace from active sources
+    - tree [$p] - Prints dependency tree for base profile (or profile $p)
+
 
 5.1.2 Arguments
 
@@ -533,7 +532,7 @@ Available arguments:
     -s --scm-status       - Display SCM status of project, allows -d
     -S --shared           - Links projects without mode as shared
     -t --threads $n       - Consume $num threads while compiling source files where $n > 0, If $n is missing optimal resolution attempted.
-    -T --threads $n       - Remove profile or dependency on the command line see 4.9
+    -T --without $CSV     - Remove profile or dependency on the command line see 4.9
     -u --scm-update       - Update project from SCM when permitted, allows -d
     -U --scm-force-update - Force update project from SCM, allows -d
     -v --version          - Displays the current maiken version number
