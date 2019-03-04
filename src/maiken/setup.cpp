@@ -77,12 +77,34 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
 
   bool c = 1;
 #ifndef _MKN_DISABLE_MODULES_
+  std::vector<YAML::Node> mod_nodes;
+  if (this->ro) modArgs(AppVars::INSTANCE().mods(), mod_nodes, getIfMissing);
   while (c) {
     c = 0;
     for (const auto &n : nodes) {
       if (n[STR_NAME].Scalar() != profile) continue;
-      for (const auto &mod : n[STR_MOD]) getIfMissing(mod, 1);
-      popDepOrMod(n, modDeps, STR_MOD, 1);
+      if (n[STR_MOD])
+        if (n[STR_MOD].IsScalar()) {
+          for (const auto &mod_str : kul::String::LINES(n[STR_MOD].Scalar()))
+            modArgs(mod_str, mod_nodes, getIfMissing);
+        } else if (n[STR_MOD].IsSequence()) {
+          bool moreso = 1, stringo = 0;
+          for (const auto &mod : n[STR_MOD]) {
+            if (stringo && !mod.IsScalar()) KEXIT(1, "NO");
+            if (mod.IsScalar()) {
+              stringo = 1;
+              moreso = 0;
+              for (const auto &mod_str : kul::String::LINES(mod.Scalar()))
+                modArgs(mod_str, mod_nodes, getIfMissing);
+            }
+          }
+          if (moreso) {
+            for (const auto &mod : n[STR_MOD]) getIfMissing(mod, 1);
+            popDepOrMod(n, modDeps, STR_MOD, 1);
+          }
+        } else {
+          KEXIT(1, "NO");
+        }
       if (n[STR_IF_MOD] && n[STR_IF_MOD][KTOSTRING(__KUL_OS__)]) {
         for (const auto &mod : n[STR_IF_MOD][KTOSTRING(__KUL_OS__)]) getIfMissing(mod, 1);
         popDepOrMod(n[STR_IF_MOD], modDeps, KTOSTRING(__KUL_OS__), 1);
@@ -92,6 +114,9 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
       break;
     }
   }
+  YAML::Node mod_node;
+  mod_node[STR_MOD] = mod_nodes;
+  popDepOrMod(mod_node, modDeps, STR_MOD, 1);
 
   auto depLevel(AppVars::INSTANCE().dependencyLevel());
   for (auto *mod : modDeps) {

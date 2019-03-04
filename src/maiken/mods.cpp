@@ -2,7 +2,7 @@
 Copyright (c) 2017, Philip Deegan.
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
+Redistribution and use in source and binary forms, mod or modout
 modification, are permitted provided that the following conditions are
 met:
 
@@ -10,11 +10,11 @@ met:
 notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above
 copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
+in the documentation and/or other materials provided mod the
 distribution.
     * Neither the name of Philip Deegan nor the names of its
 contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+this software modout specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -28,46 +28,59 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken/app.hpp"
+#include "maiken.hpp"
+#include "kul/bon.hpp"
 
-void maiken::Application::withArgs(
-    const std::string with_str, std::vector<YAML::Node> &with_nodes,
-    std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool add, bool dep) {
-  if (add && with_str.size()) {
-    kul::hash::set::String withs;
-    try {
-      parseDependencyString(with_str, withs);
-    } catch (const kul::Exception &e) {
-      if (with_str[0] == '[' && with_str[with_str.size() - 1] == ']')
-        withs.insert(this->project().root()[STR_NAME].Scalar() + with_str);
-      else
-        KEXIT(1, MKN_ERR_INVALID_WIT_CLI);
-    }
-    with(withs, with_nodes, getIfMissing, dep);
+void maiken::Application::modArgs(
+    const std::string mod_str, std::vector<YAML::Node> &mod_nodes,
+    std::function<void(const YAML::Node &, const bool)> getIfMissing) {
+  if (mod_str.size()) {
+    kul::hash::set::String mods;
+    mods.insert(mod_str);
+    mod(mods, mod_nodes, getIfMissing);
   }
 }
 
-void maiken::Application::with(
-    kul::hash::set::String &withs, std::vector<YAML::Node> &with_nodes,
-    std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool dep) {
-  for (const auto &with : withs) {
-    YAML::Node node;
-    std::string local, profiles, proj = with, version, scm;
+void maiken::Application::mod(
+    kul::hash::set::String &mods, std::vector<YAML::Node> &mod_nodes,
+    std::function<void(const YAML::Node &n, const bool mod)> getIfMissing) {
+  for (auto &mod1 : mods) {
+    auto mod(mod1);
+    kul::String::REPLACE_ALL(mod, kul::os::EOL(), "");
+    kul::String::TRIM(mod);
+    if (mod.empty()) continue;
+    // auto eol = kul::os::EOL();
+    // auto loe =std::string(eol.rbegin(), eol.rend());
+
+    // if(mod.rfind(kul::os::EOL()) == mod.size() - eol.size())
+
+    // for(const auto e : loe) if(mod.back() == e) mod.pop_back();
+    KLOG(INF) << mod;
+
+    mod_nodes.emplace_back();
+    auto &node = mod_nodes.back();
+    std::string local, profiles, proj = mod, version, scm, objs;
+    auto lbrak = proj.find("("), rbrak = proj.find(")");
     {
-      auto lbrak = proj.find("("), rbrak = proj.find(")");
       if (lbrak != std::string::npos) {
-        if (rbrak == std::string::npos) KEXIT(1, "Invalid -w - missing right ) bracket");
+        if (rbrak == std::string::npos) KEXIT(1, "Invalid -m - missing right ) bracket");
         scm = proj.substr(lbrak + 1, rbrak - lbrak - 1);
-        proj = proj.substr(0, lbrak) + with.substr(rbrak + 1);
+        proj = proj.substr(0, lbrak) + mod.substr(rbrak + 1);
         node[STR_SCM] = scm;
       }
       lbrak = proj.find("["), rbrak = proj.find("]");
       if (lbrak != std::string::npos) {
-        if (rbrak == std::string::npos) KEXIT(1, "Invalid -w - missing right ] bracket");
+        if (rbrak == std::string::npos) KEXIT(1, "Invalid -m - missing right ] bracket");
         profiles = proj.substr(lbrak + 1, rbrak - lbrak - 1);
         proj = proj.substr(0, lbrak);
         kul::String::REPLACE_ALL(profiles, ",", " ");
         node[STR_PROFILE] = profiles;
+      }
+      lbrak = proj.find("{"), rbrak = proj.rfind("}");
+      if (lbrak != std::string::npos) {
+        if (rbrak == std::string::npos) KEXIT(1, "Invalid -m - missing right } bracket");
+        objs = proj.substr(lbrak /*, rbrak - lbrak + 1*/);
+        proj = proj.substr(0, lbrak);
       }
     }
     auto am = proj.find("&");  // local
@@ -76,12 +89,12 @@ void maiken::Application::with(
       node[STR_LOCAL] = ".";
       if (am != std::string::npos || ha != std::string::npos)
         KEXIT(1,
-              "-w invalid, current project may not specify version or "
+              "-m invalid, current project may not specify version or "
               "location");
     }
 
     if (am != std::string::npos && ha != std::string::npos)
-      if (ha > am) KEXIT(1, "-w invalid, version must before location");
+      if (ha > am) KEXIT(1, "-m invalid, version must before location");
 
     if (am != std::string::npos) {
       local = proj.substr(am + 1);
@@ -94,7 +107,7 @@ void maiken::Application::with(
       node[STR_VERSION] = version;
     }
     if (proj.empty() && local.empty() && scm.empty())
-      KEXIT(1, "-w invalid, project cannot be deduced");
+      KEXIT(1, "-m invalid, project cannot be deduced");
     if (!proj.empty()) {
       if (scm.empty()) {
         scm = proj;
@@ -107,15 +120,19 @@ void maiken::Application::with(
       proj = bits[bits.size() - 1];
     }
     if (!proj.empty()) node[STR_NAME] = proj;
-
-    with_nodes.push_back(node);
-    if (!dep && !proj.empty()) {
-      std::stringstream with_define;
-      kul::String::REPLACE_ALL(proj, ".", "_");
-      std::transform(proj.begin(), proj.end(), proj.begin(), ::toupper);
-      with_define << " -D_MKN_WITH_" << proj << "_ ";
-      arg += with_define.str();
+    if (lbrak != std::string::npos) {
+      KLOG(INF);
+      for (const auto n : kul::bon::from(objs)) {
+        KLOG(INF);
+        for (const auto p : n) {
+          KLOG(INF);
+          node[p.first] = p.second;
+        }
+      }
     }
-    getIfMissing(node, 0);
+    YAML::Emitter out;
+    out << node;
+    KLOG(INF) << kul::os::EOL() << out.c_str();
+    getIfMissing(node, 1);
   }
 }

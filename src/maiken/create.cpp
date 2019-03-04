@@ -44,7 +44,7 @@ class CLIHandler : public Constants {
         Arg('g', STR_DEBUG, ArgType::MAYBE), Arg('G', STR_GET, ArgType::STRING), Arg('h', STR_HELP),
         Arg('j', STR_JARG, ArgType::STRING), Arg('K', STR_STATIC),
         Arg('l', STR_LINKER, ArgType::STRING), Arg('L', STR_ALINKER, ArgType::STRING),
-        Arg('M', STR_MAIN, ArgType::STRING),
+        Arg('m', STR_MOD, ArgType::STRING), Arg('M', STR_MAIN, ArgType::STRING),
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
         Arg('n', STR_NODES, ArgType::MAYBE),
 #endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
@@ -214,15 +214,12 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
         }
     };
 
-    getSet(STR_DEBUG, "-g", 9,
-           std::bind((void (AppVars::*)(const uint16_t &)) & AppVars::debug,
-                     std::ref(AppVars::INSTANCE()), std::placeholders::_1));
-    getSet(STR_OPT, "-O", 9,
-           std::bind((void (AppVars::*)(const uint16_t &)) & AppVars::optimise,
-                     std::ref(AppVars::INSTANCE()), std::placeholders::_1));
-    getSet(STR_WARN, "-W", 8,
-           std::bind((void (AppVars::*)(const uint16_t &)) & AppVars::warn,
-                     std::ref(AppVars::INSTANCE()), std::placeholders::_1));
+    getSet(STR_DEBUG, "-g", 9, std::bind((void (AppVars::*)(const uint16_t &)) & AppVars::debug,
+                                         std::ref(AppVars::INSTANCE()), std::placeholders::_1));
+    getSet(STR_OPT, "-O", 9, std::bind((void (AppVars::*)(const uint16_t &)) & AppVars::optimise,
+                                       std::ref(AppVars::INSTANCE()), std::placeholders::_1));
+    getSet(STR_WARN, "-W", 8, std::bind((void (AppVars::*)(const uint16_t &)) & AppVars::warn,
+                                        std::ref(AppVars::INSTANCE()), std::placeholders::_1));
   }
   {
     auto splitArgs = [](const std::string &s, const std::string &t,
@@ -250,6 +247,7 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
   }
 
   if (args.has(STR_WITH)) AppVars::INSTANCE().with(args.get(STR_WITH));
+  if (args.has(STR_MOD)) AppVars::INSTANCE().mods(args.get(STR_MOD));
 
   if (args.has(STR_WITHOUT)) {
     AppVars::INSTANCE().without(args.get(STR_WITHOUT));

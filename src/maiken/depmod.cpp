@@ -186,7 +186,7 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
         if (!module && (depOrMod[STR_NAME] && withoutThis(depOrMod[STR_NAME].Scalar(), p)))
           continue;
         auto *app = Applications::INSTANCE().getOrCreate(c, p, 0);
-        if (!with) app->par = this;
+        if (!with && !module) app->par = this;
         setApp(*app, depOrMod);
         vec.push_back(app);
         app->addRDep(this);
@@ -195,7 +195,7 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
     } else {
       if (!module && (depOrMod[STR_NAME] && withoutThis(depOrMod[STR_NAME].Scalar(), ""))) return;
       auto *app = Applications::INSTANCE().getOrCreate(c, "", 0);
-      if (!with) app->par = this;
+      if (!with && !module) app->par = this;
       setApp(*app, depOrMod);
       vec.push_back(app);
       app->addRDep(this);
@@ -215,7 +215,9 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
       app->addRDep(this);
       apps.push_back(std::make_pair(app->project().dir().path(), app->p));
     }
+
   cyclicCheck(apps);
+
   for (auto *ap : vec) {
     auto &app(*ap);
     if (app.buildDir().path().empty()) {

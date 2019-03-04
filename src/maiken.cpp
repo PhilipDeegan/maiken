@@ -195,9 +195,10 @@ void maiken::Application::populateMaps(const YAML::Node &n)
 void maiken::Application::cyclicCheck(
     const std::vector<std::pair<std::string, std::string>> &apps) const KTHROW(kul::Exception) {
   if (par) par->cyclicCheck(apps);
-  for (const auto &pa : apps)
+  for (const auto &pa : apps) {
     if (project().dir() == pa.first && p == pa.second)
       KEXIT(1, "Cyclical dependency found\n" + project().dir().path());
+  }
 }
 
 void maiken::Application::addIncludeLine(const std::string &o) KTHROW(kul::Exception) {

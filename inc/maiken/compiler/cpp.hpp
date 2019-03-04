@@ -86,8 +86,8 @@ class GccCompiler : public CCompiler {
   const std::string sharedLib(const std::string &lib) const override;
   const std::string staticLib(const std::string &lib) const override { return "lib" + lib + ".a"; }
 
-  virtual const std::string cc() const override { return "gcc"; }
-  virtual const std::string cxx() const override { return "g++"; }
+  virtual const std::string cc() const { return "gcc"; }
+  virtual const std::string cxx() const { return "g++"; }
 
   CompilerProcessCapture buildExecutable(const std::string &linker, const std::string &linkerEnd,
                                          const std::vector<std::string> &objects,

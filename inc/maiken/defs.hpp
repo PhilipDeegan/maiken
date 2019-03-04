@@ -158,7 +158,6 @@ class Constants {
   static constexpr const char *STR_INC = "inc";
   static constexpr const char *STR_FINC = "finc";
   static constexpr const char *STR_FPATH = "flib";
-  static constexpr const char *STR_EXT = "ext";
   static constexpr const char *STR_LIB = "lib";
   static constexpr const char *STR_DEP = "dep";
   static constexpr const char *STR_DEPS = "deps";

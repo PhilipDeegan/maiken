@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cereal/types/vector.hpp>
 
 #include <cereal/archives/portable_binary.hpp>
-#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  // _MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
 
 namespace maiken {
 
@@ -53,18 +53,18 @@ namespace dist {
 class Post;
 class RemoteCommandManager;
 }  // namespace dist
-#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  // _MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
 
 class AppVars : public Constants {
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   friend class dist::RemoteCommandManager;
   friend class dist::Post;
   friend class ::cereal::access;
-#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  // _MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
  private:
   bool dr = 0, f = 0, q = 0, s = 0, sh = 0, st = 0, u = 0;
   uint16_t de = -1, dl = 0, op = -1, ts = 1, wa = -1;
-  std::string aa, al, dep, la, ra, wi, wo;
+  std::string aa, al, dep, la, mo, ra, wi, wo;
   kul::hash::set::String cmds, wop;
   kul::hash::map::S2S evs, jas, pks;
 
@@ -72,7 +72,7 @@ class AppVars : public Constants {
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   uint16_t no = 0;
-#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  // _MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
 
   AppVars();
 
@@ -143,6 +143,9 @@ class AppVars : public Constants {
 
   const std::string &with() const { return wi; }
   void with(const std::string &wi) { this->wi = wi; }
+
+  const std::string &mods() const { return mo; }
+  void mods(const std::string &mo) { this->mo = mo; }
 
   const std::string &without() const { return wo; }
   void without(const std::string &wo) { this->wo = wo; }

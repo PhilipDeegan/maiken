@@ -204,6 +204,11 @@ class KUL_PUBLISH Application : public Constants {
   void with(kul::hash::set::String &withs, std::vector<YAML::Node> &with_nodes,
             std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool dep);
 
+  void modArgs(const std::string mod_str, std::vector<YAML::Node> &mod_nodes,
+               std::function<void(const YAML::Node &n, const bool mod)> getIfMissing);
+  void mod(kul::hash::set::String &mods, std::vector<YAML::Node> &mod_nodes,
+           std::function<void(const YAML::Node &n, const bool mod)> getIfMissing);
+
   static void showHelp();
 
  public:

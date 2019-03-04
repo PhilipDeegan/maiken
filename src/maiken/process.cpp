@@ -60,7 +60,7 @@ bool maiken::Application::get_binaries() {
 void maiken::Application::process() KTHROW(kul::Exception) {
   const kul::hash::set::String &cmds(CommandStateMachine::INSTANCE().commands());
   const auto gEnvVars = maiken::AppVars::INSTANCE().envVars();
-
+  kul::os::PushDir pushd(this->project().dir());
   auto loadModules = [&](Application &app) {
 #ifndef _MKN_DISABLE_MODULES_
     for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod) {
@@ -90,9 +90,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       mkn.rm();
     }
 #ifdef _MKN_WITH_MKN_RAM_
-    if (work && !app.bin.empty() && app.get_binaries()) {
-      work = false;
-    }
+    if (work && !app.bin.empty() && app.get_binaries()) work = false;  // doesn't work yet
 #endif
     app.loadTimeStamps();
 

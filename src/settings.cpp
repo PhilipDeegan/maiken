@@ -154,16 +154,14 @@ const kul::yaml::Validator maiken::Settings::validator() const {
         NodeValidator("env",
                       {NodeValidator("name", 1), NodeValidator("value", 1), NodeValidator("mode")},
                       0, NodeType::LIST),
-        NodeValidator("file",
-                      {NodeValidator("type", 1), NodeValidator("compiler", 1),
-                       NodeValidator("linker"), NodeValidator("archiver")},
+        NodeValidator("file", {NodeValidator("type", 1), NodeValidator("compiler", 1),
+                               NodeValidator("linker"), NodeValidator("archiver")},
                       1, NodeType::LIST),
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
         NodeValidator("dist",
                       {NodeValidator("port"),
-                       NodeValidator("nodes",
-                                     {NodeValidator("host", 1), NodeValidator("port", 1),
-                                      NodeValidator("user"), NodeValidator("pass")},
+                       NodeValidator("nodes", {NodeValidator("host", 1), NodeValidator("port", 1),
+                                               NodeValidator("user"), NodeValidator("pass")},
                                      0, NodeType::LIST)},
                       0, NodeType::MAP),
 #endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
@@ -230,9 +228,8 @@ void maiken::Settings::write(const kul::File &file) KTHROW(kul::Exit) {
       w.flush().close();
       file.rm();
       KEXIT(1, "gcc or clang not found, vcvars not detected")
-          << kul::os::EOL()
-          << "\tRun vcvarsall.bat or view mkn wiki to see how to configure "
-             "maiken settings.yaml"
+          << kul::os::EOL() << "\tRun vcvarsall.bat or view mkn wiki to see how to configure "
+                               "maiken settings.yaml"
           << kul::os::EOL() << "\t@ https://github.com/mkn/mkn/wiki";
     }
 

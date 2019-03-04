@@ -3,9 +3,8 @@
 name: mkn
 scm: https://github.com/dekken/maiken
 version: master
-
 property:
-    DATE: 14-MAR-2019
+    DATE: 23-MAR-2019
 
 parent: bin
 mode: none
@@ -13,7 +12,7 @@ mode: none
 profile:
   - name: base
     inc: ./inc
-    dep: mkn.kul parse.yaml
+    dep: mkn.kul#${version} parse.yaml
     src: ./src
     test: test/cpp.cpp test/py.py
     arg: -D_MKN_VERSION_=${version}_${DATE}
@@ -56,8 +55,8 @@ profile:
   - name: lint
     mod:
     - name: mkn-mod.exec
-      init:
-        python3 -m cpplint --recursive inc src
+      init: |
+        python3 -m cpplint --root=inc --recursive inc src
 
   - name: format
     mod:
