@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 const std::string maiken::cpp::WINCompiler::sharedLib(const std::string &lib) const {
-  return AppVars::INSTANCE().envVar("MKN_LIB_PRE") + lib + "." +
+  return AppVars::INSTANCE().envVar("MKN_LIB_PRE") + lib +
          AppVars::INSTANCE().envVar("MKN_LIB_EXT");
 }
 
