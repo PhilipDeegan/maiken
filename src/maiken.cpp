@@ -165,13 +165,13 @@ void maiken::Application::populateMaps(const YAML::Node &n)
   try {
     if (n[STR_INC])
       for (const auto &o : kul::String::LINES(n[STR_INC].Scalar())) addIncludeLine(o);
-  } catch (const kul::StringException) {
+  } catch (const kul::StringException&) {
     KEXIT(1, "include contains invalid bool value\n" + project().dir().path());
   }
   try {
     if (n[STR_SRC])
       for (const auto &o : kul::String::LINES(n[STR_SRC].Scalar())) addSourceLine(o);
-  } catch (const kul::StringException) {
+  } catch (const kul::StringException&) {
     KEXIT(1, "source contains invalid bool value\n" + project().dir().path());
   }
   if (n[STR_PATH])

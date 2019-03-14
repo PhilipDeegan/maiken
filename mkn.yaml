@@ -1,6 +1,7 @@
 #! clean build -dtK -O 9 -W 9 -g 0
 
 name: mkn
+scm: https://github.com/dekken/maiken
 version: master
 
 property:

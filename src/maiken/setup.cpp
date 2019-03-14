@@ -270,8 +270,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
           for (YAML::const_iterator it = n[STR_IF_INC].begin(); it != n[STR_IF_INC].end(); ++it)
             if (it->first.Scalar() == KTOSTRING(__KUL_OS__))
               for (const auto &s : kul::String::LINES(it->second.Scalar())) addIncludeLine(s);
-      } catch (const kul::StringException &e) {
-        KLOG(ERR) << e.what();
+      } catch (const kul::StringException &) {
         KEXIT(1, "if_inc contains invalid bool value\n" + project().dir().path());
       }
       try {
@@ -279,7 +278,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
           for (YAML::const_iterator it = n[STR_IF_SRC].begin(); it != n[STR_IF_SRC].end(); ++it)
             if (it->first.Scalar() == KTOSTRING(__KUL_OS__))
               for (const auto &s : kul::String::SPLIT(it->second.Scalar(), ' ')) addSourceLine(s);
-      } catch (const kul::StringException) {
+      } catch (const kul::StringException &) {
         KEXIT(1, "if_src contains invalid bool value\n" + project().dir().path());
       }
       if (n[STR_IF_LIB])
