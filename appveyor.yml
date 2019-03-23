@@ -30,7 +30,8 @@ build_script:
   - curl -o mkn.exe -L https://github.com/Dekken/maiken/raw/binaries/win10_x64/mkn.exe
   # doesnt exist for somereason?
   - mkdir -p "C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\cppwinrt"
-  - C:\Python36-x64\Scripts\pip install conan flawfinder
+  - C:\Python36-x64\python.exe -m pip install pip --upgrade
+  - C:\Python36-x64\python.exe -m pip install conan flawfinder
   - SET PYTHON=C:\Python36-x64\python.exe
   - bash -c "PATH=\"$PWD:/c/Python36-x64/:/c/Program Files/Git/usr/bin:$PATH\"; res/appveyor/run.sh"
 
