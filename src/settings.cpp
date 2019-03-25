@@ -56,6 +56,11 @@ maiken::Settings::Settings(const std::string &s) : kul::yaml::File(s) {
     if (!d.is() && !d.mk())
       KEXCEPT(SettingsException, "settings.yaml local/repo is not a valid directory");
   }
+  if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_MOD_REPO]) {
+    kul::Dir d(root()[STR_LOCAL][STR_MOD_REPO].Scalar());
+    if (!d.is() && !d.mk())
+      KEXCEPT(SettingsException, "settings.yaml local/mod-repo is not a valid directory");
+  }
   if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_REPO])
     for (const auto &s : kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
       rrs.push_back(s);

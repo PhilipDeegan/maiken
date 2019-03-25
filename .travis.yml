@@ -30,7 +30,7 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc; sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++; gcc -v; fi
   - export KUL_GIT_CO="--depth 3"
   - export MKN_LIB_LINK_LIB=1
-  - ./mkn build -dtSa "-std=c++14 -fPIC" -l "-pthread -ldl" -WOg 0
+  - ./mkn build -dtKa "-std=c++14 -fPIC" -l "-pthread -ldl" -WOg 0
   - ./mkn build -dtSa "-std=c++14 -fPIC" -l "-pthread -ldl" -WOg 0 -p lib
 
 deploy:

@@ -42,13 +42,12 @@ maiken::AppVars::AppVars() {
   pks["TIMESTAMP"] = std::time(NULL);
 
   if (Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_REPO])
-    pks["MKN_REPO"] = Settings::INSTANCE().root()[STR_LOCAL][STR_REPO].Scalar();
+    pks["MKN_REPO"] = kul::Dir(Settings::INSTANCE().root()[STR_LOCAL][STR_REPO].Scalar()).real();
   else
     pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
-
   if (Settings::INSTANCE().root()[STR_LOCAL] &&
       Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO])
-    pks["MKN_MOD_REPO"] = Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar();
+    pks["MKN_MOD_REPO"] = kul::Dir(Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar()).real();
   else
     pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 
