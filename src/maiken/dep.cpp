@@ -172,4 +172,3 @@ void maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception) 
         libs.push_back(s);
   }
 }
-

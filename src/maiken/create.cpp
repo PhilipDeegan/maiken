@@ -56,14 +56,14 @@ class CLIHandler : public Constants {
         Arg('w', STR_WITH, ArgType::STRING), Arg('W', STR_WARN, ArgType::MAYBE),
         Arg('x', STR_SETTINGS, ArgType::STRING)
   };
-  std::vector<kul::cli::Cmd> cmdV{Cmd(STR_INIT),    Cmd(STR_INC),  Cmd(STR_SRC),      Cmd(STR_MERGE),
+  std::vector<kul::cli::Cmd> cmdV{
+      Cmd(STR_INIT),  Cmd(STR_INC),      Cmd(STR_SRC),   Cmd(STR_MERGE),
 #ifndef _MKN_DISABLE_MODULES_
-                                  Cmd(STR_MODS),
+      Cmd(STR_MODS),
 #endif  //_MKN_DISABLE_MODULES_
-                                  Cmd(STR_CLEAN),   Cmd(STR_DEPS), Cmd(STR_BUILD),    Cmd(STR_RUN),
-                                  Cmd(STR_COMPILE), Cmd(STR_LINK), Cmd(STR_PROFILES), Cmd(STR_DBG),
-                                  Cmd(STR_PACK),    Cmd(STR_INFO), Cmd(STR_TRIM),     Cmd(STR_TREE),
-                                  Cmd(STR_TEST)};
+      Cmd(STR_CLEAN), Cmd(STR_DEPS),     Cmd(STR_BUILD), Cmd(STR_RUN),   Cmd(STR_COMPILE),
+      Cmd(STR_LINK),  Cmd(STR_PROFILES), Cmd(STR_DBG),   Cmd(STR_PACK),  Cmd(STR_INFO),
+      Cmd(STR_TRIM),  Cmd(STR_TREE),     Cmd(STR_TEST)};
 
  public:
   std::vector<kul::cli::Arg> args() { return argV; }

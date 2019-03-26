@@ -60,11 +60,12 @@ bool maiken::Application::get_binaries() {
 namespace maiken {
 class ObjectMerger {
  public:
-  static void into(const Application & root) {
+  static void into(const Application &root) {
     kul::Dir robj(root.buildDir().join("obj"));
-    for (auto a : root.dependencies()){
+    for (auto a : root.dependencies()) {
       kul::Dir obj(a->buildDir().join("obj"));
-      if(obj) for(auto f : obj.files()) f.cp(robj);
+      if (obj)
+        for (auto f : obj.files()) f.cp(robj);
     }
   }
 };
@@ -118,7 +119,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       if (work)
         for (auto &modLoader : app.mods)
           modLoader->module()->link(app, app.modLink(modLoader->app()));
-      if (cmds.count(STR_MERGE) && app.ro) {
+      if ((cmds.count(STR_MERGE) && app.ro) || !cmds.count(STR_MERGE)) {
         app.findObjects(objects);
         app.link(objects);
       }

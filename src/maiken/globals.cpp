@@ -47,7 +47,8 @@ maiken::AppVars::AppVars() {
     pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
   if (Settings::INSTANCE().root()[STR_LOCAL] &&
       Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO])
-    pks["MKN_MOD_REPO"] = kul::Dir(Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar()).real();
+    pks["MKN_MOD_REPO"] =
+        kul::Dir(Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar()).real();
   else
     pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 
