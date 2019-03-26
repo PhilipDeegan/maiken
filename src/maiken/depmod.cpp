@@ -219,7 +219,6 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
   cyclicCheck(apps);
 
   auto cmds = maiken::AppVars::INSTANCE().commands();
-  KLOG(INF) << cmds.count(STR_MERGE);
   for (auto *ap : vec) {
     auto &app(*ap);
     if (app.buildDir().path().empty()) {

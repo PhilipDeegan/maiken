@@ -62,16 +62,9 @@ class ObjectMerger {
  public:
   static void into(const Application & root) {
     kul::Dir robj(root.buildDir().join("obj"));
-    KLOG(INF) << robj;
     for (auto a : root.dependencies()){
       kul::Dir obj(a->buildDir().join("obj"));
-      KLOG(INF) << obj;
-      KLOG(INF) << obj.is();
-      if(obj)
-        for(auto f : obj.files()) {
-          KLOG(INF) << f;
-          f.cp(robj);
-        }
+      if(obj) for(auto f : obj.files()) f.cp(robj);
     }
   }
 };

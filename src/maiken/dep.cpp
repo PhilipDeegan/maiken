@@ -152,7 +152,6 @@ void maiken::Application::buildDepVecRec(
 
 void maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception) {
   auto cmds = maiken::AppVars::INSTANCE().commands();
-  KLOG(INF) << cmds.count(STR_MERGE);
   for (auto depP = dependencies().rbegin(); depP != dependencies().rend(); ++depP) {
     const auto &dep(**depP);
     if (!dep.sources().empty() && !cmds.count(STR_MERGE)) {
