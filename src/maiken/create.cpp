@@ -56,7 +56,7 @@ class CLIHandler : public Constants {
         Arg('w', STR_WITH, ArgType::STRING), Arg('W', STR_WARN, ArgType::MAYBE),
         Arg('x', STR_SETTINGS, ArgType::STRING)
   };
-  std::vector<kul::cli::Cmd> cmdV{Cmd(STR_INIT),    Cmd(STR_INC),  Cmd(STR_SRC),
+  std::vector<kul::cli::Cmd> cmdV{Cmd(STR_INIT),    Cmd(STR_INC),  Cmd(STR_SRC),      Cmd(STR_MERGE),
 #ifndef _MKN_DISABLE_MODULES_
                                   Cmd(STR_MODS),
 #endif  //_MKN_DISABLE_MODULES_
@@ -246,6 +246,11 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
               std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
   }
 
+  std::vector<std::string> cmds = {{STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK, STR_RUN, STR_TEST,
+                                    STR_DBG, STR_TRIM, STR_PACK, STR_MERGE}};
+  for (const auto &cmd : cmds)
+    if (args.has(cmd)) AppVars::INSTANCE().command(cmd);
+
   if (args.has(STR_WITH)) AppVars::INSTANCE().with(args.get(STR_WITH));
   if (args.has(STR_MOD)) AppVars::INSTANCE().mods(args.get(STR_MOD));
 
@@ -373,11 +378,6 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
     if (args.has(STR_MAIN)) apps[0]->main = args.get(STR_MAIN);
     if (args.has(STR_OUT)) apps[0]->out = args.get(STR_OUT);
   }
-
-  std::vector<std::string> cmds = {{STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK, STR_RUN, STR_TEST,
-                                    STR_DBG, STR_TRIM, STR_PACK}};
-  for (const auto &cmd : cmds)
-    if (args.has(cmd)) AppVars::INSTANCE().command(cmd);
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   if (AppVars::INSTANCE().nodes()) {

@@ -114,6 +114,7 @@ void maiken::Application::showHelp() {
   std::vector<std::string> ss;
   ss.push_back(MKN_DEFS_CMD);
   ss.push_back(MKN_DEFS_BUILD);
+  ss.push_back(MKN_DEFS_MERGE);
   ss.push_back(MKN_DEFS_CLEAN);
   ss.push_back(MKN_DEFS_COMP);
   ss.push_back(MKN_DEFS_DBG);

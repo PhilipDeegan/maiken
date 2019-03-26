@@ -489,6 +489,7 @@ main: cpp.cpp
 
 Available commands
     - build     - Compiles all supported files to the profile binary (./bin/profile) directory, and creates library/executable depending
+    - merge     - Blocks linking of mkn deps, copies dep sources to root project to link everything as if static - excludes non mkn dep libs
     - clean     - deletes all files from the profile directory recursively.
     - compile   - Compiles all supported file to the profile binary directory
     - link      - Creates a library/executable from found compiled files
@@ -578,6 +579,11 @@ Key             MKN_LIB_LINK_LIB
 Type            bool
 Default         false
 Description     Links libraries with dependency libraries (gcc and  derivatives only)
+
+Key             MKN_GCC_PREFERRED
+Type            bool
+Default         false
+Description     When attempting automatic settings.yaml creation, use gcc even if cl/ang are found
 
 Key             MKN_CL_PREFERRED
 Type            bool

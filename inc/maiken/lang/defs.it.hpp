@@ -35,8 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MKN_DEFS_CMD "Comandi :"
 #define MKN_DEFS_BUILD "   build     | Compila e collega (link)"
-#define MKN_DEFS_BUILD_ALL "   build-all | Compile and link all active projects and modules"
-#define MKN_DEFS_BUILD_MOD "   build-mod | Compile and link all active modules"
+#define MKN_DEFS_MERGE "   merge     | Links dep objects into root project - blocks dep linking"
 #define MKN_DEFS_CLEAN "   clean     | Cancella i file da ./bin/$profile"
 #define MKN_DEFS_COMP "   compile   | Compila i sorgenti in ./bin/$profile"
 #define MKN_DEFS_DBG                                                           \

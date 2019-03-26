@@ -31,9 +31,9 @@ script:
   - export KUL_GIT_CO="--depth 3"
   - export MKN_LIB_LINK_LIB=1
   - export KLOG=3
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./mkn build -dtSa "-std=c++14 -fPIC" -l "-pthread -ldl" -WOg 0; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./mkn build -dtKa "-std=c++14 -fPIC" -l "-pthread -ldl" -WOg 0; fi
-  - ./mkn build -dtSa "-std=c++14 -fPIC" -l "-pthread -ldl" -WOg 0 -p lib
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export MKN_GCC_PREFERRED=1; fi
+  - ./mkn build -dta "-std=c++14 -fPIC" -l "-pthread -ldl" -WOg 0 merge
+  - ./mkn build -dta "-std=c++14 -fPIC" -l "-pthread -ldl" -WOg 0 -p lib
 
 deploy:
   - provider: bintray

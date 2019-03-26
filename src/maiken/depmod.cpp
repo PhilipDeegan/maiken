@@ -218,6 +218,8 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
 
   cyclicCheck(apps);
 
+  auto cmds = maiken::AppVars::INSTANCE().commands();
+  KLOG(INF) << cmds.count(STR_MERGE);
   for (auto *ap : vec) {
     auto &app(*ap);
     if (app.buildDir().path().empty()) {
@@ -232,7 +234,7 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
       kul::env::CWD(this->project().dir());
     }
     std::string _path(app.inst ? app.inst.escr() : app.buildDir().escr());
-    if (app.sources().size() &&
+    if (!cmds.count(STR_MERGE) && app.sources().size() &&
         std::find(app.paths.begin(), app.paths.end(), _path) == app.paths.end())
       app.paths.push_back(_path);
   }

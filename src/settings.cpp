@@ -181,6 +181,11 @@ void maiken::Settings::write(const kul::File &file) KTHROW(kul::Exit) {
 
   bool c = kul::env::WHICH("clang") || kul::env::WHICH("clang.exe");
   bool g = kul::env::WHICH("gcc") || kul::env::WHICH("gcc.exe");
+  {
+    auto gcc_pref(kul::env::GET("MKN_GCC_PREFERRED"));
+    bool use_gcc = gcc_pref.empty() ? 0 : kul::String::BOOL(gcc_pref);
+    if (c && g && use_gcc) c = 0;
+  }
 
   w.write("#local:", true);
   w.write("## Optionnaly override local repository directory", true);

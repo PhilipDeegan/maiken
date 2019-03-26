@@ -151,9 +151,11 @@ void maiken::Application::buildDepVecRec(
 }
 
 void maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception) {
+  auto cmds = maiken::AppVars::INSTANCE().commands();
+  KLOG(INF) << cmds.count(STR_MERGE);
   for (auto depP = dependencies().rbegin(); depP != dependencies().rend(); ++depP) {
     const auto &dep(**depP);
-    if (!dep.sources().empty()) {
+    if (!dep.sources().empty() && !cmds.count(STR_MERGE)) {
       const std::string lib(dep.baseLibFilename());
       const auto &it(std::find(libraries().begin(), libraries().end(), lib));
       if (it != libraries().end()) libs.erase(it);
@@ -171,3 +173,4 @@ void maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception) 
         libs.push_back(s);
   }
 }
+

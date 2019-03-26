@@ -57,6 +57,26 @@ bool maiken::Application::get_binaries() {
 }
 #endif
 
+namespace maiken {
+class ObjectMerger {
+ public:
+  static void into(const Application & root) {
+    kul::Dir robj(root.buildDir().join("obj"));
+    KLOG(INF) << robj;
+    for (auto a : root.dependencies()){
+      kul::Dir obj(a->buildDir().join("obj"));
+      KLOG(INF) << obj;
+      KLOG(INF) << obj.is();
+      if(obj)
+        for(auto f : obj.files()) {
+          KLOG(INF) << f;
+          f.cp(robj);
+        }
+    }
+  }
+};
+}
+
 void maiken::Application::process() KTHROW(kul::Exception) {
   const kul::hash::set::String &cmds(CommandStateMachine::INSTANCE().commands());
   const auto gEnvVars = maiken::AppVars::INSTANCE().envVars();
@@ -89,6 +109,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       app.buildDir().rm();
       mkn.rm();
     }
+    if (cmds.count(STR_MERGE) && app.ro) ObjectMerger::into(app);
 #ifdef _MKN_WITH_MKN_RAM_
     if (work && !app.bin.empty() && app.get_binaries()) work = false;  // doesn't work yet
 #endif
@@ -104,8 +125,10 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       if (work)
         for (auto &modLoader : app.mods)
           modLoader->module()->link(app, app.modLink(modLoader->app()));
-      app.findObjects(objects);
-      app.link(objects);
+      if (cmds.count(STR_MERGE) && app.ro) {
+        app.findObjects(objects);
+        app.link(objects);
+      }
     }
     for (const auto &oldEv : oldEvs) kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
     for (const auto e : gEnvVars) maiken::AppVars::INSTANCE().envVar(e.first, e.second);
@@ -129,10 +152,8 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       CommandStateMachine::INSTANCE().main(1);
     }
   }
-
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) loadModules(**app);
   loadModules(*this);
-
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) {
     if ((*app)->ig) continue;
     if ((*app)->lang.empty()) (*app)->resolveLang();
@@ -140,14 +161,11 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     proc(**app, !(*app)->srcs.empty());
   }
   if (!this->ig) proc(*this, (!this->srcs.empty() || !this->main.empty()));
-
   if (cmds.count(STR_TEST)) test();
-
   if (cmds.count(STR_PACK)) {
     pack();
     for (auto &modLoader : mods) modLoader->module()->pack(*this, this->modPack(modLoader->app()));
   }
-
   if (CommandStateMachine::INSTANCE().main() && (cmds.count(STR_RUN) || cmds.count(STR_DBG)))
     run(cmds.count(STR_DBG));
   CommandStateMachine::INSTANCE().reset();
