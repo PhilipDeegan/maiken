@@ -33,7 +33,7 @@ build_script:
   - C:\Python36-x64\python.exe -m pip install pip --upgrade
   - C:\Python36-x64\python.exe -m pip install conan flawfinder
   - SET PYTHON=C:\Python36-x64\python.exe
-  - bash -c "PATH=\"$PWD:/c/Python36-x64/:/c/Program Files/Git/usr/bin:$PATH\"; res/appveyor/run.sh"
+  - bash -c "PATH=\"$PWD:/c/Python36-x64/:/c/Program Files/Git/usr/bin:$PATH\"; res/ci/win_appveyor.sh"
 
 artifacts:
   - path: '*.tar'
