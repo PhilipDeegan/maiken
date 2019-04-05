@@ -83,7 +83,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     c = 0;
     for (const auto &n : nodes) {
       if (n[STR_NAME].Scalar() != profile) continue;
-      if (n[STR_MOD])
+      if (n[STR_MOD]) {
         if (n[STR_MOD].IsScalar()) {
           for (const auto &mod_str : kul::String::LINES(n[STR_MOD].Scalar()))
             modArgs(mod_str, mod_nodes, getIfMissing);
@@ -105,6 +105,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
         } else {
           KEXIT(1, "NO");
         }
+      }
       if (n[STR_IF_MOD] && n[STR_IF_MOD][KTOSTRING(__KUL_OS__)]) {
         for (const auto &mod : n[STR_IF_MOD][KTOSTRING(__KUL_OS__)]) getIfMissing(mod, 1);
         popDepOrMod(n[STR_IF_MOD], modDeps, KTOSTRING(__KUL_OS__), 1);

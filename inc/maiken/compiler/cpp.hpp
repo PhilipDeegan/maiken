@@ -51,10 +51,10 @@ class CCompiler : public Compiler {
 
  public:
   virtual ~CCompiler() {}
-  virtual const std::string cc() const = 0;
-  virtual const std::string cxx() const = 0;
-  virtual const std::string sharedLib(const std::string &lib) const = 0;
-  virtual const std::string staticLib(const std::string &lib) const = 0;
+  virtual std::string cc() const = 0;
+  virtual std::string cxx() const = 0;
+  virtual std::string sharedLib(const std::string &lib) const = 0;
+  virtual std::string staticLib(const std::string &lib) const = 0;
   bool sourceIsBin() const override { return false; }
 
   const std::string oType(const std::vector<std::string> &objs) const {
@@ -83,11 +83,11 @@ class GccCompiler : public CCompiler {
  public:
   GccCompiler(const int &v = 0);
 
-  const std::string sharedLib(const std::string &lib) const override;
-  const std::string staticLib(const std::string &lib) const override { return "lib" + lib + ".a"; }
+  std::string sharedLib(const std::string &lib) const override;
+  std::string staticLib(const std::string &lib) const override { return "lib" + lib + ".a"; }
 
-  virtual const std::string cc() const { return "gcc"; }
-  virtual const std::string cxx() const { return "g++"; }
+  std::string cc() const override { return "gcc"; }
+  std::string cxx() const override { return "g++"; }
 
   CompilerProcessCapture buildExecutable(const std::string &linker, const std::string &linkerEnd,
                                          const std::vector<std::string> &objects,
@@ -120,24 +120,24 @@ class GccCompiler : public CCompiler {
 class ClangCompiler : public GccCompiler {
  public:
   ClangCompiler(const int &v = 0);
-  virtual const std::string cc() const override { return "clang"; }
-  virtual const std::string cxx() const override { return "clang++"; }
+  virtual std::string cc() const override { return "clang"; }
+  virtual std::string cxx() const override { return "clang++"; }
   CCompiler_Type type() const override { return CCompiler_Type::CLANG; }
 };
 
 class HccCompiler : public GccCompiler {
  public:
   HccCompiler(const int &v = 0) : GccCompiler(v) {}
-  virtual const std::string cc() const override { return "hcc"; }
-  virtual const std::string cxx() const override { return "h++"; }
+  std::string cc() const override { return "hcc"; }
+  std::string cxx() const override { return "h++"; }
   CCompiler_Type type() const override { return CCompiler_Type::HCC; }
 };
 
 class IntelCompiler : public GccCompiler {
  public:
   IntelCompiler(const int &v = 0);
-  virtual const std::string cc() const override { return "icc"; }
-  virtual const std::string cxx() const override { return "icpc"; }
+  std::string cc() const override { return "icc"; }
+  std::string cxx() const override { return "icpc"; }
   CCompiler_Type type() const override { return CCompiler_Type::ICC; }
 };
 
@@ -145,10 +145,10 @@ class WINCompiler : public CCompiler {
  protected:
  public:
   WINCompiler(const int &v = 0);
-  virtual const std::string cc() const override { return "cl"; }
-  virtual const std::string cxx() const override { return "cl"; }
-  const std::string sharedLib(const std::string &lib) const override;
-  const std::string staticLib(const std::string &lib) const override { return lib + ".lib"; }
+  std::string cc() const override { return "cl"; }
+  std::string cxx() const override { return "cl"; }
+  std::string sharedLib(const std::string &lib) const override;
+  std::string staticLib(const std::string &lib) const override { return lib + ".lib"; }
 
   CompilerProcessCapture buildExecutable(const std::string &linker, const std::string &linkerEnd,
                                          const std::vector<std::string> &objects,
