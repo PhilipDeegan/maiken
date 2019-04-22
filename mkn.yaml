@@ -12,7 +12,7 @@ mode: none
 profile:
   - name: base
     inc: ./inc
-    dep: mkn.kul#${version} parse.yaml
+    dep: mkn.kul parse.yaml
     src: ./src
     test: test/cpp.cpp test/py.py
     arg: -D_MKN_VERSION_=${version}_${DATE}
