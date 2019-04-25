@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_DEFS_HPP_
 #define _MAIKEN_DEFS_HPP_
 
-#include "kul/def.hpp"
+#include "kul/defs.hpp"
 
 #ifndef MKN_LANG
 #include "maiken/lang/defs.en.hpp"
