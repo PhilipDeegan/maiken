@@ -155,10 +155,8 @@ class GlobalModules {
 
   ~GlobalModules() { libs.clear(); }
   void load(Application &ap) KTHROW(kul::sys::Exception) {
-    if (!libs.count(ap.buildDir().real())) {
-      libs.insert(std::make_pair(
-          ap.buildDir().real(), std::make_shared<kul::sys::SharedLibrary>(ModuleLoader::FIND(ap))));
-    }
+    auto lib = std::make_shared<kul::sys::SharedLibrary>(ModuleLoader::FIND(ap));
+    libs.insert(std::make_pair(lib->file().dir().real(), lib));
   }
 #else
   void load(Application &ap) {}

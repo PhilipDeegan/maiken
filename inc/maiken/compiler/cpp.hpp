@@ -36,6 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/compiler.hpp"
 
 namespace maiken {
+
 namespace cpp {
 
 class Exception : public kul::Exception {
@@ -103,7 +104,8 @@ class GccCompiler : public CCompiler {
                                       const kul::File &out, const compiler::Mode &mode,
                                       bool dryRun = false) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture compileSource(const std::string &compiler,
+  CompilerProcessCapture compileSource(const maiken::Application &app,
+                                       const std::string &compiler,
                                        const std::vector<std::string> &args,
                                        const std::vector<std::string> &incs, const std::string &in,
                                        const std::string &out, const compiler::Mode &mode,
@@ -164,7 +166,8 @@ class WINCompiler : public CCompiler {
                                       const kul::File &out, const compiler::Mode &mode,
                                       bool dryRun = false) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture compileSource(const std::string &compiler,
+  CompilerProcessCapture compileSource(const maiken::Application &app,
+                                       const std::string &compiler,
                                        const std::vector<std::string> &args,
                                        const std::vector<std::string> &incs, const std::string &in,
                                        const std::string &out, const compiler::Mode &mode,

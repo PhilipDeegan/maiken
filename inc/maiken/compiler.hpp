@@ -39,6 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/string.hpp"
 
 namespace maiken {
+class KUL_PUBLISH Application;
+
 namespace compiler {
 enum Mode { NONE = 0, STAT, SHAR };
 }
@@ -88,6 +90,7 @@ class Compiler {
                                               const kul::File &out, const compiler::Mode &mode,
                                               bool dryRun = false) const KTHROW(kul::Exception) = 0;
   virtual CompilerProcessCapture compileSource(
+    const maiken::Application &app,
       const std::string &compiler, const std::vector<std::string> &args,
       const std::vector<std::string> &incs, const std::string &in, const std::string &out,
       const compiler::Mode &mode, bool dryRun = false) const KTHROW(kul::Exception) = 0;
@@ -130,6 +133,7 @@ class Compiler {
 // stuff
 class CompilationUnit {
  private:
+  const maiken::Application &app;
   const Compiler *comp;
   const std::string compiler;
   const std::vector<std::string> args;
@@ -140,11 +144,12 @@ class CompilationUnit {
   const bool dryRun;
 
  public:
-  CompilationUnit(const Compiler *comp, const std::string &compiler,
+  CompilationUnit(const maiken::Application &app,
+                  const Compiler *comp, const std::string &compiler,
                   const std::vector<std::string> &args, const std::vector<std::string> &incs,
                   const std::string &in, const std::string &out, const compiler::Mode &mode,
                   bool dryRun)
-      : comp(comp),
+      : app(app), comp(comp),
         compiler(compiler),
         args(args),
         incs(incs),

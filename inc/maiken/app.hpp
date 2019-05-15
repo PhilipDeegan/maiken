@@ -90,7 +90,7 @@ class KUL_PUBLISH Application : public Constants {
   std::vector<Application *> deps, modDeps, rdeps;
   std::vector<std::shared_ptr<ModuleLoader>> mods;
   std::vector<kul::cli::EnvVar> evs;
-  std::vector<std::string> libs, paths;
+  std::vector<std::string> defs, libs, paths;
   std::vector<std::pair<std::string, bool>> incs, srcs;
   const kul::SCM *scm = 0;
 
@@ -236,6 +236,10 @@ class KUL_PUBLISH Application : public Constants {
   const kul::hash::map::S2T<kul::hash::set::String> &arguments() const { return args; }
 
   std::vector<kul::cli::EnvVar> &envVars() { return evs; }
+
+  void add_def(const std::string &def) { defs.emplace_back(def); }
+  const std::vector<std::string> &defines() const { return defs; }
+
 
 #ifdef _MKN_WITH_MKN_RAM_
   bool get_binaries();

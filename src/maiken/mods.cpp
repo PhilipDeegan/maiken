@@ -49,13 +49,6 @@ void maiken::Application::mod(
     kul::String::REPLACE_ALL(mod, kul::os::EOL(), "");
     kul::String::TRIM(mod);
     if (mod.empty()) continue;
-    // auto eol = kul::os::EOL();
-    // auto loe =std::string(eol.rbegin(), eol.rend());
-
-    // if(mod.rfind(kul::os::EOL()) == mod.size() - eol.size())
-
-    // for(const auto e : loe) if(mod.back() == e) mod.pop_back();
-    KLOG(INF) << mod;
 
     mod_nodes.emplace_back();
     auto &node = mod_nodes.back();
@@ -121,18 +114,12 @@ void maiken::Application::mod(
     }
     if (!proj.empty()) node[STR_NAME] = proj;
     if (lbrak != std::string::npos) {
-      KLOG(INF);
       for (const auto n : kul::bon::from(objs)) {
-        KLOG(INF);
-        for (const auto p : n) {
-          KLOG(INF);
-          node[p.first] = p.second;
-        }
+        for (const auto p : n) node[p.first] = p.second;
       }
     }
     YAML::Emitter out;
     out << node;
-    KLOG(INF) << kul::os::EOL() << out.c_str();
     getIfMissing(node, 1);
   }
 }

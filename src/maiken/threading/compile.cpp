@@ -56,12 +56,12 @@ maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
   compilerFlags(comp->compilerDebug(AppVars::INSTANCE().debug()));
   compilerFlags(comp->compilerOptimization(AppVars::INSTANCE().optimise()));
   compilerFlags(comp->compilerWarning(AppVars::INSTANCE().warn()));
-  return CompilationUnit(comp, cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
+  return CompilationUnit(app, comp, cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
 }
 
 maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const KTHROW(kul::Exception) {
   try {
-    return comp->compileSource(compiler, args, incs, in, out, mode, dryRun);
+    return comp->compileSource(app, compiler, args, incs, in, out, mode, dryRun);
   } catch (const kul::Exception &e) {
     std::rethrow_exception(std::current_exception());
   } catch (const std::exception &e) {

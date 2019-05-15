@@ -215,6 +215,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(
 }
 
 maiken::CompilerProcessCapture maiken::cpp::GccCompiler::compileSource(
+    const maiken::Application &app,
     const std::string &compiler, const std::vector<std::string> &args,
     const std::vector<std::string> &incs, const std::string &in, const std::string &out,
     const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
@@ -227,6 +228,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::compileSource(
   }
   kul::Process p(cmd);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
+  for (const auto &def : app.defines()) p << std::string("-D" + def);
   for (const std::string &s : incs) {
     kul::Dir d(s);
     if (d)

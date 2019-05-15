@@ -58,7 +58,6 @@ int main(int argc, char *argv[]) {
       exit(2);
     });
     thread.join();
-    KLOG(INF);
   } catch (const kul::Exit &e) {
     if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e;
     exit_code = e.code();
