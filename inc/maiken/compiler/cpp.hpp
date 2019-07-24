@@ -54,7 +54,8 @@ class CCompiler : public Compiler {
   virtual ~CCompiler() {}
   virtual std::string cc() const = 0;
   virtual std::string cxx() const = 0;
-  virtual std::string sharedLib(const std::string &lib) const = 0;
+  virtual std::string defaultSharedLib(const std::string &lib) const;
+  virtual std::string sharedLib(const std::string &lib) const;
   virtual std::string staticLib(const std::string &lib) const = 0;
   bool sourceIsBin() const override { return false; }
 
@@ -84,7 +85,6 @@ class GccCompiler : public CCompiler {
  public:
   GccCompiler(const int &v = 0);
 
-  std::string sharedLib(const std::string &lib) const override;
   std::string staticLib(const std::string &lib) const override { return "lib" + lib + ".a"; }
 
   std::string cc() const override { return "gcc"; }
@@ -117,6 +117,9 @@ class GccCompiler : public CCompiler {
       KTHROW(kul::Exception) override;
 
   CCompiler_Type type() const override { return CCompiler_Type::GCC; }
+
+  void rpathing(kul::Process &p, const std::vector<std::string> &libs,
+                const std::vector<std::string> &libPaths) const;
 };
 
 class ClangCompiler : public GccCompiler {
@@ -149,7 +152,7 @@ class WINCompiler : public CCompiler {
   WINCompiler(const int &v = 0);
   std::string cc() const override { return "cl"; }
   std::string cxx() const override { return "cl"; }
-  std::string sharedLib(const std::string &lib) const override;
+
   std::string staticLib(const std::string &lib) const override { return lib + ".lib"; }
 
   CompilerProcessCapture buildExecutable(const std::string &linker, const std::string &linkerEnd,

@@ -30,11 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-std::string maiken::cpp::WINCompiler::sharedLib(const std::string &lib) const {
-  return AppVars::INSTANCE().envVar("MKN_LIB_PRE") + lib +
-         AppVars::INSTANCE().envVar("MKN_LIB_EXT");
-}
-
 maiken::cpp::WINCompiler::WINCompiler(const int &v) : CCompiler(v) {
   m_optimise_c.insert({{0, "-Od"},
                        {1, "-O1"},

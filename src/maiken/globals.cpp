@@ -57,16 +57,24 @@ maiken::AppVars::AppVars() {
   if (Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_LIB])
     pks["MKN_LIB"] = Settings::INSTANCE().root()[STR_LOCAL][STR_LIB].Scalar();
 
-  evs["MKN_OBJ"] = "o";
-  if (kul::env::EXISTS("MKN_OBJ")) evs["MKN_OBJ"] = kul::env::GET("MKN_OBJ");
-
 #ifdef _WIN32
+  evs["MKN_OBJ"] = "obj";
   evs["MKN_LIB_EXT"] = ".dll";
   evs["MKN_LIB_PRE"] = "";
 #else
+  evs["MKN_OBJ"] = "o";
   evs["MKN_LIB_EXT"] = ".so";
   evs["MKN_LIB_PRE"] = "lib";
 #endif
-  if (kul::env::EXISTS("MKN_LIB_EXT")) evs["MKN_LIB_EXT"] = kul::env::GET("MKN_LIB_EXT");
-  if (kul::env::EXISTS("MKN_LIB_PRE")) evs["MKN_LIB_PRE"] = kul::env::GET("MKN_LIB_PRE");
+  evs["MKN_OBJ_DEF"] = evs["MKN_OBJ"];
+  evs["MKN_LIB_EXT_DEF"] = evs["MKN_LIB_EXT"];
+  evs["MKN_LIB_PRE_DEF"] = evs["MKN_LIB_PRE"];
+
+  auto check_set = [&](const std::string key){
+    auto cstr = key.c_str();
+    if (kul::env::EXISTS(cstr)) evs[key] = kul::env::GET(cstr);
+  };
+  check_set("MKN_LIB_EXT");
+  check_set("MKN_LIB_PRE");
+  check_set("MKN_OBJ");
 }

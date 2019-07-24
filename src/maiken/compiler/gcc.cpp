@@ -30,11 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-std::string maiken::cpp::GccCompiler::sharedLib(const std::string &lib) const {
-  return AppVars::INSTANCE().envVar("MKN_LIB_PRE") + lib +
-         AppVars::INSTANCE().envVar("MKN_LIB_EXT");
-}
-
 maiken::cpp::GccCompiler::GccCompiler(const int &v) : CCompiler(v) {
   m_optimise_c.insert({{0, ""},
                        {1, "-O1"},
@@ -58,7 +53,7 @@ maiken::cpp::GccCompiler::GccCompiler(const int &v) : CCompiler(v) {
                     {9, "-g3 -pg"}});
   m_optimise_l_bin.insert(
       {{0, ""}, {1, ""}, {2, ""}, {3, ""}, {4, ""}, {5, ""}, {6, ""}, {7, ""}, {8, ""}, {9, ""}});
-  m_optimise_l_bin.insert(
+  m_optimise_l_lib.insert(
       {{0, ""}, {1, ""}, {2, ""}, {3, ""}, {4, ""}, {5, ""}, {6, ""}, {7, ""}, {8, ""}, {9, ""}});
   m_debug_l_bin.insert(
       {{0, ""}, {1, ""}, {2, ""}, {3, ""}, {4, ""}, {5, ""}, {6, ""}, {7, ""}, {8, ""}, {9, ""}});
@@ -74,6 +69,35 @@ maiken::cpp::GccCompiler::GccCompiler(const int &v) : CCompiler(v) {
                    {7, "-Wall"},
                    {8, "-Wall -Wextra"},
                    {9, "-Wall -Wextra -Werror"}});
+}
+
+void maiken::cpp::GccCompiler::rpathing(
+    kul::Process &p,
+    const std::vector<std::string> &libs,
+    const std::vector<std::string> &libPaths) const {
+
+  std::unordered_set<std::string> rpaths;
+  for (const std::string &path : libPaths) {
+    for (const std::string &lib : libs) {
+      kul::File lib_file(sharedLib(lib), path), def(defaultSharedLib(lib), path);
+      if(!lib_file && def) lib_file = def;
+      if (lib_file)  rpaths.emplace(lib_file.dir().real());
+    }
+  }
+  for ( const auto & rpath: rpaths) {
+    kul::Dir path(rpath);
+    std::stringstream loader;
+#if defined(__APPLE__)
+    loader << "-Wl,-rpath," << path.esc();
+    kul::File tmp_out(out);
+    tmp_out.mk();
+    loader << " -Wl,-rpath,@loader_path/" << tmp_out.relative(path);
+    tmp_out.rm();
+#else
+    loader << "-Wl,-rpath=" << path.esc();
+#endif
+    p << loader.str();
+  }
 }
 
 maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(
@@ -94,28 +118,10 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   for (const std::string &path : libPaths) p.arg("-L" + path);
   if (mode == compiler::Mode::STAT) p.arg("-static");
-  {
-    auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
+  { auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
     if ((ll.size())) {
       if (mode == compiler::Mode::SHAR || mode == compiler::Mode::NONE) {
-        for (const std::string &path : libPaths) {
-          for (const std::string &lib : libs) {
-            kul::File lib_file(sharedLib(lib), path);
-            if (lib_file) {
-              std::stringstream loader;
-#if defined(__APPLE__)
-              loader << "-Wl,-rpath," << kul::Dir(lib_file.dir().real()).esc();
-              kul::File tmp_out(out);
-              tmp_out.mk();
-              loader << " -Wl,-rpath,@loader_path/" << tmp_out.relative(lib_file.dir());
-              tmp_out.rm();
-#else
-              loader << "-Wl,-rpath=" << kul::Dir(lib_file.dir().real()).esc();
-#endif
-              p << loader.str();
-            }
-          }
-        }
+        rpathing(p, libs, libPaths);
       }
     }
   }
@@ -160,33 +166,14 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(
   if (mode == compiler::Mode::SHAR) p.arg("-shared").arg("-o");
   p.arg(lib);
   for (const std::string &d : dirs) p.arg(kul::File(oStar(objects), d).escm());
+
   {
     auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
     if ((ll.size())) {
       uint16_t llv = kul::String::UINT16(ll);
       for (const std::string &path : libPaths) p.arg("-L" + path);
       if (llv == 1) {
-        for (const std::string &lib : libs) p.arg("-l" + lib);
-        if (mode == compiler::Mode::SHAR || mode == compiler::Mode::NONE) {
-          for (const std::string &path : libPaths) {
-            for (const std::string &lib : libs) {
-              kul::File lib_file(sharedLib(lib), path);
-              if (lib_file) {
-                std::stringstream loader;
-#if defined(__APPLE__)
-                loader << "-Wl,-rpath," << kul::Dir(lib_file.dir().real()).esc();
-                kul::File tmp_out(out);
-                tmp_out.mk();
-                loader << " -Wl,-rpath,@loader_path/" << tmp_out.relative(lib_file.dir());
-                tmp_out.rm();
-#else
-                loader << "-Wl,-rpath=" << kul::Dir(lib_file.dir().real()).esc();
-#endif
-                p << loader.str();
-              }
-            }
-          }
-        }
+        rpathing(p, libs, libPaths);
       } else {
         for (const std::string &path : libPaths) {
           for (const std::string &lib : libs) {
