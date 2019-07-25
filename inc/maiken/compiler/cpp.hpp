@@ -118,7 +118,8 @@ class GccCompiler : public CCompiler {
 
   CCompiler_Type type() const override { return CCompiler_Type::GCC; }
 
-  void rpathing(kul::Process &p, const std::vector<std::string> &libs,
+  void rpathing(kul::Process &p, const kul::File &out,
+                const std::vector<std::string> &libs,
                 const std::vector<std::string> &libPaths) const;
 };
 

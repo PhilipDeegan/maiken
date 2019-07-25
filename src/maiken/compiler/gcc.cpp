@@ -72,10 +72,10 @@ maiken::cpp::GccCompiler::GccCompiler(const int &v) : CCompiler(v) {
 }
 
 void maiken::cpp::GccCompiler::rpathing(
-    kul::Process &p,
+    kul::Process &p, const kul::File &out,
     const std::vector<std::string> &libs,
     const std::vector<std::string> &libPaths) const {
-
+  (void) out; // possibly unused
   std::unordered_set<std::string> rpaths;
   for (const std::string &path : libPaths) {
     for (const std::string &lib : libs) {
@@ -121,7 +121,8 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(
   { auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
     if ((ll.size())) {
       if (mode == compiler::Mode::SHAR || mode == compiler::Mode::NONE) {
-        rpathing(p, libs, libPaths);
+        kul::File file(out);
+        rpathing(p, file, libs, libPaths);
       }
     }
   }
@@ -173,7 +174,8 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(
       uint16_t llv = kul::String::UINT16(ll);
       for (const std::string &path : libPaths) p.arg("-L" + path);
       if (llv == 1) {
-        rpathing(p, libs, libPaths);
+        for (const std::string &lib : libs) p.arg("-l" + lib);
+        rpathing(p, out, libs, libPaths);
       } else {
         for (const std::string &path : libPaths) {
           for (const std::string &lib : libs) {

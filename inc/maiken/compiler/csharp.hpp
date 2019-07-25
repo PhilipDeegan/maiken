@@ -66,6 +66,7 @@ class WINCompiler : public Compiler {
                                        const std::vector<std::string> &incs, const std::string &in,
                                        const std::string &out, const compiler::Mode &mode,
                                        bool dryRun = false) const KTHROW(kul::Exception) override {
+    (void)app;
     (void)compiler;
     (void)args;
     (void)incs;
