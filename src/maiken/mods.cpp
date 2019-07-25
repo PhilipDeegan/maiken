@@ -36,14 +36,28 @@ void maiken::Application::modArgs(
     std::function<void(const YAML::Node &, const bool)> getIfMissing) {
   if (mod_str.size()) {
     kul::hash::set::String mods;
-    mods.insert(mod_str);
+    std::stringstream ss;
+    size_t lb = 0, rb = 0;
+    for (auto & c : mod_str) {
+      rb = c == '}' ? rb + 1 : rb;
+      lb = c == '{' ? lb + 1 : lb;
+      if ((c == ',' || c == ' ') && rb == lb) {
+        mods.insert(ss.str());
+        ss.str(std::string());
+        lb = rb = 0;
+        continue;
+      }
+      ss << c;
+    }
+    if(rb != lb)  KEXIT(1, "Invalid -m - inconsistent {} brackets");
+    if ( ss.str().size() ) mods.insert(ss.str());
     mod(mods, mod_nodes, getIfMissing);
   }
 }
 
 void maiken::Application::mod(
     kul::hash::set::String &mods, std::vector<YAML::Node> &mod_nodes,
-    std::function<void(const YAML::Node &n, const bool mod)> getIfMissing) {
+    std::function<void(const YAML::Node &, const bool)> getIfMissing) {
   for (auto &mod1 : mods) {
     auto mod(mod1);
     kul::String::REPLACE_ALL(mod, kul::os::EOL(), "");

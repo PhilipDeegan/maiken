@@ -48,9 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   "automatically"
 #define MKN_DEFS_INC "   inc       | Print include directories to std out"
 #define MKN_DEFS_SRC "   src       | Print found source files to std out [allows -d]."
-#define MKN_DEFS_TRIM                                                    \
-  "   trim      | Removes trailing whitespace from inc/src files under " \
-  "project directory"
+
 #define MKN_DEFS_TREE "   tree      | Display dependency tree"
 
 #define MKN_DEFS_ARG "Arguments:"
@@ -91,8 +89,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   "   -L/--all-linker $t     | Adds $t to linking of all projects with link " \
   "operations"
 #define MKN_DEFS_MOD                                                        \
-  "   -m/--mod [$csv]        | Activate modules with phase found in $csv, " \
-  "$csv missing, all phases activated"
+  "   -m/--mod [$csv]        | Activate modules for selected phase (init/compile/link/pack) "
 #define MKN_DEFS_MAIN                                                          \
   "   -M/--main $m           | Sets main linker file to $m, supercedes /main " \
   "tag"

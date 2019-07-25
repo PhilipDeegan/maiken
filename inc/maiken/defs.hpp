@@ -97,7 +97,6 @@ class Constants {
   static constexpr const char *STR_PACK = "pack";
   static constexpr const char *STR_RUN = "run";
   static constexpr const char *STR_THREADS = "threads";
-  static constexpr const char *STR_TRIM = "trim";
   static constexpr const char *STR_TREE = "tree";
 
   static constexpr const char *STR_SCM_COMMIT = "scm-commit";

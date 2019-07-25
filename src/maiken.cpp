@@ -90,42 +90,6 @@ kul::hash::set::String maiken::Application::inactiveMains() const {
   return iMs;
 }
 
-void maiken::Application::trim() {
-  for (const auto &s : includes()) {
-    kul::Dir d(s.first);
-    if (d.real().find(project().dir().real()) != std::string::npos)
-      for (const kul::File &f : d.files()) trim(f);
-  }
-  for (const auto &p1 : sourceMap())
-    for (const auto &p2 : p1.second)
-      for (const auto &p3 : p2.second) {
-        const kul::File &f(p3);
-        if (f.dir().real().find(project().dir().real()) != std::string::npos) trim(f);
-      }
-}
-
-void maiken::Application::trim(const kul::File &f) {
-  kul::File tmp(f.real() + ".tmp");
-  {
-    kul::io::Writer w(tmp);
-    kul::io::Reader r(f);
-    const char *l = r.readLine();
-    if (l) {
-      std::string s(l);
-      while (s.size() && (s[s.size() - 1] == ' ' || s[s.size() - 1] == '\t')) s.pop_back();
-      w << s.c_str();
-      while ((l = r.readLine())) {
-        w << kul::os::EOL();
-        s = l;
-        while (s.size() && (s[s.size() - 1] == ' ' || s[s.size() - 1] == '\t')) s.pop_back();
-        w << s.c_str();
-      }
-    }
-  }
-  f.rm();
-  tmp.mv(f);
-}
-
 void maiken::Application::populateMaps(const YAML::Node &n)
     KTHROW(kul::Exception) {  // IS EITHER ROOT OR PROFILE NODE!
 

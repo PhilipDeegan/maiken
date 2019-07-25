@@ -120,8 +120,6 @@ class KUL_PUBLISH Application : public Constants {
   void link(const kul::hash::set::String &objects) KTHROW(kul::Exception);
   void run(bool dbg);
   void test();
-  void trim();
-  void trim(const kul::File &f);
 
   void scmStatus(const bool &deps = false) KTHROW(kul::scm::Exception);
   void scmUpdate(const bool &f) KTHROW(kul::scm::Exception);

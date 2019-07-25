@@ -111,65 +111,34 @@ void maiken::Application::showConfig(bool force) {
 }
 
 void maiken::Application::showHelp() {
-  std::vector<std::string> ss;
-  ss.push_back(MKN_DEFS_CMD);
-  ss.push_back(MKN_DEFS_BUILD);
-  ss.push_back(MKN_DEFS_MERGE);
-  ss.push_back(MKN_DEFS_CLEAN);
-  ss.push_back(MKN_DEFS_COMP);
-  ss.push_back(MKN_DEFS_DBG);
-  ss.push_back(MKN_DEFS_INIT);
-  ss.push_back(MKN_DEFS_LINK);
-  ss.push_back(MKN_DEFS_PACK);
-  ss.push_back(MKN_DEFS_PROFS);
-  ss.push_back(MKN_DEFS_RUN);
-  ss.push_back(MKN_DEFS_INC);
-  ss.push_back(MKN_DEFS_SRC);
-  ss.push_back(MKN_DEFS_TRIM);
-  ss.push_back(MKN_DEFS_TREE);
-  ss.push_back("");
-  ss.push_back(MKN_DEFS_ARG);
-  ss.push_back(MKN_DEFS_ARGS);
-  ss.push_back(MKN_DEFS_ADD);
-  ss.push_back(MKN_DEFS_BINC);
-  ss.push_back(MKN_DEFS_BPATH);
-  ss.push_back(MKN_DEFS_DIRC);
-  ss.push_back(MKN_DEFS_DEPS);
-  ss.push_back(MKN_DEFS_DRYR);
-  ss.push_back(MKN_DEFS_DEBUG);
-  ss.push_back(MKN_DEFS_GET);
-  ss.push_back(MKN_DEFS_EVSA);
-  ss.push_back(MKN_DEFS_FINC);
-  ss.push_back(MKN_DEFS_FPATH);
-  ss.push_back(MKN_DEFS_HELP);
-  ss.push_back(MKN_DEFS_JARG);
-  ss.push_back(MKN_DEFS_STATIC);
-  ss.push_back(MKN_DEFS_MOD);
-  ss.push_back(MKN_DEFS_MAIN);
-  ss.push_back(MKN_DEFS_LINKER);
-  ss.push_back(MKN_DEFS_ALINKR);
-  ss.push_back(MKN_DEFS_OUT);
-  ss.push_back(MKN_DEFS_OPTIM);
-  ss.push_back(MKN_DEFS_PROF);
-  ss.push_back(MKN_DEFS_PROP);
-  ss.push_back(MKN_DEFS_RUN_ARGS);
-  ss.push_back(MKN_DEFS_STAT);
-  ss.push_back(MKN_DEFS_SHARED);
-  ss.push_back(MKN_DEFS_THREDS);
-  ss.push_back(MKN_DEFS_WITHOUT);
-  ss.push_back(MKN_DEFS_UPDATE);
-  ss.push_back(MKN_DEFS_FUPDATE);
-  ss.push_back(MKN_DEFS_VERSON);
-  ss.push_back(MKN_DEFS_WITH);
-  ss.push_back(MKN_DEFS_WARN);
-  ss.push_back(MKN_DEFS_SETTNGS);
-  ss.push_back("");
-  ss.push_back(MKN_DEFS_EXMPL);
-  ss.push_back(MKN_DEFS_EXMPL1);
-  ss.push_back(MKN_DEFS_EXMPL2);
-  ss.push_back(MKN_DEFS_EXMPL3);
-  ss.push_back(MKN_DEFS_EXMPL4);
-  ss.push_back("");
+  std::vector<std::string> ss = {
+    MKN_DEFS_CMD,   MKN_DEFS_BUILD, MKN_DEFS_MERGE,
+    MKN_DEFS_CLEAN, MKN_DEFS_COMP,  MKN_DEFS_DBG,
+    MKN_DEFS_INIT,  MKN_DEFS_LINK,  MKN_DEFS_PACK,
+    MKN_DEFS_PROFS, MKN_DEFS_RUN,   MKN_DEFS_INC,
+    MKN_DEFS_SRC,                   MKN_DEFS_TREE,
+    "",
+    MKN_DEFS_ARG,   MKN_DEFS_ARGS,  MKN_DEFS_ADD,
+    MKN_DEFS_BINC,  MKN_DEFS_BPATH, MKN_DEFS_DIRC,
+    MKN_DEFS_DEPS,  MKN_DEFS_DRYR,  MKN_DEFS_DEBUG,
+    MKN_DEFS_GET,   MKN_DEFS_EVSA,  MKN_DEFS_FINC,
+    MKN_DEFS_FPATH, MKN_DEFS_HELP,  MKN_DEFS_JARG,
+    MKN_DEFS_STATIC,
+    MKN_DEFS_MOD,   MKN_DEFS_MAIN,  MKN_DEFS_LINKER,
+    MKN_DEFS_ALINKR,
+    MKN_DEFS_OUT,   MKN_DEFS_OPTIM, MKN_DEFS_PROF,
+    MKN_DEFS_PROP,  MKN_DEFS_RUN_ARGS,
+    MKN_DEFS_STAT,  MKN_DEFS_SHARED,
+    MKN_DEFS_THREDS,
+    MKN_DEFS_WITHOUT,
+    MKN_DEFS_UPDATE,
+    MKN_DEFS_FUPDATE,
+    MKN_DEFS_VERSON,
+    MKN_DEFS_WITH, MKN_DEFS_WARN,   MKN_DEFS_SETTNGS,
+    "",
+    MKN_DEFS_EXMPL,  MKN_DEFS_EXMPL1,  MKN_DEFS_EXMPL2,  MKN_DEFS_EXMPL3,  MKN_DEFS_EXMPL4,
+    ""
+  };
   for (const auto &s : ss) KOUT(NON) << s;
 }
 

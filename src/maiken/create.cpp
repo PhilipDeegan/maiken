@@ -63,7 +63,7 @@ class CLIHandler : public Constants {
 #endif  //_MKN_DISABLE_MODULES_
       Cmd(STR_CLEAN), Cmd(STR_DEPS),     Cmd(STR_BUILD), Cmd(STR_RUN),   Cmd(STR_COMPILE),
       Cmd(STR_LINK),  Cmd(STR_PROFILES), Cmd(STR_DBG),   Cmd(STR_PACK),  Cmd(STR_INFO),
-      Cmd(STR_TRIM),  Cmd(STR_TREE),     Cmd(STR_TEST)};
+      Cmd(STR_TREE),  Cmd(STR_TEST)};
 
  public:
   std::vector<kul::cli::Arg> args() { return argV; }
@@ -247,7 +247,7 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
   }
 
   std::vector<std::string> cmds = {{STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK, STR_RUN, STR_TEST,
-                                    STR_DBG, STR_TRIM, STR_PACK, STR_MERGE}};
+                                    STR_DBG, STR_PACK, STR_MERGE}};
   for (const auto &cmd : cmds)
     if (args.has(cmd)) AppVars::INSTANCE().command(cmd);
 

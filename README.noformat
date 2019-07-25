@@ -443,6 +443,22 @@ such that the following commands are valid
 Similarly dependencies can be removed with the "-T" option, this is for instance if you have a library installed
  in your system and do not wish to use the mkn configured version.
 
+4.9.1 Add modules on the command line
+
+  Similar to -w/-T
+  Modules may be added with -m, with the same rules regarding, but with additional properties for nested attributes
+  eg.
+  mkn build -m lang.python3{compile{with:numpy}},lang.pybind11 -w lang.pybind11
+
+  is the same as adding the following to mkn.yaml:
+
+    dep: lang.pybind11
+    mod:
+    - name: lang.python3
+      compile:
+        with: numpy
+    - name: lang.pybind11
+
 4.10 Github integration
 
 When maiken is compiled with "-w mkn.ram[https]" features are activated when attempting to resolve dependencies when they
@@ -523,6 +539,7 @@ Available arguments:
     -l --linker $t        - Adds $t to linking of root project
     -K --static           - Links projects without mode as static
     -L --all-linker $t    - Adds $t to linking of all projects
+    -m --mod $str         - Add module(s), see 4.9.1
     -M --main $f          - Set main file as $f, overrides yaml main tag
     -n --nodes [$n]       - Activate distributed compilation with $n nodes from chosen settings.yaml (-x)
     -o --out $f           - Set output binary/lib name to be $f, overrides yaml out tag

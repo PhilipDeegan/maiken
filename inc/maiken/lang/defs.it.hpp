@@ -56,9 +56,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_SRC                                                     \
   "   src       | Stampa i file sorgenti trovati sullo standard output " \
   "[consente l'opzione -d]."
-#define MKN_DEFS_TRIM                                                          \
-  "   trim      | Rimuove gli spazi finali dai file sorgenti (inc/src) sotto " \
-  "la cartella di progetto"
 #define MKN_DEFS_TREE "   tree      | Display dependency tree"
 
 #define MKN_DEFS_ARG "Argomenti:"
@@ -96,8 +93,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   "   -L/--all-linker $t     | Aggiunge $t per il collegamento (link) di " \
   "tutti i progetti che lo prevedono"
 #define MKN_DEFS_MOD                                                        \
-  "   -m/--mod [$csv]        | Activate modules with phase found in $csv, " \
-  "$csv missing, all phases activated"
+  "   -m/--mod [$csv]        | Activate modules for selected phase (init/compile/link/pack) "
 #define MKN_DEFS_MAIN                                                          \
   "   -M/--main $m           | Sets main linker file to $m, supercedes /main " \
   "tag"
