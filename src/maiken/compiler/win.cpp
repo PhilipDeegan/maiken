@@ -121,10 +121,17 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(
     const std::vector<std::string> &libPaths, const kul::File &out,
     const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
   kul::hash::set::String dirs;
+
   for (const auto &o : objects) dirs.insert(kul::File(o).dir().real());
 
   std::string lib = out.dir().join(sharedLib(out.name()));
   std::string imp = out.dir().join(staticLib(out.name()));
+  kul::File   def(out.name()+".def", out.dir());
+
+  if (kul::env::EXISTS("MKN_WINDOWS_EXPORT_ALL_SYMBOLS")
+    && kul::String::BOOL(kul::env::GET("MKN_WINDOWS_EXPORT_ALL_SYMBOLS")))
+    maiken::cpp::CL_DEF().dump_object_exports(objects, def);
+
   if (mode == compiler::Mode::STAT) lib = out.dir().join(staticLib(out.name()));
   std::string cmd = linker;
   std::vector<std::string> bits;
@@ -138,6 +145,7 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(
   if (mode == compiler::Mode::STAT) p.arg("-LTCG");
   p.arg("-OUT:\"" + lib + "\"");
   if (mode == compiler::Mode::SHAR) {
+    if(def) p.arg("-DEF:\"" + def.escm() + "\"");
     p.arg("-IMPLIB:\"" + imp + "\"").arg("-DLL");
     for (const std::string &path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
     for (const std::string &lib : libs) p.arg(staticLib(lib));

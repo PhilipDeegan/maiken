@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_CODE_CPP_HPP_
 #define _MAIKEN_CODE_CPP_HPP_
 
+#include <set>
 #include <unordered_map>
 
 #include "maiken/compiler.hpp"
@@ -190,6 +191,16 @@ class WINCompiler : public CCompiler {
   }
   CCompiler_Type type() const override { return CCompiler_Type::WIN; }
 };
+class CL_DEF{
+ public:
+  void make_def(const std::vector<std::string> &files);
+  void dump(const kul::File &out);
+  void dump_object_exports(const std::vector<std::string> &files, const kul::File &out);
+ private:
+  std::set<std::string> Symbols;
+  std::set<std::string> DataSymbols;
+};
+
 }  // namespace cpp
 }  // namespace maiken
 #endif /* _MAIKEN_CODE_CPP_HPP_ */
