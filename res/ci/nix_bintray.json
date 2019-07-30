@@ -16,9 +16,9 @@
     },
 
     "version": {
-        "name": "0.4",
-        "desc": "This is a version",
-        "released": "2015-01-04",
+        "name": "0.5",
+        "desc": "Yes",
+        "released": "2019-07-30",
         "vcs_tag": "0.5",
         "gpgSign": false
     },
