@@ -35,15 +35,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken {
 
+class Source {
+ public:
+  explicit Source(std::string in) : m_in(in){}
+  explicit Source(std::string in, std::string args) : m_in(in), m_args(args){}
+  const std::string & args() const { return m_args; }
+  const std::string & in()  const { return m_in; }
+
+  bool operator==(const Source & that) const { return this->in() == that.in(); }
+
+ private:
+   std::string m_in, m_args;
+};
+
 class SourceFinder : public Constants {
+ public:
+  using SourceMap = kul::hash::map::S2T<kul::hash::map::S2T<std::vector<maiken::Source>>>;
+  SourceFinder(const maiken::Application &_app) : app(_app) {}
+  std::vector<std::pair<maiken::Source, std::string>> all_sources_from(
+    const SourceMap &sources, kul::hash::set::String &objects, std::vector<kul::File> &cacheFiles);
+
  private:
   const maiken::Application &app;
-
- public:
-  SourceFinder(const maiken::Application &_app) : app(_app) {}
-  std::vector<std::pair<std::string, std::string>> all_sources_from(
-      const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> &sources,
-      kul::hash::set::String &objects, std::vector<kul::File> &cacheFiles);
 };
 }  // end namespace maiken
 

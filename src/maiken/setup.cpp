@@ -312,7 +312,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     kul::hash::map::S2S n_tests;
     kul::Dir testsD(buildDir().join("test"));
     for (const auto pair : tests) {
-      auto files = Regexer::RESOLVE_REGEX(pair.first);
+      auto files = Regexer::RESOLVE(pair.first);
       if (files.empty()) files.emplace_back(pair.first);
       for (const auto file : files) {
         const std::string fileType = file.substr(file.rfind(".") + 1);

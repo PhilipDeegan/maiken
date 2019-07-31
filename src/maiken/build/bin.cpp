@@ -168,7 +168,8 @@ void maiken::Application::buildExecutable(const kul::hash::set::String &objects)
 
 void maiken::Application::buildTest(const kul::hash::set::String &objects) KTHROW(kul::Exception) {
   const std::string oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
-  std::vector<std::pair<std::string, std::string>> test_objects, source_objects;
+  std::vector<std::pair<Source, std::string>> source_objects;
+  std::vector<std::pair<std::string, std::string>> test_objects;
   kul::Dir objD(buildDir().join("obj")), testsD(buildDir().join("test")),
       tmpD(buildDir().join("tmp"));
   objD.mk();
@@ -185,8 +186,8 @@ void maiken::Application::buildTest(const kul::hash::set::String &objects) KTHRO
     kul::File object(os.str(), objD);
     test_objects.push_back(std::make_pair(p.first, os.str()));
     source_objects.emplace_back(
-        std::make_pair(AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
-                       AppVars::INSTANCE().dryRun() ? object.esc() : object.escm()));
+         (AppVars::INSTANCE().dryRun() ? source.esc() : source.escm()),
+          AppVars::INSTANCE().dryRun() ? object.esc() : object.escm());
   }
   {
     std::vector<kul::File> cacheFiles;

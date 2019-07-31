@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <regex>
 #include "kul/log.hpp"
 
-std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str) KTHROW(kul::Exception) {
+std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(kul::Exception) {
   std::vector<std::string> v;
   auto posL = str.find("(");
   auto posR = str.find(")");
@@ -54,7 +54,7 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str) KTHROW(
         std::smatch match;
         std::string subject(item.real());
         if (std::regex_search(subject, match, re) && match.size() > 1)
-          RESOLVE_REGEX_REC(item.real(), v);
+          RESOLVE_REC(item.real(), v);
       } catch (std::regex_error &e) {
         KEXIT(1, "Regex Failure:\n") << e.what();
       }
@@ -64,7 +64,7 @@ std::vector<std::string> maiken::Regexer::RESOLVE_REGEX(std::string str) KTHROW(
   return v;
 }
 
-void maiken::Regexer::RESOLVE_REGEX_REC(const std::string &i, std::vector<std::string> &v)
+void maiken::Regexer::RESOLVE_REC(const std::string &i, std::vector<std::string> &v)
     KTHROW(kul::Exception) {
   if (kul::File(i).is() && !kul::Dir(i).is()) {
     v.push_back(i);
