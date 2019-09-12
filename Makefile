@@ -55,9 +55,9 @@ general:
 
 	@if [ ! -d "ext/parse/yaml/$(YAML_GIT)" ]; then \
 		git clone --depth 1 https://github.com/mkn/parse.yaml.git --branch $(YAML_GIT) ext/parse/yaml/$(YAML_GIT); \
-		cd ext/parse/yaml/$(YAML_GIT) 2>&1 /dev/null; \
+		cd ext/parse/yaml/$(YAML_GIT); \
 		./mkn.sh;  \
-		cd ../../.. 2>&1 /dev/null; \
+		cd ../../..; \
 	fi;
 	@if [ ! -d "ext/parse/yaml/$(YAML_GIT)/p/bin" ]; then \
 		mkdir ext/parse/yaml/$(YAML_GIT)/p/bin; \
@@ -67,9 +67,8 @@ general:
 		$(MAKE) yaml; \
 	fi;
 
-	@if [ ! -d "bin" ]; then \
-		mkdir -p bin; \
-	fi;
+	@mkdir -p bin;
+
 	@for f in $(shell find src -type f -name '*.cpp'); do \
 		echo $(CXX) $(CXXFLAGS) $(INCS) -o "bin/$$(basename $$f).o" -c "$$f"; \
 		$(CXX) $(CXXFLAGS) $(INCS) -o "bin/$$(basename $$f).o" -c "$$f" || exit 1 ; \
