@@ -242,7 +242,7 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
       splitArgs(
           args.get(STR_ENV), "environment",
           std::bind(
-              (void (AppVars::*)(const std::string &, const std::string &)) & AppVars::envVars,
+              (void (AppVars::*)(const std::string &, const std::string &)) & AppVars::envVar,
               std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
   }
 
