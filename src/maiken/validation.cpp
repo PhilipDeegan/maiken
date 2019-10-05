@@ -138,7 +138,7 @@ void maiken::Application::preSetupValidation() KTHROW(maiken::Exception) {
       keys.insert(it->first.Scalar());
     }
   }
-  bool dpp{project().root()[STR_PARENT]};
+  bool dpp(project().root()[STR_PARENT]);
   bool dpf = 0;
   Validator::PRE_BUILD(*this, project().root());
   std::vector<std::string> profiles;
