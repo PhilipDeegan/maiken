@@ -68,42 +68,67 @@ const kul::yaml::Validator maiken::Project::validator() const {
   NodeValidator if_src("if_src", {NodeValidator("*")}, 0, NodeType::MAP);
   NodeValidator if_lnk("if_link", {NodeValidator("*")}, 0, NodeType::MAP);
 
-  return Validator(
-      {NodeValidator("name", 1), NodeValidator("version"), NodeValidator("scm"),
-       NodeValidator("bin"), NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP),
-       NodeValidator("super"), NodeValidator("parent"), NodeValidator("inc"), NodeValidator("src"),
-       NodeValidator("path"), NodeValidator("lib"), NodeValidator("link"), NodeValidator("lang"),
-       NodeValidator("main"), NodeValidator("test"), NodeValidator("mode"), NodeValidator("arg"),
-       NodeValidator("install"), NodeValidator("out"), NodeValidator("ext"), NodeValidator("self"),
-       NodeValidator("with"), env, dep, if_dep, mod, if_mod, if_arg, if_inc, if_lib, if_src, if_lnk,
-       NodeValidator("profile", {NodeValidator("name", 1),
-                                 NodeValidator("parent"),
-                                 NodeValidator("inc"),
-                                 NodeValidator("src"),
-                                 NodeValidator("path"),
-                                 NodeValidator("lib"),
-                                 NodeValidator("link"),
-                                 NodeValidator("lang"),
-                                 NodeValidator("main"),
-                                 NodeValidator("test"),
-                                 NodeValidator("bin"),
-                                 NodeValidator("mode"),
-                                 NodeValidator("arg"),
-                                 NodeValidator("install"),
-                                 NodeValidator("out"),
-                                 NodeValidator("self"),
-                                 NodeValidator("with"),
-                                 env,
-                                 dep,
-                                 if_dep,
-                                 mod,
-                                 if_mod,
-                                 if_arg,
-                                 if_inc,
-                                 if_lib,
-                                 if_src,
-                                 if_lnk},
-                     0, NodeType::LIST)});
+  return Validator({NodeValidator("name", 1),
+                    NodeValidator("version"),
+                    NodeValidator("scm"),
+                    NodeValidator("bin"),
+                    NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP),
+                    NodeValidator("super"),
+                    NodeValidator("parent"),
+                    NodeValidator("inc"),
+                    NodeValidator("src"),
+                    NodeValidator("path"),
+                    NodeValidator("lib"),
+                    NodeValidator("link"),
+                    NodeValidator("lang"),
+                    NodeValidator("main"),
+                    NodeValidator("test"),
+                    NodeValidator("mode"),
+                    NodeValidator("arg"),
+                    NodeValidator("install"),
+                    NodeValidator("out"),
+                    NodeValidator("ext"),
+                    NodeValidator("self"),
+                    NodeValidator("with"),
+                    env,
+                    dep,
+                    if_dep,
+                    mod,
+                    if_mod,
+                    if_arg,
+                    if_inc,
+                    if_lib,
+                    if_src,
+                    if_lnk,
+                    NodeValidator("profile",
+                                  {NodeValidator("name", 1),
+                                   NodeValidator("parent"),
+                                   NodeValidator("inc"),
+                                   NodeValidator("src"),
+                                   NodeValidator("path"),
+                                   NodeValidator("lib"),
+                                   NodeValidator("link"),
+                                   NodeValidator("lang"),
+                                   NodeValidator("main"),
+                                   NodeValidator("test"),
+                                   NodeValidator("bin"),
+                                   NodeValidator("mode"),
+                                   NodeValidator("arg"),
+                                   NodeValidator("install"),
+                                   NodeValidator("out"),
+                                   NodeValidator("self"),
+                                   NodeValidator("with"),
+                                   env,
+                                   dep,
+                                   if_dep,
+                                   mod,
+                                   if_mod,
+                                   if_arg,
+                                   if_inc,
+                                   if_lib,
+                                   if_src,
+                                   if_lnk},
+                                  0, NodeType::LIST)});
 }
 
 void maiken::NewProject::write() {
@@ -125,4 +150,12 @@ void maiken::NewProject::write() {
     w.write("    return 0;", true);
     w.write("}", true);
   }
+}
+
+#include "maiken/app.hpp"
+std::vector<maiken::Application const *> maiken::Project::getBinaryTargets() const {
+  std::vector<Application const *> ret;
+  for (auto const *app : maiken::Applications::INSTANCE().applicationsFor(*this))
+    if (app->main.size()) ret.emplace_back(app);
+  return ret;
 }

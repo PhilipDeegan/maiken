@@ -49,10 +49,6 @@ class ProjectException : public kul::Exception {
 
 class Projects;
 class KUL_PUBLISH Project : public kul::yaml::File, public Constants {
-  friend class Projects;
-  friend class Application;
-  friend class kul::yaml::File;
-
  public:
   Project(const kul::Dir &d)
       : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml")), m_dir(d.real()) {}
@@ -61,9 +57,13 @@ class KUL_PUBLISH Project : public kul::yaml::File, public Constants {
   const kul::yaml::Validator validator() const;
 
   static kul::hash::map::S2S populate_tests(const YAML::Node &node);
+  std::vector<Application const *> getBinaryTargets() const;
 
  private:
   const kul::Dir m_dir;
+  friend class Projects;
+  friend class Application;
+  friend class kul::yaml::File;
 };
 
 class Projects {

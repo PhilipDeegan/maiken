@@ -69,6 +69,7 @@ class KUL_PUBLISH Application : public Constants {
   friend class Executioner;
   friend class SourceFinder;
   friend class ThreadingCompiler;
+  friend class Project;
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   friend class dist::CompileRequest;
 #endif  //  _MKN_WITH_MKN_RAM_  &&         _MKN_WITH_IO_CEREAL_
@@ -216,6 +217,7 @@ class KUL_PUBLISH Application : public Constants {
   Application &operator=(const Application &a) = delete;
   virtual ~Application();
 
+  std::string getMain() { return main; }
   virtual void process() KTHROW(kul::Exception);
   const kul::Dir &buildDir() const { return bd; }
   const std::string &binary() const { return bin; }
@@ -237,7 +239,6 @@ class KUL_PUBLISH Application : public Constants {
 
   void add_def(const std::string &def) { defs.emplace_back(def); }
   const std::vector<std::string> &defines() const { return defs; }
-
 
 #ifdef _MKN_WITH_MKN_RAM_
   bool get_binaries();
@@ -279,6 +280,12 @@ class Applications : public Constants {
                                bool setup = 1) KTHROW(kul::Exception);
 
   Application *getOrNullptr(const std::string &project);
+
+  std::vector<Application const *> applicationsFor(Project const &project) const {
+    std::vector<Application const *> ret;
+    for (auto const &profile : m_apps.at(project.dir().real())) ret.emplace_back(profile.second);
+    return ret;
+  }
 
  private:
   kul::hash::map::S2T<kul::hash::map::S2T<Application *>> m_apps;
