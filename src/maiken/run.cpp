@@ -74,18 +74,17 @@ class Runner : public Constants {
       std::string arg;
       for (const auto &s : a.libraryPaths()) arg += s + kul::env::SEP();
       if (!arg.empty()) arg.pop_back();
+#if defined(__APPLE__)
+      kul::cli::EnvVar dy("DYLD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
+      KOUT(DBG) << dy.name() << " : " << dy.toString();
+      envies.push_back(std::make_pair(dy.name(), dy.toString()));
+#endif
 #ifdef _WIN32
       kul::cli::EnvVar pa("PATH", arg, kul::cli::EnvVarMode::PREP);
-
-#elif defined(__APPLE__)
-      kul::cli::EnvVar dy("DYLD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
-      KOUT(INF) << dy.name() << " : " << dy.toString();
-      envies.push_back(std::make_pair(dy.name(), dy.toString()));
 #else
       kul::cli::EnvVar pa("LD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
-
 #endif
-      KOUT(INF) << pa.name() << " : " << pa.toString();
+      KOUT(DBG) << pa.name() << " : " << pa.toString();
       envies.push_back(std::make_pair(pa.name(), pa.toString()));
     }
     for (const auto &ev : envies) {
@@ -101,7 +100,7 @@ class Runner : public Constants {
         p->var(ev.first,
                kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
     }
-    KOUT(INF) << (*p);
+    KOUT(DBG) << (*p);
     if (!AppVars::INSTANCE().dryRun()) p->start();
   }
 };
