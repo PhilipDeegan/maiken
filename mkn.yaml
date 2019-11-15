@@ -10,57 +10,51 @@ parent: bin
 mode: none
 
 profile:
-  - name: base
-    inc: ./inc
-    dep: mkn.kul parse.yaml
-    src: ./src
-    test: test/cpp.cpp test/py.py
-    arg: -D_MKN_VERSION_=${version}_${DATE}
-    if_arg:
-      win_shared: -DYAML_CPP_DLL
-    if_link:
-      win_cl: -nodefaultlib:libucrt.lib ucrt.lib
+- name: base
+  inc: ./inc
+  dep: mkn.kul parse.yaml
+  src: ./src
+  test: test/cpp.cpp test/py.py
+  arg: -D_MKN_VERSION_=${version}_${DATE}
+  if_arg:
+    win_shared: -DYAML_CPP_DLL
+  if_link:
+    win_cl: -nodefaultlib:libucrt.lib ucrt.lib
 
-  - name: bin
-    parent: base
-    main: mkn.cpp
+- name: bin
+  parent: base
+  main: mkn.cpp
 
-  - name: static
-    parent: bin
-    mode: static
+- name: static
+  parent: bin
+  mode: static
 
-  - name: shared
-    parent: bin
-    mode: shared
+- name: shared
+  parent: bin
+  mode: shared
 
-  - name: mod
-    mode: shared
-    inc: ./inc
-    src: ./src
-    with: mkn.kul parse.yaml[shared]
-    if_arg:
-      win_shared: -DYAML_CPP_DLL -DKUL_SHARED -DKUL_EXPORT
+- name: mod
+  mode: shared
+  inc: ./inc
+  src: ./src
+  with: mkn.kul parse.yaml[shared]
+  if_arg:
+    win_shared: -DYAML_CPP_DLL -DKUL_SHARED -DKUL_EXPORT
 
-  - name: lib
-    parent: base
-    if_arg:
-      win_shared: -DKUL_SHARED -DKUL_EXPORT
+- name: lib
+  parent: base
+  if_arg:
+    win_shared: -DKUL_SHARED -DKUL_EXPORT
 
-  - name: server
-    parent: lib
-    with: io.cereal mkn.ram[https]
-    main: server.cpp
-    mode: none
+- name: server
+  parent: lib
+  with: io.cereal mkn.ram[https]
+  main: server.cpp
+  mode: none
 
-  - name: lint
-    mod:
-    - name: mkn-mod.exec
-      init: |
-        python3 -m cpplint --root=inc --recursive inc src
+- name: format
+  mod: |
+    clang.format{init:{style: file, paths: .}}
 
-  - name: format
-    mod:
-    - name: clang.format
-      init:
-        style: file
-        paths: .
+- name: subl.gdb
+  mod: subl.gdb
