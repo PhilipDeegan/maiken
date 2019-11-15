@@ -45,18 +45,19 @@ maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
   for (const auto &s : kul::cli::asArgs(app.arg)) args.push_back(s);
   if (app.cArg.count(base))
     for (const auto &s : kul::cli::asArgs(app.cArg[base])) args.push_back(s);
-  std::string cmd = compiler + " " + AppVars::INSTANCE().args();
-  if (AppVars::INSTANCE().jargs().count(fileType) > 0)
-    cmd += " " + (*AppVars::INSTANCE().jargs().find(fileType)).second;
   // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
-  auto compilerFlags = [&args](const std::string &&as) {
+  auto compilerFlags = [&args](std::string as) {
     for (const auto &s : kul::cli::asArgs(as)) args.push_back(s);
   };
+  if (AppVars::INSTANCE().jargs().count(fileType) > 0)
+    compilerFlags((*AppVars::INSTANCE().jargs().find(fileType)).second);
+  compilerFlags(AppVars::INSTANCE().args());
   auto comp = Compilers::INSTANCE().get(compiler);
   compilerFlags(comp->compilerDebug(AppVars::INSTANCE().debug()));
   compilerFlags(comp->compilerOptimization(AppVars::INSTANCE().optimise()));
   compilerFlags(comp->compilerWarning(AppVars::INSTANCE().warn()));
-  return CompilationUnit(app, comp, cmd, args, incs, src, obj, app.m, AppVars::INSTANCE().dryRun());
+  return CompilationUnit(app, comp, compiler, args, incs, src, obj, app.m,
+                         AppVars::INSTANCE().dryRun());
 }
 
 maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const KTHROW(kul::Exception) {

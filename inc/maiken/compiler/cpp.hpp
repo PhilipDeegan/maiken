@@ -79,6 +79,19 @@ class CCompiler : public Compiler {
   const std::string oStar(const std::vector<std::string> &objs) const { return "*." + oType(objs); }
 
   virtual CCompiler_Type type() const = 0;
+
+  static std::string CC(std::string deFault) {
+    if (kul::env::EXISTS("CC")) return kul::env::GET("CC");
+    return deFault;
+  }
+  static std::string CXX(std::string deFault) {
+    if (kul::env::EXISTS("CXX")) return kul::env::GET("CXX");
+    return deFault;
+  }
+  static std::string LD(std::string deFault) {
+    if (kul::env::EXISTS("LD")) return kul::env::GET("LD");
+    return deFault;
+  }
 };
 
 class GccCompiler : public CCompiler {
@@ -87,8 +100,8 @@ class GccCompiler : public CCompiler {
 
   std::string staticLib(const std::string &lib) const override { return "lib" + lib + ".a"; }
 
-  std::string cc() const override { return "gcc"; }
-  std::string cxx() const override { return "g++"; }
+  virtual std::string cc() const override { return CC("gcc"); }
+  virtual std::string cxx() const override { return CXX("g++"); }
 
   CompilerProcessCapture buildExecutable(const std::string &linker, const std::string &linkerEnd,
                                          const std::vector<std::string> &objects,
@@ -104,8 +117,7 @@ class GccCompiler : public CCompiler {
                                       const kul::File &out, const compiler::Mode &mode,
                                       bool dryRun = false) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture compileSource(const maiken::Application &app,
-                                       const std::string &compiler,
+  CompilerProcessCapture compileSource(const maiken::Application &app, const std::string &compiler,
                                        const std::vector<std::string> &args,
                                        const std::vector<std::string> &incs, const std::string &in,
                                        const std::string &out, const compiler::Mode &mode,
@@ -118,32 +130,31 @@ class GccCompiler : public CCompiler {
 
   CCompiler_Type type() const override { return CCompiler_Type::GCC; }
 
-  void rpathing(kul::Process &p, const kul::File &out,
-                const std::vector<std::string> &libs,
+  void rpathing(kul::Process &p, const kul::File &out, const std::vector<std::string> &libs,
                 const std::vector<std::string> &libPaths) const;
 };
 
 class ClangCompiler : public GccCompiler {
  public:
   ClangCompiler(const int &v = 0);
-  virtual std::string cc() const override { return "clang"; }
-  virtual std::string cxx() const override { return "clang++"; }
+  std::string cc() const override { return CC("clang"); }
+  std::string cxx() const override { return CXX("clang++"); }
   CCompiler_Type type() const override { return CCompiler_Type::CLANG; }
 };
 
 class HccCompiler : public GccCompiler {
  public:
   HccCompiler(const int &v = 0) : GccCompiler(v) {}
-  std::string cc() const override { return "hcc"; }
-  std::string cxx() const override { return "h++"; }
+  std::string cc() const override { return CC("hcc"); }
+  std::string cxx() const override { return CXX("h++"); }
   CCompiler_Type type() const override { return CCompiler_Type::HCC; }
 };
 
 class IntelCompiler : public GccCompiler {
  public:
   IntelCompiler(const int &v = 0);
-  std::string cc() const override { return "icc"; }
-  std::string cxx() const override { return "icpc"; }
+  std::string cc() const override { return CC("icc"); }
+  std::string cxx() const override { return CXX("icpc"); }
   CCompiler_Type type() const override { return CCompiler_Type::ICC; }
 };
 
@@ -151,8 +162,8 @@ class WINCompiler : public CCompiler {
  protected:
  public:
   WINCompiler(const int &v = 0);
-  std::string cc() const override { return "cl"; }
-  std::string cxx() const override { return "cl"; }
+  std::string cc() const override { return CC("cl"); }
+  std::string cxx() const override { return CXX("cl"); }
 
   std::string staticLib(const std::string &lib) const override { return lib + ".lib"; }
 
@@ -170,8 +181,7 @@ class WINCompiler : public CCompiler {
                                       const kul::File &out, const compiler::Mode &mode,
                                       bool dryRun = false) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture compileSource(const maiken::Application &app,
-                                       const std::string &compiler,
+  CompilerProcessCapture compileSource(const maiken::Application &app, const std::string &compiler,
                                        const std::vector<std::string> &args,
                                        const std::vector<std::string> &incs, const std::string &in,
                                        const std::string &out, const compiler::Mode &mode,

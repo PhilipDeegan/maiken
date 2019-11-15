@@ -326,7 +326,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
       auto files = Regexer::RESOLVE_REGEX(pair.first);
       if (files.empty()) files.emplace_back(pair.first);
       for (const auto file : files) {
-        const std::string &fileType = file.substr(file.rfind(".") + 1);
+        const std::string fileType = file.substr(file.rfind(".") + 1);
         if (fs.count(fileType) == 0) {
           n_tests.insert(file, file);
         } else {

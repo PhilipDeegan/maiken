@@ -90,9 +90,9 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(
   kul::hash::set::String dirs;
   for (const auto &o : objects) dirs.insert(kul::File(o).dir().real());
 
-  std::string cmd = linker;
+  std::string cmd = LD(linker);
   std::vector<std::string> bits;
-  if (linker.find(" ") != std::string::npos) {
+  if (cmd == linker && linker.find(" ") != std::string::npos) {
     bits = kul::cli::asArgs(linker);
     cmd = bits[0];
   }
@@ -127,8 +127,9 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(
   std::string imp = out.dir().join(staticLib(out.name()));
   if (mode == compiler::Mode::STAT) lib = out.dir().join(staticLib(out.name()));
   std::string cmd = linker;
+  if (mode == compiler::Mode::SHAR) cmd = LD(linker);
   std::vector<std::string> bits;
-  if (linker.find(" ") != std::string::npos) {
+  if (cmd == linker && linker.find(" ") != std::string::npos) {
     bits = kul::cli::asArgs(linker);
     cmd = bits[0];
   }
@@ -156,14 +157,20 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(
 }
 
 maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(
-    const maiken::Application &app,
-    const std::string &compiler, const std::vector<std::string> &args,
-    const std::vector<std::string> &incs, const std::string &in, const std::string &out,
-    const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
-  (void)mode;
-  std::string cmd = compiler;
+    const maiken::Application &app, const std::string &compiler,
+    const std::vector<std::string> &args, const std::vector<std::string> &incs,
+    const std::string &in, const std::string &out, const maiken::compiler::Mode &,
+    bool dryRun) const KTHROW(kul::Exception) {
+  const std::string fileType = in.substr(in.rfind(".") + 1);
+
+  std::string cmd;
+  if (kul::String::NO_CASE_CMP(fileType, "c"))
+    cmd = CC(compiler);
+  else
+    cmd = CXX(compiler);
+
   std::vector<std::string> bits;
-  if (compiler.find(" ") != std::string::npos) {
+  if (cmd == compiler && compiler.find(" ") != std::string::npos) {
     bits = kul::cli::asArgs(compiler);
     cmd = bits[0];
   }
