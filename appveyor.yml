@@ -26,12 +26,12 @@ cache:
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
 
 build_script:
-  - SET PATH=C:\Program Files\Git\usr\bin;%PATH%
+  - SET PATH=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\bin\Hostx64\x64;C:\Program Files\Git\usr\bin;%PATH%
   - SET PYTHON=C:\Python36-x64\python.exe
-  - curl -o mkn.exe -L https://github.com/Dekken/maiken/raw/binaries/win10_x64/mkn.exe
   - C:\Python36-x64\python.exe -m pip install pip --upgrade
   - C:\Python36-x64\python.exe -m pip install conan flawfinder
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - rm "C:\Program Files\Git\usr\bin\link.exe" # messes with msvc link.exe
   - bash -c "PATH=\"$PWD:/c/Python36-x64/:/c/Program Files/Git/usr/bin:$PATH\"; res/ci/win_appveyor.sh"
 
 artifacts:
