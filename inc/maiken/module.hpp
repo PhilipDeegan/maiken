@@ -74,22 +74,10 @@ class Module {
   virtual ~Module() {}
   Module() KTHROW(ModuleException) {}
 
-  virtual void init(Application &app, const YAML::Node &arg) KTHROW(std::exception) {
-    (void)app;
-    (void)arg;
-  }
-  virtual void compile(Application &app, const YAML::Node &arg) KTHROW(std::exception) {
-    (void)app;
-    (void)arg;
-  }
-  virtual void link(Application &app, const YAML::Node &arg) KTHROW(std::exception) {
-    (void)app;
-    (void)arg;
-  }
-  virtual void pack(Application &app, const YAML::Node &arg) KTHROW(std::exception) {
-    (void)app;
-    (void)arg;
-  }
+  virtual void init(Application &, const YAML::Node &) KTHROW(std::exception) {}
+  virtual void compile(Application &, const YAML::Node &) KTHROW(std::exception) {}
+  virtual void link(Application &, const YAML::Node &) KTHROW(std::exception) {}
+  virtual void pack(Application &, const YAML::Node &) KTHROW(std::exception) {}
 };
 
 class GlobalModules;

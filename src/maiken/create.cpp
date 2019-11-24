@@ -140,10 +140,7 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
     KOUT(NON) << ss.str();
     KEXIT(0, "");
   }
-  if (args.has(STR_INIT)) {
-    NewProject p;
-    KEXIT(0, "");
-  }
+  if (args.has(STR_INIT)) NewProject{};
   if (args.has(STR_DIR)) {
     kul::Dir d(args.get(STR_DIR));
     if (!d) KEXIT(1, "STR_DIR DOES NOT EXIST: " + args.get(STR_DIR));

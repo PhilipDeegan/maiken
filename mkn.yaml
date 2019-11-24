@@ -4,15 +4,18 @@ name: mkn
 scm: https://github.com/dekken/maiken
 version: master
 property:
-    DATE: 15-NOV-2019
+    DATE: 24-NOV-2019
 
 parent: bin
 mode: none
 
 profile:
-- name: base
+- name: headers
   inc: ./inc
   dep: mkn.kul parse.yaml
+
+- name: base
+  parent: headers
   src: ./src
   test: test/cpp.cpp test/py.py
   arg: -D_MKN_VERSION_=${version}_${DATE}

@@ -26,12 +26,20 @@ before_install:
       gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
       rvm get stable
     fi
-    [[ "$TRAVIS_OS_NAME" == "linux" ]] && eval "${MATRIX_EVAL}"
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      eval "${MATRIX_EVAL}"
+    fi
+
 script:
   - |
-    export MKN_LIB_LINK_LIB="1" KUL_GIT_CO="--depth 3" KLOG="3" CC CXX
-    [[ "$TRAVIS_OS_NAME" == "osx" ]]   && ./res/ci/osx_travis.sh
-    [[ "$TRAVIS_OS_NAME" == "linux" ]] && ./res/ci/nix_travis.sh
+    export MKN_LIB_LINK_LIB="1" KUL_GIT_CO="--depth 3" KLOG="3"
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      ./res/ci/osx_travis.sh
+    fi
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      export CC CXX
+      ./res/ci/nix_travis.sh
+    fi
 
 deploy:
   - provider: bintray
