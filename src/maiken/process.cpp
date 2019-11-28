@@ -69,7 +69,7 @@ class ObjectMerger {
     }
   }
 };
-}
+}  // namespace maiken
 
 void maiken::Application::process() KTHROW(kul::Exception) {
   const kul::hash::set::String &cmds(CommandStateMachine::INSTANCE().commands());
@@ -155,7 +155,10 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     proc(**app, !(*app)->srcs.empty());
   }
   if (!this->ig) proc(*this, (!this->srcs.empty() || !this->main.empty()));
-  if (cmds.count(STR_TEST)) test();
+  if (cmds.count(STR_TEST)) {
+    for (auto &modLoader : mods) modLoader->module()->test(*this, this->modTest(modLoader->app()));
+    test();
+  }
   if (cmds.count(STR_PACK)) {
     pack();
     for (auto &modLoader : mods) modLoader->module()->pack(*this, this->modPack(modLoader->app()));
@@ -163,4 +166,5 @@ void maiken::Application::process() KTHROW(kul::Exception) {
   if (CommandStateMachine::INSTANCE().main() && (cmds.count(STR_RUN) || cmds.count(STR_DBG)))
     run(cmds.count(STR_DBG));
   CommandStateMachine::INSTANCE().reset();
+  AppVars::INSTANCE().show(0);
 }

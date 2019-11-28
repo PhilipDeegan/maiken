@@ -1,53 +1,45 @@
-#! clean build -dtK -O 9 -W 9 -g 0
+#! clean build test -tKOW 9 -g 0 -p @,test
 
 name: mkn
 scm: https://github.com/dekken/maiken
 version: master
 property:
-    DATE: 24-NOV-2019
+    DATE: 28-NOV-2019
 
-parent: bin
+parent: lib
 mode: none
+main: mkn.cpp
 
 profile:
 - name: headers
   inc: ./inc
-  dep: mkn.kul parse.yaml
+  dep: mkn.kul
+  if_arg:
+    shared: -DKUL_SHARED -DKUL_EXPORT
+    win_shared: -DYAML_CPP_DLL
 
-- name: base
+- name: lib
   parent: headers
   src: ./src
-  test: test/cpp.cpp test/py.py
+  dep: parse.yaml
   arg: -D_MKN_VERSION_=${version}_${DATE}
-  if_arg:
-    win_shared: -DYAML_CPP_DLL
   if_link:
+    nix: -ldl -pthread
     win_cl: -nodefaultlib:libucrt.lib ucrt.lib
 
-- name: bin
-  parent: base
-  main: mkn.cpp
-
 - name: static
-  parent: bin
+  parent: lib
   mode: static
 
 - name: shared
-  parent: bin
+  parent: lib
   mode: shared
 
 - name: mod
+  parent: headers
   mode: shared
-  inc: ./inc
   src: ./src
-  with: mkn.kul parse.yaml[shared]
-  if_arg:
-    win_shared: -DYAML_CPP_DLL -DKUL_SHARED -DKUL_EXPORT
-
-- name: lib
-  parent: base
-  if_arg:
-    win_shared: -DKUL_SHARED -DKUL_EXPORT
+  with: parse.yaml[shared]
 
 - name: server
   parent: lib
@@ -59,5 +51,9 @@ profile:
   mod: |
     clang.format{init:{style: file, paths: .}}
 
-- name: subl.gdb
-  mod: subl.gdb
+- name: test
+  test: test/cpp.cpp
+  env: PYTHONPATH=.
+  mod: |
+     mkn-mod.exec{test: ./test/test.sh }
+

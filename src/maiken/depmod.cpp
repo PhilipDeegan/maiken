@@ -130,6 +130,7 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
       if (node[STR_INIT]) this->modInit(&app, node[STR_INIT]);
       if (node[STR_COMPILE]) this->modCompile(&app, node[STR_COMPILE]);
       if (node[STR_LINK]) this->modLink(&app, node[STR_LINK]);
+      if (node[STR_TEST]) this->modTest(&app, node[STR_TEST]);
       if (node[STR_PACK]) this->modPack(&app, node[STR_PACK]);
       app.isMod = 1;
     }

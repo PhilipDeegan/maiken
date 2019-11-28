@@ -95,28 +95,18 @@ void maiken::Application::populateMaps(const YAML::Node &n)
 
   {
     using namespace kul::cli;
+    if (n[STR_ENV]) {
+      if (n[STR_ENV].IsScalar())
+        evs.emplace_back(PARSE_ENV_NODE(n[STR_ENV], this));
+      else
+        for (const auto &c : n[STR_ENV]) evs.emplace_back(PARSE_ENV_NODE(c, this));
+    }
+
     for (const auto &p : AppVars::INSTANCE().envVars()) {
       if (std::find_if(evs.begin(), evs.end(),
                        [&p](const EnvVar &ev) { return ev.name() == p.first; }) != evs.end())
         continue;
       evs.push_back(EnvVar(p.first, p.second, EnvVarMode::REPL));
-    }
-    for (const auto &c : n[STR_ENV]) {
-      EnvVarMode mode = EnvVarMode::REPL;
-      if (c[STR_MODE]) {
-        if (c[STR_MODE].Scalar().compare(STR_APPEND) == 0)
-          mode = EnvVarMode::APPE;
-        else if (c[STR_MODE].Scalar().compare(STR_PREPEND) == 0)
-          mode = EnvVarMode::PREP;
-        else if (c[STR_MODE].Scalar().compare(STR_REPLACE) == 0)
-          mode = EnvVarMode::REPL;
-      }
-      evs.erase(
-          std::remove_if(evs.begin(), evs.end(),
-                         [&c](const EnvVar &ev) { return ev.name() == c[STR_NAME].Scalar(); }),
-          evs.end());
-      evs.emplace_back(c[STR_NAME].Scalar(), Properties::RESOLVE(*this, c[STR_VALUE].Scalar()),
-                       mode);
     }
   }
 

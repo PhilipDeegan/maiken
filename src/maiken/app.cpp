@@ -29,6 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/app.hpp"
+#include "maiken/property.hpp"
 
 maiken::Application *maiken::Applications::getOrCreate(const maiken::Project &proj,
                                                        const std::string &_profile, bool setup)
@@ -86,4 +87,30 @@ maiken::Application *maiken::Applications::getOrNullptr(const std::string &proje
         << " there are multiple versions in the dependency tree";
   }
   return app;
+}
+
+kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const &n, Application *app) {
+  using namespace kul::cli;
+  KLOG(INF);
+  if (n.IsScalar()) {
+    auto bits = kul::String::SPLIT(n.Scalar(), "=");
+    if (bits.size() != 2) KEXIT(1, "NOOOO");
+    auto ev = EnvVar(bits[0], bits[1], EnvVarMode::REPL);
+    KLOG(INF) << ev.name();
+    return ev;
+  } else if (n.IsSequence()) {
+    EnvVarMode mode = EnvVarMode::PREP;
+    if (n[STR_MODE].Scalar().compare(STR_APPEND) == 0)
+      mode = EnvVarMode::APPE;
+    else if (n[STR_MODE].Scalar().compare(STR_PREPEND) == 0)
+      mode = EnvVarMode::PREP;
+    else if (n[STR_MODE].Scalar().compare(STR_REPLACE) == 0)
+      mode = EnvVarMode::REPL;
+    auto ev = EnvVar(n[STR_NAME].Scalar(),
+                     app ? Properties::RESOLVE(*app, n[STR_VALUE].Scalar()) : n[STR_VALUE].Scalar(),
+                     mode);
+    KLOG(INF) << ev.name();
+    return ev;
+  }
+  KEXIT(1, "NO");
 }

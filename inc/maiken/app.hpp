@@ -82,7 +82,8 @@ class KUL_PUBLISH Application : public Constants {
   std::string arg, bin, lang, lnk, main, out, scr, scv;
   const std::string p;
   kul::Dir bd, inst;
-  std::unordered_map<const Application *, YAML::Node> modIArgs, modCArgs, modLArgs, modPArgs;
+  std::unordered_map<const Application *, YAML::Node> modIArgs, modCArgs, modLArgs, modTArgs,
+      modPArgs;
   const maiken::Project &proj;
   kul::hash::map::S2T<kul::hash::map::S2S> fs;
   kul::hash::map::S2S cArg, cLnk, includeStamps, itss, ps, tests;
@@ -182,6 +183,14 @@ class KUL_PUBLISH Application : public Constants {
     return YAML::Node();
   }
 
+  void modTest(const Application *const other, const YAML::Node &modArg) {
+    modTArgs.emplace(std::make_pair(other, modArg));
+  }
+  YAML::Node modTest(const Application *const other) const {
+    if (modTArgs.count(other)) return (*modTArgs.find(other)).second;
+    return YAML::Node();
+  }
+
   void modPack(const Application *const other, const YAML::Node &modArg) {
     modPArgs.emplace(std::make_pair(other, modArg));
   }
@@ -263,6 +272,8 @@ class KUL_PUBLISH Application : public Constants {
 
   static std::vector<Application *> CREATE(const kul::cli::Args &args) KTHROW(kul::Exception);
   static std::vector<Application *> CREATE(int16_t argc, char *argv[]) KTHROW(kul::Exception);
+
+  static kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const &, Application * = nullptr);
 };
 
 class Applications : public Constants {

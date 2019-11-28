@@ -77,6 +77,7 @@ class Module {
   virtual void init(Application &, const YAML::Node &) KTHROW(std::exception) {}
   virtual void compile(Application &, const YAML::Node &) KTHROW(std::exception) {}
   virtual void link(Application &, const YAML::Node &) KTHROW(std::exception) {}
+  virtual void test(Application &, const YAML::Node &) KTHROW(std::exception) {}
   virtual void pack(Application &, const YAML::Node &) KTHROW(std::exception) {}
 };
 

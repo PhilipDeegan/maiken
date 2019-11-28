@@ -223,7 +223,7 @@ Prerequisites:
     - Windows Dev Kit 10+ (http://msdn.microsoft.com/en-us/windows/desktop/ff851942.aspx)
 
 Operations:
-    - git clone http://www.github.com/Dekken/maiken.git maiken/master
+    - git clone http://www.github.com/mkn/maiken maiken/master
     - cd maiken/master
     - make.bat - Enter directories for MSVS/WinKit when prompted
 
@@ -231,9 +231,9 @@ Testing:
     static : ./mkn clean build -dtKa -EHsc
     shared : ./mkn clean build -dtSa -EHsc
 
-Example Windows settings can be found at: https://github.com/Dekken/maiken/wiki
+Example Windows settings can be found at: https://github.com/mkn/maiken/wiki
 
-Binary available @ https://github.com/Dekken/maiken/tree/binaries
+Binary available @ https://github.com/mkn/maiken/tree/binaries
 
 
 3.2 Unix
@@ -245,7 +245,7 @@ Prerequisites:
 3.2.1 Debian
 
 Operations:
-    - git clone http://www.github.com/Dekken/maiken.git maiken/master
+    - git clone http://www.github.com/mkn/maiken maiken/master
     - cd maiken/master
     - shared
         make nix
@@ -254,41 +254,44 @@ Operations:
     WITH CLANG
         make nix CXX=clang++
     IF CLANG SECONDARY TO GCC
-        LD_LIBRARY_PATH=<GCC_INSTALL>/lib64 make nix CXX=clang++ CXXFLAGS="-O2 -std=c++14 -Wall -I<GCC_INSTALL>/include/c++/5.2.0 -I<GCC_INSTALL>/include/c++/5.2.0/x86_64-unknown-linux-gnu" LDFLAGS="-L<GCC_INSTALL>/lib64"
+        GCC_VER=$(gcc --version | grep ^gcc | sed 's/^.* //g')
+        CXXFLAGS="-O2 -std=c++14 -Wall -I<GCC_INSTALL>/include/c++/${GCC_VER} -I<GCC_INSTALL>/include/c++/${GCC_VER}/x86_64-unknown-linux-gnu"
+        LDFLAGS="-L<GCC_INSTALL>/lib64"
+        LD_LIBRARY_PATH=<GCC_INSTALL>/lib64 make nix CXX=clang++ CXXFLAGS="${CXXFLAGS}" LDFLAGS="${LDFLAGS}"
 
 Testing:
-    ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l "-pthread -ldl"
+    ./mkn clean build -dtKOWa "-std=c++14"
 
 
 3.2.1 Mac/OSX
 
 Operations:
-    - git clone http://www.github.com/Dekken/maiken.git maiken/master
+    - git clone http://www.github.com/mkn/maiken maiken/master
     - cd maiken/master
     - make bsd CXX=clang++
 
 Testing:
-    ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l "-pthread -ldl"
+    ./mkn clean build -dtKOWa "-std=c++14
 
-3.2.3 NetBSD
+3.2.3 NetBSD/FreeBSD/etc
 
-Operations:
-    - git clone http://www.github.com/Dekken/maiken.git maiken/master
-    - cd maiken/master
-    - gmake bsd LDFLAGS="-pthread -ldl -lexecinfo"
+  Operations:
+      - git clone http://www.github.com/mkn/maiken maiken/master
+      - cd maiken/master
+      - gmake bsd LDFLAGS="-pthread -ldl -lexecinfo"
 
-Operations:
-    ./mkn clean build -dtKa "-Os -std=c++14 -Wall" -l "-pthread -ldl -lexecinfo"
+  Operations:
+      ./mkn clean build -dtKOWa "-std=c++14" -l "-pthread -ldl -lexecinfo"
 
-3.2.3 FreeBSD
+  3.2.3 FreeBSD
 
-Operations:
-    - git clone http://www.github.com/Dekken/maiken.git maiken/master
-    - cd maiken/master
-    - gmake bsd CXXFLAGS="-std=c++14 -Os -Wall -D_GLIBCXX_USE_C99"
+  Operations:
+      - git clone http://www.github.com/mkn/maiken maiken/master
+      - cd maiken/master
+      - gmake bsd CXXFLAGS="-std=c++14 -Os -Wall -D_GLIBCXX_USE_C99"
 
-Operations:
-    ./mkn clean build -dtKa "-Os -std=c++14 -Wall -D_GLIBCXX_USE_C99" -l "-pthread -ldl"
+  Operations:
+      ./mkn clean build -dtKOWa "-std=c++14 -D_GLIBCXX_USE_C99" -l "-pthread -ldl"
 
 
 4.1 Logging -

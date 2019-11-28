@@ -56,18 +56,6 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     for (std::size_t i = 0; i < project().root()[STR_PROFILE].size(); i++)
       nodes.push_back(project().root()[STR_PROFILE][i]);
 
-  using namespace kul::cli;
-  for (const YAML::Node &c : Settings::INSTANCE().root()[STR_ENV]) {
-    EnvVarMode mode = EnvVarMode::PREP;
-    if (c[STR_MODE].Scalar().compare(STR_APPEND) == 0)
-      mode = EnvVarMode::APPE;
-    else if (c[STR_MODE].Scalar().compare(STR_PREPEND) == 0)
-      mode = EnvVarMode::PREP;
-    else if (c[STR_MODE].Scalar().compare(STR_REPLACE) == 0)
-      mode = EnvVarMode::REPL;
-    evs.emplace_back(c[STR_NAME].Scalar(), Properties::RESOLVE(*this, c[STR_VALUE].Scalar()), mode);
-  }
-
   auto getIfMissing = [&](const YAML::Node &n, const bool mod) {
     const std::string &cwd(kul::env::CWD());
     kul::Dir projectDir(resolveDepOrModDirectory(n, mod));

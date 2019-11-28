@@ -42,18 +42,8 @@ void maiken::Application::showConfig(bool force) {
     std::string path = kul::env::GET("PATH");
     for (const YAML::Node &c : Settings::INSTANCE().root()[STR_ENV]) {
       if (c[STR_NAME].Scalar() != "PATH") continue;
-      EnvVarMode mode = EnvVarMode::PREP;
-      if (c[STR_MODE]) {
-        if (c[STR_MODE].Scalar().compare(STR_APPEND) == 0)
-          mode = EnvVarMode::APPE;
-        else if (c[STR_MODE].Scalar().compare(STR_PREPEND) == 0)
-          mode = EnvVarMode::PREP;
-        else if (c[STR_MODE].Scalar().compare(STR_REPLACE) == 0)
-          mode = EnvVarMode::REPL;
-        else
-          KEXIT(1, "Unhandled EnvVar mode: " + c[STR_MODE].Scalar());
-      }
-      path = EnvVar(c[STR_NAME].Scalar(), c[STR_VALUE].Scalar(), mode).toString();
+      auto ev = PARSE_ENV_NODE(c, this);
+      path = ev.toString();
       break;
     }
     {
@@ -105,40 +95,37 @@ void maiken::Application::showConfig(bool force) {
         }
       }
     }
+    if (kul::LogMan::INSTANCE().dbg()) {
+      KOUT(NON) << "ENV     :";
+      for (auto const &ev : evs)
+        if (std::string(ev.name()).find("MKN_") != 0)
+          KOUT(NON) << "  " << ev.name() << " = " << ev.toString();
+    }
     KOUT(NON) << "+++++++++++++++++++++++++++++";
   }
   AppVars::INSTANCE().show(1);
 }
 
 void maiken::Application::showHelp() {
-  std::vector<std::string> ss = {
-    MKN_DEFS_CMD,   MKN_DEFS_BUILD, MKN_DEFS_MERGE,
-    MKN_DEFS_CLEAN, MKN_DEFS_COMP,  MKN_DEFS_DBG,
-    MKN_DEFS_INIT,  MKN_DEFS_LINK,  MKN_DEFS_PACK,
-    MKN_DEFS_PROFS, MKN_DEFS_RUN,   MKN_DEFS_INC,
-    MKN_DEFS_SRC,                   MKN_DEFS_TREE,
-    "",
-    MKN_DEFS_ARG,   MKN_DEFS_ARGS,  MKN_DEFS_ADD,
-    MKN_DEFS_BINC,  MKN_DEFS_BPATH, MKN_DEFS_DIRC,
-    MKN_DEFS_DEPS,  MKN_DEFS_DRYR,  MKN_DEFS_DEBUG,
-    MKN_DEFS_GET,   MKN_DEFS_EVSA,  MKN_DEFS_FINC,
-    MKN_DEFS_FPATH, MKN_DEFS_HELP,  MKN_DEFS_JARG,
-    MKN_DEFS_STATIC,
-    MKN_DEFS_MOD,   MKN_DEFS_MAIN,  MKN_DEFS_LINKER,
-    MKN_DEFS_ALINKR,
-    MKN_DEFS_OUT,   MKN_DEFS_OPTIM, MKN_DEFS_PROF,
-    MKN_DEFS_PROP,  MKN_DEFS_RUN_ARGS,
-    MKN_DEFS_STAT,  MKN_DEFS_SHARED,
-    MKN_DEFS_THREDS,
-    MKN_DEFS_WITHOUT,
-    MKN_DEFS_UPDATE,
-    MKN_DEFS_FUPDATE,
-    MKN_DEFS_VERSON,
-    MKN_DEFS_WITH, MKN_DEFS_WARN,   MKN_DEFS_SETTNGS,
-    "",
-    MKN_DEFS_EXMPL,  MKN_DEFS_EXMPL1,  MKN_DEFS_EXMPL2,  MKN_DEFS_EXMPL3,  MKN_DEFS_EXMPL4,
-    ""
-  };
+  std::vector<std::string> ss = {MKN_DEFS_CMD,      MKN_DEFS_BUILD,   MKN_DEFS_MERGE,
+                                 MKN_DEFS_CLEAN,    MKN_DEFS_COMP,    MKN_DEFS_DBG,
+                                 MKN_DEFS_INIT,     MKN_DEFS_LINK,    MKN_DEFS_PACK,
+                                 MKN_DEFS_PROFS,    MKN_DEFS_RUN,     MKN_DEFS_INC,
+                                 MKN_DEFS_SRC,      MKN_DEFS_TREE,    "",
+                                 MKN_DEFS_ARG,      MKN_DEFS_ARGS,    MKN_DEFS_ADD,
+                                 MKN_DEFS_BINC,     MKN_DEFS_BPATH,   MKN_DEFS_DIRC,
+                                 MKN_DEFS_DEPS,     MKN_DEFS_DRYR,    MKN_DEFS_DEBUG,
+                                 MKN_DEFS_GET,      MKN_DEFS_EVSA,    MKN_DEFS_FINC,
+                                 MKN_DEFS_FPATH,    MKN_DEFS_HELP,    MKN_DEFS_JARG,
+                                 MKN_DEFS_STATIC,   MKN_DEFS_MOD,     MKN_DEFS_MAIN,
+                                 MKN_DEFS_LINKER,   MKN_DEFS_ALINKR,  MKN_DEFS_OUT,
+                                 MKN_DEFS_OPTIM,    MKN_DEFS_PROF,    MKN_DEFS_PROP,
+                                 MKN_DEFS_RUN_ARGS, MKN_DEFS_STAT,    MKN_DEFS_SHARED,
+                                 MKN_DEFS_THREDS,   MKN_DEFS_WITHOUT, MKN_DEFS_UPDATE,
+                                 MKN_DEFS_FUPDATE,  MKN_DEFS_VERSON,  MKN_DEFS_WITH,
+                                 MKN_DEFS_WARN,     MKN_DEFS_SETTNGS, "",
+                                 MKN_DEFS_EXMPL,    MKN_DEFS_EXMPL1,  MKN_DEFS_EXMPL2,
+                                 MKN_DEFS_EXMPL3,   MKN_DEFS_EXMPL4,  ""};
   for (const auto &s : ss) KOUT(NON) << s;
 }
 

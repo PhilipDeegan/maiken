@@ -53,6 +53,7 @@ const kul::yaml::Validator maiken::Project::validator() const {
       NodeValidator("init", {NodeValidator("*")}, 0, NodeType::NON),
       NodeValidator("compile", {NodeValidator("*")}, 0, NodeType::NON),
       NodeValidator("link", {NodeValidator("*")}, 0, NodeType::NON),
+      NodeValidator("test", {NodeValidator("*")}, 0, NodeType::NON),
       NodeValidator("pack", {NodeValidator("*")}, 0, NodeType::NON)};
   NodeValidator mod("mod", modVals, 0, NodeType::NON);
   NodeValidator if_mod("if_mod", {NodeValidator("*", modVals, 0, NodeType::LIST)}, 0,
@@ -60,7 +61,7 @@ const kul::yaml::Validator maiken::Project::validator() const {
 
   NodeValidator env("env",
                     {NodeValidator("name", 1), NodeValidator("mode"), NodeValidator("value", 1)}, 0,
-                    NodeType::LIST);
+                    NodeType::NON);
 
   NodeValidator if_arg("if_arg", {NodeValidator("*")}, 0, NodeType::MAP);
   NodeValidator if_inc("if_inc", {NodeValidator("*")}, 0, NodeType::MAP);
