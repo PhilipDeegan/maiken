@@ -4,7 +4,7 @@ name: mkn
 scm: https://github.com/dekken/maiken
 version: master
 property:
-    DATE: 28-NOV-2019
+    DATE: 29-NOV-2019
 
 parent: lib
 mode: none
@@ -53,7 +53,7 @@ profile:
 
 - name: test
   test: test/cpp.cpp
-  env: PYTHONPATH=.
+  env: PYTHONPATH=.=.
   mod: |
      mkn-mod.exec{test: ./test/test.sh }
 

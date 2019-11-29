@@ -91,10 +91,11 @@ maiken::Application *maiken::Applications::getOrNullptr(const std::string &proje
 
 kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const &n, Application *app) {
   using namespace kul::cli;
-  KLOG(INF);
   if (n.IsScalar()) {
     auto bits = kul::String::SPLIT(n.Scalar(), "=");
-    if (bits.size() != 2) KEXIT(1, "NOOOO");
+    if (bits.size() != 2)
+      KEXIT(1, "env string is invalid, expects one '=' only, string ") << n.Scalar()
+             << "\n in: " << app->project().file();
     auto ev = EnvVar(bits[0], bits[1], EnvVarMode::REPL);
     KLOG(INF) << ev.name();
     return ev;
@@ -112,5 +113,5 @@ kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const &n, Applic
     KLOG(INF) << ev.name();
     return ev;
   }
-  KEXIT(1, "NO");
+  KEXIT(1, "env field is invalid, expects string lines or list");
 }
