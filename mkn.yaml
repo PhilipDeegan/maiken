@@ -53,7 +53,7 @@ profile:
 
 - name: test
   test: test/cpp.cpp
-  env: PYTHONPATH=.=.
+  env: PYTHONPATH=.
   mod: |
      mkn-mod.exec{test: ./test/test.sh }
 
