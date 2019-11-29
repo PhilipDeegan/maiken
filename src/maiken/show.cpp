@@ -40,18 +40,14 @@ void maiken::Application::showConfig(bool force) {
     KOUT(NON) << "THREADS : " << AppVars::INSTANCE().threads() << "\n";
     KOUT(NON) << "BINARIES";
     std::string path = kul::env::GET("PATH");
-    for (const YAML::Node &c : Settings::INSTANCE().root()[STR_ENV]) {
-      if (c[STR_NAME].Scalar() != "PATH") continue;
-      auto ev = PARSE_ENV_NODE(c, this);
-      path = ev.toString();
-      break;
-    }
-    {
-      auto it(std::find_if(evs.begin(), evs.end(), [](const kul::cli::EnvVar &ev) {
+    auto checkSetPATH = [&](std::vector<kul::cli::EnvVar> const& envs) {
+      auto it(std::find_if(envs.begin(), envs.end(), [](const kul::cli::EnvVar &ev) {
         return strcmp(ev.name(), "PATH") == 0;
       }));
-      if (it != evs.end()) path = (*it).toString();
-    }
+      if (it != envs.end()) path = (*it).toString();
+    };
+    checkSetPATH(evs);
+
     for (const auto &c : Settings::INSTANCE().root()[STR_FILE]) {
       bool a = 0, g = 0, l = 0;
       KOUT(NON) << "TYPE    : " << c[STR_TYPE].Scalar();

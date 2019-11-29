@@ -28,7 +28,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken/global.hpp"
+#include "maiken/app.hpp"
 
 namespace maiken {
 std::shared_ptr<AppVars> AppVars::instance;
@@ -40,22 +40,23 @@ maiken::AppVars::AppVars() {
   pks["MKN_HOME"] = kul::user::home(STR_MAIKEN).path();
   pks["DATETIME"] = kul::DateTime::NOW();
   pks["TIMESTAMP"] = std::time(NULL);
+  auto root = Settings::INSTANCE().root();
 
-  if (Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_REPO])
-    pks["MKN_REPO"] = kul::Dir(Settings::INSTANCE().root()[STR_LOCAL][STR_REPO].Scalar()).real();
+  if (root[STR_LOCAL] && root[STR_LOCAL][STR_REPO])
+    pks["MKN_REPO"] = kul::Dir(root[STR_LOCAL][STR_REPO].Scalar()).real();
   else
     pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
-  if (Settings::INSTANCE().root()[STR_LOCAL] &&
-      Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO])
+  if (root[STR_LOCAL] &&
+      root[STR_LOCAL][STR_MOD_REPO])
     pks["MKN_MOD_REPO"] =
-        kul::Dir(Settings::INSTANCE().root()[STR_LOCAL][STR_MOD_REPO].Scalar()).real();
+        kul::Dir(root[STR_LOCAL][STR_MOD_REPO].Scalar()).real();
   else
     pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 
-  if (Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_BIN])
-    pks["MKN_BIN"] = Settings::INSTANCE().root()[STR_LOCAL][STR_BIN].Scalar();
-  if (Settings::INSTANCE().root()[STR_LOCAL] && Settings::INSTANCE().root()[STR_LOCAL][STR_LIB])
-    pks["MKN_LIB"] = Settings::INSTANCE().root()[STR_LOCAL][STR_LIB].Scalar();
+  if (root[STR_LOCAL] && root[STR_LOCAL][STR_BIN])
+    pks["MKN_BIN"] = root[STR_LOCAL][STR_BIN].Scalar();
+  if (root[STR_LOCAL] && root[STR_LOCAL][STR_LIB])
+    pks["MKN_LIB"] = root[STR_LOCAL][STR_LIB].Scalar();
 
 #ifdef _WIN32
   evs["MKN_OBJ"] = "obj";
@@ -77,4 +78,16 @@ maiken::AppVars::AppVars() {
   check_set("MKN_LIB_EXT");
   check_set("MKN_LIB_PRE");
   check_set("MKN_OBJ");
+
+  if (root[STR_ENV]) {
+    if (root[STR_ENV].IsScalar()){
+      auto ev = maiken::Application::PARSE_ENV_NODE(root[STR_ENV]);
+      evs.emplace(ev.name(), ev.toString());
+    } else{
+      for (const auto &c : root[STR_ENV]) {
+        auto ev = maiken::Application::PARSE_ENV_NODE(c);
+        evs.emplace(ev.name(), ev.toString());
+      }
+    }
+  }
 }

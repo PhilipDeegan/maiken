@@ -95,23 +95,29 @@ kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const &n, Applic
     auto bits = kul::String::SPLIT(n.Scalar(), "=");
     if (bits.size() != 2)
       KEXIT(1, "env string is invalid, expects one '=' only, string ") << n.Scalar()
-             << "\n in: " << app->project().file();
-    auto ev = EnvVar(bits[0], bits[1], EnvVarMode::REPL);
-    KLOG(INF) << ev.name();
-    return ev;
-  } else if (n.IsSequence()) {
-    EnvVarMode mode = EnvVarMode::PREP;
+             << "\n in: " << (app ? app->project().file() : "settings file");
+
+    auto replace = [](std::string const& n, std::string & in, std::string f){
+      auto pos = in.find(f);
+      if(pos != std::string::npos)
+        if(pos == 0 || (pos > 0 && in[pos - 1] != '\\'))
+          kul::String::REPLACE(in, f, std::string(kul::env::GET(n.c_str())));
+    };
+    replace(bits[0], bits[1], "$" + bits[0]);
+    replace(bits[0], bits[1], "${" + bits[0] + "}");
+
+    return EnvVar(bits[0], bits[1], EnvVarMode::REPL);
+  }
+  EnvVarMode mode = EnvVarMode::PREP;
+  if(n[STR_MODE]){
     if (n[STR_MODE].Scalar().compare(STR_APPEND) == 0)
       mode = EnvVarMode::APPE;
     else if (n[STR_MODE].Scalar().compare(STR_PREPEND) == 0)
       mode = EnvVarMode::PREP;
     else if (n[STR_MODE].Scalar().compare(STR_REPLACE) == 0)
       mode = EnvVarMode::REPL;
-    auto ev = EnvVar(n[STR_NAME].Scalar(),
-                     app ? Properties::RESOLVE(*app, n[STR_VALUE].Scalar()) : n[STR_VALUE].Scalar(),
-                     mode);
-    KLOG(INF) << ev.name();
-    return ev;
   }
-  KEXIT(1, "env field is invalid, expects string lines or list");
+  return EnvVar(n[STR_NAME].Scalar(),
+                   app ? Properties::RESOLVE(*app, n[STR_VALUE].Scalar()) : n[STR_VALUE].Scalar(),
+                   mode);
 }
