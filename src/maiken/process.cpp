@@ -72,9 +72,8 @@ class ObjectMerger {
 }  // namespace maiken
 
 void maiken::Application::process() KTHROW(kul::Exception) {
-  const kul::hash::set::String &cmds(CommandStateMachine::INSTANCE().commands());
-  const auto gEnvVars = maiken::AppVars::INSTANCE().envVars();
-  for(auto const& ev : gEnvVars) KLOG(INF) << ev.first << " : " << ev.second;
+  auto const& cmds = CommandStateMachine::INSTANCE().commands();
+  auto const& gEnvVars = maiken::AppVars::INSTANCE().envVars();
 
   kul::os::PushDir pushd(this->project().dir());
   auto loadModules = [&](Application &app) {
