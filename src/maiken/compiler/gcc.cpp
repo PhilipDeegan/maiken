@@ -171,7 +171,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(
 
   {
     auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
-    if ((ll.size())) {
+    if (ll.size() && mode == compiler::Mode::SHAR) {
       uint16_t llv = kul::String::UINT16(ll);
       for (const std::string &path : libPaths) p.arg("-L" + path);
       if (llv == 1) {
