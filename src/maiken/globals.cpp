@@ -38,6 +38,7 @@ maiken::AppVars::AppVars() {
   pks["OS"] = KTOSTRING(__KUL_OS__);
   pks["HOME"] = kul::user::home().path();
   pks["MKN_HOME"] = kul::user::home(STR_MAIKEN).path();
+
   pks["DATETIME"] = kul::DateTime::NOW();
   pks["TIMESTAMP"] = std::time(NULL);
   auto root = Settings::INSTANCE().root();
@@ -46,10 +47,8 @@ maiken::AppVars::AppVars() {
     pks["MKN_REPO"] = kul::Dir(root[STR_LOCAL][STR_REPO].Scalar()).real();
   else
     pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
-  if (root[STR_LOCAL] &&
-      root[STR_LOCAL][STR_MOD_REPO])
-    pks["MKN_MOD_REPO"] =
-        kul::Dir(root[STR_LOCAL][STR_MOD_REPO].Scalar()).real();
+  if (root[STR_LOCAL] && root[STR_LOCAL][STR_MOD_REPO])
+    pks["MKN_MOD_REPO"] = kul::Dir(root[STR_LOCAL][STR_MOD_REPO].Scalar()).real();
   else
     pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 
@@ -71,7 +70,7 @@ maiken::AppVars::AppVars() {
   evs["MKN_LIB_EXT_DEF"] = evs["MKN_LIB_EXT"];
   evs["MKN_LIB_PRE_DEF"] = evs["MKN_LIB_PRE"];
 
-  auto check_set = [&](const std::string key){
+  auto check_set = [&](const std::string key) {
     auto cstr = key.c_str();
     if (kul::env::EXISTS(cstr)) evs[key] = kul::env::GET(cstr);
   };
@@ -80,10 +79,10 @@ maiken::AppVars::AppVars() {
   check_set("MKN_OBJ");
 
   if (root[STR_ENV]) {
-    if (root[STR_ENV].IsScalar()){
+    if (root[STR_ENV].IsScalar()) {
       auto ev = maiken::Application::PARSE_ENV_NODE(root[STR_ENV]);
       evs.emplace(ev.name(), ev.toString());
-    } else{
+    } else {
       for (const auto &c : root[STR_ENV]) {
         auto ev = maiken::Application::PARSE_ENV_NODE(c);
         evs.emplace(ev.name(), ev.toString());

@@ -31,7 +31,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 maiken::Application::Application(const maiken::Project &proj, const std::string &profile)
-    : m(compiler::Mode::NONE), p(profile), proj(proj) {}
+    : m(compiler::Mode::NONE), p(profile), proj(proj) {
+  ps["MKN_ROOT"] = proj.dir().real();
+}
 
 maiken::Application::~Application() {
   for (auto mod : mods) mod->unload();

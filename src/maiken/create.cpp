@@ -57,13 +57,13 @@ class CLIHandler : public Constants {
         Arg('x', STR_SETTINGS, ArgType::STRING)
   };
   std::vector<kul::cli::Cmd> cmdV{
-      Cmd(STR_INIT),  Cmd(STR_INC),      Cmd(STR_SRC),   Cmd(STR_MERGE),
+      Cmd(STR_INIT),    Cmd(STR_INC),  Cmd(STR_SRC),      Cmd(STR_MERGE),
 #ifndef _MKN_DISABLE_MODULES_
       Cmd(STR_MODS),
 #endif  //_MKN_DISABLE_MODULES_
-      Cmd(STR_CLEAN), Cmd(STR_DEPS),     Cmd(STR_BUILD), Cmd(STR_RUN),   Cmd(STR_COMPILE),
-      Cmd(STR_LINK),  Cmd(STR_PROFILES), Cmd(STR_DBG),   Cmd(STR_PACK),  Cmd(STR_INFO),
-      Cmd(STR_TREE),  Cmd(STR_TEST)};
+      Cmd(STR_CLEAN),   Cmd(STR_DEPS), Cmd(STR_BUILD),    Cmd(STR_RUN),
+      Cmd(STR_COMPILE), Cmd(STR_LINK), Cmd(STR_PROFILES), Cmd(STR_DBG),
+      Cmd(STR_PACK),    Cmd(STR_INFO), Cmd(STR_TREE),     Cmd(STR_TEST)};
 
  public:
   std::vector<kul::cli::Arg> args() { return argV; }
@@ -146,6 +146,7 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
     if (!d) KEXIT(1, "STR_DIR DOES NOT EXIST: " + args.get(STR_DIR));
     kul::env::CWD(args.get(STR_DIR));
   }
+
   const Project &project(*Projects::INSTANCE().getOrCreate(kul::env::CWD()));
 
   std::vector<std::string> profiles;
@@ -211,12 +212,15 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
         }
     };
 
-    getSet(STR_DEBUG, "-g", 9, std::bind((void (AppVars::*)(const uint16_t &)) & AppVars::debug,
-                                         std::ref(AppVars::INSTANCE()), std::placeholders::_1));
-    getSet(STR_OPT, "-O", 9, std::bind((void (AppVars::*)(const uint16_t &)) & AppVars::optimise,
-                                       std::ref(AppVars::INSTANCE()), std::placeholders::_1));
-    getSet(STR_WARN, "-W", 8, std::bind((void (AppVars::*)(const uint16_t &)) & AppVars::warn,
-                                        std::ref(AppVars::INSTANCE()), std::placeholders::_1));
+    getSet(STR_DEBUG, "-g", 9,
+           std::bind((void (AppVars::*)(const uint16_t &)) & AppVars::debug,
+                     std::ref(AppVars::INSTANCE()), std::placeholders::_1));
+    getSet(STR_OPT, "-O", 9,
+           std::bind((void (AppVars::*)(const uint16_t &)) & AppVars::optimise,
+                     std::ref(AppVars::INSTANCE()), std::placeholders::_1));
+    getSet(STR_WARN, "-W", 8,
+           std::bind((void (AppVars::*)(const uint16_t &)) & AppVars::warn,
+                     std::ref(AppVars::INSTANCE()), std::placeholders::_1));
   }
   {
     auto splitArgs = [](const std::string &s, const std::string &t,
@@ -238,9 +242,8 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
     if (args.has(STR_ENV))
       splitArgs(
           args.get(STR_ENV), "environment",
-          std::bind(
-              (void (AppVars::*)(const std::string &, const std::string &)) & AppVars::envVar,
-              std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
+          std::bind((void (AppVars::*)(const std::string &, const std::string &)) & AppVars::envVar,
+                    std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
   }
 
   std::vector<std::string> cmds = {{STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK, STR_RUN, STR_TEST,
