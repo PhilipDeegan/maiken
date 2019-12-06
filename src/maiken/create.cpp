@@ -87,13 +87,18 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
     KTHROW(kul::Exception) {
   using namespace kul::cli;
 
+  kul::File yml("mkn.yaml");
   if (args.empty() || (args.size() == 1 && args.has(STR_DIR))) {
     if (args.size() == 1 && args.has(STR_DIR)) {
       kul::Dir d(args.get(STR_DIR));
-      if (!d) KEXIT(1, "STR_DIR DOES NOT EXIST: " + args.get(STR_DIR));
+      kul::File f(args.get(STR_DIR));
+      if (!d && !f) KEXIT(1, "Invalid -C argument, no such item: " + args.get(STR_DIR));
+      if(f) {
+        yml = f;
+        d = f.dir();
+      }
       kul::env::CWD(d);
     }
-    kul::File yml("mkn.yaml");
     if (yml) {
       kul::io::Reader reader(yml);
       const char *c = reader.readLine();
@@ -140,14 +145,20 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
     KOUT(NON) << ss.str();
     KEXIT(0, "");
   }
-  if (args.has(STR_INIT)) NewProject{};
   if (args.has(STR_DIR)) {
     kul::Dir d(args.get(STR_DIR));
-    if (!d) KEXIT(1, "STR_DIR DOES NOT EXIST: " + args.get(STR_DIR));
-    kul::env::CWD(args.get(STR_DIR));
+    kul::File f(args.get(STR_DIR));
+    if (!d && !f) KEXIT(1, "Invalid -C argument, no such item: " + args.get(STR_DIR));
+    if(f) {
+      yml = f;
+      d = f.dir();
+    }
+    kul::env::CWD(d);
   }
+  if (args.has(STR_INIT)) NewProject{};
 
-  const Project &project(*Projects::INSTANCE().getOrCreate(kul::env::CWD()));
+  if(!yml && kul::File("mkn.yml").is()) yml = kul::File("mkn.yml");
+  const Project &project(*Projects::INSTANCE().getOrCreate(yml));
 
   std::vector<std::string> profiles;
   if (args.has(STR_PROFILE)) {

@@ -189,6 +189,7 @@ System properties:
            win cmd prompt = %HOMEDRIVE%/%HOMEPATH%
     DATETIME - DateTime when app launched format %Y-%m-%d-%H:%M:%S
     TIMESTAMP - Unix timestamp when app launched in seconds
+    MKN_ROOT - Directory of current mkn.yaml file
     MKN_REPO - if settings.xml has [local][repo], it is that, otherwise
            bsd/nix/win(with msys/cygwin/etc) = ~/.maiken/repo
            win cmd prompt = %HOMEDRIVE%/%HOMEPATH%/maiken/repo

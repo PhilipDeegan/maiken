@@ -50,8 +50,7 @@ class ProjectException : public kul::Exception {
 class Projects;
 class KUL_PUBLISH Project : public kul::yaml::File, public Constants {
  public:
-  Project(const kul::Dir &d)
-      : kul::yaml::File(kul::Dir::JOIN(d.real(), "mkn.yaml")), m_dir(d.real()) {}
+  Project(const kul::File &f) : kul::yaml::File(f) , m_dir(f.dir()) {}
   Project(const Project &p) : kul::yaml::File(p), m_dir(p.m_dir) {}
   const kul::Dir &dir() const { return m_dir; }
   const kul::yaml::Validator validator() const;
@@ -75,9 +74,13 @@ class Projects {
   const Project *getOrCreate(const kul::Dir &d) {
     if (!d) KEXCEPT(ProjectException, "Directory does not exist:\n" + d.path());
     kul::File f("mkn.yaml", d);
+    if(!f && kul::File("mkn.yml", d).is()) f = kul::File("mkn.yml", d);
+    return getOrCreate(f);
+  }
+  const Project *getOrCreate(const kul::File &f) {
     if (!f.is()) KEXCEPT(ProjectException, "project file does not exist:\n" + f.full());
     if (!m_projects.count(f.real())) {
-      auto project = std::make_unique<Project>(d);
+      auto project = std::make_unique<Project>(f);
       try {
         kul::yaml::Item::VALIDATE(project->root(), project->validator().children());
       } catch (const kul::yaml::Exception &e) {

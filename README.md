@@ -2,8 +2,7 @@
 
 | Operating system  | Build Status |
 | ------------- | -------------
-| Linux  | [![Linux Build](https://semaphoreci.com/api/v1/dekken/maiken/branches/master/badge.svg)](https://semaphoreci.com/dekken/maiken)  |
-| Mac  | [![Mac Build](https://travis-ci.org/Dekken/maiken.svg?branch=master)](https://travis-ci.org/Dekken/maiken)  |
+| Linux/Mac  | [![Linux/Mac Build](https://travis-ci.org/Dekken/maiken.svg?branch=master)](https://travis-ci.org/Dekken/maiken)  |
 | Windows  | [![Windows Build](https://ci.appveyor.com/api/projects/status/tsfqtewavevo0a8y/branch/master?svg=true)](https://ci.appveyor.com/project/Dekken/maiken)  |
 
 
