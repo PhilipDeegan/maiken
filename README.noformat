@@ -180,6 +180,18 @@ profiles:
 
 Compiler binares are expected to have their default names e.g. gcc/gcc.exe/cl.exe. This only applies to compilers and not archivers or linkers. Compiler masking is provided to use alternate compiler binaries with the same functionality as the underlying compiler.
 
+Masking settings.yml exmaple
+
+```
+compiler:
+  mask:
+    g++:
+      mpicxx
+```
+
+Each value under "g++:" is considered to be a filesystem binary which supports all flags which are supported by "g++".
+
+
 
 2.2.2 Properties
 
