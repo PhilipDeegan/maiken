@@ -68,7 +68,7 @@ maiken::cpp::GccCompiler::GccCompiler(const int &v) : CCompiler(v) {
                    {6, "-Wall"},
                    {7, "-Wall"},
                    {8, "-Wall -Wextra"},
-                   {9, "-Wall -Wextra -Werror"}});
+                   {9, "-Wall -Wextra -pedantic -Werror"}});
 }
 
 void maiken::cpp::GccCompiler::rpathing(kul::Process &p, const kul::File &out,
