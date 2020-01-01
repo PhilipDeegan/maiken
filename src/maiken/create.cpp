@@ -174,12 +174,21 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
         profiles.emplace_back("");
         continue;
       }
+      bool wildcard = profile.rfind("*") == profile.size() - 1;
       for (const auto &n : project.root()[STR_PROFILE]) {
-        f = n[STR_NAME].Scalar() == profile;
-        if (f) break;
+        std::string yProfile = n[STR_NAME].Scalar();
+        if(wildcard && yProfile.find(profile.substr(0, profile.rfind("*"))) == 0){
+          profiles.emplace_back(yProfile);
+          f = 1;
+        }
+        else
+          f = yProfile == profile;
+
+        if (f && !wildcard) break;
       }
+
       if (!f) KEXIT(1, "profile does not exist");
-      profiles.emplace_back(profile);
+      if (!wildcard) profiles.emplace_back(profile);
     }
   }
   if (profiles.empty()) profiles.emplace_back("");
