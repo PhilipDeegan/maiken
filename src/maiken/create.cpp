@@ -96,6 +96,9 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
       if(f) {
         yml = f;
         d = f.dir();
+      } else {
+        if(kul::File("mkn.yaml", d.real()).is()) yml = kul::File("mkn.yaml", d.real());
+        if(kul::File("mkn.yml", d.real()).is())  yml = kul::File("mkn.yml", d.real());
       }
       kul::env::CWD(d);
     }
@@ -152,6 +155,9 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
     if(f) {
       yml = f;
       d = f.dir();
+    } else {
+      if(kul::File("mkn.yaml", d.real()).is()) yml = kul::File("mkn.yaml", d.real());
+      if(kul::File("mkn.yml", d.real()).is())  yml = kul::File("mkn.yml", d.real());
     }
     kul::env::CWD(d);
   }
