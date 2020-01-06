@@ -63,7 +63,6 @@ std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(
     return std::make_shared<std::tuple<std::string, int, int>>(r.substr(lb + 2, rb - 2 - lb), lb,
                                                                rb);
   return 0;
-  std::shared_ptr<std::tuple<std::string, int, int>>(0);
 }
 
 std::string maiken::Properties::RESOLVE(const Application &app, const std::string &s)
