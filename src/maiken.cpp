@@ -142,7 +142,9 @@ void maiken::Application::populateMaps(const YAML::Node &n)
 
   if (n[STR_LIB])
     for (const auto &s : kul::String::SPLIT(n[STR_LIB].Scalar(), ' '))
-      if (s.size()) libs.push_back(Properties::RESOLVE(*this, s));
+      if (s.size())
+        for (const auto &S : kul::String::SPLIT(Properties::RESOLVE(*this, s), ' '))
+          if (S.size()) libs.push_back(S);
 
   for (const std::string &s : libraryPaths())
     if (!kul::Dir(s).is()) KEXIT(1, s + " is not a valid directory\n" + project().dir().path());

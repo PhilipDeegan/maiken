@@ -209,8 +209,7 @@ maiken::CompilerProcessCapture maiken::Application::buildLibrary(
     if (m == compiler::Mode::NONE) m = compiler::Mode::SHAR;
     if (!(*files().find(lang)).second.count(STR_COMPILER))
       KEXIT(1, "No compiler found for filetype " + lang);
-    std::string linker = fs[lang][STR_LINKER];
-    std::string linkEnd;
+    std::string linker = fs[lang][STR_LINKER], linkEnd;
     if (ro) linkEnd = AppVars::INSTANCE().linker();
     if (!AppVars::INSTANCE().allinker().empty()) linkEnd += " " + AppVars::INSTANCE().allinker();
     if (!lnk.empty()) linkEnd += " " + lnk;
@@ -222,7 +221,7 @@ maiken::CompilerProcessCapture maiken::Application::buildLibrary(
     lib = AppVars::INSTANCE().dryRun() ? kul::File(lib, outD).esc() : kul::File(lib, outD).escm();
     std::vector<std::string> obV;
     for (const auto &o : objects) obV.emplace_back(o);
-    const std::string &base(
+    auto const& base(
         Compilers::INSTANCE().base((*(*files().find(lang)).second.find(STR_COMPILER)).second));
     if (cLnk.count(base)) linkEnd += " " + cLnk[base];
     auto *comp = Compilers::INSTANCE().get(base);
