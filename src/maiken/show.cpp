@@ -96,6 +96,9 @@ void maiken::Application::showConfig(bool force) {
       for (auto const &ev : evs)
         if (std::string(ev.name()).find("MKN_") != 0)
           KOUT(NON) << "  " << ev.name() << " = " << ev.toString();
+      for(auto const &ev : {"CC", "CXX"})
+        if (kul::env::EXISTS(ev))
+          KOUT(NON) << "  " << ev << " = " << kul::env::GET(ev);
     }
     KOUT(NON) << "+++++++++++++++++++++++++++++";
   }
