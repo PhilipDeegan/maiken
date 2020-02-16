@@ -1,5 +1,5 @@
 
-set -e
+set -ex
 WHICH=which
 [ -z "$INCLUDE" ] && echo "Windows vcvars.bat has not been called" && exit 1
 [ -z "$(where git)" ] && echo "no git" && exit 1
@@ -22,7 +22,7 @@ INCS=(inc
 )
 
 for i in ${INCS[@]}; do INC+=" -I$i"; done
-compile(){ cl -nologo -EHsc $INC -c -Fo$1 "$2" > /dev/null || exit 1; }
+compile(){ cl -nologo -EHsc $INC -c -Fo$1 "$2" || exit 1 ; }
 archive(){ lib -nologo -LTCG -OUT:"$1" "$2/*.o"; }
 exe(){     link -OUT:"mkn.exe" -nologo bin/*.o parse.yaml.lib  \
            -nodefaultlib:libucrt.lib ucrt.lib; rm parse.yaml.lib; }
