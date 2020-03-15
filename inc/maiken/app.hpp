@@ -244,7 +244,7 @@ class KUL_PUBLISH Application : public Constants {
   const kul::hash::map::S2S &properties() const { return ps; }
   const kul::hash::map::S2T<kul::hash::set::String> &arguments() const { return args; }
 
-  std::vector<kul::cli::EnvVar> & envVars() { return evs; }
+  std::vector<kul::cli::EnvVar> &envVars() { return evs; }
 
   void add_def(const std::string &def) { defs.emplace_back(def); }
   const std::vector<std::string> &defines() const { return defs; }

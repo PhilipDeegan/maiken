@@ -4,7 +4,7 @@ name: mkn
 scm: https://github.com/dekken/maiken
 version: master
 property:
-    DATE: 15-FEB-2020
+    DATE: 15-MAR-2020
 
 parent: lib
 mode: none
@@ -48,8 +48,12 @@ profile:
   mode: none
 
 - name: format
-  mod: |
-    clang.format{init:{style: file, paths: .}}
+  mod:
+  - name: clang.format
+    init:
+      style: file
+      types: cpp:cxx:cc:h:hpp
+      paths: .
 
 - name: test
   test: test/cpp.cpp

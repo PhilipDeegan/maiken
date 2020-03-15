@@ -60,8 +60,7 @@ class WINCompiler : public Compiler {
                                       const kul::File &out, const compiler::Mode &mode,
                                       bool dryRun = false) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture compileSource(const maiken::Application &app,
-                                       const std::string &compiler,
+  CompilerProcessCapture compileSource(const maiken::Application &app, const std::string &compiler,
                                        const std::vector<std::string> &args,
                                        const std::vector<std::string> &incs, const std::string &in,
                                        const std::string &out, const compiler::Mode &mode,

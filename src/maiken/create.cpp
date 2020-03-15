@@ -93,12 +93,12 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
       kul::Dir d(args.get(STR_DIR));
       kul::File f(args.get(STR_DIR));
       if (!d && !f) KEXIT(1, "Invalid -C argument, no such item: " + args.get(STR_DIR));
-      if(f) {
+      if (f) {
         yml = f;
         d = f.dir();
       } else {
-        if(kul::File("mkn.yaml", d.real()).is()) yml = kul::File("mkn.yaml", d.real());
-        if(kul::File("mkn.yml", d.real()).is())  yml = kul::File("mkn.yml", d.real());
+        if (kul::File("mkn.yaml", d.real()).is()) yml = kul::File("mkn.yaml", d.real());
+        if (kul::File("mkn.yml", d.real()).is()) yml = kul::File("mkn.yml", d.real());
       }
       kul::env::CWD(d);
     }
@@ -152,18 +152,18 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
     kul::Dir d(args.get(STR_DIR));
     kul::File f(args.get(STR_DIR));
     if (!d && !f) KEXIT(1, "Invalid -C argument, no such item: " + args.get(STR_DIR));
-    if(f) {
+    if (f) {
       yml = f;
       d = f.dir();
     } else {
-      if(kul::File("mkn.yaml", d.real()).is()) yml = kul::File("mkn.yaml", d.real());
-      if(kul::File("mkn.yml", d.real()).is())  yml = kul::File("mkn.yml", d.real());
+      if (kul::File("mkn.yaml", d.real()).is()) yml = kul::File("mkn.yaml", d.real());
+      if (kul::File("mkn.yml", d.real()).is()) yml = kul::File("mkn.yml", d.real());
     }
     kul::env::CWD(d);
   }
   if (args.has(STR_INIT)) NewProject{};
 
-  if(!yml && kul::File("mkn.yml").is()) yml = kul::File("mkn.yml");
+  if (!yml && kul::File("mkn.yml").is()) yml = kul::File("mkn.yml");
   const Project &project(*Projects::INSTANCE().getOrCreate(yml));
 
   std::vector<std::string> profiles;
@@ -177,11 +177,10 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
       bool wildcard = profile.rfind("*") == profile.size() - 1;
       for (const auto &n : project.root()[STR_PROFILE]) {
         std::string yProfile = n[STR_NAME].Scalar();
-        if(wildcard && yProfile.find(profile.substr(0, profile.rfind("*"))) == 0){
+        if (wildcard && yProfile.find(profile.substr(0, profile.rfind("*"))) == 0) {
           profiles.emplace_back(yProfile);
           f = 1;
-        }
-        else
+        } else
           f = yProfile == profile;
 
         if (f && !wildcard) break;

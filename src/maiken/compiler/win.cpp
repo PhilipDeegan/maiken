@@ -175,7 +175,7 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(
     cmd = bits[0];
   }
   kul::Process p(cmd);
-  for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
+  for (size_t i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-nologo");
   for (const auto &def : app.defines()) p << std::string("-D" + def);
   for (const std::string &s : incs) p.arg("-I\"" + s + "\"");

@@ -40,7 +40,7 @@ void maiken::Application::showConfig(bool force) {
     KOUT(NON) << "THREADS : " << AppVars::INSTANCE().threads() << "\n";
     KOUT(NON) << "BINARIES";
     std::string path = kul::env::GET("PATH");
-    auto checkSetPATH = [&](std::vector<kul::cli::EnvVar> const& envs) {
+    auto checkSetPATH = [&](std::vector<kul::cli::EnvVar> const &envs) {
       auto it(std::find_if(envs.begin(), envs.end(), [](const kul::cli::EnvVar &ev) {
         return strcmp(ev.name(), "PATH") == 0;
       }));
@@ -96,9 +96,8 @@ void maiken::Application::showConfig(bool force) {
       for (auto const &ev : evs)
         if (std::string(ev.name()).find("MKN_") != 0)
           KOUT(NON) << "  " << ev.name() << " = " << ev.toString();
-      for(auto const &ev : {"CC", "CXX"})
-        if (kul::env::EXISTS(ev))
-          KOUT(NON) << "  " << ev << " = " << kul::env::GET(ev);
+      for (auto const &ev : {"CC", "CXX"})
+        if (kul::env::EXISTS(ev)) KOUT(NON) << "  " << ev << " = " << kul::env::GET(ev);
     }
     KOUT(NON) << "+++++++++++++++++++++++++++++";
   }

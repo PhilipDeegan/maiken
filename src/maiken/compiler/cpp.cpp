@@ -30,13 +30,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-std::string maiken::cpp::CCompiler::defaultSharedLib(const std::string &lib) const  {
+std::string maiken::cpp::CCompiler::defaultSharedLib(const std::string &lib) const {
   return AppVars::INSTANCE().envVar("MKN_LIB_PRE_DEF") + lib +
          AppVars::INSTANCE().envVar("MKN_LIB_EXT_DEF");
 }
 
-std::string maiken::cpp::CCompiler::sharedLib(const std::string &lib) const  {
+std::string maiken::cpp::CCompiler::sharedLib(const std::string &lib) const {
   return AppVars::INSTANCE().envVar("MKN_LIB_PRE") + lib +
          AppVars::INSTANCE().envVar("MKN_LIB_EXT");
 }
-

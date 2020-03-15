@@ -88,7 +88,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_ALINKR                                                       \
   "   -L/--all-linker $t     | Adds $t to linking of all projects with link " \
   "operations"
-#define MKN_DEFS_MOD                                                        \
+#define MKN_DEFS_MOD \
   "   -m/--mod [$csv]        | Activate modules for selected phase (init/compile/link/pack) "
 #define MKN_DEFS_MAIN                                                          \
   "   -M/--main $m           | Sets main linker file to $m, supercedes /main " \

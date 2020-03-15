@@ -92,7 +92,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_ALINKR                                                    \
   "   -L/--all-linker $t     | Aggiunge $t per il collegamento (link) di " \
   "tutti i progetti che lo prevedono"
-#define MKN_DEFS_MOD                                                        \
+#define MKN_DEFS_MOD \
   "   -m/--mod [$csv]        | Activate modules for selected phase (init/compile/link/pack) "
 #define MKN_DEFS_MAIN                                                          \
   "   -M/--main $m           | Sets main linker file to $m, supercedes /main " \

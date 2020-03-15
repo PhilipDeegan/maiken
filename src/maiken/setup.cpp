@@ -250,9 +250,10 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
                 continue;
             }
 
-            std::stringstream ifArg;
+            std::stringstream ifArg_ss;
             for (const auto &s : kul::cli::asArgs(it->second.Scalar()))
-              ifArg << Properties::RESOLVE(*this, s) << " ";
+              ifArg_ss << Properties::RESOLVE(*this, s) << " ";
+            auto ifArg = ifArg_ss.str();
 
             bool isCVal = 0;
             for (const auto &s : maiken::Compilers::INSTANCE().keys()) {
@@ -260,19 +261,19 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
               if (isCVal) break;
             }
             if (isCVal) {
-              cVal[left] = cVal[left] + ifArg.str();
+              cVal[left] = cVal[left] + ifArg;
               continue;
             }
             if (lang.empty() && left == STR_BIN)
-              var += ifArg.str();
+              var += ifArg;
             else if (main.empty() && left == STR_LIB)
-              var += ifArg.str();
+              var += ifArg;
             if (m == compiler::Mode::SHAR && left == STR_SHARED)
-              var += ifArg.str();
+              var += ifArg;
             else if (m == compiler::Mode::STAT && left == STR_STATIC)
-              var += ifArg.str();
+              var += ifArg;
             else if (left == KTOSTRING(__KUL_OS__))
-              var += ifArg.str();
+              var += ifArg;
           }
       };
 

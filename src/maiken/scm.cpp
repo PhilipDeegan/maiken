@@ -79,10 +79,11 @@ void maiken::Application::scmUpdate(const bool &f) KTHROW(kul::scm::Exception) {
                    "REQUIRED!";
 
     const std::string &tscr(
-        !this->scr.empty() ? this->scr : this->project().root()[STR_SCM]
-                                             ? Properties::RESOLVE(
-                                                   *this, this->project().root()[STR_SCM].Scalar())
-                                             : this->project().root()[STR_NAME].Scalar());
+        !this->scr.empty()
+            ? this->scr
+            : this->project().root()[STR_SCM]
+                  ? Properties::RESOLVE(*this, this->project().root()[STR_SCM].Scalar())
+                  : this->project().root()[STR_NAME].Scalar());
 
     scmUpdate(f, scm, SCMGetter::REPO(this->project().dir(), tscr, isMod));
     UpdateTracker::INSTANCE().add(this->project().dir().real());

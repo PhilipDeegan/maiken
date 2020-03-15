@@ -81,16 +81,13 @@ class CCompiler : public Compiler {
   virtual CCompiler_Type type() const = 0;
 
   static std::string CC(std::string deFault) {
-    if (kul::env::EXISTS("CC")) return kul::env::GET("CC");
-    return deFault;
+    return kul::env::EXISTS("CC") ? kul::env::GET("CC") : deFault;
   }
   static std::string CXX(std::string deFault) {
-    if (kul::env::EXISTS("CXX")) return kul::env::GET("CXX");
-    return deFault;
+    return kul::env::EXISTS("CXX") ? kul::env::GET("CXX") : deFault;
   }
   static std::string LD(std::string deFault) {
-    if (kul::env::EXISTS("LD")) return kul::env::GET("LD");
-    return deFault;
+    return kul::env::EXISTS("LD") ? kul::env::GET("LD") : deFault;
   }
 };
 

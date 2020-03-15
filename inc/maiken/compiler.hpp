@@ -90,47 +90,39 @@ class Compiler {
                                               const kul::File &out, const compiler::Mode &mode,
                                               bool dryRun = false) const KTHROW(kul::Exception) = 0;
   virtual CompilerProcessCapture compileSource(
-    const maiken::Application &app,
-      const std::string &compiler, const std::vector<std::string> &args,
-      const std::vector<std::string> &incs, const std::string &in, const std::string &out,
-      const compiler::Mode &mode, bool dryRun = false) const KTHROW(kul::Exception) = 0;
+      const maiken::Application &app, const std::string &compiler,
+      const std::vector<std::string> &args, const std::vector<std::string> &incs,
+      const std::string &in, const std::string &out, const compiler::Mode &mode,
+      bool dryRun = false) const KTHROW(kul::Exception) = 0;
   virtual void preCompileHeader(const std::vector<std::string> &incs,
                                 const std::vector<std::string> &args, const std::string &in,
                                 const std::string &out, bool dryRun = false) const
       KTHROW(kul::Exception) = 0;
 
   std::string compilerDebug(const uint8_t &key) const {
-    if (m_debug_c.count(key)) return (*m_debug_c.find(key)).second;
-    return "";
+    return m_debug_c.count(key) ? m_debug_c.at(key) : "";
   }
   std::string compilerOptimization(const uint8_t &key) const {
-    if (m_optimise_c.count(key)) return (*m_optimise_c.find(key)).second;
-    return "";
+    return m_optimise_c.count(key) ? m_optimise_c.at(key) : "";
   }
   std::string compilerWarning(const uint8_t &key) const {
-    if (m_warn_c.count(key)) return (*m_warn_c.find(key)).second;
-    return "";
+    return m_warn_c.count(key) ? m_warn_c.at(key) : "";
   }
   std::string linkerDebugBin(const uint8_t &key) const {
-    if (m_debug_l_bin.count(key)) return (*m_debug_l_bin.find(key)).second;
-    return "";
+    return m_debug_l_bin.count(key) ? m_debug_l_bin.at(key) : "";
   }
   std::string linkerDebugLib(const uint8_t &key) const {
-    if (m_debug_l_lib.count(key)) return (*m_debug_l_lib.find(key)).second;
-    return "";
+    return m_debug_l_lib.count(key) ? m_debug_l_lib.at(key) :"";
   }
   std::string linkerOptimizationBin(const uint8_t &key) const {
-    if (m_optimise_l_bin.count(key)) return (*m_optimise_l_bin.find(key)).second;
-    return "";
+    return m_optimise_l_bin.count(key) ? m_optimise_l_bin.at(key) : "";
   }
   std::string linkerOptimizationLib(const uint8_t &key) const {
-    if (m_optimise_l_lib.count(key)) return (*m_optimise_l_lib.find(key)).second;
-    return "";
+    return m_optimise_l_lib.count(key) ? m_optimise_l_lib.at(key) : "";
   }
 };
 
-// this class exists to minimise thread captures and avoid forking too much
-// stuff
+// this class exists to minimise thread captures and avoid forking too much stuff
 class CompilationUnit {
  private:
   const maiken::Application &app;
@@ -144,12 +136,12 @@ class CompilationUnit {
   const bool dryRun;
 
  public:
-  CompilationUnit(const maiken::Application &app,
-                  const Compiler *comp, const std::string &compiler,
+  CompilationUnit(const maiken::Application &app, const Compiler *comp, const std::string &compiler,
                   const std::vector<std::string> &args, const std::vector<std::string> &incs,
                   const std::string &in, const std::string &out, const compiler::Mode &mode,
                   bool dryRun)
-      : app(app), comp(comp),
+      : app(app),
+        comp(comp),
         compiler(compiler),
         args(args),
         incs(incs),

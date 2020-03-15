@@ -41,21 +41,18 @@ kul::File maiken::ModuleLoader::FIND(Application &ap)
 
   std::string file;
   std::vector<kul::File> files;
-  if(ap.buildDir())
-    for (const auto &f : ap.buildDir().files(0))
-      files.emplace_back(f.real());
+  if (ap.buildDir())
+    for (const auto &f : ap.buildDir().files(0)) files.emplace_back(f.real());
   else {
-    if(!ap.libraries().empty() && !ap.libraryPaths().empty()) {
-      for(const auto & path : ap.libraryPaths())
-        for (const auto &f : kul::Dir(path).files(0))
-          files.emplace_back(f.real());
+    if (!ap.libraries().empty() && !ap.libraryPaths().empty()) {
+      for (const auto &path : ap.libraryPaths())
+        for (const auto &f : kul::Dir(path).files(0)) files.emplace_back(f.real());
     }
   }
   if (files.empty() && !ap.sources().empty()) {
     ap.process();
-    if(ap.buildDir())
-      for (const auto &f : ap.buildDir().files(0))
-        files.emplace_back(f.real());
+    if (ap.buildDir())
+      for (const auto &f : ap.buildDir().files(0)) files.emplace_back(f.real());
   }
   for (const auto &f : files) {
     const auto &name(f.name());
@@ -83,11 +80,10 @@ std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(Application &ap
     KTHROW(kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_
 {
-  std::function<void(Application &ap)> global_load = [&](Application &ap){
-    for (auto dep = ap.dependencies().rbegin(); dep != ap.dependencies().rend(); ++dep){
+  std::function<void(Application & ap)> global_load = [&](Application &ap) {
+    for (auto dep = ap.dependencies().rbegin(); dep != ap.dependencies().rend(); ++dep) {
       auto &dap = (**dep);
-      if (!dap.sources().empty() || !dap.libraries().empty())
-        GlobalModules::INSTANCE().load(dap);
+      if (!dap.sources().empty() || !dap.libraries().empty()) GlobalModules::INSTANCE().load(dap);
       global_load(dap);
     }
   };

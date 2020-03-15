@@ -221,7 +221,7 @@ maiken::CompilerProcessCapture maiken::Application::buildLibrary(
     lib = AppVars::INSTANCE().dryRun() ? kul::File(lib, outD).esc() : kul::File(lib, outD).escm();
     std::vector<std::string> obV;
     for (const auto &o : objects) obV.emplace_back(o);
-    auto const& base(
+    auto const &base(
         Compilers::INSTANCE().base((*(*files().find(lang)).second.find(STR_COMPILER)).second));
     if (cLnk.count(base)) linkEnd += " " + cLnk[base];
     auto *comp = Compilers::INSTANCE().get(base);
