@@ -4,7 +4,8 @@ name: mkn
 scm: https://github.com/dekken/maiken
 version: master
 property:
-    DATE: 15-MAR-2020
+  DATE: 15-MAR-2020
+
 
 parent: lib
 mode: none
@@ -59,4 +60,3 @@ profile:
   test: test/cpp.cpp
   mod: |
      mkn-mod.exec{test: ./test/test.sh }
-

@@ -83,7 +83,7 @@ void maiken::Application::compile(kul::hash::set::String &objects) KTHROW(kul::E
   compile(src_objs, objects, cacheFiles);
 }
 
-void maiken::Application::compile(std::vector<std::pair<std::string, std::string>> &src_objs,
+void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::string>> &src_objs,
                                   kul::hash::set::String &objects,
                                   std::vector<kul::File> &cacheFiles) KTHROW(kul::Exception) {
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
@@ -145,9 +145,9 @@ void maiken::Application::compile(std::vector<std::pair<std::string, std::string
   }
 
 #endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-  std::queue<std::pair<std::string, std::string>> sourceQueue;
+  std::queue<std::pair<maiken::Source, std::string>> sourceQueue;
   for (auto &so : src_objs) {
-    sourceQueue.push(std::make_pair(so.first, so.second));
+    sourceQueue.emplace(so.first, so.second);
     kul::File object_file(so.second);
     if (!object_file.dir()) object_file.dir().mk();
   }
@@ -160,13 +160,13 @@ void maiken::Application::compile(std::vector<std::pair<std::string, std::string
   if (_MKN_TIMESTAMPS_) writeTimeStamps(objects, cacheFiles);
 }
 
-void maiken::Application::compile(std::queue<std::pair<std::string, std::string>> &sourceQueue,
+void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::string>> &sourceQueue,
                                   kul::hash::set::String &objects,
                                   std::vector<kul::File> &cacheFiles) KTHROW(kul::Exception) {
   ThreadingCompiler tc(*this);
   kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
   std::vector<maiken::CompilationUnit> c_units;
-  std::queue<std::pair<std::string, std::string>> cQueue;
+  std::queue<std::pair<maiken::Source, std::string>> cQueue;
 
   kul::File init;
   if (!main.empty()) {
@@ -181,13 +181,13 @@ void maiken::Application::compile(std::queue<std::pair<std::string, std::string>
     kul::File object(os.str(), tmpD);
 
     c_units.emplace_back(tc.compilationUnit(
-        std::make_pair(AppVars::INSTANCE().dryRun() ? source.esc() : source.escm(),
+        std::make_pair(Source(AppVars::INSTANCE().dryRun() ? source.esc() : source.escm()),
                        AppVars::INSTANCE().dryRun() ? object.esc() : object.escm())));
   }
 
   while (sourceQueue.size() > 0) {
     cQueue.push(sourceQueue.front());
-    if (init && kul::File(sourceQueue.front().first) == init) {
+    if (init && kul::File(sourceQueue.front().first.in()) == init) {
       sourceQueue.pop();
       continue;
     };
@@ -244,7 +244,7 @@ void maiken::Application::compile(std::queue<std::pair<std::string, std::string>
 
   while (cQueue.size()) {
     objects.insert(cQueue.front().second);
-    cacheFiles.push_back(kul::File(cQueue.front().first));
+    cacheFiles.emplace_back(kul::File(cQueue.front().first.in()));
     cQueue.pop();
   }
 }

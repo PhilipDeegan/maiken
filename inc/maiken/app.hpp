@@ -31,6 +31,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_APP_HPP_
 #define _MAIKEN_APP_HPP_
 
+namespace maiken {
+class Application;
+}
+
 #include "maiken/defs.hpp"
 
 #include "kul/cli.hpp"
@@ -40,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/scm/man.hpp"
 #include "kul/threads.hpp"
 
+#include "maiken/source.hpp"
 #include "maiken/compiler.hpp"
 #include "maiken/compiler/compilers.hpp"
 #include "maiken/except.hpp"
@@ -61,7 +66,7 @@ class Module;
 class ModuleLoader;
 class ThreadingCompiler;
 class Applications;
-class SourceFinder;
+class Source;
 class CompilerPrinter;
 class KUL_PUBLISH Application : public Constants {
   friend class Applications;
@@ -70,6 +75,10 @@ class KUL_PUBLISH Application : public Constants {
   friend class SourceFinder;
   friend class ThreadingCompiler;
   friend class Project;
+
+ public:
+  using SourceMap = kul::hash::map::S2T<kul::hash::map::S2T<std::vector<maiken::Source>>>;
+
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   friend class dist::CompileRequest;
 #endif  //  _MKN_WITH_MKN_RAM_  &&         _MKN_WITH_IO_CEREAL_
@@ -93,7 +102,8 @@ class KUL_PUBLISH Application : public Constants {
   std::vector<std::shared_ptr<ModuleLoader>> mods;
   std::vector<kul::cli::EnvVar> evs;
   std::vector<std::string> defs, libs, paths;
-  std::vector<std::pair<std::string, bool>> incs, srcs;
+  std::vector<std::pair<maiken::Source, bool>> srcs;
+  std::vector<std::pair<std::string, bool>> incs;
   const kul::SCM *scm = 0;
 
   void buildExecutable(const kul::hash::set::String &objects) KTHROW(kul::Exception);
@@ -110,10 +120,10 @@ class KUL_PUBLISH Application : public Constants {
   static void parseDependencyString(std::string s, kul::hash::set::String &include);
 
   void compile(kul::hash::set::String &objects) KTHROW(kul::Exception);
-  void compile(std::vector<std::pair<std::string, std::string>> &src_objs,
+  void compile(std::vector<std::pair<maiken::Source, std::string>> &src_objs,
                kul::hash::set::String &objects, std::vector<kul::File> &cacheFiles)
       KTHROW(kul::Exception);
-  void compile(std::queue<std::pair<std::string, std::string>> &src_objs,
+  void compile(std::queue<std::pair<maiken::Source, std::string>> &src_objs,
                kul::hash::set::String &objects, std::vector<kul::File> &cacheFiles)
       KTHROW(kul::Exception);
   void build() KTHROW(kul::Exception);
@@ -238,7 +248,7 @@ class KUL_PUBLISH Application : public Constants {
   const std::vector<std::shared_ptr<ModuleLoader>> &modules() const { return mods; }
   const kul::hash::map::S2T<kul::hash::map::S2S> &files() const { return fs; }
   const std::vector<std::string> &libraries() const { return libs; }
-  const std::vector<std::pair<std::string, bool>> &sources() const { return srcs; }
+  const std::vector<std::pair<Source, bool>> &sources() const { return srcs; }
   const std::vector<std::pair<std::string, bool>> &includes() const { return incs; }
   const std::vector<std::string> &libraryPaths() const { return paths; }
   const kul::hash::map::S2S &properties() const { return ps; }
@@ -254,10 +264,11 @@ class KUL_PUBLISH Application : public Constants {
 #endif
 
   void addInclude(const std::string &s, bool p = 1) {
+    for (const auto &inc : incs) KLOG(INF) << inc.first;
     auto it = std::find_if(
         incs.begin(), incs.end(),
         [&](const std::pair<std::string, bool> &element) { return element.first == s; });
-    if (it == incs.end()) incs.push_back(std::make_pair(s, p));
+    if (it == incs.end()) incs.emplace_back(s, p);
   }
   void addLibpath(const std::string &s) { paths.push_back(s); }
 
@@ -268,7 +279,7 @@ class KUL_PUBLISH Application : public Constants {
     std::string n = project().root()[STR_NAME].Scalar();
     return out.empty() ? inst ? p.empty() ? n : n + "_" + p : n : out;
   }
-  kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> sourceMap() const;
+  SourceMap sourceMap() const;
 
   static std::vector<Application *> CREATE(const kul::cli::Args &args) KTHROW(kul::Exception);
   static std::vector<Application *> CREATE(int16_t argc, char *argv[]) KTHROW(kul::Exception);
@@ -330,7 +341,7 @@ class ThreadingCompiler : public Constants {
     }
   }
 
-  CompilationUnit compilationUnit(const std::pair<std::string, std::string> &pair) const
+  CompilationUnit compilationUnit(const std::pair<maiken::Source, std::string> &pair) const
       KTHROW(kul::Exception);
 };
 
@@ -390,9 +401,8 @@ class BuildRecorder {
 
 class CompilerValidation : public Constants {
  public:
-  static void check_compiler_for(
-      const maiken::Application &app,
-      const kul::hash::map::S2T<kul::hash::map::S2T<kul::hash::set::String>> &sources);
+  static void check_compiler_for(const maiken::Application &app,
+                                 const Application::SourceMap &sources);
 };
 }  // namespace maiken
 #endif /* _MAIKEN_APP_HPP_ */

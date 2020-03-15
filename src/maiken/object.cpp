@@ -46,7 +46,7 @@ void maiken::Application::findObjects(kul::hash::set::String &objects) const {
         for (const kul::File f : objDir.files(true)) objects.insert(f.real());
       } else {
         for (const auto &kv : ft.second)
-          for (const auto &f : kv.second) objects.insert(kul::File(f).mini());
+          for (const auto &f : kv.second) objects.insert(kul::File(f.in()).mini());
       }
     } catch (const CompilerNotFoundException &e) {
       KEXIT(1, "No compiler found for filetype " + ft.first);
