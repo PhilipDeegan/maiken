@@ -1,5 +1,7 @@
 version: 0.1.{build}
 
+clone_folder: C:\Users\appveyor\maiken\app\mkn\master
+
 branches:
   only:
     - master
