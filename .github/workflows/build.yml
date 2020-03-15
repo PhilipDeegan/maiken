@@ -15,8 +15,8 @@ jobs:
     - name: make nix
       run: make nix
     - name: mkn
-      run: KLOG=3 ./mkn clean build test -tKOW 9 -g 0 -p @,test -w mkn.ram[https]
+      run: KLOG=3 ./mkn clean build test -dtKOW 9 -g 0 -p @,test -w mkn.ram[https] -a -fPIC
     - uses: actions/upload-artifact@v1
       with:
         name: mkn
-        path: mkn
+        path: bin/build/mkn
