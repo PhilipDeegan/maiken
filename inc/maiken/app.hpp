@@ -264,7 +264,6 @@ class KUL_PUBLISH Application : public Constants {
 #endif
 
   void addInclude(const std::string &s, bool p = 1) {
-    for (const auto &inc : incs) KLOG(INF) << inc.first;
     auto it = std::find_if(
         incs.begin(), incs.end(),
         [&](const std::pair<std::string, bool> &element) { return element.first == s; });
