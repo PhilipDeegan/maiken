@@ -180,13 +180,13 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
         if (wildcard && yProfile.find(profile.substr(0, profile.rfind("*"))) == 0) {
           profiles.emplace_back(yProfile);
           f = 1;
-        } else
+        } else if(!f)
           f = yProfile == profile;
 
         if (f && !wildcard) break;
       }
 
-      if (!f) KEXIT(1, "profile does not exist");
+      if (!f) KEXIT(1, "profile does not exist: ") << profile;
       if (!wildcard) profiles.emplace_back(profile);
     }
   }
