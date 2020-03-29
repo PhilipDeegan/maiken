@@ -10,8 +10,8 @@ $CWD/win_build.sh
 
 export MKN_CL_PREFERRED=1
 export PYTHON=/c/Python36-x64/python.exe
-./mkn clean build -dtKOg 0 -w mkn.ram[https]
-./mkn clean build -dtSOg 0 -p lib
+./mkn clean build -a -std:c++17 -dtKOg 0 -w mkn.ram[https]
+./mkn clean build -a -std:c++17 -dtSOg 0 -p lib
 $PYTHON /c/Python36-x64/Scripts/flawfinder .
 rm -rf bin/build/tmp bin/build/obj
 rm -rf bin/lib/tmp bin/lib/obj

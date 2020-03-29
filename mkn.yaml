@@ -1,4 +1,4 @@
-#! clean build test -tKOW 9 -g 0 -p @,test
+#! clean build -dtKOW 9 -g 0 -qp @
 
 name: mkn
 scm: https://github.com/dekken/maiken
@@ -56,8 +56,3 @@ profile:
       style: file
       types: cpp:cxx:cc:h:hpp
       paths: .
-
-- name: test
-  test: test/cpp.cpp
-  mod: |
-     mkn-mod.exec{test: ./test/test.sh }

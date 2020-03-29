@@ -33,6 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/app.hpp"
 
+#include <optional>
+
 namespace maiken::string {
 
 struct Between {

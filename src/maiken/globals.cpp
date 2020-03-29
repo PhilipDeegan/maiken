@@ -45,21 +45,20 @@ maiken::AppVars::AppVars() {
 
   if (root[STR_LOCAL]) {
     auto const& local = root[STR_LOCAL];
-    if (local[STR_REPO])
-      pks["MKN_REPO"] = kul::Dir(local[STR_REPO].Scalar()).real();
-    else
-      pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
-    if (local[STR_MOD_REPO])
-      pks["MKN_MOD_REPO"] = kul::Dir(local[STR_MOD_REPO].Scalar()).real();
-    else
-      pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
+    if (local[STR_REPO]) pks["MKN_REPO"] = kul::Dir(local[STR_REPO].Scalar()).real();
+    if (local[STR_MOD_REPO]) pks["MKN_MOD_REPO"] = kul::Dir(local[STR_MOD_REPO].Scalar()).real();
   }
+  if (!pks.count("MKN_REPO"))
+    pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
+  if (!pks.count("MKN_MOD_REPO"))
+    pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 
   std::string ext, pre;
-  if constexpr (kul::def::is_win)
-    evs["MKN_OBJ"] = "obj", ext = ".dll", pre = "";
-  else
-    evs["MKN_OBJ"] = "o", ext = ".so", pre = "lib";
+#if KUL_IS_WIN
+  evs["MKN_OBJ"] = "obj", ext = ".dll", pre = "";
+#else
+  evs["MKN_OBJ"] = "o", ext = ".so", pre = "lib";
+#endif
 
   evs["MKN_OBJ_DEF"] = evs["MKN_OBJ"];
   evs["MKN_LIB_EXT_DEF"] = ext;

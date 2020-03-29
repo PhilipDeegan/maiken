@@ -22,7 +22,7 @@ INCS=(inc
 )
 
 for i in ${INCS[@]}; do INC+=" -I$i"; done
-compile(){ cl -nologo -EHsc $INC -c -Fo$1 "$2" || exit 1 ; }
+compile(){ cl -std:c++17 -nologo -EHsc $INC -c -Fo$1 "$2" || exit 1 ; }
 archive(){ lib -nologo -LTCG -OUT:"$1" "$2/*.o"; }
 exe(){     link -OUT:"mkn.exe" -nologo bin/*.o parse.yaml.lib  \
            -nodefaultlib:libucrt.lib ucrt.lib; rm parse.yaml.lib; }

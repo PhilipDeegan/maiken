@@ -124,6 +124,7 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
     showHelp();
     KEXIT(0, "");
   }
+  if (args.has(STR_QUIET)) AppVars::INSTANCE().quiet(true);
   if (args.has(STR_VERSION)) {
     std::stringstream ss, mod;
     ss << KTOSTRING(_MKN_VERSION_) << " (" << KTOSTRING(__KUL_OS__) << ") w/[";
