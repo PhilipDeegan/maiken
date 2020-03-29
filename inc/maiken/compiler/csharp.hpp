@@ -46,24 +46,26 @@ class WINCompiler : public Compiler {
   WINCompiler(const int &v = 0) : Compiler(v) {}
   bool sourceIsBin() const override { return true; }
 
-  CompilerProcessCapture buildExecutable(const std::string &linker, const std::string &linkerEnd,
+  CompilerProcessCapture buildExecutable(maiken::Application const &app, std::string const &linker,
+                                         std::string const &linkerEnd,
                                          const std::vector<std::string> &objects,
                                          const std::vector<std::string> &libs,
                                          const std::vector<std::string> &libPaths,
-                                         const std::string &out, const compiler::Mode &mode,
+                                         std::string const &out, const compiler::Mode &mode,
                                          bool dryRun = false) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture buildLibrary(const std::string &linker, const std::string &linkerEnd,
+  CompilerProcessCapture buildLibrary(maiken::Application const &app, std::string const &linker,
+                                      std::string const &linkerEnd,
                                       const std::vector<std::string> &objects,
                                       const std::vector<std::string> &libs,
                                       const std::vector<std::string> &libPaths,
                                       const kul::File &out, const compiler::Mode &mode,
                                       bool dryRun = false) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture compileSource(const maiken::Application &app, const std::string &compiler,
+  CompilerProcessCapture compileSource(const maiken::Application &app, std::string const &compiler,
                                        const std::vector<std::string> &args,
-                                       const std::vector<std::string> &incs, const std::string &in,
-                                       const std::string &out, const compiler::Mode &mode,
+                                       const std::vector<std::string> &incs, std::string const &in,
+                                       std::string const &out, const compiler::Mode &mode,
                                        bool dryRun = false) const KTHROW(kul::Exception) override {
     (void)app;
     (void)compiler;
@@ -76,8 +78,8 @@ class WINCompiler : public Compiler {
     KEXCEPTION("Method compileSource is not implemented in C Sharp");
   }
   virtual void preCompileHeader(const std::vector<std::string> &incs,
-                                const std::vector<std::string> &args, const std::string &in,
-                                const std::string &out, bool dryRun = false) const
+                                const std::vector<std::string> &args, std::string const &in,
+                                std::string const &out, bool dryRun = false) const
       KTHROW(kul::Exception) override {
     (void)incs;
     (void)args;

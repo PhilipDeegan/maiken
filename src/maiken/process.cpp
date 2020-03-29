@@ -30,50 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-#ifdef _MKN_WITH_MKN_RAM_
-#include "maiken/github.hpp"
-bool maiken::Application::get_binaries() {
-  size_t suxcess = 0;
-  kul::Dir outD(inst ? inst.real() : buildDir());
-  const auto files = kul::String::SPLIT(this->binary(), " ");
-  for (const std::string &file : files) {
-    std::string fn = file.substr(file.rfind("/") + 1);
-    kul::https::Get(file)
-        .withHeaders({{"User-Agent", "Mozilla not a virus"},
-                      {"Accept", "application/octet-stream"},
-                      {"Content-Disposition", "attachment; filename=" + fn}})
-        .withResponse([&](const kul::http::Response &r) {
-          if (r.status() == 200) {
-            kul::File dl(fn);
-            if (dl.is()) {
-              suxcess++;
-              dl.mv(outD);
-            }
-          }
-        })
-        .send();
-  }
-  return suxcess == files.size();
-}
-#endif
-
-namespace maiken {
-class ObjectMerger {
- public:
-  static void into(const Application &root) {
-    kul::Dir robj(root.buildDir().join("obj"));
-    for (auto a : root.dependencies()) {
-      kul::Dir obj(a->buildDir().join("obj"));
-      if (obj)
-        for (auto f : obj.files()) f.cp(robj);
-    }
-  }
-};
-}  // namespace maiken
-
 void maiken::Application::process() KTHROW(kul::Exception) {
   auto const &cmds = CommandStateMachine::INSTANCE().commands();
-  auto const &gEnvVars = maiken::AppVars::INSTANCE().envVars();
 
   kul::os::PushDir pushd(this->project().dir());
   auto loadModules = [&](Application &app) {
@@ -84,6 +42,18 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     for (auto &modLoader : app.mods) modLoader->module()->init(app, app.modInit(modLoader->app()));
 #endif  //_MKN_DISABLE_MODULES_
   };
+
+  std::vector<Application *> apps;
+  /*auto proc0 = [&](Application &app, bool work) {
+    if (work) {
+      if (!app.buildDir()) app.buildDir().mk();
+      if (BuildRecorder::INSTANCE().has(app.buildDir().real())) return;
+      BuildRecorder::INSTANCE().add(app.buildDir().real());
+      apps.emplace_back(&app);
+    }
+  };
+  auto proc1 = [&]() { Processor::process(apps); };*/
+
   auto proc = [&](Application &app, bool work) {
     kul::env::CWD(app.project().dir());
 
@@ -93,21 +63,11 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       BuildRecorder::INSTANCE().add(app.buildDir().real());
     }
     kul::Dir mkn(app.buildDir().join(".mkn"));
-    std::vector<std::pair<std::string, std::string>> oldEvs;
-    for (const auto &ev : app.envVars()) {
-      const std::string v = kul::env::GET(ev.name());
-      oldEvs.push_back(std::pair<std::string, std::string>(ev.name(), v));
-      kul::env::SET(ev.name(), ev.toString().c_str());
-      maiken::AppVars::INSTANCE().envVar(ev.name(), ev.toString());
-    }
+
     if (cmds.count(STR_CLEAN) && app.buildDir().is()) {
       app.buildDir().rm();
       mkn.rm();
     }
-    if (cmds.count(STR_MERGE) && app.ro) ObjectMerger::into(app);
-#ifdef _MKN_WITH_MKN_RAM_
-    if (work && !app.bin.empty() && app.get_binaries()) work = false;  // doesn't work yet
-#endif
     app.loadTimeStamps();
 
     kul::hash::set::String objects;
@@ -120,13 +80,9 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       if (work)
         for (auto &modLoader : app.mods)
           modLoader->module()->link(app, app.modLink(modLoader->app()));
-      if ((cmds.count(STR_MERGE) && app.ro) || !cmds.count(STR_MERGE)) {
-        app.findObjects(objects);
-        app.link(objects);
-      }
+      app.findObjects(objects);
+      app.link(objects);
     }
-    for (const auto &oldEv : oldEvs) kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
-    for (const auto e : gEnvVars) maiken::AppVars::INSTANCE().envVar(e.first, e.second);
   };
 
   auto _mods = ModuleMinimiser::modules(*this);
@@ -156,6 +112,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     proc(**app, !(*app)->srcs.empty());
   }
   if (!this->ig) proc(*this, (!this->srcs.empty() || !this->main.empty()));
+  // proc1();
   if (cmds.count(STR_TEST)) {
     for (auto &modLoader : mods) modLoader->module()->test(*this, this->modTest(modLoader->app()));
     test();

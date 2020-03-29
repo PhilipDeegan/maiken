@@ -92,9 +92,7 @@ kul::hash::set::String maiken::Application::inactiveMains() const {
   return iMs;
 }
 
-void maiken::Application::populateMaps(const YAML::Node &n)
-    KTHROW(kul::Exception) {  // IS EITHER ROOT OR PROFILE NODE!
-
+void maiken::Application::populateMaps(const YAML::Node &n) KTHROW(kul::Exception) {
   {
     using namespace kul::cli;
     if (n[STR_ENV]) {
@@ -108,7 +106,7 @@ void maiken::Application::populateMaps(const YAML::Node &n)
       if (std::find_if(evs.begin(), evs.end(),
                        [&p](const EnvVar &ev) { return ev.name() == p.first; }) != evs.end())
         continue;
-      evs.push_back(EnvVar(p.first, p.second, EnvVarMode::REPL));
+      evs.emplace_back(p.first, p.second, EnvVarMode::REPL);
     }
   }
 

@@ -9,7 +9,7 @@ endif
 
 OS =
 CXX=g++
-CXXFLAGS=-std=c++14 -Os -Wall -fmessage-length=0 -fPIC -g3
+CXXFLAGS=-std=c++17 -Os -Wall -fmessage-length=0 -fPIC -g3
 INCS =  -Iinc \
 		-Iext/parse/yaml/$(YAML_GIT)/p/include \
 		-Iext/mkn/kul/$(KUL_GIT)/inc \

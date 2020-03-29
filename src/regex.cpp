@@ -53,8 +53,7 @@ std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(kul::E
         std::regex re(str);
         std::smatch match;
         std::string subject(item.real());
-        if (std::regex_search(subject, match, re) && match.size() > 1)
-          RESOLVE_REC(item.real(), v);
+        if (std::regex_search(subject, match, re) && match.size() > 1) RESOLVE_REC(item.real(), v);
       } catch (std::regex_error &e) {
         KEXIT(1, "Regex Failure:\n") << e.what();
       }

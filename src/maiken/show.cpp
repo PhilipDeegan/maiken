@@ -39,14 +39,14 @@ void maiken::Application::showConfig(bool force) {
     KOUT(NON) << "REPO    : " << repo;
     KOUT(NON) << "THREADS : " << AppVars::INSTANCE().threads() << "\n";
     KOUT(NON) << "BINARIES";
+
     std::string path = kul::env::GET("PATH");
-    auto checkSetPATH = [&](std::vector<kul::cli::EnvVar> const &envs) {
-      auto it(std::find_if(envs.begin(), envs.end(), [](const kul::cli::EnvVar &ev) {
+    {
+      auto it(std::find_if(evs.begin(), evs.end(), [](kul::cli::EnvVar const &ev) {
         return strcmp(ev.name(), "PATH") == 0;
       }));
-      if (it != envs.end()) path = (*it).toString();
-    };
-    checkSetPATH(evs);
+      if (it != evs.end()) path = (*it).toString();
+    }
 
     for (const auto &c : Settings::INSTANCE().root()[STR_FILE]) {
       bool a = 0, g = 0, l = 0;
@@ -105,25 +105,34 @@ void maiken::Application::showConfig(bool force) {
 }
 
 void maiken::Application::showHelp() {
-  std::vector<std::string> ss = {MKN_DEFS_CMD,      MKN_DEFS_BUILD,   MKN_DEFS_MERGE,
-                                 MKN_DEFS_CLEAN,    MKN_DEFS_COMP,    MKN_DEFS_DBG,
-                                 MKN_DEFS_INIT,     MKN_DEFS_LINK,    MKN_DEFS_PACK,
-                                 MKN_DEFS_PROFS,    MKN_DEFS_RUN,     MKN_DEFS_INC,
-                                 MKN_DEFS_SRC,      MKN_DEFS_TREE,    "",
-                                 MKN_DEFS_ARG,      MKN_DEFS_ARGS,    MKN_DEFS_ADD,
-                                 MKN_DEFS_BINC,     MKN_DEFS_BPATH,   MKN_DEFS_DIRC,
-                                 MKN_DEFS_DEPS,     MKN_DEFS_DRYR,    MKN_DEFS_DEBUG,
-                                 MKN_DEFS_GET,      MKN_DEFS_EVSA,    MKN_DEFS_FINC,
-                                 MKN_DEFS_FPATH,    MKN_DEFS_HELP,    MKN_DEFS_JARG,
-                                 MKN_DEFS_STATIC,   MKN_DEFS_MOD,     MKN_DEFS_MAIN,
-                                 MKN_DEFS_LINKER,   MKN_DEFS_ALINKR,  MKN_DEFS_OUT,
-                                 MKN_DEFS_OPTIM,    MKN_DEFS_PROF,    MKN_DEFS_PROP,
-                                 MKN_DEFS_RUN_ARGS, MKN_DEFS_STAT,    MKN_DEFS_SHARED,
-                                 MKN_DEFS_THREDS,   MKN_DEFS_WITHOUT, MKN_DEFS_UPDATE,
-                                 MKN_DEFS_FUPDATE,  MKN_DEFS_VERSON,  MKN_DEFS_WITH,
-                                 MKN_DEFS_WARN,     MKN_DEFS_SETTNGS, "",
-                                 MKN_DEFS_EXMPL,    MKN_DEFS_EXMPL1,  MKN_DEFS_EXMPL2,
-                                 MKN_DEFS_EXMPL3,   MKN_DEFS_EXMPL4,  ""};
+  std::vector<std::string> ss = {MKN_DEFS_CMD,      MKN_DEFS_BUILD,
+                                 MKN_DEFS_CLEAN,    MKN_DEFS_COMP,
+                                 MKN_DEFS_DBG,      MKN_DEFS_INIT,
+                                 MKN_DEFS_LINK,     MKN_DEFS_PACK,
+                                 MKN_DEFS_PROFS,    MKN_DEFS_RUN,
+                                 MKN_DEFS_INC,      MKN_DEFS_SRC,
+                                 MKN_DEFS_TREE,     "",
+                                 MKN_DEFS_ARG,      MKN_DEFS_ARGS,
+                                 MKN_DEFS_ADD,      MKN_DEFS_BINC,
+                                 MKN_DEFS_BPATH,    MKN_DEFS_DIRC,
+                                 MKN_DEFS_DEPS,     MKN_DEFS_DRYR,
+                                 MKN_DEFS_DEBUG,    MKN_DEFS_GET,
+                                 MKN_DEFS_EVSA,     MKN_DEFS_FINC,
+                                 MKN_DEFS_FPATH,    MKN_DEFS_HELP,
+                                 MKN_DEFS_JARG,     MKN_DEFS_STATIC,
+                                 MKN_DEFS_MOD,      MKN_DEFS_MAIN,
+                                 MKN_DEFS_LINKER,   MKN_DEFS_ALINKR,
+                                 MKN_DEFS_OUT,      MKN_DEFS_OPTIM,
+                                 MKN_DEFS_PROF,     MKN_DEFS_PROP,
+                                 MKN_DEFS_RUN_ARGS, MKN_DEFS_STAT,
+                                 MKN_DEFS_SHARED,   MKN_DEFS_THREDS,
+                                 MKN_DEFS_WITHOUT,  MKN_DEFS_UPDATE,
+                                 MKN_DEFS_FUPDATE,  MKN_DEFS_VERSON,
+                                 MKN_DEFS_WITH,     MKN_DEFS_WARN,
+                                 MKN_DEFS_SETTNGS,  "",
+                                 MKN_DEFS_EXMPL,    MKN_DEFS_EXMPL1,
+                                 MKN_DEFS_EXMPL2,   MKN_DEFS_EXMPL3,
+                                 MKN_DEFS_EXMPL4,   ""};
   for (const auto &s : ss) KOUT(NON) << s;
 }
 

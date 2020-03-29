@@ -41,6 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 class KUL_PUBLISH Application;
 
+struct CompilationInfo {
+  std::string lib_prefix, lib_postfix, lib_ext;
+};
+
 namespace compiler {
 enum Mode { NONE = 0, STAT, SHAR };
 }
@@ -60,11 +64,11 @@ class CompilerProcessCapture : public kul::ProcessCapture {
   void exception(const std::exception_ptr &e) { ep = e; }
   const std::exception_ptr &exception() const { return ep; }
 
-  void cmd(const std::string &cm) { this->c = cm; }
-  const std::string &cmd() const { return c; }
+  void cmd(std::string const &cm) { this->c = cm; }
+  std::string const &cmd() const { return c; }
 
-  void file(const std::string &f) { this->f = f; }
-  const std::string &file() const { return f; }
+  void file(std::string const &f) { this->f = f; }
+  std::string const &file() const { return f; }
 };
 
 class Compiler {
@@ -78,25 +82,23 @@ class Compiler {
   virtual ~Compiler() {}
   virtual bool sourceIsBin() const = 0;
   virtual CompilerProcessCapture buildExecutable(
-      const std::string &linker, const std::string &linkerEnd,
+      maiken::Application const &app, std::string const &linker, std::string const &linkerEnd,
       const std::vector<std::string> &objects, const std::vector<std::string> &libs,
-      const std::vector<std::string> &libPaths, const std::string &out, const compiler::Mode &mode,
+      const std::vector<std::string> &libPaths, std::string const &out, const compiler::Mode &mode,
       bool dryRun = false) const KTHROW(kul::Exception) = 0;
-  virtual CompilerProcessCapture buildLibrary(const std::string &linker,
-                                              const std::string &linkerEnd,
-                                              const std::vector<std::string> &objects,
-                                              const std::vector<std::string> &libs,
-                                              const std::vector<std::string> &libPaths,
-                                              const kul::File &out, const compiler::Mode &mode,
-                                              bool dryRun = false) const KTHROW(kul::Exception) = 0;
+  virtual CompilerProcessCapture buildLibrary(
+      const maiken::Application &app, std::string const &linker, std::string const &linkerEnd,
+      const std::vector<std::string> &objects, const std::vector<std::string> &libs,
+      const std::vector<std::string> &libPaths, const kul::File &out, const compiler::Mode &mode,
+      bool dryRun = false) const KTHROW(kul::Exception) = 0;
   virtual CompilerProcessCapture compileSource(
-      const maiken::Application &app, const std::string &compiler,
+      const maiken::Application &app, std::string const &compiler,
       const std::vector<std::string> &args, const std::vector<std::string> &incs,
-      const std::string &in, const std::string &out, const compiler::Mode &mode,
+      std::string const &in, std::string const &out, const compiler::Mode &mode,
       bool dryRun = false) const KTHROW(kul::Exception) = 0;
   virtual void preCompileHeader(const std::vector<std::string> &incs,
-                                const std::vector<std::string> &args, const std::string &in,
-                                const std::string &out, bool dryRun = false) const
+                                const std::vector<std::string> &args, std::string const &in,
+                                std::string const &out, bool dryRun = false) const
       KTHROW(kul::Exception) = 0;
 
   std::string compilerDebug(const uint8_t &key) const {
@@ -112,7 +114,7 @@ class Compiler {
     return m_debug_l_bin.count(key) ? m_debug_l_bin.at(key) : "";
   }
   std::string linkerDebugLib(const uint8_t &key) const {
-    return m_debug_l_lib.count(key) ? m_debug_l_lib.at(key) :"";
+    return m_debug_l_lib.count(key) ? m_debug_l_lib.at(key) : "";
   }
   std::string linkerOptimizationBin(const uint8_t &key) const {
     return m_optimise_l_bin.count(key) ? m_optimise_l_bin.at(key) : "";
@@ -136,9 +138,9 @@ class CompilationUnit {
   const bool dryRun;
 
  public:
-  CompilationUnit(const maiken::Application &app, const Compiler *comp, const std::string &compiler,
+  CompilationUnit(const maiken::Application &app, const Compiler *comp, std::string const &compiler,
                   const std::vector<std::string> &args, const std::vector<std::string> &incs,
-                  const std::string &in, const std::string &out, const compiler::Mode &mode,
+                  std::string const &in, std::string const &out, const compiler::Mode &mode,
                   bool dryRun)
       : app(app),
         comp(comp),

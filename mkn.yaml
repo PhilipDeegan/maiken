@@ -4,7 +4,7 @@ name: mkn
 scm: https://github.com/dekken/maiken
 version: master
 property:
-  DATE: 20-MAR-2020
+  DATE: 30-MAR-2020
 
 
 parent: lib
@@ -21,9 +21,10 @@ profile:
 
 - name: lib
   parent: headers
-  src: ./src
+  src: |
+       ./src
+       ./src/maiken/create.cpp, -D_MKN_VERSION_=${version}_${DATE}
   dep: parse.yaml
-  arg: -D_MKN_VERSION_=${version}_${DATE}
   if_link:
     nix: -ldl -pthread
     win_cl: -nodefaultlib:libucrt.lib ucrt.lib

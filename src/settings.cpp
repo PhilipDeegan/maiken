@@ -151,8 +151,7 @@ const kul::yaml::Validator maiken::Settings::validator() const {
     NodeValidator("super"), NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP),
         NodeValidator("inc"), NodeValidator("path"),
         NodeValidator("local",
-                      {NodeValidator("repo"), NodeValidator("mod-repo"), NodeValidator("debugger"),
-                       NodeValidator("lib"), NodeValidator("bin")},
+                      {NodeValidator("repo"), NodeValidator("mod-repo"), NodeValidator("debugger")},
                       0, NodeType::MAP),
         NodeValidator("remote", {NodeValidator("repo"), NodeValidator("mod-repo")}, 0,
                       NodeType::MAP),
@@ -191,7 +190,7 @@ void maiken::Settings::write(const kul::File &file) KTHROW(kul::Exit) {
 
   w.write("#local:", true);
   w.write("## Optionnaly override local repository directory", true);
-  w.write("#    repo: <directory>", true);
+  w.write("#  repo: <directory>", true);
   w << kul::os::EOL();
 
 #ifdef _WIN32
@@ -212,20 +211,20 @@ void maiken::Settings::write(const kul::File &file) KTHROW(kul::Exit) {
         "run",
         true);
     w.write("#env:", true);
-    w.write("#  - name: VAR", true);
-    w.write("#    mode: prepend", true);
-    w.write("#    value: value", true);
+    w.write("#- name: VAR", true);
+    w.write("#  mode: prepend", true);
+    w.write("#  value: value", true);
     w << kul::os::EOL();
 
     w.write("file:", true);
-    w.write("  - type: c:S", true);
-    w.write("    archiver: ar -cr", true);
-    w << "    compiler: " << (c ? "clang" : "gcc") << kul::os::EOL();
-    w << "    linker: " << (c ? "clang" : "gcc") << kul::os::EOL();
-    w.write("  - type: cpp:cxx:cc", true);
-    w.write("    archiver: ar -cr", true);
-    w << "    compiler: " << (c ? "clan" : "") << "g++" << kul::os::EOL();
-    w << "    linker: " << (c ? "clan" : "") << "g++" << kul::os::EOL();
+    w.write("- type: c:S", true);
+    w.write("  archiver: ar -cr", true);
+    w << "  compiler: " << (c ? "clang" : "gcc") << kul::os::EOL();
+    w << "  linker: " << (c ? "clang" : "gcc") << kul::os::EOL();
+    w.write("- type: cpp:cxx:cc", true);
+    w.write("  archiver: ar -cr", true);
+    w << "  compiler: " << (c ? "clan" : "") << "g++" << kul::os::EOL();
+    w << "  linker: " << (c ? "clan" : "") << "g++" << kul::os::EOL();
     w << kul::os::EOL();
   }
 
@@ -250,7 +249,7 @@ void maiken::Settings::write(const kul::File &file) KTHROW(kul::Exit) {
     for (auto s : kul::String::SPLIT(inc, kul::env::SEP())) {
       kul::String::REPLACE_ALL(s, "\\", "/");
       kul::String::REPLACE_ALL(s, " ", "\\ ");
-      w << "    " << s << kul::os::EOL();
+      w << "  " << s << kul::os::EOL();
     }
     w << kul::os::EOL();
 
@@ -258,37 +257,37 @@ void maiken::Settings::write(const kul::File &file) KTHROW(kul::Exit) {
     for (auto s : kul::String::SPLIT(lib, kul::env::SEP())) {
       kul::String::REPLACE_ALL(s, "\\", "/");
       kul::String::REPLACE_ALL(s, " ", "\\ ");
-      w << "    " << s << kul::os::EOL();
+      w << "  " << s << kul::os::EOL();
     }
     w << kul::os::EOL();
 
     w.write("env:", true);
-    w.write("  - name: PATH", true);
-    w.write("    mode: prepend", true);
-    w << "    value: " << kul::File(cl).dir().real() << kul::os::EOL();
+    w.write("- name: PATH", true);
+    w.write("  mode: prepend", true);
+    w << "  value: " << kul::File(cl).dir().real() << kul::os::EOL();
     w << kul::os::EOL();
 
     w.write("file:", true);
-    w.write("  - type: cpp:cxx:cc:c", true);
-    w.write("    archiver: lib", true);
-    w.write("    compiler: cl", true);
-    w.write("    linker: link", true);
+    w.write("- type: cpp:cxx:cc:c", true);
+    w.write("  archiver: lib", true);
+    w.write("  compiler: cl", true);
+    w.write("  linker: link", true);
   }
 #endif
   w << kul::os::EOL();
 
   w.write("# Other examples", true);
-  w.write("#  - type: cu", true);
-  w.write("#    archiver: ar -cr", true);
-  w.write("#    compiler: nvcc", true);
-  w.write("#    linker: nvcc", true);
+  w.write("#- type: cu", true);
+  w.write("#  archiver: ar -cr", true);
+  w.write("#  compiler: nvcc", true);
+  w.write("#  linker: nvcc", true);
 
-  w.write("#  - type: m", true);
-  w.write("#    archiver: ar -cr", true);
-  w.write("#    compiler: g++ -lobjc", true);
-  w.write("#    linker: g++", true);
+  w.write("#- type: m", true);
+  w.write("#  archiver: ar -cr", true);
+  w.write("#  compiler: g++ -lobjc", true);
+  w.write("#  linker: g++", true);
 
-  w.write("#  - type: cs", true);
-  w.write("#    compiler: csc", true);
-  w.write("#    linker: csc", true);
+  w.write("#- type: cs", true);
+  w.write("#  compiler: csc", true);
+  w.write("#  linker: csc", true);
 }

@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void maiken::Application::modArgs(
     const std::string mod_str, std::vector<YAML::Node> &mod_nodes,
-    std::function<void(const YAML::Node &, const bool)> getIfMissing) {
+    std::function<void(YAML::Node const &, const bool)> getIfMissing) {
   if (mod_str.size()) {
     kul::hash::set::String mods;
     std::stringstream ss;
@@ -56,62 +56,55 @@ void maiken::Application::modArgs(
 }
 
 void maiken::Application::mod(kul::hash::set::String &mods, std::vector<YAML::Node> &mod_nodes,
-                              std::function<void(const YAML::Node &, const bool)> getIfMissing) {
-  for (auto &mod1 : mods) {
-    auto mod(mod1);
+                              std::function<void(YAML::Node const &, const bool)> getIfMissing) {
+  for (auto mod : mods) {
     kul::String::REPLACE_ALL(mod, kul::os::EOL(), "");
     kul::String::TRIM(mod);
     if (mod.empty()) continue;
 
     mod_nodes.emplace_back();
     auto &node = mod_nodes.back();
-    std::string local, profiles, proj = mod, version, scm, objs;
-    auto lbrak = proj.find("("), rbrak = proj.find(")");
+    std::string local /*&*/, profiles, proj = mod, version /*#*/, scm, objs;
+
+    auto get_between = [&](auto &var, auto lbrak, auto rbrak) {
+      auto between = maiken::string::between_rm_str(proj, lbrak, rbrak);
+      if (between.found) proj = between.remaining, var = *between.found;
+      return !between.error;
+    };
+
+    if (!get_between(scm, "(", ")")) KEXIT(1, "Invalid -m - missing right ) bracket");
+    if (!node[STR_SCM]) node[STR_SCM] = scm;
+
+    if (!get_between(profiles, "[", "]")) KEXIT(1, "Invalid -m - missing right ] bracket");
+    kul::String::REPLACE_ALL(profiles, ",", " ");
+    if (!node[STR_PROFILE] && profiles.size()) node[STR_PROFILE] = profiles;
+
     {
-      if (lbrak != std::string::npos) {
-        if (rbrak == std::string::npos) KEXIT(1, "Invalid -m - missing right ) bracket");
-        scm = proj.substr(lbrak + 1, rbrak - lbrak - 1);
-        proj = proj.substr(0, lbrak) + mod.substr(rbrak + 1);
-        node[STR_SCM] = scm;
-      }
-      lbrak = proj.find("["), rbrak = proj.find("]");
-      if (lbrak != std::string::npos) {
-        if (rbrak == std::string::npos) KEXIT(1, "Invalid -m - missing right ] bracket");
-        profiles = proj.substr(lbrak + 1, rbrak - lbrak - 1);
-        proj = proj.substr(0, lbrak);
-        kul::String::REPLACE_ALL(profiles, ",", " ");
-        node[STR_PROFILE] = profiles;
-      }
-      lbrak = proj.find("{"), rbrak = proj.rfind("}");
+      auto lbrak = proj.find("{"), rbrak = proj.rfind("}");
       if (lbrak != std::string::npos) {
         if (rbrak == std::string::npos) KEXIT(1, "Invalid -m - missing right } bracket");
-        objs = proj.substr(lbrak /*, rbrak - lbrak + 1*/);
-        proj = proj.substr(0, lbrak);
+        objs = proj.substr(lbrak), proj = proj.substr(0, lbrak);
       }
-    }
-    auto am = proj.find("&");  // local
-    auto ha = proj.find("#");  // version
-    if (proj == this->project().root()[STR_NAME].Scalar()) {
-      node[STR_LOCAL] = ".";
-      if (am != std::string::npos || ha != std::string::npos)
-        KEXIT(1,
-              "-m invalid, current project may not specify version or "
-              "location");
+
+      auto am = proj.find("&"), ha = proj.find("#");
+      if (proj == this->project().root()[STR_NAME].Scalar()) {
+        node[STR_LOCAL] = ".";
+        if (am != std::string::npos || ha != std::string::npos)
+          KEXIT(1,
+                "-m invalid, current project may not specify version or "
+                "location");
+      }
+
+      if (am != std::string::npos && ha != std::string::npos)
+        if (ha > am) KEXIT(1, "-m invalid, version must before location");
+
+      auto if_set = [&](auto s, auto &v, auto n) {
+        if (s != std::string::npos) v = proj.substr(s + 1), proj = proj.substr(0, s), n = v;
+      };
+      if_set(am, local, node[STR_LOCAL]);
+      if_set(ha, version, node[STR_VERSION]);
     }
 
-    if (am != std::string::npos && ha != std::string::npos)
-      if (ha > am) KEXIT(1, "-m invalid, version must before location");
-
-    if (am != std::string::npos) {
-      local = proj.substr(am + 1);
-      proj = proj.substr(0, am);
-      node[STR_LOCAL] = local;
-    }
-    if (ha != std::string::npos) {
-      version = proj.substr(ha + 1);
-      proj = proj.substr(0, ha);
-      node[STR_VERSION] = version;
-    }
     if (proj.empty() && local.empty() && scm.empty())
       KEXIT(1, "-m invalid, project cannot be deduced");
     if (!proj.empty()) {
@@ -119,18 +112,16 @@ void maiken::Application::mod(kul::hash::set::String &mods, std::vector<YAML::No
         scm = proj;
         node[STR_SCM] = scm;
       }
-      auto bits(kul::String::SPLIT(proj, "/"));
-      proj = bits[bits.size() - 1];
+      proj = kul::String::SPLIT(proj, "/").back();
     } else if (proj.empty() && !scm.empty()) {
-      auto bits(kul::String::SPLIT(scm, "/"));
-      proj = bits[bits.size() - 1];
+      proj = kul::String::SPLIT(scm, "/").back();
     }
     if (!proj.empty()) node[STR_NAME] = proj;
-    if (lbrak != std::string::npos) {
-      for (const auto n : kul::bon::from(objs)) {
+
+    if (objs.size())
+      for (const auto n : kul::bon::from(objs))
         for (const auto p : n) node[p.first] = p.second;
-      }
-    }
+
     YAML::Emitter out;
     out << node;
     getIfMissing(node, 1);

@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 20202, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -28,19 +28,36 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_REGEX_HPP_
-#define _MAIKEN_REGEX_HPP_
+#ifndef _MAIKEN_STRING_HPP_
+#define _MAIKEN_STRING_HPP_
 
-#include "kul/os.hpp"
+#include "maiken/app.hpp"
 
-namespace maiken {
+namespace maiken::string {
 
-class Regexer {
- public:
-  static std::vector<std::string> RESOLVE(std::string str) KTHROW(kul::Exception);
-
-  static void RESOLVE_REC(const std::string &i, std::vector<std::string> &v) KTHROW(kul::Exception);
+struct Between {
+  std::string remaining;
+  std::optional<std::string> found;
+  bool error = 0;
 };
-}  // end namespace maiken
 
-#endif  // _MAIKEN_REGEX_HPP_
+inline auto between_rm_str(std::string const& in, std::string lstr, std::string rstr) {
+  Between ret{in, {}, 0};
+
+  auto lpos = in.find(lstr), rpos = in.rfind(rstr);
+
+  if (lpos != std::string::npos) {
+    if (rpos == std::string::npos) {
+      ret.error = 1;
+      return ret;
+    }
+    ret.found = in.substr(lpos + 1, rpos - lpos - 1);
+    ret.remaining = in.substr(0, lpos) + in.substr(rpos + 1);
+  }
+
+  return ret;
+}
+
+} /* namespace maiken::string */
+
+#endif  // _MAIKEN_STRING_HPP_

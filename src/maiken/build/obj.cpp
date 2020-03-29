@@ -205,8 +205,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
 
-  auto lambex = [&](const kul::Exception &e) {
-    (void)e;
+  auto lambex = [&](const kul::Exception &) {
     ctp.stop();
     ctp.interrupt();
   };

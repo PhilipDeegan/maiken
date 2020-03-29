@@ -53,8 +53,7 @@ void maiken::Application::parseDependencyString(std::string s, kul::hash::set::S
       lB = 1;
     } else if (c == ']') {
       if (pro.str().empty()) KEXIT(1, MKN_ERR_INVALID_DEP_CLI);
-      lB = 0;
-      rB = 1;
+      lB = 0, rB = 1;
       includeDependency(dep.str(), pro.str(), include);
       pro.str(std::string());
       dep.str(std::string());
@@ -112,8 +111,7 @@ void maiken::Application::buildDepVec(const std::string &depVal) {
   std::vector<Application *> t;
   for (size_t i = 0; i < dePs.size(); i++) {
     for (auto *const ap : dePs[dePs.size() - (1 + i)]) {
-      const std::string &s(ap->project().dir().real());
-      const std::string &p(ap->p);
+      const std::string &s(ap->project().dir().real()), &p(ap->p);
       const auto it = std::find_if(t.begin(), t.end(), [&s, &p](Application *const a) {
         return a->project().dir().real() == s && a->p == p;
       });
@@ -123,8 +121,7 @@ void maiken::Application::buildDepVec(const std::string &depVal) {
   }
 
   for (auto app1 = t.rbegin(); app1 != t.rend(); ++app1) {
-    const std::string &s((*app1)->project().dir().real());
-    const std::string &p((*app1)->p);
+    const std::string &s((*app1)->project().dir().real()), &p((*app1)->p);
     const auto it = std::find_if(deps.begin(), deps.end(), [&s, &p](Application *const a) {
       return a->project().dir().real() == s && a->p == p;
     });
@@ -141,7 +138,7 @@ void maiken::Application::buildDepVecRec(
     std::unordered_map<uint16_t, std::vector<Application *>> &dePs, int16_t ig, int16_t i,
     const kul::hash::set::String &inc) {
   for (auto *const a : deps) {
-    const std::string &name(a->project().root()[STR_NAME].Scalar());
+    auto name = a->project().root()[STR_NAME].Scalar();
     std::stringstream ss;
     ss << name << "[" << (a->p.empty() ? name : a->p) << "]";
     if (ig > 0 || inc.count(name) || inc.count(ss.str())) a->ig = 0;
@@ -154,8 +151,8 @@ void maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception) 
   auto cmds = maiken::AppVars::INSTANCE().commands();
   for (auto depP = dependencies().rbegin(); depP != dependencies().rend(); ++depP) {
     const auto &dep(**depP);
-    if (!dep.sources().empty() && !cmds.count(STR_MERGE)) {
-      const std::string lib(dep.baseLibFilename());
+    if (!dep.sources().empty()) {
+      auto lib = dep.baseLibFilename();
       const auto &it(std::find(libraries().begin(), libraries().end(), lib));
       if (it != libraries().end()) libs.erase(it);
       libs.push_back(lib);
@@ -163,7 +160,8 @@ void maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception) 
 
     for (const auto &s : dep.includes())
       if (s.second && std::find(includes().begin(), includes().end(), s) == includes().end())
-        incs.push_back(std::make_pair(s.first, true));
+        incs.emplace_back(s.first, true);
+
     for (const std::string &s : dep.libraryPaths())
       if (std::find(libraryPaths().begin(), libraryPaths().end(), s) == libraryPaths().end())
         paths.push_back(s);

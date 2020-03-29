@@ -234,7 +234,7 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
       kul::env::CWD(this->project().dir());
     }
     std::string _path(app.inst ? app.inst.escr() : app.buildDir().escr());
-    if (!cmds.count(STR_MERGE) && app.sources().size() &&
+    if (app.sources().size() &&
         std::find(app.paths.begin(), app.paths.end(), _path) == app.paths.end())
       app.paths.push_back(_path);
   }

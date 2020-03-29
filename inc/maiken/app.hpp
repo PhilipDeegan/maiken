@@ -50,6 +50,7 @@ class Application;
 #include "maiken/except.hpp"
 #include "maiken/global.hpp"
 #include "maiken/project.hpp"
+#include "maiken/string.hpp"
 
 int main(int argc, char *argv[]);
 
@@ -68,6 +69,7 @@ class ThreadingCompiler;
 class Applications;
 class Source;
 class CompilerPrinter;
+class Processor;
 class KUL_PUBLISH Application : public Constants {
   friend class Applications;
   friend class CompilerPrinter;
@@ -75,6 +77,7 @@ class KUL_PUBLISH Application : public Constants {
   friend class SourceFinder;
   friend class ThreadingCompiler;
   friend class Project;
+  friend class Processor;
 
  public:
   using SourceMap = kul::hash::map::S2T<kul::hash::map::S2T<std::vector<maiken::Source>>>;
@@ -217,8 +220,7 @@ class KUL_PUBLISH Application : public Constants {
   bool is_build_stale();
 
   void withArgs(const std::string with, std::vector<YAML::Node> &with_nodes,
-                std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool root,
-                bool dep);
+                std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool dep);
   void with(kul::hash::set::String &withs, std::vector<YAML::Node> &with_nodes,
             std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool dep);
 
@@ -255,13 +257,10 @@ class KUL_PUBLISH Application : public Constants {
   const kul::hash::map::S2T<kul::hash::set::String> &arguments() const { return args; }
 
   std::vector<kul::cli::EnvVar> &envVars() { return evs; }
+  const std::vector<kul::cli::EnvVar> &envVars() const { return evs; }
 
   void add_def(const std::string &def) { defs.emplace_back(def); }
   const std::vector<std::string> &defines() const { return defs; }
-
-#ifdef _MKN_WITH_MKN_RAM_
-  bool get_binaries();
-#endif
 
   void addInclude(const std::string &s, bool p = 1) {
     auto it = std::find_if(
@@ -284,6 +283,9 @@ class KUL_PUBLISH Application : public Constants {
   static std::vector<Application *> CREATE(int16_t argc, char *argv[]) KTHROW(kul::Exception);
 
   static kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const &, Application * = nullptr);
+  static kul::cli::EnvVar PARSE_PROFILE_NAME(YAML::Node const &, Application * = nullptr);
+
+  CompilationInfo m_cInfo;
 };
 
 class Applications : public Constants {
@@ -366,6 +368,7 @@ class ModuleMinimiser {
 
 class CommandStateMachine {
   friend class maiken::Application;
+  friend class maiken::Processor;
 
  private:
   bool _main = 1;
@@ -404,4 +407,6 @@ class CompilerValidation : public Constants {
                                  const Application::SourceMap &sources);
 };
 }  // namespace maiken
+
+#include "maiken/processor.hpp"
 #endif /* _MAIKEN_APP_HPP_ */

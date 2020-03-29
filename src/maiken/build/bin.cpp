@@ -121,7 +121,7 @@ class Executioner : public Constants {
       auto linkDbg(comp->linkerDebugBin(AppVars::INSTANCE().debug()));
       if (!linkDbg.empty()) linker += " " + linkDbg;
       const CompilerProcessCapture &cpc =
-          comp->buildExecutable(linker, linkEnd, obV, app.libraries(), app.libraryPaths(), bin,
+          comp->buildExecutable(app, linker, linkEnd, obV, app.libraries(), app.libraryPaths(), bin,
                                 app.m, AppVars::INSTANCE().dryRun());
       if (AppVars::INSTANCE().dryRun())
         KOUT(NON) << cpc.cmd();
@@ -185,9 +185,8 @@ void maiken::Application::buildTest(const kul::hash::set::String &objects) KTHRO
     os << ss.str() << "-" << source.name() << oType;
     kul::File object(os.str(), objD);
     test_objects.push_back(std::make_pair(p.first, os.str()));
-    source_objects.emplace_back(
-         (AppVars::INSTANCE().dryRun() ? source.esc() : source.escm()),
-          AppVars::INSTANCE().dryRun() ? object.esc() : object.escm());
+    source_objects.emplace_back((AppVars::INSTANCE().dryRun() ? source.esc() : source.escm()),
+                                AppVars::INSTANCE().dryRun() ? object.esc() : object.escm());
   }
   {
     std::vector<kul::File> cacheFiles;
@@ -230,8 +229,9 @@ maiken::CompilerProcessCapture maiken::Application::buildLibrary(
     if (!linkOpt.empty()) linker += " " + linkOpt;
     auto linkDbg(comp->linkerDebugLib(AppVars::INSTANCE().debug()));
     if (!linkDbg.empty()) linker += " " + linkDbg;
-    const CompilerProcessCapture &cpc = comp->buildLibrary(
-        linker, linkEnd, obV, libraries(), libraryPaths(), lib, m, AppVars::INSTANCE().dryRun());
+    const CompilerProcessCapture &cpc =
+        comp->buildLibrary(*this, linker, linkEnd, obV, libraries(), libraryPaths(), lib, m,
+                           AppVars::INSTANCE().dryRun());
     if (AppVars::INSTANCE().dryRun())
       KOUT(NON) << cpc.cmd();
     else {

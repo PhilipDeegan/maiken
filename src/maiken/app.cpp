@@ -73,7 +73,7 @@ maiken::Application *maiken::Applications::getOrCreateRoot(const maiken::Project
 }
 
 maiken::Application *maiken::Applications::getOrNullptr(const std::string &project) {
-  uint8_t count = 0;
+  uint32_t count = 0;
   Application *app = nullptr;
   for (const auto p1 : m_apps)
     for (const auto p2 : p1.second) {

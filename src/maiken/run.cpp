@@ -101,7 +101,7 @@ class Runner : public Constants {
                kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
     }
     KOUT(DBG) << (*p);
-    if (!AppVars::INSTANCE().dryRun()) p->start();
+    if (!AppVars::INSTANCE().dryRun()) p->set(a.envVars()).start();
   }
 };
 }  // namespace maiken

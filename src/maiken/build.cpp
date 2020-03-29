@@ -43,10 +43,7 @@ void maiken::Application::link(const kul::hash::set::String &objects) KTHROW(kul
     build.mk();
     kul::File ts("timestamp", build);
     if (ts) ts.rm();
-    {
-      kul::io::Writer w(ts);
-      w << kul::Now::MILLIS();
-    }
+    kul::io::Writer(ts) << kul::Now::MILLIS();
   }
   if (CommandStateMachine::INSTANCE().commands().count(STR_TEST) && !tests.empty())
     buildTest(objects);
@@ -76,18 +73,9 @@ bool maiken::Application::is_build_stale() {
   kul::Dir d(".mkn/build");
   kul::File f("timestamp", d);
   if (!d || !f) return true;
-  kul::io::Reader r(f);
-  try {
-    size_t then = (size_t)43200 * ((size_t)60 * (size_t)1000);
-    size_t now = kul::Now::MILLIS();
-    size_t _MKN_BUILD_IS_STALE_MINUTES = now - then;
-    const char *c = r.readLine();
-    size_t timestamp = kul::String::UINT64(std::string(c));
-    if (_MKN_BUILD_IS_STALE_MINUTES > timestamp) return true;
-  } catch (const kul::Exception &e) {
-    KERR << e.stack();
-  } catch (const std::exception &e) {
-    KERR << e.what();
-  }
+  size_t then = size_t{43200} * size_t{60} * size_t{1000};
+  size_t now = kul::Now::MILLIS();
+  size_t timestamp = kul::String::UINT64(std::string(kul::io::Reader(f).readLine()));
+  if (now - then > timestamp) return true;
   return false;
 }

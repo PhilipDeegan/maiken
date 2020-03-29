@@ -56,14 +56,14 @@ class CLIHandler : public Constants {
         Arg('w', STR_WITH, ArgType::STRING), Arg('W', STR_WARN, ArgType::MAYBE),
         Arg('x', STR_SETTINGS, ArgType::STRING)
   };
-  std::vector<kul::cli::Cmd> cmdV{
-      Cmd(STR_INIT),    Cmd(STR_INC),  Cmd(STR_SRC),      Cmd(STR_MERGE),
+  std::vector<kul::cli::Cmd> cmdV{Cmd(STR_INIT),     Cmd(STR_INC),     Cmd(STR_SRC),
 #ifndef _MKN_DISABLE_MODULES_
-      Cmd(STR_MODS),
+                                  Cmd(STR_MODS),
 #endif  //_MKN_DISABLE_MODULES_
-      Cmd(STR_CLEAN),   Cmd(STR_DEPS), Cmd(STR_BUILD),    Cmd(STR_RUN),
-      Cmd(STR_COMPILE), Cmd(STR_LINK), Cmd(STR_PROFILES), Cmd(STR_DBG),
-      Cmd(STR_PACK),    Cmd(STR_INFO), Cmd(STR_TREE),     Cmd(STR_TEST)};
+                                  Cmd(STR_CLEAN),    Cmd(STR_DEPS),    Cmd(STR_BUILD),
+                                  Cmd(STR_RUN),      Cmd(STR_COMPILE), Cmd(STR_LINK),
+                                  Cmd(STR_PROFILES), Cmd(STR_DBG),     Cmd(STR_PACK),
+                                  Cmd(STR_INFO),     Cmd(STR_TREE),    Cmd(STR_TEST)};
 
  public:
   std::vector<kul::cli::Arg> args() { return argV; }
@@ -180,7 +180,7 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
         if (wildcard && yProfile.find(profile.substr(0, profile.rfind("*"))) == 0) {
           profiles.emplace_back(yProfile);
           f = 1;
-        } else if(!f)
+        } else if (!f)
           f = yProfile == profile;
 
         if (f && !wildcard) break;
@@ -271,8 +271,8 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
                     std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
   }
 
-  std::vector<std::string> cmds = {{STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK, STR_RUN, STR_TEST,
-                                    STR_DBG, STR_PACK, STR_MERGE}};
+  std::vector<std::string> cmds = {
+      {STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK, STR_RUN, STR_TEST, STR_DBG, STR_PACK}};
   for (const auto &cmd : cmds)
     if (args.has(cmd)) AppVars::INSTANCE().command(cmd);
 
@@ -396,11 +396,10 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
   }
 
   if (apps.size() == 1) {
-    if (args.has(STR_ADD)) {
-      for (const auto &s : kul::String::ESC_SPLIT(args.get(STR_ADD), ',')) KLOG(INF) << s;
+    if (args.has(STR_ADD))
       for (const auto &s : kul::String::ESC_SPLIT(args.get(STR_ADD), ','))
         apps[0]->addSourceLine(s);
-    }
+
     if (args.has(STR_MAIN)) apps[0]->main = args.get(STR_MAIN);
     if (args.has(STR_OUT)) apps[0]->out = args.get(STR_OUT);
   }

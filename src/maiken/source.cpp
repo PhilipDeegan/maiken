@@ -45,6 +45,7 @@ void maiken::Application::addSourceLine(const std::string &s) KTHROW(kul::Except
     srcs.emplace_back(Source(str, args), recurse_dir);
   };
   auto do_resolve = [&](const std::string &str, bool recurse_dir = true, std::string args = "") {
+    args = Properties::RESOLVE(*this, args);
     std::string pResolved(Properties::RESOLVE(*this, str));
     kul::Dir d(pResolved);
     if (d.is())

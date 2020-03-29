@@ -80,9 +80,9 @@ maiken::cpp::WINCompiler::WINCompiler(const int &v) : CCompiler(v) {
 }
 
 maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(
-    const std::string &linker, const std::string &linkerEnd,
+    maiken::Application const &app, std::string const &linker, std::string const &linkerEnd,
     const std::vector<std::string> &objects, const std::vector<std::string> &libs,
-    const std::vector<std::string> &libPaths, const std::string &out,
+    const std::vector<std::string> &libPaths, std::string const &out,
     const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
   (void)mode;
   std::string exe = out + ".exe";
@@ -99,14 +99,14 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(
   kul::Process p(cmd);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-OUT:\"" + exe + "\"").arg("-nologo");
-  for (const std::string &path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
-  for (const std::string &d : dirs) p.arg(kul::File(oStar(objects), d).escm());
-  for (const std::string &lib : libs) p.arg(staticLib(lib));
-  for (const std::string &s : kul::cli::asArgs(linkerEnd)) p.arg(s);
+  for (std::string const &path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
+  for (std::string const &d : dirs) p.arg(kul::File(oStar(objects), d).escm());
+  for (std::string const &lib : libs) p.arg(staticLib(lib));
+  for (std::string const &s : kul::cli::asArgs(linkerEnd)) p.arg(s);
 
   CompilerProcessCapture pc;
   try {
-    if (!dryRun) p.start();
+    if (!dryRun) p.set(app.envVars()).start();
   } catch (const kul::proc::Exception &e) {
     pc.exception(std::current_exception());
   }
@@ -116,14 +116,14 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(
 }
 
 maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(
-    const std::string &linker, const std::string &linkerEnd,
+    maiken::Application const &app, std::string const &linker, std::string const &linkerEnd,
     const std::vector<std::string> &objects, const std::vector<std::string> &libs,
     const std::vector<std::string> &libPaths, const kul::File &out,
     const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
   kul::hash::set::String dirs;
   for (const auto &o : objects) dirs.insert(kul::File(o).dir().real());
 
-  std::string lib = out.dir().join(sharedLib(out.name()));
+  std::string lib = out.dir().join(sharedLib(app, out.name()));
   std::string imp = out.dir().join(staticLib(out.name()));
   if (mode == compiler::Mode::STAT) lib = out.dir().join(staticLib(out.name()));
   std::string cmd = linker;
@@ -140,14 +140,14 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(
   p.arg("-OUT:\"" + lib + "\"");
   if (mode == compiler::Mode::SHAR) {
     p.arg("-IMPLIB:\"" + imp + "\"").arg("-DLL");
-    for (const std::string &path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
-    for (const std::string &lib : libs) p.arg(staticLib(lib));
+    for (std::string const &path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
+    for (std::string const &lib : libs) p.arg(staticLib(lib));
   }
-  for (const std::string &d : dirs) p.arg(kul::File(oStar(objects), d).escm());
-  for (const std::string &s : kul::cli::asArgs(linkerEnd)) p.arg(s);
+  for (std::string const &d : dirs) p.arg(kul::File(oStar(objects), d).escm());
+  for (std::string const &s : kul::cli::asArgs(linkerEnd)) p.arg(s);
   CompilerProcessCapture pc;
   try {
-    if (!dryRun) p.start();
+    if (!dryRun) p.set(app.envVars()).start();
   } catch (const kul::proc::Exception &e) {
     pc.exception(std::current_exception());
   }
@@ -157,9 +157,9 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(
 }
 
 maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(
-    const maiken::Application &app, const std::string &compiler,
+    const maiken::Application &app, std::string const &compiler,
     const std::vector<std::string> &args, const std::vector<std::string> &incs,
-    const std::string &in, const std::string &out, const maiken::compiler::Mode &,
+    std::string const &in, std::string const &out, const maiken::compiler::Mode &,
     bool dryRun) const KTHROW(kul::Exception) {
   const std::string fileType = in.substr(in.rfind(".") + 1);
 
@@ -178,13 +178,13 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(
   for (size_t i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-nologo");
   for (const auto &def : app.defines()) p << std::string("-D" + def);
-  for (const std::string &s : incs) p.arg("-I\"" + s + "\"");
-  for (const std::string &s : args) p.arg(s);
+  for (std::string const &s : incs) p.arg("-I\"" + s + "\"");
+  for (std::string const &s : args) p.arg(s);
   p.arg("-c").arg("-Fo\"" + out + "\"").arg("\"" + in + "\"");
   CompilerProcessCapture pc;
   if (!kul::LogMan::INSTANCE().inf()) pc.setProcess(p);
   try {
-    if (!dryRun) p.start();
+    if (!dryRun) p.set(app.envVars()).start();
   } catch (const kul::Exception &e) {
     pc.exception(std::current_exception());
   }

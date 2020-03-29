@@ -32,8 +32,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void maiken::Application::withArgs(
     const std::string with_str, std::vector<YAML::Node> &with_nodes,
-    std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool add, bool dep) {
-  if (add && with_str.size()) {
+    std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool dep) {
+  if (with_str.size()) {
     kul::hash::set::String withs;
     try {
       parseDependencyString(with_str, withs);
@@ -52,26 +52,22 @@ void maiken::Application::with(
     std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool dep) {
   for (const auto &with : withs) {
     YAML::Node node;
-    std::string local, profiles, proj = with, version, scm;
-    {
-      auto lbrak = proj.find("("), rbrak = proj.find(")");
-      if (lbrak != std::string::npos) {
-        if (rbrak == std::string::npos) KEXIT(1, "Invalid -w - missing right ) bracket");
-        scm = proj.substr(lbrak + 1, rbrak - lbrak - 1);
-        proj = proj.substr(0, lbrak) + with.substr(rbrak + 1);
-        node[STR_SCM] = scm;
-      }
-      lbrak = proj.find("["), rbrak = proj.find("]");
-      if (lbrak != std::string::npos) {
-        if (rbrak == std::string::npos) KEXIT(1, "Invalid -w - missing right ] bracket");
-        profiles = proj.substr(lbrak + 1, rbrak - lbrak - 1);
-        proj = proj.substr(0, lbrak);
-        kul::String::REPLACE_ALL(profiles, ",", " ");
-        node[STR_PROFILE] = profiles;
-      }
-    }
-    auto am = proj.find("&");  // local
-    auto ha = proj.find("#");  // version
+    std::string local /*&*/, profiles, proj = with, version /*#*/, scm;
+
+    auto get_between = [&](auto &var, auto lbrak, auto rbrak) {
+      auto between = maiken::string::between_rm_str(proj, lbrak, rbrak);
+      if (between.found) proj = between.remaining, var = *between.found;
+      return !between.error;
+    };
+
+    if (!get_between(scm, "(", ")")) KEXIT(1, "Invalid -w - missing right ) bracket");
+    if (!node[STR_SCM]) node[STR_SCM] = scm;
+
+    if (!get_between(profiles, "[", "]")) KEXIT(1, "Invalid -w - missing right ] bracket");
+    kul::String::REPLACE_ALL(profiles, ",", " ");
+    if (!node[STR_PROFILE]) node[STR_PROFILE] = profiles;
+
+    auto am = proj.find("&"), ha = proj.find("#");
     if (proj == this->project().root()[STR_NAME].Scalar()) {
       node[STR_LOCAL] = ".";
       if (am != std::string::npos || ha != std::string::npos)
@@ -83,16 +79,12 @@ void maiken::Application::with(
     if (am != std::string::npos && ha != std::string::npos)
       if (ha > am) KEXIT(1, "-w invalid, version must before location");
 
-    if (am != std::string::npos) {
-      local = proj.substr(am + 1);
-      proj = proj.substr(0, am);
-      node[STR_LOCAL] = local;
-    }
-    if (ha != std::string::npos) {
-      version = proj.substr(ha + 1);
-      proj = proj.substr(0, ha);
-      node[STR_VERSION] = version;
-    }
+    auto if_set = [&](auto s, auto &v, auto n) {
+      if (s != std::string::npos) v = proj.substr(s + 1), proj = proj.substr(0, s), n = v;
+    };
+    if_set(am, local, node[STR_LOCAL]);
+    if_set(ha, version, node[STR_VERSION]);
+
     if (proj.empty() && local.empty() && scm.empty())
       KEXIT(1, "-w invalid, project cannot be deduced");
     if (!proj.empty()) {
@@ -100,11 +92,9 @@ void maiken::Application::with(
         scm = proj;
         node[STR_SCM] = scm;
       }
-      auto bits(kul::String::SPLIT(proj, "/"));
-      proj = bits[bits.size() - 1];
+      proj = kul::String::SPLIT(proj, "/").back();
     } else if (proj.empty() && !scm.empty()) {
-      auto bits(kul::String::SPLIT(scm, "/"));
-      proj = bits[bits.size() - 1];
+      proj = kul::String::SPLIT(scm, "/").back();
     }
     if (!proj.empty()) node[STR_NAME] = proj;
 

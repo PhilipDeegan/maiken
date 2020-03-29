@@ -38,11 +38,11 @@ class Validator : public maiken::Constants {
   std::vector<std::string> ifOSLefts{"bsd", "nix", "win"};
   Validator() {
     std::vector<std::string> ifLefts;
-    for (const auto &s : maiken::Compilers::INSTANCE().keys()) ifArgsLefts.push_back(s);
-    for (const auto &s : ifOSLefts)
-      for (const std::string &a : ifArgsLefts) ifLefts.push_back(s + "_" + a);
-    for (const auto &s : ifLefts) ifArgsLefts.push_back(s);
-    for (const auto &s : ifOSLefts) ifArgsLefts.push_back(s);
+    for (auto const &s : maiken::Compilers::INSTANCE().keys()) ifArgsLefts.push_back(s);
+    for (auto const &s : ifOSLefts)
+      for (auto const &a : ifArgsLefts) ifLefts.push_back(s + "_" + a);
+    for (auto const &s : ifLefts) ifArgsLefts.push_back(s);
+    for (auto const &s : ifOSLefts) ifArgsLefts.push_back(s);
   }
   static Validator &INSTANCE() {
     static Validator v;
@@ -64,30 +64,17 @@ class Validator : public maiken::Constants {
  public:
   static void PRE_BUILD(const maiken::Application &a, const YAML::Node &n)
       KTHROW(maiken::Exception) {
-    // if (n[STR_MAIN] && n[STR_LANG])
-    //   KEXIT(1,
-    //         "cannot have both main and lang tag\n" +
-    //         a.project().dir().path());
-    // if (n[STR_MAIN]) {
-    //   const std::string& m(n[STR_MAIN].Scalar());
-    //   if (m.find(".") == std::string::npos)
-    //     KEXIT(1, "main tag invalid format, expects <file>.<type>\n" +
-    //                  a.project().dir().path());
-    // }
     if (n[STR_MODE]) {
-      const auto &s(n[STR_MODE].Scalar());
+      auto const &s(n[STR_MODE].Scalar());
       if (s != STR_NONE && s != STR_STATIC && s != STR_SHARED)
         KEXIT(1, "mode tag invalid value, expects none/static/shared\n" + a.project().dir().path());
     }
-    if (n[STR_IF_ARG]) IF_VALUEDATER(a, n[STR_IF_ARG], STR_IF_ARG, INSTANCE().ifArgsLefts);
-    if (n[STR_IF_LNK]) IF_VALUEDATER(a, n[STR_IF_LNK], STR_IF_LNK, INSTANCE().ifArgsLefts);
-    if (n[STR_IF_INC]) IF_VALUEDATER(a, n[STR_IF_INC], STR_IF_INC, INSTANCE().ifOSLefts);
-    if (n[STR_IF_SRC]) IF_VALUEDATER(a, n[STR_IF_SRC], STR_IF_SRC, INSTANCE().ifOSLefts);
-    if (n[STR_IF_LIB]) IF_VALUEDATER(a, n[STR_IF_LIB], STR_IF_LIB, INSTANCE().ifOSLefts);
-    if (n[STR_IF_DEP]) IF_VALUEDATER(a, n[STR_IF_DEP], STR_IF_DEP, INSTANCE().ifOSLefts);
-    if (n[STR_IF_MOD]) IF_VALUEDATER(a, n[STR_IF_MOD], STR_IF_MOD, INSTANCE().ifOSLefts);
+    for (auto const &str_if : {STR_IF_ARG, STR_IF_LNK})
+      if (n[str_if]) IF_VALUEDATER(a, n[str_if], str_if, INSTANCE().ifArgsLefts);
+    for (auto const &str_if : {STR_IF_INC, STR_IF_SRC, STR_IF_LIB, STR_IF_DEP, STR_IF_MOD})
+      if (n[str_if]) IF_VALUEDATER(a, n[str_if], str_if, INSTANCE().ifOSLefts);
     if (n[STR_DEP])
-      for (const auto &d : n[STR_DEP])
+      for (auto const &d : n[STR_DEP])
         if (!d[STR_LOCAL] && !d[STR_NAME])
           KEXIT(1, "dependency name must exist if local tag does not\n" + a.project().dir().path());
   }
@@ -105,7 +92,7 @@ class Validator : public maiken::Constants {
   }
   static bool PARENT_CYCLE(const maiken::Application &a, const std::string &pr,
                            const std::string &pa) {
-    for (const auto &p1 : a.project().root()[STR_PROFILE]) {
+    for (auto const &p1 : a.project().root()[STR_PROFILE]) {
       if (p1[STR_NAME].Scalar() != pr) continue;
       if (p1[STR_PARENT]) {
         std::string resolved(maiken::Properties::RESOLVE(a, p1[STR_PARENT].Scalar()));
@@ -120,7 +107,7 @@ class Validator : public maiken::Constants {
   static void SELF_CHECK(const maiken::Application &a, const YAML::Node &n,
                          const std::vector<std::string> &profiles) {
     if (n[STR_SELF])
-      for (const auto &s :
+      for (auto const &s :
            kul::String::SPLIT(maiken::Properties::RESOLVE(a, n[STR_SELF].Scalar()), ' '))
         if (std::find(profiles.begin(), profiles.end(), s) == profiles.end())
           KEXIT(1, "Self tag references unknown profile: \"" + s + "\" in " +
@@ -142,7 +129,7 @@ void maiken::Application::preSetupValidation() KTHROW(maiken::Exception) {
   bool dpf = 0;
   Validator::PRE_BUILD(*this, project().root());
   std::vector<std::string> profiles;
-  for (const auto &profile : project().root()[STR_PROFILE]) {
+  for (auto const &profile : project().root()[STR_PROFILE]) {
     const std::string &p(profile[STR_NAME].Scalar());
     if (p.find("[") != std::string::npos || p.find("]") != std::string::npos)
       KEXIT(1, "Profile may not contain character \"[\" or \"]\"");
@@ -155,7 +142,7 @@ void maiken::Application::preSetupValidation() KTHROW(maiken::Exception) {
       bool f = 0;
       std::string resolved(Properties::RESOLVE(*this, profile[STR_PARENT].Scalar()));
       if (resolved == profile[STR_NAME].Scalar()) KEXIT(1, "Profile may not be its own parent");
-      for (const auto &p1 : project().root()[STR_PROFILE]) {
+      for (auto const &p1 : project().root()[STR_PROFILE]) {
         if (profile[STR_NAME].Scalar() == p1[STR_NAME].Scalar()) continue;
         if (resolved == p1[STR_NAME].Scalar()) f = 1;
         if (f) {
@@ -175,10 +162,10 @@ void maiken::Application::preSetupValidation() KTHROW(maiken::Exception) {
   if (dpp && !dpf)
     KEXIT(1, "Parent for default profile does not exist: \n" + project().dir().path());
   Validator::SELF_CHECK(*this, project().root(), profiles);
-  for (const auto &n : project().root()[STR_PROFILE]) Validator::SELF_CHECK(*this, n, profiles);
+  for (auto const &n : project().root()[STR_PROFILE]) Validator::SELF_CHECK(*this, n, profiles);
 }
 
 void maiken::Application::postSetupValidation() KTHROW(maiken::Exception) {
   Validator::POST_BUILD(*this, project().root());
-  for (const auto &profile : project().root()[STR_PROFILE]) Validator::POST_BUILD(*this, profile);
+  for (auto const &profile : project().root()[STR_PROFILE]) Validator::POST_BUILD(*this, profile);
 }

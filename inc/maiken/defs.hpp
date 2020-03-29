@@ -85,7 +85,6 @@ class Constants {
   static constexpr const char *STR_OBJ = "obj";
 
   static constexpr const char *STR_BUILD = "build";
-  static constexpr const char *STR_MERGE = "merge";
   static constexpr const char *STR_DEBUG = "debug";
   static constexpr const char *STR_DEBUGGER = "debugger";
   static constexpr const char *STR_CLEAN = "clean";

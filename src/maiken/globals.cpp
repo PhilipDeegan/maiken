@@ -43,39 +43,32 @@ maiken::AppVars::AppVars() {
   pks["TIMESTAMP"] = std::time(NULL);
   auto root = Settings::INSTANCE().root();
 
-  if (root[STR_LOCAL] && root[STR_LOCAL][STR_REPO])
-    pks["MKN_REPO"] = kul::Dir(root[STR_LOCAL][STR_REPO].Scalar()).real();
-  else
-    pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
-  if (root[STR_LOCAL] && root[STR_LOCAL][STR_MOD_REPO])
-    pks["MKN_MOD_REPO"] = kul::Dir(root[STR_LOCAL][STR_MOD_REPO].Scalar()).real();
-  else
-    pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
+  if (root[STR_LOCAL]) {
+    auto const& local = root[STR_LOCAL];
+    if (local[STR_REPO])
+      pks["MKN_REPO"] = kul::Dir(local[STR_REPO].Scalar()).real();
+    else
+      pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
+    if (local[STR_MOD_REPO])
+      pks["MKN_MOD_REPO"] = kul::Dir(local[STR_MOD_REPO].Scalar()).real();
+    else
+      pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
+  }
 
-  if (root[STR_LOCAL] && root[STR_LOCAL][STR_BIN])
-    pks["MKN_BIN"] = root[STR_LOCAL][STR_BIN].Scalar();
-  if (root[STR_LOCAL] && root[STR_LOCAL][STR_LIB])
-    pks["MKN_LIB"] = root[STR_LOCAL][STR_LIB].Scalar();
+  std::string ext, pre;
+  if constexpr (kul::def::is_win)
+    evs["MKN_OBJ"] = "obj", ext = ".dll", pre = "";
+  else
+    evs["MKN_OBJ"] = "o", ext = ".so", pre = "lib";
 
-#ifdef _WIN32
-  evs["MKN_OBJ"] = "obj";
-  evs["MKN_LIB_EXT"] = ".dll";
-  evs["MKN_LIB_PRE"] = "";
-#else
-  evs["MKN_OBJ"] = "o";
-  evs["MKN_LIB_EXT"] = ".so";
-  evs["MKN_LIB_PRE"] = "lib";
-#endif
   evs["MKN_OBJ_DEF"] = evs["MKN_OBJ"];
-  evs["MKN_LIB_EXT_DEF"] = evs["MKN_LIB_EXT"];
-  evs["MKN_LIB_PRE_DEF"] = evs["MKN_LIB_PRE"];
+  evs["MKN_LIB_EXT_DEF"] = ext;
+  evs["MKN_LIB_PRE_DEF"] = pre;
 
   auto check_set = [&](const std::string key) {
     auto cstr = key.c_str();
     if (kul::env::EXISTS(cstr)) evs[key] = kul::env::GET(cstr);
   };
-  check_set("MKN_LIB_EXT");
-  check_set("MKN_LIB_PRE");
   check_set("MKN_OBJ");
 
   if (root[STR_ENV]) {
@@ -83,7 +76,7 @@ maiken::AppVars::AppVars() {
       auto ev = maiken::Application::PARSE_ENV_NODE(root[STR_ENV]);
       evs.emplace(ev.name(), ev.toString());
     } else {
-      for (const auto &c : root[STR_ENV]) {
+      for (const auto& c : root[STR_ENV]) {
         auto ev = maiken::Application::PARSE_ENV_NODE(c);
         evs.emplace(ev.name(), ev.toString());
       }
