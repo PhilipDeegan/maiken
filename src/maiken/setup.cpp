@@ -199,7 +199,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
         nm = 0;
       }
       if (out.empty() && n[STR_OUT]) out = Properties::RESOLVE(*this, n[STR_OUT].Scalar());
-      if (main.empty() && n[STR_MAIN]) main = n[STR_MAIN].Scalar();
+      if (!main_ && n[STR_MAIN]) addMainLine(n[STR_MAIN].Scalar());
       if (tests.empty() && n[STR_TEST]) tests = Project::populate_tests(n[STR_TEST]);
       if (lang.empty() && n[STR_LANG]) lang = n[STR_LANG].Scalar();
       profile = n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
@@ -208,10 +208,10 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     }
   }
 
-  if (main.empty() && lang.empty()) resolveLang();
+  if (!main_ && lang.empty()) resolveLang();
   if (par) {
-    if (!main.empty() && lang.empty()) lang = main.substr(main.rfind(".") + 1);
-    main.clear();
+    if (main_ && lang.empty()) lang = main_->in().substr(main_->in().rfind(".") + 1);
+    main_ = {};
   }
 
   if (nm) {
@@ -224,21 +224,13 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
   c = 1;
   while (c) {
     c = 0;
-    auto const &propK = AppVars::INSTANCE().properkeys();
     for (auto const &n : nodes) {
       if (n[STR_NAME].Scalar() != profile) continue;
-      if (inst.path().empty()) {
-        if (Settings::INSTANCE().root()[STR_LOCAL] && propK.count("MKN_BIN") && !main.empty())
-          inst = kul::Dir((*propK.find("MKN_BIN")).second);
-        else if (Settings::INSTANCE().root()[STR_LOCAL] && propK.count("MKN_LIB") && main.empty())
-          inst = kul::Dir((*propK.find("MKN_LIB")).second);
-        else if (n[STR_INSTALL])
-          inst = kul::Dir(Properties::RESOLVE(*this, n[STR_INSTALL].Scalar()));
-        if (!inst.path().empty()) {
-          if (!inst && !inst.mk())
-            KEXIT(1, "install tag is not a valid directory\n" + project().dir().path());
-          inst = kul::Dir(inst.real());
-        }
+      if (inst.path().empty() && n[STR_INSTALL]) {
+        inst = kul::Dir(Properties::RESOLVE(*this, n[STR_INSTALL].Scalar()));
+        if (!inst && !inst.mk())
+          KEXIT(1, "install tag is not a valid directory\n" + project().dir().path());
+        inst = kul::Dir(inst.real());
       }
 
       auto ifArgOrLnk = [&](auto const &n, auto const &nName, std::string &var,
@@ -267,7 +259,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
               cVal[left] = cVal[left] + ifArg;
               continue;
             }
-            auto trues = {lang.empty() && left == STR_BIN, main.empty() && left == STR_LIB,
+            auto trues = {lang.empty() && left == STR_BIN, !main_ && left == STR_LIB,
                           m == compiler::Mode::SHAR && left == STR_SHARED,
                           m == compiler::Mode::STAT && left == STR_STATIC,
                           left == KTOSTRING(__KUL_OS__)};

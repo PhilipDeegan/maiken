@@ -49,10 +49,10 @@ int main(int argc, char *argv[]) {
     ret = e.code();
   } catch (const kul::Exception &e) {
     KERR << e.stack();
-    ret = 2;
+    ret = 1;
   } catch (const std::exception &e) {
     KERR << e.what();
-    ret = 3;
+    ret = 1;
   }
   maiken::Applications::INSTANCE().clear();
   return ret;

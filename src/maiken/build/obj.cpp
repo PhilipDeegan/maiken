@@ -168,29 +168,8 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   std::vector<maiken::CompilationUnit> c_units;
   std::queue<std::pair<maiken::Source, std::string>> cQueue;
 
-  kul::File init;
-  if (!main.empty()) {
-    const std::string oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
-    const kul::File source(main);
-    init = source;
-    std::stringstream ss, os;
-    ss << std::hex << std::hash<std::string>()(source.real());
-    os << ss.str() << "-" << source.name() << oType;
-    kul::Dir tmpD(buildDir().join("tmp"));
-    if (!tmpD) tmpD.mk();
-    kul::File object(os.str(), tmpD);
-
-    c_units.emplace_back(tc.compilationUnit(
-        std::make_pair(Source(AppVars::INSTANCE().dryRun() ? source.esc() : source.escm()),
-                       AppVars::INSTANCE().dryRun() ? object.esc() : object.escm())));
-  }
-
   while (sourceQueue.size() > 0) {
     cQueue.push(sourceQueue.front());
-    if (init && kul::File(sourceQueue.front().first.in()) == init) {
-      sourceQueue.pop();
-      continue;
-    };
     c_units.emplace_back(tc.compilationUnit(sourceQueue.front()));
     sourceQueue.pop();
   }

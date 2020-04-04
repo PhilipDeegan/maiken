@@ -1,15 +1,15 @@
-#! clean build -dtKOW 9 -g 0 -qp @
+#! clean build test -dtKOW 9 -g 0 -q
 
 name: mkn
 scm: https://github.com/dekken/maiken
 version: master
 property:
-  DATE: 30-MAR-2020
-
+  DATE: 04-APR-2020
 
 parent: lib
 mode: none
 main: mkn.cpp
+test: test/cpp.cpp
 
 profile:
 - name: headers

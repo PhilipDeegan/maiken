@@ -35,15 +35,14 @@ void maiken::Application::findObjects(kul::hash::set::String &objects) const {
     try {
       if (!(*files().find(ft.first)).second.count(STR_COMPILER))
         KEXIT(1, "No compiler found for filetype " + ft.first);
-      const auto *compiler =
-          Compilers::INSTANCE().get((*(*files().find(ft.first)).second.find(STR_COMPILER)).second);
+      auto compiler = Compilers::INSTANCE().get(files().at(ft.first).at(STR_COMPILER));
       if (!compiler->sourceIsBin()) {
         if (!buildDir().is())
           KEXCEPT(maiken::Exception, "Cannot link without compiling.\n" + project().dir().path());
         kul::Dir objDir("obj", buildDir());
         if (!buildDir().is())
           KEXCEPT(maiken::Exception, "No object directory found.\n" + project().dir().path());
-        for (const kul::File f : objDir.files(true)) objects.insert(f.real());
+        for (const kul::File f : objDir.files(true)) objects.insert(f.mini());
       } else {
         for (const auto &kv : ft.second)
           for (const auto &f : kv.second) objects.insert(kul::File(f.in()).mini());
