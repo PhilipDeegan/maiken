@@ -69,7 +69,7 @@ kul::hash::set::String maiken::Application::inactiveMains() const {
   kul::hash::set::String iMs;
   std::string p;
   try {
-    p = kul::Dir::REAL(main);
+    p = kul::Dir::REAL(main_->in());
   } catch (const kul::Exception &e) {
   }
   std::string f;

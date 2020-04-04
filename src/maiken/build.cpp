@@ -34,7 +34,7 @@ void maiken::Application::link(const kul::hash::set::String &objects) KTHROW(kul
   showConfig();
   if (objects.size() > 0) {
     buildDir().mk();
-    if (!main.empty())
+    if (main_)
       buildExecutable(objects);
     else
       buildLibrary(objects);

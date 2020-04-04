@@ -157,6 +157,6 @@ void maiken::NewProject::write() {
 std::vector<maiken::Application const *> maiken::Project::getBinaryTargets() const {
   std::vector<Application const *> ret;
   for (auto const *app : maiken::Applications::INSTANCE().applicationsFor(*this))
-    if (app->main.size()) ret.emplace_back(app);
+    if (app->main()) ret.emplace_back(app);
   return ret;
 }

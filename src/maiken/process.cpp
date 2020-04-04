@@ -36,25 +36,17 @@ void maiken::Application::process() KTHROW(kul::Exception) {
   kul::os::PushDir pushd(this->project().dir());
   auto loadModules = [&](Application &app) {
 #ifndef _MKN_DISABLE_MODULES_
-    for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod) {
+    for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod)
       app.mods.push_back(ModuleLoader::LOAD(**mod));
-    }
     for (auto &modLoader : app.mods) modLoader->module()->init(app, app.modInit(modLoader->app()));
 #endif  //_MKN_DISABLE_MODULES_
   };
 
   std::vector<Application *> apps;
-  /*auto proc0 = [&](Application &app, bool work) {
-    if (work) {
-      if (!app.buildDir()) app.buildDir().mk();
-      if (BuildRecorder::INSTANCE().has(app.buildDir().real())) return;
-      BuildRecorder::INSTANCE().add(app.buildDir().real());
-      apps.emplace_back(&app);
-    }
-  };
-  auto proc1 = [&]() { Processor::process(apps); };*/
+  std::function<void(Application &, bool)> proc_a;
+  std::function<void()> proc_b = []() {};
 
-  auto proc = [&](Application &app, bool work) {
+  proc_a = [&](Application &app, bool work) {
     kul::env::CWD(app.project().dir());
 
     if (work) {
@@ -85,6 +77,19 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     }
   };
 
+  char beta[] = "MKN_BETA";
+  if (kul::env::EXISTS(beta) && std::string(kul::env::GET(beta)) == "1") {
+    proc_a = [&](Application &app, bool work) {
+      if (work) {
+        if (!app.buildDir()) app.buildDir().mk();
+        if (BuildRecorder::INSTANCE().has(app.buildDir().real())) return;
+        BuildRecorder::INSTANCE().add(app.buildDir().real());
+        apps.emplace_back(&app);
+      }
+    };
+    proc_b = [&]() { Processor::process(apps); };
+  }
+
   auto _mods = ModuleMinimiser::modules(*this);
   for (auto &mod : ModuleMinimiser::modules(*this)) {
     bool build = mod.second->is_build_required();
@@ -98,9 +103,10 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       build = kul::String::BOOL(kul::cli::receive(ss.str()));
     }
     if (build) {
+      auto is_main = CommandStateMachine::INSTANCE().main();
       CommandStateMachine::INSTANCE().main(0);
       for (auto &m : _mods) m.second->process();
-      CommandStateMachine::INSTANCE().main(1);
+      CommandStateMachine::INSTANCE().main(is_main);
     }
   }
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) loadModules(**app);
@@ -108,11 +114,13 @@ void maiken::Application::process() KTHROW(kul::Exception) {
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) {
     if ((*app)->ig) continue;
     if ((*app)->lang.empty()) (*app)->resolveLang();
-    (*app)->main.clear();
-    proc(**app, !(*app)->srcs.empty());
+    (*app)->main_ = {};
+    proc_a(**app, !(*app)->srcs.empty());
   }
-  if (!this->ig) proc(*this, (!this->srcs.empty() || !this->main.empty()));
-  // proc1();
+  if (!this->ig) proc_a(*this, (!this->srcs.empty() || this->main_));
+
+  proc_b();
+
   if (cmds.count(STR_TEST)) {
     for (auto &modLoader : mods) modLoader->module()->test(*this, this->modTest(modLoader->app()));
     test();

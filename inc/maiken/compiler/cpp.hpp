@@ -94,33 +94,18 @@ class CCompiler : public Compiler {
 class GccCompiler : public CCompiler {
  public:
   GccCompiler(const int &v = 0);
+  virtual ~GccCompiler() {}
 
   std::string staticLib(std::string const &lib) const override { return "lib" + lib + ".a"; }
 
   virtual std::string cc() const override { return CC("gcc"); }
   virtual std::string cxx() const override { return CXX("g++"); }
 
-  CompilerProcessCapture buildExecutable(maiken::Application const &app, std::string const &linker,
-                                         std::string const &linkerEnd,
-                                         std::vector<std::string> const &objects,
-                                         std::vector<std::string> const &libs,
-                                         std::vector<std::string> const &libPaths,
-                                         std::string const &out, const compiler::Mode &mode,
-                                         bool dryRun = false) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture compileSource(CompileDAO &dao) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture buildLibrary(maiken::Application const &app, std::string const &linker,
-                                      std::string const &linkerEnd,
-                                      std::vector<std::string> const &objects,
-                                      std::vector<std::string> const &libs,
-                                      std::vector<std::string> const &libPaths,
-                                      const kul::File &out, const compiler::Mode &mode,
-                                      bool dryRun = false) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture buildExecutable(LinkDAO &dao) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture compileSource(const maiken::Application &app, std::string const &compiler,
-                                       std::vector<std::string> const &args,
-                                       std::vector<std::string> const &incs, std::string const &in,
-                                       std::string const &out, const compiler::Mode &mode,
-                                       bool dryRun = false) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture buildLibrary(LinkDAO &dao) const KTHROW(kul::Exception) override;
 
   virtual void preCompileHeader(std::vector<std::string> const &incs,
                                 std::vector<std::string> const &args, std::string const &in,
@@ -136,7 +121,7 @@ class GccCompiler : public CCompiler {
 
 class ClangCompiler : public GccCompiler {
  public:
-  ClangCompiler(const int &v = 0);
+  ClangCompiler(const int &v = 0) : GccCompiler(v) {}
   std::string cc() const override { return CC("clang"); }
   std::string cxx() const override { return CXX("clang++"); }
   CCompiler_Type type() const override { return CCompiler_Type::CLANG; }
@@ -152,7 +137,7 @@ class HccCompiler : public GccCompiler {
 
 class IntelCompiler : public GccCompiler {
  public:
-  IntelCompiler(const int &v = 0);
+  IntelCompiler(const int &v = 0) : GccCompiler(v) {}
   std::string cc() const override { return CC("icc"); }
   std::string cxx() const override { return CXX("icpc"); }
   CCompiler_Type type() const override { return CCompiler_Type::ICC; }
@@ -162,42 +147,22 @@ class WINCompiler : public CCompiler {
  protected:
  public:
   WINCompiler(const int &v = 0);
+  virtual ~WINCompiler() {}
+
   std::string cc() const override { return CC("cl"); }
   std::string cxx() const override { return CXX("cl"); }
 
   std::string staticLib(std::string const &lib) const override { return lib + ".lib"; }
 
-  CompilerProcessCapture buildExecutable(maiken::Application const &app, std::string const &linker,
-                                         std::string const &linkerEnd,
-                                         std::vector<std::string> const &objects,
-                                         std::vector<std::string> const &libs,
-                                         std::vector<std::string> const &libPaths,
-                                         std::string const &out, const compiler::Mode &mode,
-                                         bool dryRun = false) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture compileSource(CompileDAO &dao) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture buildLibrary(maiken::Application const &app, std::string const &linker,
-                                      std::string const &linkerEnd,
-                                      std::vector<std::string> const &objects,
-                                      std::vector<std::string> const &libs,
-                                      std::vector<std::string> const &libPaths,
-                                      const kul::File &out, const compiler::Mode &mode,
-                                      bool dryRun = false) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture buildExecutable(LinkDAO &dao) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture compileSource(const maiken::Application &app, std::string const &compiler,
-                                       std::vector<std::string> const &args,
-                                       std::vector<std::string> const &incs, std::string const &in,
-                                       std::string const &out, const compiler::Mode &mode,
-                                       bool dryRun = false) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture buildLibrary(LinkDAO &dao) const KTHROW(kul::Exception) override;
 
-  virtual void preCompileHeader(std::vector<std::string> const &incs,
-                                std::vector<std::string> const &args, std::string const &in,
-                                std::string const &out, bool dryRun = false) const
+  virtual void preCompileHeader(std::vector<std::string> const &, std::vector<std::string> const &,
+                                std::string const &, std::string const &, bool = false) const
       KTHROW(kul::Exception) override {
-    (void)incs;
-    (void)args;
-    (void)in;
-    (void)out;
-    (void)dryRun;
     KEXCEPTION("Method is not implemented");
   }
   CCompiler_Type type() const override { return CCompiler_Type::WIN; }

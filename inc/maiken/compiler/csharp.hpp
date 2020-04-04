@@ -44,48 +44,21 @@ class Exception : public kul::Exception {
 class WINCompiler : public Compiler {
  public:
   WINCompiler(const int &v = 0) : Compiler(v) {}
+  virtual ~WINCompiler() {}
+
   bool sourceIsBin() const override { return true; }
 
-  CompilerProcessCapture buildExecutable(maiken::Application const &app, std::string const &linker,
-                                         std::string const &linkerEnd,
-                                         const std::vector<std::string> &objects,
-                                         const std::vector<std::string> &libs,
-                                         const std::vector<std::string> &libPaths,
-                                         std::string const &out, const compiler::Mode &mode,
-                                         bool dryRun = false) const KTHROW(kul::Exception) override;
-
-  CompilerProcessCapture buildLibrary(maiken::Application const &app, std::string const &linker,
-                                      std::string const &linkerEnd,
-                                      const std::vector<std::string> &objects,
-                                      const std::vector<std::string> &libs,
-                                      const std::vector<std::string> &libPaths,
-                                      const kul::File &out, const compiler::Mode &mode,
-                                      bool dryRun = false) const KTHROW(kul::Exception) override;
-
-  CompilerProcessCapture compileSource(const maiken::Application &app, std::string const &compiler,
-                                       const std::vector<std::string> &args,
-                                       const std::vector<std::string> &incs, std::string const &in,
-                                       std::string const &out, const compiler::Mode &mode,
-                                       bool dryRun = false) const KTHROW(kul::Exception) override {
-    (void)app;
-    (void)compiler;
-    (void)args;
-    (void)incs;
-    (void)in;
-    (void)out;
-    (void)mode;
-    (void)dryRun;
+  CompilerProcessCapture compileSource(CompileDAO &) const override {
     KEXCEPTION("Method compileSource is not implemented in C Sharp");
   }
-  virtual void preCompileHeader(const std::vector<std::string> &incs,
-                                const std::vector<std::string> &args, std::string const &in,
-                                std::string const &out, bool dryRun = false) const
+
+  CompilerProcessCapture buildExecutable(LinkDAO &dao) const KTHROW(kul::Exception) override;
+
+  CompilerProcessCapture buildLibrary(LinkDAO &dao) const KTHROW(kul::Exception) override;
+
+  virtual void preCompileHeader(const std::vector<std::string> &, const std::vector<std::string> &,
+                                std::string const &, std::string const &, bool = false) const
       KTHROW(kul::Exception) override {
-    (void)incs;
-    (void)args;
-    (void)in;
-    (void)out;
-    (void)dryRun;
     KEXCEPTION("Method preCompileHeader is not implemented in C Sharp");
   }
 };

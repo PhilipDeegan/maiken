@@ -123,7 +123,7 @@ void maiken::Application::test() {
 }
 
 void maiken::Application::run(bool dbg) {
-  if (main.empty()) return;
+  if (!main_) return;
   std::string bin;
   for (const auto &file : buildDir().files(false)) {
     bin = file.name();

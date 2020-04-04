@@ -65,13 +65,13 @@ void maiken::Application::pack() KTHROW(kul::Exception) {
   kul::Dir pk(buildDir().join("pack"));
   if (!pk && !pk.mk()) KEXIT(1, "Cannot create: " + pk.path());
 
-  kul::Dir bin(pk.join("bin"), main.size());
+  kul::Dir bin(pk.join("bin"), main_.has_value());
   kul::Dir lib(pk.join("lib"));
 
-  if (!main.empty() || !srcs.empty()) {
+  if (main_ || !srcs.empty()) {
     const auto v((inst ? inst : buildDir()).files(0));
     if (v.empty()) KEXIT(1, "Current project lib/bin not found during pack");
-    for (const auto &f : v) f.cp(main.size() ? bin : lib);
+    for (const auto &f : v) f.cp(main_ ? bin : lib);
   }
 
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)

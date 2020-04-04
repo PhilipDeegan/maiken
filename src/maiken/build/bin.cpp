@@ -31,12 +31,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 #include "maiken/dist.hpp"
 
+#include <mutex>
+
 namespace maiken {
 
 class DistLinker {
  public:
-  static void send(const kul::File &bin) {
-    (void)bin;
+  static void send([[maybe_unused]] const kul::File &bin) {
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
     std::vector<std::shared_ptr<maiken::dist::Post>> posts;
     auto post_lambda = [](const dist::Host &host, const kul::File &bin) {
@@ -83,22 +84,22 @@ class Executioner : public Constants {
   friend class Application;
 
   static CompilerProcessCapture build_exe(const kul::hash::set::String &objects,
-                                          const std::string &main, const std::string &out,
+                                          std::string const &main, std::string const &out,
                                           const kul::Dir outD, Application &app) {
-    const std::string &file = main;
-    const std::string &fileType = file.substr(file.rfind(".") + 1);
+    auto dryRun = AppVars::INSTANCE().dryRun();
+    auto &file = main;
+    std::string const &fileType = file.substr(file.rfind(".") + 1);
+    kul::Dir objD(app.buildDir().join("obj"));
 
-    if (!(*app.files().find(fileType)).second.count(STR_COMPILER))
+    if (!app.files().at(fileType).count(STR_COMPILER))
       KEXIT(1, "No compiler found for filetype " + fileType);
-    if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() &&
-        !app.libraries().empty()) {
+    if (!dryRun && kul::LogMan::INSTANCE().inf() && !app.libraries().empty()) {
       KOUT(NON) << "LIBRARIES";
-      for (const std::string &s : app.libraries()) KOUT(NON) << "\t" << s;
+      for (std::string const &s : app.libraries()) KOUT(NON) << "\t" << s;
     }
-    if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() &&
-        !app.libraryPaths().empty()) {
+    if (!dryRun && kul::LogMan::INSTANCE().inf() && !app.libraryPaths().empty()) {
       KOUT(NON) << "LIBRARY PATHS";
-      for (const std::string &s : app.libraryPaths()) KOUT(NON) << "\t" << s;
+      for (std::string const &s : app.libraryPaths()) KOUT(NON) << "\t" << s;
     }
     try {
       std::string linker = app.fs[fileType][STR_LINKER];
@@ -106,133 +107,118 @@ class Executioner : public Constants {
       if (app.ro) linkEnd = AppVars::INSTANCE().linker();
       if (!AppVars::INSTANCE().allinker().empty()) linkEnd += " " + AppVars::INSTANCE().allinker();
       if (!app.lnk.empty()) linkEnd += " " + app.lnk;
-      if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && linkEnd.size())
+      if (!dryRun && kul::LogMan::INSTANCE().inf() && linkEnd.size())
         KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
-      std::string bin(AppVars::INSTANCE().dryRun() ? kul::File(outD.join(out)).esc()
-                                                   : kul::File(outD.join(out)).escm());
+      std::string bin(dryRun ? kul::File(outD.join(out)).esc() : kul::File(outD.join(out)).escm());
       std::vector<std::string> obV;
-      for (const auto &o : objects) obV.emplace_back(o);
-      const std::string &base(Compilers::INSTANCE().base(
-          (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second));
+      for (auto const &o : objects) obV.emplace_back(o);
+      auto const &base(Compilers::INSTANCE().base(app.files().at(fileType).at(STR_COMPILER)));
       if (app.cLnk.count(base)) linkEnd += " " + app.cLnk[base];
       auto *comp = Compilers::INSTANCE().get(base);
       auto linkOpt(comp->linkerOptimizationBin(AppVars::INSTANCE().optimise()));
       if (!linkOpt.empty()) linker += " " + linkOpt;
       auto linkDbg(comp->linkerDebugBin(AppVars::INSTANCE().debug()));
       if (!linkDbg.empty()) linker += " " + linkDbg;
-      const CompilerProcessCapture &cpc =
-          comp->buildExecutable(app, linker, linkEnd, obV, app.libraries(), app.libraryPaths(), bin,
-                                app.m, AppVars::INSTANCE().dryRun());
-      if (AppVars::INSTANCE().dryRun())
-        KOUT(NON) << cpc.cmd();
-      else {
-        app.checkErrors(cpc);
-        KOUT(INF) << cpc.cmd();
-        KOUT(NON) << "Creating bin: " << kul::File(cpc.file()).real();
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-        if (AppVars::INSTANCE().nodes()) DistLinker::send(cpc.file());
-#endif
-      }
-      return cpc;
+
+      LinkDAO dao{app,   linker, linkEnd, bin, {objD}, obV, app.libraries(), app.libraryPaths(),
+                  app.m, dryRun};
+
+      return comp->buildExecutable(dao);
     } catch (const CompilerNotFoundException &e) {
       KEXCEPTION("UNSUPPORTED COMPILER EXCEPTION");
+    }
+  }
+
+  static void print(CompilerProcessCapture const &cpc, Application &app) {
+    auto dryRun = AppVars::INSTANCE().dryRun();
+    if (dryRun)
+      KOUT(NON) << cpc.cmd();
+    else {
+      app.checkErrors(cpc);
+      KOUT(INF) << cpc.cmd();
+      KOUT(NON) << "Creating bin: " << kul::File(cpc.file()).real();
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+      if (AppVars::INSTANCE().nodes()) DistLinker::send(cpc.file());
+#endif
     }
   }
 };
 }  // namespace maiken
 
-void maiken::Application::buildExecutable(const kul::hash::set::String &objects)
+void maiken::Application::buildExecutable(const kul::hash::set::String & /*objects_*/)
     KTHROW(kul::Exception) {
-  const std::string &file = main;
-  const std::string &fileType = file.substr(file.rfind(".") + 1);
+  kul::hash::set::String objects;
+  auto &file = main_->in();
+  std::string const &fileType = file.substr(file.rfind(".") + 1);
   if (fs.count(fileType) == 0)
     KEXIT(1, "Unable to handle artifact: \"" + file + "\" - type is not in file list");
   const std::string oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
-  kul::Dir objD(buildDir().join("obj"));
-  const std::string &name(out.empty() ? project().root()[STR_NAME].Scalar() : out);
-  const kul::File source(main);
-  std::stringstream ss, os;
-  ss << std::hex << std::hash<std::string>()(source.real());
-  os << ss.str() << "-" << source.name() << oType;
-  kul::File object(os.str(), objD);
-  kul::Dir tmpD(buildDir().join("tmp"));
-  kul::File tbject(os.str(), tmpD);
+  kul::Dir objD(buildDir().join("obj")), tmpD(buildDir().join("tmp"));
+  std::string const &name(out.empty() ? project().root()[STR_NAME].Scalar() : out);
+  auto obFile = Source(kul::File(main_->in()).real()).object();
+  kul::File tbject(obFile, tmpD);
   if (!tbject)
     KERR << "Source expected not found (ignoring) " << tbject;
-  else
-    tbject.mv(objD);
-  Executioner::build_exe(objects, main, name, kul::Dir(inst ? inst.real() : buildDir()), *this);
-  object.mv(tmpD);
-  object.mv(tmpD);
+  else {
+    objects.emplace(tbject.escm());
+  }
+  auto install = kul::Dir(inst ? inst.real() : buildDir());
+  auto cpc = Executioner::build_exe(objects, file, name, install, *this);
+  Executioner::print(cpc, *this);
 }
 
-void maiken::Application::buildTest(const kul::hash::set::String &objects) KTHROW(kul::Exception) {
-  const std::string oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
-  std::vector<std::pair<Source, std::string>> source_objects;
-  std::vector<std::pair<std::string, std::string>> test_objects;
-  kul::Dir objD(buildDir().join("obj")), testsD(buildDir().join("test")),
-      tmpD(buildDir().join("tmp"));
-  objD.mk();
-  for (const auto &p : tests) {
-    const std::string &file = p.first;
-    const std::string &fileType = file.substr(file.rfind(".") + 1);
-    if (fs.count(fileType) == 0) continue;
-    if (!testsD) testsD.mk();
-    if (!tmpD) tmpD.mk();
-    const kul::File source(p.first);
-    std::stringstream ss, os;
-    ss << std::hex << std::hash<std::string>()(source.real());
-    os << ss.str() << "-" << source.name() << oType;
-    kul::File object(os.str(), objD);
-    test_objects.push_back(std::make_pair(p.first, os.str()));
-    source_objects.emplace_back((AppVars::INSTANCE().dryRun() ? source.esc() : source.escm()),
-                                AppVars::INSTANCE().dryRun() ? object.esc() : object.escm());
-  }
-  {
-    std::vector<kul::File> cacheFiles;
+void maiken::Application::buildTest(const kul::hash::set::String & /*objects*/)
+    KTHROW(kul::Exception) {
+  std::mutex mute;
+  std::vector<CompilerProcessCapture> cpcs;
+
+  auto build_test = [&mute, &cpcs](auto &to, auto &testsD, auto &tmpD, auto *app) {
     kul::hash::set::String cobjects;
-    compile(source_objects, cobjects, cacheFiles);
-  }
-  for (const auto &to : test_objects) kul::File(to.second, objD).mv(tmpD);
-  for (const auto &to : test_objects) {
-    kul::File(to.second, tmpD).mv(objD);
-    kul::hash::set::String cobjects = objects;
-    cobjects.insert(kul::File(to.second, objD).escm());
-    Executioner::build_exe(cobjects, to.first, to.second, testsD, *this);
-    kul::File(to.second, objD).mv(tmpD);
-  }
+    cobjects.insert(kul::File(to.object(), tmpD).escm());
+    auto cpc = Executioner::build_exe(cobjects, to.in(), kul::File(to.in()).name(), testsD, *app);
+    std::lock_guard<std::mutex> lock(mute);
+    cpcs.push_back(cpc);
+  };
+
+  kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000, 1000);
+  kul::Dir testsD(buildDir().join("test"), 1), tmpD(buildDir().join("tmp"), 1);
+  for (auto const &test : SourceFinder(*this).tests())
+    ctp.async(std::bind(build_test, test, testsD, tmpD, this));
+  ctp.finish(10000000);  // 10 milliseconds
+
+  for (auto const &cpc : cpcs) Executioner::print(cpc, *this);
 }
 
-maiken::CompilerProcessCapture maiken::Application::buildLibrary(
-    const kul::hash::set::String &objects) KTHROW(kul::Exception) {
+maiken::CompilerProcessCapture maiken::Application::buildLibrary(const kul::hash::set::String &)
+    KTHROW(kul::Exception) {
+  auto dryRun = AppVars::INSTANCE().dryRun();
   if (fs.count(lang) > 0) {
+    kul::Dir objD(buildDir().join("obj"));
     if (m == compiler::Mode::NONE) m = compiler::Mode::SHAR;
-    if (!(*files().find(lang)).second.count(STR_COMPILER))
-      KEXIT(1, "No compiler found for filetype " + lang);
+    if (!files().at(lang).count(STR_COMPILER)) KEXIT(1, "No compiler found for filetype " + lang);
     std::string linker = fs[lang][STR_LINKER], linkEnd;
     if (ro) linkEnd = AppVars::INSTANCE().linker();
     if (!AppVars::INSTANCE().allinker().empty()) linkEnd += " " + AppVars::INSTANCE().allinker();
     if (!lnk.empty()) linkEnd += " " + lnk;
-    if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && linkEnd.size())
+    if (!dryRun && kul::LogMan::INSTANCE().inf() && linkEnd.size())
       KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
     if (m == compiler::Mode::STAT) linker = fs[lang][STR_ARCHIVER];
     kul::Dir outD(inst ? inst.real() : buildDir());
     std::string lib(baseLibFilename());
-    lib = AppVars::INSTANCE().dryRun() ? kul::File(lib, outD).esc() : kul::File(lib, outD).escm();
-    std::vector<std::string> obV;
-    for (const auto &o : objects) obV.emplace_back(o);
-    auto const &base(
-        Compilers::INSTANCE().base((*(*files().find(lang)).second.find(STR_COMPILER)).second));
+    lib = dryRun ? kul::File(lib, outD).esc() : kul::File(lib, outD).escm();
+    auto const &base(Compilers::INSTANCE().base(files().at(lang).at(STR_COMPILER)));
     if (cLnk.count(base)) linkEnd += " " + cLnk[base];
     auto *comp = Compilers::INSTANCE().get(base);
     auto linkOpt(comp->linkerOptimizationLib(AppVars::INSTANCE().optimise()));
     if (!linkOpt.empty()) linker += " " + linkOpt;
     auto linkDbg(comp->linkerDebugLib(AppVars::INSTANCE().debug()));
     if (!linkDbg.empty()) linker += " " + linkDbg;
-    const CompilerProcessCapture &cpc =
-        comp->buildLibrary(*this, linker, linkEnd, obV, libraries(), libraryPaths(), lib, m,
-                           AppVars::INSTANCE().dryRun());
-    if (AppVars::INSTANCE().dryRun())
+
+    std::vector<std::string> obV;
+    LinkDAO dao{*this, linker, linkEnd, lib, {objD}, obV, libraries(), libraryPaths(), m, dryRun};
+
+    CompilerProcessCapture const &cpc = comp->buildLibrary(dao);
+    if (dryRun)
       KOUT(NON) << cpc.cmd();
     else {
       checkErrors(cpc);

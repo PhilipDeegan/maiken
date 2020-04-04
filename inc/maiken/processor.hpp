@@ -42,6 +42,15 @@ class ProcessException : public kul::Exception {
 };
 
 class Application;
+/*
+class GraphNode {
+  Application *app;
+};
+
+class Graph {
+ private:
+  std::unordered_map<size_t, std::vector<GraphNode>> nodes;
+};*/
 
 class Processor : public Constants {
  public:

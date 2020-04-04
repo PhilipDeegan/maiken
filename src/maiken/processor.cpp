@@ -34,44 +34,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct ProcInfo {
   kul::hash::set::String objects;
-  std::vector<std::pair<maiken::Source, std::string>> src_objs;
   maiken::ThreadingCompiler tc;
 
   ProcInfo(maiken::Application &app) : tc(app) {}
 };
 
 void maiken::Processor::process(std::vector<Application *> apps) {
+  KLOG(DBG) << "BETA PROCESSOR";
+
   auto const &cmds = CommandStateMachine::INSTANCE().commands();
 
   std::unordered_map<Application *, std::shared_ptr<ProcInfo>> app_info;
-
-  for (auto *apP : apps) {
-    auto &app = *apP;
-    app_info.emplace(apP, std::make_shared<ProcInfo>(app));
-
-    auto &objects = app_info.at(apP)->objects;
-    auto &src_objs = app_info[apP]->src_objs;
-
-    kul::os::PushDir pushd(app.project().dir().real());
-    if (cmds.count(STR_CLEAN) && app.buildDir().is()) {
-      kul::Dir(app.buildDir().join(".mkn")).rm();
-      app.buildDir().rm();
-    }
-    app.loadTimeStamps();
-    if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE))
-      for (auto &modLoader : app.mods)
-        modLoader->module()->compile(app, app.modCompile(modLoader->app()));
-
-    SourceFinder s_finder(app);
-    auto sources = app.sourceMap();
-    CompilerValidation::check_compiler_for(app, sources);
-    std::vector<kul::File> cacheFiles;
-    auto l_src_objs = s_finder.all_sources_from(sources, objects, cacheFiles);
-    src_objs.insert(src_objs.end(), l_src_objs.begin(), l_src_objs.end());
-  }
-
-  kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
-  std::vector<maiken::CompilationUnit> c_units;
 
   auto o = [](const std::string &s) {
     if (s.size()) KOUT(NON) << s;
@@ -79,8 +52,12 @@ void maiken::Processor::process(std::vector<Application *> apps) {
   auto e = [](const std::string &s) {
     if (s.size()) KERR << s;
   };
+
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
+  kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
+  std::vector<maiken::CompilationUnit> c_units;
+
   auto lambex = [&](const kul::Exception &) {
     ctp.stop();
     ctp.interrupt();
@@ -104,24 +81,44 @@ void maiken::Processor::process(std::vector<Application *> apps) {
     }
   };
 
-  for (auto &[app, pinfo] : app_info) {
-    for (auto &pair : app_info[app]->src_objs) {
-      auto unit = app_info[app]->tc.compilationUnit(pair);
-      kul::this_thread::nSleep(5000000);  // dup appears to be overloaded with too many threads
-      ctp.async(std::bind(lambda, unit), std::bind(lambex, std::placeholders::_1));
+  if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE))
+    for (auto *apP : apps) {
+      auto &app = *apP;
+      kul::os::PushDir pushd(app.project().dir());
+
+      for (auto &modLoader : app.mods)
+        modLoader->module()->compile(app, app.modCompile(modLoader->app()));
+
+      app_info.emplace(apP, std::make_shared<ProcInfo>(app));
+
+      if (cmds.count(STR_CLEAN) && app.buildDir().is()) {
+        kul::Dir(app.buildDir().join(".mkn")).rm();
+        app.buildDir().rm();
+      }
+      app.loadTimeStamps();
+
+      SourceFinder s_finder(app);
+      auto sources = app.sourceMap();
+      CompilerValidation::check_compiler_for(app, sources);
+      std::vector<kul::File> cacheFiles;
+      auto &objects = app_info.at(apP)->objects;
+      for (auto const &pair : s_finder.all_sources_from(sources, objects, cacheFiles)) {
+        auto unit = app_info[apP]->tc.compilationUnit(pair);
+        kul::this_thread::nSleep(5000000);  // dup appears to be overloaded with too many threads
+        ctp.async(std::bind(lambda, unit), std::bind(lambex, std::placeholders::_1));
+      }
     }
-  }
+
   ctp.finish(1000000 * 1000);
   if (ctp.exception()) KEXIT(1, "Compile error detected");
 
-  for (auto *apP : apps) {
-    auto &objects = app_info.at(apP)->objects;
-    auto &app = *apP;
-    if (cmds.count(STR_BUILD) || cmds.count(STR_LINK)) {
+  if (cmds.count(STR_BUILD) || cmds.count(STR_LINK))
+    for (auto *apP : apps) {
+      auto &objects = app_info.at(apP)->objects;
+      auto &app = *apP;
       for (auto &modLoader : app.mods)
         modLoader->module()->link(app, app.modLink(modLoader->app()));
       app.findObjects(objects);
       app.link(objects);
     }
-  }
 }

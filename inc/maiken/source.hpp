@@ -39,8 +39,10 @@ class Source {
  public:
   explicit Source(std::string in) : m_in(in) {}
   explicit Source(std::string in, std::string args) : m_in(in), m_args(args) {}
-  const std::string &args() const { return m_args; }
-  const std::string &in() const { return m_in; }
+  auto &args() const { return m_args; }
+  auto &in() const { return m_in; }
+
+  std::string object() const;
 
   bool operator==(const Source &that) const { return this->in() == that.in(); }
 
@@ -51,13 +53,17 @@ class Source {
 class SourceFinder : public Constants {
  public:
   using SourceMap = kul::hash::map::S2T<kul::hash::map::S2T<std::vector<maiken::Source>>>;
-  SourceFinder(const maiken::Application &_app) : app(_app) {}
+  SourceFinder(const maiken::Application &_app);
   std::vector<std::pair<maiken::Source, std::string>> all_sources_from(
       const SourceMap &sources, kul::hash::set::String &objects,
       std::vector<kul::File> &cacheFiles);
 
+  std::vector<maiken::Source> tests();
+
  private:
-  const maiken::Application &app;
+  maiken::Application const &app;
+  std::string const oType;
+  kul::Dir objD, tmpD;
 };
 }  // end namespace maiken
 

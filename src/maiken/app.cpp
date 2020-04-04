@@ -42,10 +42,8 @@ maiken::Application *maiken::Applications::getOrCreate(const maiken::Project &pr
     m_appPs.push_back(std::move(app));
     m_apps[pDir][profile] = pp;
     if (setup) {
-      const std::string &cwd(kul::env::CWD());
-      kul::env::CWD(proj.dir());
+      kul::os::PushDir pushd(proj.dir());
       pp->setup();
-      kul::env::CWD(cwd);
     }
   }
   return m_apps[pDir][profile];
@@ -57,17 +55,8 @@ maiken::Application *maiken::Applications::getOrCreateRoot(const maiken::Project
   std::string pDir(proj.dir().real());
   std::string profile = _profile.empty() ? "@" : _profile;
   if (!m_apps.count(pDir) || !m_apps[pDir].count(profile)) {
-    auto app = std::make_unique<Application>(proj, _profile);
-    auto pp = app.get();
+    auto *pp = getOrCreate(proj, _profile, setup);
     pp->ro = 1;
-    m_appPs.push_back(std::move(app));
-    m_apps[pDir][profile] = pp;
-    if (setup) {
-      const std::string &cwd(kul::env::CWD());
-      kul::env::CWD(proj.dir());
-      pp->setup();
-      kul::env::CWD(cwd);
-    }
   }
   return m_apps[pDir][profile];
 }

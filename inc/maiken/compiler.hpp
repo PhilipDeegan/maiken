@@ -49,6 +49,22 @@ namespace compiler {
 enum Mode { NONE = 0, STAT, SHAR };
 }
 
+struct CompileDAO {
+  maiken::Application const &app;
+  std::string const &compiler, &in, &out;
+  std::vector<std::string> const &args, &incs;
+  compiler::Mode const &mode;
+  bool dryRun = false;
+};
+struct LinkDAO {
+  maiken::Application const &app;
+  std::string const &linker, &linkerEnd, &out;
+  std::vector<kul::Dir> stars;
+  std::vector<std::string> const &objects, &libs, &libPaths;
+  compiler::Mode const &mode;
+  bool dryRun = false;
+};
+
 class Compiler;
 class CompilerProcessCapture : public kul::ProcessCapture {
  private:
@@ -81,21 +97,13 @@ class Compiler {
  public:
   virtual ~Compiler() {}
   virtual bool sourceIsBin() const = 0;
-  virtual CompilerProcessCapture buildExecutable(
-      maiken::Application const &app, std::string const &linker, std::string const &linkerEnd,
-      const std::vector<std::string> &objects, const std::vector<std::string> &libs,
-      const std::vector<std::string> &libPaths, std::string const &out, const compiler::Mode &mode,
-      bool dryRun = false) const KTHROW(kul::Exception) = 0;
-  virtual CompilerProcessCapture buildLibrary(
-      const maiken::Application &app, std::string const &linker, std::string const &linkerEnd,
-      const std::vector<std::string> &objects, const std::vector<std::string> &libs,
-      const std::vector<std::string> &libPaths, const kul::File &out, const compiler::Mode &mode,
-      bool dryRun = false) const KTHROW(kul::Exception) = 0;
-  virtual CompilerProcessCapture compileSource(
-      const maiken::Application &app, std::string const &compiler,
-      const std::vector<std::string> &args, const std::vector<std::string> &incs,
-      std::string const &in, std::string const &out, const compiler::Mode &mode,
-      bool dryRun = false) const KTHROW(kul::Exception) = 0;
+
+  virtual CompilerProcessCapture compileSource(CompileDAO &dao) const KTHROW(kul::Exception) = 0;
+
+  virtual CompilerProcessCapture buildExecutable(LinkDAO &dao) const KTHROW(kul::Exception) = 0;
+
+  virtual CompilerProcessCapture buildLibrary(LinkDAO &dao) const KTHROW(kul::Exception) = 0;
+
   virtual void preCompileHeader(const std::vector<std::string> &incs,
                                 const std::vector<std::string> &args, std::string const &in,
                                 std::string const &out, bool dryRun = false) const

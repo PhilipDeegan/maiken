@@ -62,11 +62,12 @@ maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
 
 maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const KTHROW(kul::Exception) {
   try {
-    return comp->compileSource(app, compiler, args, incs, in, out, mode, dryRun);
-  } catch (const kul::Exception &e) {
-    std::rethrow_exception(std::current_exception());
+    kul::os::PushDir pushd(app.project().dir());
+
+    CompileDAO dao{app, compiler, in, out, args, incs, mode, dryRun};
+
+    return comp->compileSource(dao);
   } catch (const std::exception &e) {
     std::rethrow_exception(std::current_exception());
   }
-  KEXCEPT(maiken::Exception, "this shouldn't happen!");
 }

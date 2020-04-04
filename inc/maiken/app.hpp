@@ -35,6 +35,8 @@ namespace maiken {
 class Application;
 }
 
+#include <optional>
+
 #include "maiken/defs.hpp"
 
 #include "kul/cli.hpp"
@@ -44,13 +46,13 @@ class Application;
 #include "kul/scm/man.hpp"
 #include "kul/threads.hpp"
 
-#include "maiken/source.hpp"
 #include "maiken/compiler.hpp"
 #include "maiken/compiler/compilers.hpp"
 #include "maiken/except.hpp"
 #include "maiken/global.hpp"
 #include "maiken/project.hpp"
 #include "maiken/string.hpp"
+#include "maiken/source.hpp"
 
 int main(int argc, char *argv[]);
 
@@ -71,6 +73,7 @@ class Source;
 class CompilerPrinter;
 class Processor;
 class KUL_PUBLISH Application : public Constants {
+  using This = Application;
   friend class Applications;
   friend class CompilerPrinter;
   friend class Executioner;
@@ -91,11 +94,11 @@ class KUL_PUBLISH Application : public Constants {
   const Application *par = nullptr;
   Application *sup = nullptr;
   compiler::Mode m;
-  std::string arg, bin, lang, lnk, main, out, scr, scv;
+  std::string arg, bin, lang, lnk, out, scr, scv;
+  std::optional<Source> main_;
   const std::string p;
   kul::Dir bd, inst;
-  std::unordered_map<const Application *, YAML::Node> modIArgs, modCArgs, modLArgs, modTArgs,
-      modPArgs;
+  std::unordered_map<const This *, YAML::Node> modIArgs, modCArgs, modLArgs, modTArgs, modPArgs;
   const maiken::Project &proj;
   kul::hash::map::S2T<kul::hash::map::S2S> fs;
   kul::hash::map::S2S cArg, cLnk, includeStamps, itss, ps, tests;
@@ -169,7 +172,10 @@ class KUL_PUBLISH Application : public Constants {
 
   bool incSrc(const kul::File &f) const;
   void addCLIArgs(const kul::cli::Args &args);
+
   void addSourceLine(const std::string &o) KTHROW(kul::Exception);
+  void addMainLine(const std::string &o) KTHROW(kul::Exception);
+
   void addIncludeLine(const std::string &o) KTHROW(kul::Exception);
 
   void modInit(const Application *const other, const YAML::Node &modArg) {
@@ -238,7 +244,7 @@ class KUL_PUBLISH Application : public Constants {
   Application &operator=(const Application &a) = delete;
   virtual ~Application();
 
-  std::string getMain() { return main; }
+  auto &main() const { return main_; }
   virtual void process() KTHROW(kul::Exception);
   const kul::Dir &buildDir() const { return bd; }
   const std::string &binary() const { return bin; }
@@ -378,6 +384,8 @@ class CommandStateMachine {
     static CommandStateMachine a;
     return a;
   }
+  static bool has(std::string cmd) { return INSTANCE().cmds.count(cmd); }
+
   void reset() {
     cmds.clear();
     for (const auto &s : maiken::AppVars::INSTANCE().commands()) cmds.insert(s);

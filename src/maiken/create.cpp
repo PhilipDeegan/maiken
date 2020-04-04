@@ -401,7 +401,7 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
       for (const auto &s : kul::String::ESC_SPLIT(args.get(STR_ADD), ','))
         apps[0]->addSourceLine(s);
 
-    if (args.has(STR_MAIN)) apps[0]->main = args.get(STR_MAIN);
+    if (args.has(STR_MAIN)) apps[0]->main_ = Source(args.get(STR_MAIN));
     if (args.has(STR_OUT)) apps[0]->out = args.get(STR_OUT);
   }
 

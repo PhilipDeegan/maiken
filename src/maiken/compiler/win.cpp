@@ -79,16 +79,21 @@ maiken::cpp::WINCompiler::WINCompiler(const int &v) : CCompiler(v) {
                    {9, "-Wall"}});
 }
 
-maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(
-    maiken::Application const &app, std::string const &linker, std::string const &linkerEnd,
-    const std::vector<std::string> &objects, const std::vector<std::string> &libs,
-    const std::vector<std::string> &libPaths, std::string const &out,
-    const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
-  (void)mode;
-  std::string exe = out + ".exe";
+maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(LinkDAO &dao) const
+    KTHROW(kul::Exception) {
+  auto &app = dao.app;
+  auto &objects = dao.objects, &libs = dao.libs, &libPaths = dao.libPaths;
+  auto &dryRun = dao.dryRun;
+  auto &linker = dao.linker, &linkerEnd = dao.linkerEnd, &out = dao.out;
 
+  std::vector<std::string> fobjects;
   kul::hash::set::String dirs;
-  for (const auto &o : objects) dirs.insert(kul::File(o).dir().real());
+  for (auto const &d : dao.stars) {
+    dirs.insert(d.real());
+    for (auto const &f : d.files()) fobjects.emplace_back(f.escm());
+  }
+
+  std::string exe = out + ".exe";
 
   std::string cmd = LD(linker);
   std::vector<std::string> bits;
@@ -100,7 +105,8 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-OUT:\"" + exe + "\"").arg("-nologo");
   for (std::string const &path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
-  for (std::string const &d : dirs) p.arg(kul::File(oStar(objects), d).escm());
+  for (std::string const &d : dirs) p.arg(kul::File(oStar(fobjects), d).escm());
+  for (std::string const &o : objects) p << kul::File(o).escm();
   for (std::string const &lib : libs) p.arg(staticLib(lib));
   for (std::string const &s : kul::cli::asArgs(linkerEnd)) p.arg(s);
 
@@ -115,13 +121,22 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(
   return pc;
 }
 
-maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(
-    maiken::Application const &app, std::string const &linker, std::string const &linkerEnd,
-    const std::vector<std::string> &objects, const std::vector<std::string> &libs,
-    const std::vector<std::string> &libPaths, const kul::File &out,
-    const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
+maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(LinkDAO &dao) const
+    KTHROW(kul::Exception) {
+  auto &app = dao.app;
+  auto &objects = dao.objects, &libs = dao.libs, &libPaths = dao.libPaths;
+  auto &dryRun = dao.dryRun;
+  auto &linker = dao.linker, &linkerEnd = dao.linkerEnd;
+  auto &mode = dao.mode;
+
+  kul::File out(dao.out);
+
+  std::vector<std::string> fobjects;
   kul::hash::set::String dirs;
-  for (const auto &o : objects) dirs.insert(kul::File(o).dir().real());
+  for (auto const &d : dao.stars) {
+    dirs.insert(d.real());
+    for (auto const &f : d.files()) fobjects.emplace_back(f.escm());
+  }
 
   std::string lib = out.dir().join(sharedLib(app, out.name()));
   std::string imp = out.dir().join(staticLib(out.name()));
@@ -143,7 +158,8 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(
     for (std::string const &path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
     for (std::string const &lib : libs) p.arg(staticLib(lib));
   }
-  for (std::string const &d : dirs) p.arg(kul::File(oStar(objects), d).escm());
+  for (std::string const &d : dirs) p.arg(kul::File(oStar(fobjects), d).escm());
+  for (std::string const &o : objects) p << kul::File(o).escm();
   for (std::string const &s : kul::cli::asArgs(linkerEnd)) p.arg(s);
   CompilerProcessCapture pc;
   try {
@@ -156,11 +172,13 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(
   return pc;
 }
 
-maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(
-    const maiken::Application &app, std::string const &compiler,
-    const std::vector<std::string> &args, const std::vector<std::string> &incs,
-    std::string const &in, std::string const &out, const maiken::compiler::Mode &,
-    bool dryRun) const KTHROW(kul::Exception) {
+maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(CompileDAO &dao) const
+    KTHROW(kul::Exception) {
+  auto &app = dao.app;
+  auto &compiler = dao.compiler, &in = dao.in, &out = dao.out;
+  auto &args = dao.args, &incs = dao.incs;
+  auto &dryRun = dao.dryRun;
+
   const std::string fileType = in.substr(in.rfind(".") + 1);
 
   std::string cmd;

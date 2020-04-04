@@ -30,12 +30,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(
-    maiken::Application const &app, std::string const &linker, std::string const &linkerEnd,
-    const std::vector<std::string> &objects, const std::vector<std::string> &libs,
-    const std::vector<std::string> &libPaths, std::string const &out,
-    const maiken::compiler::Mode &mode, bool dryRun) const KTHROW(kul::Exception) {
-  (void)mode;
+maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(LinkDAO &dao) const
+    KTHROW(kul::Exception) {
+  auto &app = dao.app;
+  auto &objects = dao.objects, &libs = dao.libs, &libPaths = dao.libPaths;
+  auto &dryRun = dao.dryRun;
+  auto &linker = dao.linker, &linkerEnd = dao.linkerEnd, &out = dao.out;
+
   std::string exe = out + ".exe";
   std::string cmd = linker;
   std::vector<std::string> bits;
@@ -60,7 +61,7 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(
     p.arg("/REFERENCE:" + s);
   }
 
-  for (std::string const &o : objects) p.arg(o);
+  for (std::string const &o : objects) p << o;
   if (linkerEnd.find(" ") != std::string::npos)
     for (std::string const &s : kul::String::SPLIT(linkerEnd, ' ')) p.arg(s);
   else
@@ -76,12 +77,16 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(
   return pc;
 }
 
-maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildLibrary(
-    maiken::Application const &app, std::string const &linker, std::string const &linkerEnd,
-    const std::vector<std::string> &objects, const std::vector<std::string> &,
-    const std::vector<std::string> &, const kul::File &out, const maiken::compiler::Mode &,
-    bool dryRun) const KTHROW(kul::Exception) {
-  std::string dll = out.real() + ".dll";
+maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildLibrary(LinkDAO &dao) const
+    KTHROW(kul::Exception) {
+  auto &app = dao.app;
+  auto &objects = dao.objects;
+  auto &dryRun = dao.dryRun;
+  auto &linker = dao.linker, &linkerEnd = dao.linkerEnd;
+
+  kul::File out(dao.out);
+
+  std::string dll = out.full() + ".dll";
   std::string cmd = linker;
   std::vector<std::string> bits;
   if (linker.find(" ") != std::string::npos) {
@@ -92,7 +97,7 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildLibrary(
   p.arg("/target:library").arg("/OUT:" + dll).arg("/nologo");
   CompilerProcessCapture pc(p);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
-  for (std::string const &o : objects) p.arg(o);
+  for (std::string const &o : objects) p << o;
   for (std::string const &s : kul::String::SPLIT(linkerEnd, ' ')) p.arg(s);
   try {
     if (!dryRun) p.set(app.envVars()).start();
