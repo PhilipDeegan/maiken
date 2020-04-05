@@ -74,10 +74,12 @@ maiken::AppVars::AppVars() {
     if (root[STR_ENV].IsScalar()) {
       auto ev = maiken::Application::PARSE_ENV_NODE(root[STR_ENV]);
       evs.emplace(ev.name(), ev.toString());
+      kul::env::SET(ev.name(), ev.toString().c_str());
     } else {
       for (const auto& c : root[STR_ENV]) {
         auto ev = maiken::Application::PARSE_ENV_NODE(c);
         evs.emplace(ev.name(), ev.toString());
+        kul::env::SET(ev.name(), ev.toString().c_str());
       }
     }
   }

@@ -201,6 +201,7 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(CompileDA
   p.arg("-c").arg("-Fo\"" + out + "\"").arg("\"" + in + "\"");
   CompilerProcessCapture pc;
   if (!kul::LogMan::INSTANCE().inf()) pc.setProcess(p);
+
   try {
     if (!dryRun) p.set(app.envVars()).start();
   } catch (const kul::Exception &e) {

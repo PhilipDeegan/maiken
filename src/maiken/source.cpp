@@ -57,7 +57,7 @@ void maiken::Application::addSourceLine(const std::string &s) KTHROW(kul::Except
     if (d.is())
       check_replace(d.real(), recurse_dir, args);
     else {
-      kul::File f(d.locl());
+      kul::File f(pResolved);
       if (f)
         check_replace(f.real(), false, args);
       else {

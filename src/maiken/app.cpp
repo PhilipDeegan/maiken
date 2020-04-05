@@ -55,8 +55,12 @@ maiken::Application *maiken::Applications::getOrCreateRoot(const maiken::Project
   std::string pDir(proj.dir().real());
   std::string profile = _profile.empty() ? "@" : _profile;
   if (!m_apps.count(pDir) || !m_apps[pDir].count(profile)) {
-    auto *pp = getOrCreate(proj, _profile, setup);
+    auto *pp = getOrCreate(proj, _profile, /*setup = */  false);
     pp->ro = 1;
+    if (setup) {
+      kul::os::PushDir pushd(proj.dir());
+      pp->setup();
+    }
   }
   return m_apps[pDir][profile];
 }
