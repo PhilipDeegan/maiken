@@ -220,9 +220,13 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     if (cpc.exception()) std::rethrow_exception(cpc.exception());
   }
 
+  kul::Dir tmpD(buildDir().join("tmp"), 1);
   while (cQueue.size()) {
-    objects.insert(cQueue.front().second);
-    cacheFiles.emplace_back(kul::File(cQueue.front().first.in()));
+    kul::Dir dir(kul::File(cQueue.front().second).dir());
+    if (dir.real() != tmpD.real()) {
+      objects.insert(cQueue.front().second);
+      cacheFiles.emplace_back(kul::File(cQueue.front().first.in()));
+    }
     cQueue.pop();
   }
 }

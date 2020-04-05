@@ -200,7 +200,6 @@ std::vector<std::pair<maiken::Source, std::string>> maiken::SourceFinder::all_so
 
   if (app.main_) handle_source(*app.main_, tmpD);
   for (auto const &test : tests()) handle_source(test, tmpD);
-
   return source_objects;
 }
 

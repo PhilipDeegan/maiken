@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void maiken::Application::link(const kul::hash::set::String &objects) KTHROW(kul::Exception) {
   showConfig();
-  if (objects.size() > 0) {
+  if (objects.size() > 0 || main_) {
     buildDir().mk();
     if (main_)
       buildExecutable(objects);

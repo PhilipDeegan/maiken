@@ -69,7 +69,7 @@ kul::hash::set::String maiken::Application::inactiveMains() const {
   kul::hash::set::String iMs;
   std::string p;
   try {
-    p = kul::Dir::REAL(main_->in());
+    if (main_) p = kul::Dir::REAL(main_->in());
   } catch (const kul::Exception &e) {
   }
   std::string f;
@@ -93,7 +93,6 @@ kul::hash::set::String maiken::Application::inactiveMains() const {
 }
 
 void maiken::Application::populateMaps(const YAML::Node &n) KTHROW(kul::Exception) {
-
   if (n[STR_ENV]) {
     if (n[STR_ENV].IsScalar())
       evs.emplace_back(PARSE_ENV_NODE(n[STR_ENV], this));

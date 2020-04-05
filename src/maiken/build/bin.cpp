@@ -84,12 +84,12 @@ class Executioner : public Constants {
   friend class Application;
 
   static CompilerProcessCapture build_exe(const kul::hash::set::String &objects,
+                                          std::vector<kul::Dir> const &starDirs,
                                           std::string const &main, std::string const &out,
                                           const kul::Dir outD, Application &app) {
     auto dryRun = AppVars::INSTANCE().dryRun();
     auto &file = main;
     std::string const &fileType = file.substr(file.rfind(".") + 1);
-    kul::Dir objD(app.buildDir().join("obj"));
 
     if (!app.files().at(fileType).count(STR_COMPILER))
       KEXIT(1, "No compiler found for filetype " + fileType);
@@ -120,7 +120,7 @@ class Executioner : public Constants {
       auto linkDbg(comp->linkerDebugBin(AppVars::INSTANCE().debug()));
       if (!linkDbg.empty()) linker += " " + linkDbg;
 
-      LinkDAO dao{app,   linker, linkEnd, bin, {objD}, obV, app.libraries(), app.libraryPaths(),
+      LinkDAO dao{app,   linker, linkEnd, bin, starDirs, obV, app.libraries(), app.libraryPaths(),
                   app.m, dryRun};
 
       return comp->buildExecutable(dao);
@@ -145,7 +145,7 @@ class Executioner : public Constants {
 };
 }  // namespace maiken
 
-void maiken::Application::buildExecutable(const kul::hash::set::String & /*objects_*/)
+void maiken::Application::buildExecutable(const kul::hash::set::String &objects_)
     KTHROW(kul::Exception) {
   kul::hash::set::String objects;
   auto &file = main_->in();
@@ -163,25 +163,36 @@ void maiken::Application::buildExecutable(const kul::hash::set::String & /*objec
     objects.emplace(tbject.escm());
   }
   auto install = kul::Dir(inst ? inst.real() : buildDir());
-  auto cpc = Executioner::build_exe(objects, file, name, install, *this);
+
+  std::vector<kul::Dir> starDirs;
+  if (objects_.size()) starDirs.emplace_back(objD);
+
+  auto cpc = Executioner::build_exe(objects, starDirs, file, name, install, *this);
   Executioner::print(cpc, *this);
 }
 
-void maiken::Application::buildTest(const kul::hash::set::String & /*objects*/)
-    KTHROW(kul::Exception) {
+void maiken::Application::buildTest(const kul::hash::set::String &objects) KTHROW(kul::Exception) {
+  kul::Dir objD(buildDir().join("obj"));
+  kul::Dir tmpD(buildDir().join("tmp"), 1);
+  kul::Dir testsD(buildDir().join("test"), 1);
+
+  std::vector<kul::Dir> starDirs;
+  if (objects.size()) starDirs.emplace_back(objD);
+
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
 
-  auto build_test = [&mute, &cpcs](auto &to, auto &testsD, auto &tmpD, auto *app) {
+  auto build_test = [&mute, &cpcs, &starDirs](auto &to, auto &testsD, auto &tmpD, auto *app) {
     kul::hash::set::String cobjects;
     cobjects.insert(kul::File(to.object(), tmpD).escm());
-    auto cpc = Executioner::build_exe(cobjects, to.in(), kul::File(to.in()).name(), testsD, *app);
+    auto out = kul::File(to.in()).name();
+    auto cpc = Executioner::build_exe(cobjects, starDirs, to.in(), out, testsD, *app);
     std::lock_guard<std::mutex> lock(mute);
     cpcs.push_back(cpc);
   };
 
   kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000, 1000);
-  kul::Dir testsD(buildDir().join("test"), 1), tmpD(buildDir().join("tmp"), 1);
+
   for (auto const &test : SourceFinder(*this).tests())
     ctp.async(std::bind(build_test, test, testsD, tmpD, this));
   ctp.finish(10000000);  // 10 milliseconds
@@ -189,8 +200,8 @@ void maiken::Application::buildTest(const kul::hash::set::String & /*objects*/)
   for (auto const &cpc : cpcs) Executioner::print(cpc, *this);
 }
 
-maiken::CompilerProcessCapture maiken::Application::buildLibrary(const kul::hash::set::String &)
-    KTHROW(kul::Exception) {
+maiken::CompilerProcessCapture maiken::Application::buildLibrary(
+    const kul::hash::set::String &objects) KTHROW(kul::Exception) {
   auto dryRun = AppVars::INSTANCE().dryRun();
   if (fs.count(lang) > 0) {
     kul::Dir objD(buildDir().join("obj"));
@@ -214,8 +225,10 @@ maiken::CompilerProcessCapture maiken::Application::buildLibrary(const kul::hash
     auto linkDbg(comp->linkerDebugLib(AppVars::INSTANCE().debug()));
     if (!linkDbg.empty()) linker += " " + linkDbg;
 
+    std::vector<kul::Dir> starDirs;
+    if (objects.size()) starDirs.emplace_back(objD);
     std::vector<std::string> obV;
-    LinkDAO dao{*this, linker, linkEnd, lib, {objD}, obV, libraries(), libraryPaths(), m, dryRun};
+    LinkDAO dao{*this, linker, linkEnd, lib, starDirs, obV, libraries(), libraryPaths(), m, dryRun};
 
     CompilerProcessCapture const &cpc = comp->buildLibrary(dao);
     if (dryRun)

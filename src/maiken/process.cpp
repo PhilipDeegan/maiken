@@ -117,7 +117,8 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     (*app)->main_ = {};
     proc_a(**app, !(*app)->srcs.empty());
   }
-  if (!this->ig) proc_a(*this, (!this->srcs.empty() || this->main_));
+  if (!this->ig)
+    proc_a(*this, !this->srcs.empty() || !SourceFinder(*this).tests().empty() || this->main_);
 
   proc_b();
 
