@@ -67,6 +67,52 @@ class Exception : public kul::Exception {
 class RemoteCommandManager;
 class Server;
 }  // namespace dist
+
+class DistLinker {
+ public:
+  static void send([[maybe_unused]] const kul::File &bin) {
+#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+    std::vector<std::shared_ptr<maiken::dist::Post>> posts;
+    auto post_lambda = [](const dist::Host &host, const kul::File &bin) {
+      kul::io::BinaryReader br(bin);
+      dist::Blob b;
+      b.files_left = 1;
+      b.file = bin.real();
+      size_t red = 0;
+      do {
+        bzero(b.c1, dist::BUFF_SIZE / 2);
+        red = b.len = br.read(b.c1, dist::BUFF_SIZE / 2);
+        if (red == 0) {
+          b.last_packet = 1;
+          b.files_left = 0;
+        }
+        std::ostringstream ss(std::ios::out | std::ios::binary);
+        {
+          cereal::PortableBinaryOutputArchive oarchive(ss);
+          oarchive(b);
+        }
+        auto link = std::make_shared<maiken::dist::Post>(
+            maiken::dist::RemoteCommandManager::INST().build_link_request(ss.str()));
+        link->send(host);
+      } while (red > 0);
+    };
+
+    auto &hosts(maiken::dist::RemoteCommandManager::INST().hosts());
+    size_t threads = hosts.size();
+    kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000, 1000);
+    auto post_ex = [&](const kul::Exception &e) {
+      ctp.stop().interrupt();
+      throw e;
+    };
+    for (size_t i = 0; i < threads; i++) {
+      ctp.async(std::bind(post_lambda, std::ref(hosts[i]), std::ref(bin)), post_ex);
+    }
+    ctp.finish(10000000);  // 10 milliseconds
+    ctp.rethrow();
+#endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+  }
+};
+
 }  // namespace maiken
 
 #include "maiken/dist/message.hpp"

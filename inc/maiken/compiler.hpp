@@ -38,11 +38,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/proc.hpp"
 #include "kul/string.hpp"
 
+#include "maiken/global.hpp"
+
 namespace maiken {
 class KUL_PUBLISH Application;
 
 struct CompilationInfo {
   std::string lib_prefix, lib_postfix, lib_ext;
+
+  CompilationInfo()
+      : lib_prefix(AppVars::INSTANCE().envVar("MKN_LIB_PRE_DEF")),
+        lib_ext(AppVars::INSTANCE().envVar("MKN_LIB_EXT_DEF")) {}
 };
 
 namespace compiler {

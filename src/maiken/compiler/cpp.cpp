@@ -40,8 +40,5 @@ std::string maiken::cpp::CCompiler::sharedLib(Application const &app,
   auto pre = app.m_cInfo.lib_prefix;
   auto ext = app.m_cInfo.lib_ext;
 
-  pre = pre.size() ? pre : AppVars::INSTANCE().envVar("MKN_LIB_PRE_DEF");
-  ext = ext.size() ? ext : AppVars::INSTANCE().envVar("MKN_LIB_EXT_DEF");
-
   return pre + lib + ext;
 }

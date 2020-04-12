@@ -31,8 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_SETTINGS_HPP_
 #define _MAIKEN_SETTINGS_HPP_
 
-#include "kul/log.hpp"
 #include "kul/os.hpp"
+#include "kul/log.hpp"
 #include "kul/yaml.hpp"
 
 #include "maiken/defs.hpp"
