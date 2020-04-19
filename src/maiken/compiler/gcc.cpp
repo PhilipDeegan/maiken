@@ -136,7 +136,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(LinkDAO
   std::string exe = out;
   if (KTOSTRING(__KUL_OS__) == std::string("win")) exe += ".exe";
   p.arg("-o").arg(exe);
-  for (std::string const &d : dirs) p << kul::File(oStar(fobjects), d).escm();
+  for (std::string const &d : dirs) p << kul::File(oStar(), d).escm();
   for (std::string const &o : objects) p << kul::File(o).escm();
   for (std::string const &lib : libs) p.arg("-l" + lib);
   for (std::string const &s : kul::cli::asArgs(linkerEnd)) p << s;
@@ -184,7 +184,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(LinkDAO &d
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   if (mode == compiler::Mode::SHAR) p.arg("-shared").arg("-o");
   p.arg(lib);
-  for (std::string const &d : dirs) p.arg(kul::File(oStar(fobjects), d).escm());
+  for (std::string const &d : dirs) p.arg(kul::File(oStar(), d).escm());
   for (std::string const &o : objects) p << kul::File(o).escm();
 
   {

@@ -105,7 +105,7 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(LinkDAO
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-OUT:\"" + exe + "\"").arg("-nologo");
   for (std::string const &path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
-  for (std::string const &d : dirs) p.arg(kul::File(oStar(fobjects), d).escm());
+  for (std::string const &d : dirs) p.arg(kul::File(oStar(), d).escm());
   for (std::string const &o : objects) p << kul::File(o).escm();
   for (std::string const &lib : libs) p.arg(staticLib(lib));
   for (std::string const &s : kul::cli::asArgs(linkerEnd)) p.arg(s);
@@ -158,7 +158,7 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(LinkDAO &d
     for (std::string const &path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
     for (std::string const &lib : libs) p.arg(staticLib(lib));
   }
-  for (std::string const &d : dirs) p.arg(kul::File(oStar(fobjects), d).escm());
+  for (std::string const &d : dirs) p.arg(kul::File(oStar(), d).escm());
   for (std::string const &o : objects) p << kul::File(o).escm();
   for (std::string const &s : kul::cli::asArgs(linkerEnd)) p.arg(s);
   CompilerProcessCapture pc;

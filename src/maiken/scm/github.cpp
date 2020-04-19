@@ -42,7 +42,8 @@ bool maiken::Github::GET_DEFAULT_BRANCH(const std::string &owner, const std::str
       .withResponse([&b, &branch](const kul::http::Response &r) {
         if (r.status() == 200) {
           kul::yaml::String yaml(r.body());
-          if (yaml.root()["default_branch"]) {
+          KLOG(OTH) << "Github API default branch response: " << r.body();
+          if (yaml.root() && yaml.root()["default_branch"]) {
             branch = yaml.root()["default_branch"].Scalar();
             b = 1;
           }

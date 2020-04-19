@@ -85,7 +85,8 @@ maiken::Application *maiken::Applications::getOrNullptr(const std::string &proje
 kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const &n, Application *app) {
   using namespace kul::cli;
   if (n.IsScalar()) {
-    auto bits = kul::String::SPLIT(n.Scalar(), "=");
+    auto bits = kul::String::ESC_SPLIT(n.Scalar(), '=');
+
     if (bits.size() != 2)
       KEXIT(1, "env string is invalid, expects one '=' only, string ")
           << n.Scalar() << "\n in: " << (app ? app->project().file() : "settings file");
@@ -99,9 +100,9 @@ kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const &n, Applic
     replace(bits[0], bits[1], "$" + bits[0]);
     replace(bits[0], bits[1], "${" + bits[0] + "}");
 
-    return EnvVar(bits[0], app ? Properties::RESOLVE(*app, bits[1]) : n[STR_VALUE].Scalar(),
-                  EnvVarMode::REPL);
+    return EnvVar(bits[0], app ? Properties::RESOLVE(*app, bits[1]) : bits[1], EnvVarMode::REPL);
   }
+
   EnvVarMode mode = EnvVarMode::PREP;
   if (n[STR_MODE]) {
     if (n[STR_MODE].Scalar().compare(STR_APPEND) == 0)

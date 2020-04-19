@@ -605,7 +605,7 @@ Description     Sets the preceding command line string when using "dbg"
 
 Key             MKN_OBJ
 Type            String
-Default         "o"
+Default         Linux/BSD="o", Windows="obj"
 Description     Sets the file type to compile object files to
 
 Key             MKN_LIB_LINK_LIB
