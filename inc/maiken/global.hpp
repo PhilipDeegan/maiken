@@ -62,7 +62,7 @@ class AppVars : public Constants {
   friend class ::cereal::access;
 #endif  // _MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
  private:
-  bool dr = 0, f = 0, q = 0, s = 0, sh = 0, st = 0, u = 0;
+  bool dr = 0, du = 0, fo = 0, fu = 0, q = 0, s = 0, sh = 0, st = 0, u = 0;
   uint16_t de = -1, dl = 0, op = -1, ts = 1, wa = -1;
   std::string aa, al, dep, la, mo, ra, wi, wo;
   kul::hash::set::String cmds, wop;
@@ -79,6 +79,12 @@ class AppVars : public Constants {
  public:
   const std::string &args() const { return aa; }
   void args(const std::string &aa) { this->aa = aa; }
+
+  const bool &dump() const { return this->du; }
+  void dump(const bool &du) { this->du = du; }
+
+  const bool &force() const { return this->fo; }
+  void force(const bool &fo) { this->fo = fo; }
 
   const std::string &runArgs() const { return ra; }
   void runArgs(const std::string &ra) { this->ra = ra; }
@@ -101,8 +107,8 @@ class AppVars : public Constants {
   const bool &update() const { return this->u; }
   void update(const bool &u) { this->u = u; }
 
-  const bool &fupdate() const { return this->f; }
-  void fupdate(const bool &f) { this->f = f; }
+  const bool &fupdate() const { return this->fu; }
+  void fupdate(const bool &fu) { this->fu = fu; }
 
   const bool &show() const { return this->s; }
   void show(const bool &s) { this->s = s; }

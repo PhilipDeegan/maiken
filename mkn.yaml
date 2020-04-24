@@ -4,7 +4,9 @@ name: mkn
 scm: https://github.com/dekken/maiken
 version: master
 property:
-  DATE: 12-APR-2020
+  DATE: 24-APR-2020
+
+src: ./src/maiken/create.cpp, -D_MKN_VERSION_=${version}_${DATE}
 
 parent: lib
 mode: none
@@ -21,9 +23,7 @@ profile:
 
 - name: lib
   parent: headers
-  src: |
-       ./src
-       ./src/maiken/create.cpp, -D_MKN_VERSION_=${version}_${DATE}
+  src: ./src
   dep: parse.yaml
   if_link:
     nix: -ldl -pthread
@@ -50,9 +50,10 @@ profile:
   mode: none
 
 - name: format
-  mod:
-  - name: clang.format
-    init:
-      style: file
-      types: cpp:cxx:cc:h:hpp
-      paths: .
+  mod: |
+    clang.format{init{style: file, paths: .}}
+# - name:
+#   init:
+
+    # types: cpp:cxx:cc:h:hpp
+

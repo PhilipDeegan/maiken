@@ -38,10 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_CLEAN "   clean     | Delete files from ./bin/$profile"
 #define MKN_DEFS_COMP "   compile   | Compile sources to ./bin/$profile"
 #define MKN_DEFS_DBG "   dbg       | Executes project profile binary with debugger"
-#define MKN_DEFS_INIT "   init      | Create minimal mkn.xml in ./"
+#define MKN_DEFS_INIT "   init      | Create minimal mkn.yaml in ./"
 #define MKN_DEFS_LINK "   link      | Link object files to exe/lib"
 #define MKN_DEFS_PACK "   pack      | Copy binary files & library files into bin/$profile/pack"
-#define MKN_DEFS_PROFS "   profiles  | Display profiles contained within ./mkn.xml"
+#define MKN_DEFS_PROFS "   profiles  | Display profiles contained within ./mkn.yaml"
 #define MKN_DEFS_RUN                                                          \
   "   run       | Executes project profile binary linking dynamic libraries " \
   "automatically"
@@ -60,6 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_BINC                                                       \
   "   -b/--binc $s           | Add include directories to back of compile " \
   "command, seperated by standard system PATH environment win=; others=:"
+
 #define MKN_DEFS_BPATH                                                        \
   "   -B/--bpath $s          | Add library search directory to back of link " \
   "command, seperated by standard system PATH environment win=; others=:"
@@ -67,6 +68,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_DEPS                                             \
   "   -d/--dependencies [$d] | Number of children to include or " \
   "project/profile CSV, missing assumed infinite"
+
+#define MKN_DEFS_DUMP "   -D/--dump              | Write command logs to ./.mkn/logs/$PROFILE"
+
 #define MKN_DEFS_EVSA                                                          \
   "   -E/--env $a            | CSV key=value environment variables override, " \
   "format \"k1=v1,k2=v2\""
@@ -103,7 +107,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   "   -r/--run-args $a       | Passes $a to running binary as arguments, " \
   "suppercedes -a"
 #define MKN_DEFS_DRYR                                                 \
-  "   -D/--dry-run           | Do not compile but print out process " \
+  "   -R/--dry-run           | Do not compile but print out process " \
   "commands, do not run etc"
 #define MKN_DEFS_STAT                                                     \
   "   -s/--scm-status        | Display SCM status of project directory, " \
@@ -116,8 +120,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_VERSON                                                     \
   "   -v/--version           | Displays the current maiken version number " \
   "then exits, first checked command/argument"
-#define MKN_DEFS_SETTNGS                                              \
-  "   -x/--settings $f       | Sets settings.xml in use to file $f, " \
+#define MKN_DEFS_SETTNGS                                               \
+  "   -x/--settings $f       | Sets settings.yaml in use to file $f, " \
   "directory of $f missing $(HOME)/maiken/$f attempted"
 #define MKN_DEFS_STATIC "   -K/--static            | Links projects without mode as static"
 #define MKN_DEFS_SHARED "   -S/--shared            | Links projects without mode as shared"

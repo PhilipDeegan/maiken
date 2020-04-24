@@ -86,12 +86,25 @@ class Executioner : public Constants {
 
   static void print(CompilerProcessCapture const &cpc, Application &app) {
     auto dryRun = AppVars::INSTANCE().dryRun();
+
+    kul::Dir cmdLogDir(".mkn/log/" + app.buildDir().name() + "/bin/cmd", 1);
+    kul::Dir outLogDir(".mkn/log/" + app.buildDir().name() + "/bin/out", 1);
+    kul::Dir errLogDir(".mkn/log/" + app.buildDir().name() + "/bin/err", 1);
+
     if (dryRun)
       KOUT(NON) << cpc.cmd();
     else {
       app.checkErrors(cpc);
       KOUT(INF) << cpc.cmd();
       KOUT(NON) << "Creating bin: " << kul::File(cpc.file()).real();
+
+      if (AppVars::INSTANCE().dump()) {
+        std::string base = kul::File(cpc.file()).name();
+        kul::io::Writer(kul::File(base + ".txt", cmdLogDir)) << cpc.cmd();
+        if (cpc.outs().size()) kul::io::Writer(kul::File(base + ".txt", outLogDir)) << cpc.outs();
+        if (cpc.errs().size()) kul::io::Writer(kul::File(base + ".txt", errLogDir)) << cpc.errs();
+      }
+
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
       if (AppVars::INSTANCE().nodes()) DistLinker::send(cpc.file());
 #endif

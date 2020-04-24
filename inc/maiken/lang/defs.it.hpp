@@ -40,12 +40,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_DBG                                                           \
   "   dbg       | Esegue col debugger un programma associato a un profilo di " \
   "progetto"
-#define MKN_DEFS_INIT "   init      | Crea un file mkn.xml minimale in ./"
+#define MKN_DEFS_INIT "   init      | Crea un file mkn.yaml minimale in ./"
 #define MKN_DEFS_LINK                                                     \
   "   link      | Collega (link) i file oggetto all'eseguibile/libreria " \
   "(exe/lib)"
 #define MKN_DEFS_PACK "   pack      | Copia i file binari e le librerie in bin/$profile/pack"
-#define MKN_DEFS_PROFS "   profiles  | Mostra i profili contenuti in ./mkn.xml"
+#define MKN_DEFS_PROFS "   profiles  | Mostra i profili contenuti in ./mkn.yaml"
 #define MKN_DEFS_RUN                                                       \
   "   run       | Esegue un programma associato a un profilo di progetto " \
   "collegando le librerie dinamiche automaticamente"
@@ -71,6 +71,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_DIRC                                                    \
   "   -C/--directory $d      | Esegue nella directory $d invece che in " \
   "quella corrente"
+
+#define MKN_DEFS_DUMP "   -D/--dump              | Write command logs to ./.mkn/logs/$PROFILE"
+
 #define MKN_DEFS_EVSA                                                 \
   "   -E/--env $a            | Sovrascrive le variabili di ambiente " \
   "specificate come lista di chiave=valore separate da virgola: "     \
@@ -107,7 +110,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   "   -r/--run-args $a       | Passes $a to running binary as arguments, " \
   "suppercedes -a"
 #define MKN_DEFS_DRYR                                                  \
-  "   -D/--dry-run           | Visualizza i comandi su console senza " \
+  "   -R/--dry-run           | Visualizza i comandi su console senza " \
   "realmente compilare, eseguire, ect."
 #define MKN_DEFS_STAT                                                          \
   "   -s/--scm-status        | Mostra lo stato dell'SCM della cartella di un " \
@@ -124,8 +127,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_DEFS_VERSON                                                      \
   "   -v/--version           | Mostra l'attuale versione di maiken, ignora " \
   "eventuali altri argomenti specificati"
-#define MKN_DEFS_SETTNGS                                                     \
-  "   -x/--settings $f       | Imposta il file settings.xml in uso al file " \
+#define MKN_DEFS_SETTNGS                                                      \
+  "   -x/--settings $f       | Imposta il file settings.yaml in uso al file " \
   "$f, se la cartella di $f e` mancante viene cercato come $(HOME)/maiken/$f"
 #define MKN_DEFS_STATIC                                                      \
   "   -K/--static            | Effettua il collegamento (link) statico dei " \

@@ -202,7 +202,7 @@ System properties:
     DATETIME - DateTime when app launched format %Y-%m-%d-%H:%M:%S
     TIMESTAMP - Unix timestamp when app launched in seconds
     MKN_ROOT - Directory of current mkn.yaml file
-    MKN_REPO - if settings.xml has [local][repo], it is that, otherwise
+    MKN_REPO - if settings.yaml has [local][repo], it is that, otherwise
            bsd/nix/win(with msys/cygwin/etc) = ~/.maiken/repo
            win cmd prompt = %HOMEDRIVE%/%HOMEPATH%/maiken/repo
 
@@ -524,8 +524,8 @@ Available commands
     - clean     - deletes all files from the profile directory recursively.
     - compile   - Compiles all supported file to the profile binary directory
     - link      - Creates a library/executable from found compiled files
-    - profiles  - displays $(PWD)/mkn.xml profiles to std::out - then exits (--version takes precendence)
-    - init      - Create a minimal project file ${PWD}/mkn.xml, exits, error if one exists
+    - profiles  - displays $(PWD)/mkn.yaml profiles to std::out - then exits (--version takes precendence)
+    - init      - Create a minimal project file ${PWD}/mkn.yaml, exits, error if one exists
     - inc       - Print include directories to std out
     - src       - Print found source files to std out [allows -d].
     - pack      - Copy binary files & library files into bin/$profile/pack
@@ -543,7 +543,7 @@ Available arguments:
     -B --bpath $s         - Add library search directory to back of link command, seperated by standard system PATH environment win=; others=:
     -C --directory $d     - Execute on directory $d rather than current directory
     -d --dependencies     - See 4.8
-    -D --dry-run $f       - Do not compile/link, but print out compiler process strings, do not run etc
+    -D --dump             - Write command logs to ./.mkn/logs/$PROFILE
     -E --env $e           - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
     -f --finc $s          - Add include directories to front of compile command, seperated by standard system PATH environment win=; others=:
     -F --fpath $s         - Add library search directory to front of link command, seperated by standard system PATH environment win=; others=:
@@ -562,6 +562,7 @@ Available arguments:
     -p --profile $p       - Activate profile p
     -P --property $p      - CSV key=value properties override format -P "k1=v1,k2=v2" , backslash escaps , and =
     -r --run-args $a      - Passes $a to running binary as arguments, suppercedes -a
+    -R --dry-run          - Print commands without executing them.
     -s --scm-status       - Display SCM status of project, allows -d
     -S --shared           - Links projects without mode as shared
     -t --threads $n       - Consume $num threads while compiling source files where $n > 0, If $n is missing optimal resolution attempted.
