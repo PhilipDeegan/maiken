@@ -38,13 +38,14 @@ class CLIHandler : public Constants {
   std::vector<kul::cli::Arg> argV {
     Arg('a', STR_ARG, ArgType::STRING), Arg('A', STR_ADD, ArgType::STRING),
         Arg('b', STR_BINC, ArgType::STRING), Arg('B', STR_BPATH, ArgType::STRING),
-        Arg('C', STR_DIR, ArgType::STRING), Arg('d', STR_DEP, ArgType::MAYBE),
+        Arg('C', STR_DIR, ArgType::STRING), Arg('d', STR_DEP, ArgType::MAYBE), Arg('D', STR_DUMP),
         Arg('R', STR_DRY_RUN), Arg('E', STR_ENV, ArgType::STRING),
         Arg('f', STR_FINC, ArgType::STRING), Arg('F', STR_FPATH, ArgType::STRING),
-        Arg('g', STR_DEBUG, ArgType::MAYBE), Arg('G', STR_GET, ArgType::STRING), Arg('h', STR_HELP),
-        Arg('j', STR_JARG, ArgType::STRING), Arg('K', STR_STATIC),
-        Arg('l', STR_LINKER, ArgType::STRING), Arg('L', STR_ALINKER, ArgType::STRING),
-        Arg('m', STR_MOD, ArgType::STRING), Arg('M', STR_MAIN, ArgType::STRING),
+        Arg(' ', STR_FORCE), Arg('g', STR_DEBUG, ArgType::MAYBE),
+        Arg('G', STR_GET, ArgType::STRING), Arg('h', STR_HELP), Arg('j', STR_JARG, ArgType::STRING),
+        Arg('K', STR_STATIC), Arg('l', STR_LINKER, ArgType::STRING),
+        Arg('L', STR_ALINKER, ArgType::STRING), Arg('m', STR_MOD, ArgType::STRING),
+        Arg('M', STR_MAIN, ArgType::STRING),
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
         Arg('n', STR_NODES, ArgType::MAYBE),
 #endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
@@ -194,10 +195,12 @@ std::vector<maiken::Application *> maiken::Application::CREATE(const kul::cli::A
   if (profiles.empty()) profiles.emplace_back("");
 
   if (args.has(STR_SETTINGS) && !Settings::SET(args.get(STR_SETTINGS)))
-    KEXIT(1, "Unable to set specific settings xml");
+    KEXIT(1, "Unable to set specific settings files");
   else
     Settings::INSTANCE();
 
+  if (args.has(STR_DUMP)) AppVars::INSTANCE().dump(true);
+  if (args.has(STR_FORCE)) AppVars::INSTANCE().force(true);
   if (args.has(STR_DRY_RUN)) AppVars::INSTANCE().dryRun(true);
   if (args.has(STR_SHARED)) AppVars::INSTANCE().shar(true);
   if (args.has(STR_STATIC)) AppVars::INSTANCE().stat(true);

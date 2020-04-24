@@ -45,7 +45,8 @@ void maiken::Application::addSourceLine(const std::string &s) KTHROW(kul::Except
     });
     if (it != srcs.end()) {
       if (!(*it).first.args().empty())
-        KEXCEPT(maiken::Exception, "Source file being added twice: ") << str;
+        KEXCEPT(maiken::Exception, "Source file being added twice: ")
+            << str << " " << (*it).first.args();
       if ((*it).first.args().empty() && !args.empty()) srcs.erase(it);
     }
     srcs.emplace_back(Source(str, args), recurse_dir);
@@ -88,18 +89,17 @@ maiken::Application::sourceMap() const {
   const kul::hash::set::String iMs = inactiveMains();
   kul::hash::map::S2T<kul::hash::map::S2T<std::vector<maiken::Source>>> sm;
 
-  auto check_replace = [&](const std::string &str, std::string args,
+  auto check_replace = [&](const std::string &src, std::string args,
                            std::vector<maiken::Source> &v) {
     auto it = std::find_if(v.begin(), v.end(),
-                           [&](const Source &element) { return element.in() == str; });
+                           [&](const Source &element) { return element.in() == src; });
     if (it != v.end()) {
-      if (!(*it).args().empty())
-        KEXCEPT(maiken::Exception, "Source file being added twice: ") << str;
-      if ((*it).args().empty() && !args.empty()) v.erase(it);
+      args += " " + (*it).args();
+      v.erase(it);
     }
-    v.emplace_back(str, args);
+    v.emplace_back(src, args);
     it = std::find_if(v.begin(), v.end(),
-                      [&](const Source &element) { return element.in() == str; });
+                      [&](const Source &element) { return element.in() == src; });
   };
 
   for (const auto &sourceDir : sources()) {

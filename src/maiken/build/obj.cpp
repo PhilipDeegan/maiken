@@ -153,7 +153,7 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
   }
   if (!src_objs.empty()) compile(sourceQueue, objects, cacheFiles);
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-  ctp.finish(10000000);  // 10 milliseconds
+  ctp.finish(50000000);  // 50 milliseconds
   ctp.rethrow();
 #endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
 
@@ -189,7 +189,11 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     ctp.interrupt();
   };
 
-  auto lambda = [o, e, &mute, &lambex, &cpcs](const maiken::CompilationUnit &c_unit) {
+  kul::Dir cmdLogDir(".mkn/log/" + buildDir().name() + "/obj/cmd", 1);
+  kul::Dir outLogDir(".mkn/log/" + buildDir().name() + "/obj/out", 1);
+  kul::Dir errLogDir(".mkn/log/" + buildDir().name() + "/obj/err", 1);
+
+  auto lambda = [&, o, e](const maiken::CompilationUnit &c_unit) {
     const CompilerProcessCapture cpc = c_unit.compile();
     if (!AppVars::INSTANCE().dryRun()) {
       if (kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
@@ -197,10 +201,21 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
       KOUT(INF) << cpc.cmd();
     } else
       KOUT(NON) << cpc.cmd();
+
+    if (AppVars::INSTANCE().dump()) {
+      std::string base = kul::File(cpc.file()).name();
+      kul::io::Writer(kul::File(base + ".txt", cmdLogDir)) << cpc.cmd();
+      if (cpc.outs().size()) kul::io::Writer(kul::File(base + ".txt", outLogDir)) << cpc.outs();
+      if (cpc.errs().size()) kul::io::Writer(kul::File(base + ".txt", errLogDir)) << cpc.errs();
+    }
+
     std::lock_guard<std::mutex> lock(mute);
     cpcs.push_back(cpc);
+
     try {
-      if (cpc.exception()) std::rethrow_exception(cpc.exception());
+      if (!AppVars::INSTANCE().force())
+        if (cpc.exception()) std::rethrow_exception(cpc.exception());
+
     } catch (const kul::Exception &e) {
       lambex(e);
     } catch (const std::exception &e) {
@@ -214,11 +229,21 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   }
 
   ctp.finish(1000000 * 1000);
-  if (ctp.exception()) KEXIT(1, "Compile error detected");
 
-  for (auto &cpc : cpcs) {
-    if (cpc.exception()) std::rethrow_exception(cpc.exception());
-  }
+  auto delEmpty = [](auto &dir) {
+    if (dir.files().empty()) dir.rm();
+  };
+
+  delEmpty(cmdLogDir);
+  delEmpty(outLogDir);
+  delEmpty(errLogDir);
+
+  if (!AppVars::INSTANCE().force())
+    if (ctp.exception()) KEXIT(1, "Compile error detected");
+
+  if (!AppVars::INSTANCE().force())
+    for (auto &cpc : cpcs)
+      if (cpc.exception()) std::rethrow_exception(cpc.exception());
 
   kul::Dir tmpD(buildDir().join("tmp"), 1);
   while (cQueue.size()) {

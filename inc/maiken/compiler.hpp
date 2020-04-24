@@ -71,17 +71,10 @@ struct LinkDAO {
   bool dryRun = false;
 };
 
-class Compiler;
 class CompilerProcessCapture : public kul::ProcessCapture {
- private:
-  std::exception_ptr ep;
-  std::string c, f;
-
  public:
-  CompilerProcessCapture() : ep() {}
-  CompilerProcessCapture(kul::AProcess &p) : kul::ProcessCapture(p), ep() {}
-  CompilerProcessCapture(const CompilerProcessCapture &cp)
-      : kul::ProcessCapture(cp), ep(cp.ep), c(cp.c), f(cp.f) {}
+  CompilerProcessCapture() {}
+  CompilerProcessCapture(kul::AProcess &p) : kul::ProcessCapture(p) {}
 
   void exception(const std::exception_ptr &e) { ep = e; }
   const std::exception_ptr &exception() const { return ep; }
@@ -91,6 +84,10 @@ class CompilerProcessCapture : public kul::ProcessCapture {
 
   void file(std::string const &f) { this->f = f; }
   std::string const &file() const { return f; }
+
+ private:
+  std::exception_ptr ep;
+  std::string c, f;
 };
 
 class Compiler {
@@ -138,7 +135,6 @@ class Compiler {
   }
 };
 
-// this class exists to minimise thread captures and avoid forking too much stuff
 class CompilationUnit {
  private:
   const maiken::Application &app;
