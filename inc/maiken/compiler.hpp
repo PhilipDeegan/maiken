@@ -47,8 +47,8 @@ struct CompilationInfo {
   std::string lib_prefix, lib_postfix, lib_ext;
 
   CompilationInfo()
-      : lib_prefix(AppVars::INSTANCE().envVar("MKN_LIB_PRE_DEF")),
-        lib_ext(AppVars::INSTANCE().envVar("MKN_LIB_EXT_DEF")) {}
+      : lib_prefix(AppVars::INSTANCE().envVar("MKN_LIB_PRE")),
+        lib_ext(AppVars::INSTANCE().envVar("MKN_LIB_EXT")) {}
 };
 
 namespace compiler {

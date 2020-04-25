@@ -6,11 +6,9 @@ version: master
 property:
   DATE: 24-APR-2020
 
-src: ./src/maiken/create.cpp, -D_MKN_VERSION_=${version}_${DATE}
-
 parent: lib
-mode: none
 main: mkn.cpp
+mode: none
 test: test/cpp.cpp
 
 profile:
@@ -26,27 +24,23 @@ profile:
   src: ./src
   dep: parse.yaml
   if_link:
-    nix: -ldl -pthread
+    nix: -ldl -pthread -rdynamic
     win_cl: -nodefaultlib:libucrt.lib ucrt.lib
-
-- name: static
-  parent: lib
-  mode: static
-
-- name: shared
-  parent: lib
-  mode: shared
 
 - name: mod
   parent: headers
   mode: shared
-  src: ./src
-  with: parse.yaml[shared]
+  if_dep:
+    win: parse.yaml[shared]
+    nix: parse.yaml[headers]
+    bsd: parse.yaml[headers]
+  if_src:
+    win: src
 
 - name: server
   parent: lib
   with: io.cereal mkn.ram[https]
-  main: server.cpp
+  main: src/server.cpp
   mode: none
 
 - name: format

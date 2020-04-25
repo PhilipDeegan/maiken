@@ -83,11 +83,11 @@ std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(Application &ap
   std::function<void(Application & ap)> global_load = [&](Application &ap) {
     for (auto dep = ap.dependencies().rbegin(); dep != ap.dependencies().rend(); ++dep) {
       auto &dap = (**dep);
-      if (!dap.sources().empty() || !dap.libraries().empty()) GlobalModules::INSTANCE().load(dap);
+      if (!dap.sources().empty()) GlobalModules::INSTANCE().load(dap);
       global_load(dap);
     }
   };
   global_load(ap);
 
-  return std::make_shared<ModuleLoader>(ap, kul::File(FIND(ap)));
+  return std::make_shared<ModuleLoader>(ap, FIND(ap));
 }

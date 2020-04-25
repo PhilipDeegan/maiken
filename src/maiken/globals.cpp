@@ -60,21 +60,25 @@ maiken::AppVars::AppVars() {
   evs["MKN_OBJ"] = "o", ext = ".so", pre = "lib";
 #endif
 
-  evs["MKN_OBJ_DEF"] = evs["MKN_OBJ"];
-  evs["MKN_LIB_EXT_DEF"] = ext;
-  evs["MKN_LIB_PRE_DEF"] = pre;
+  evs["MKN_LIB_EXT"] = ext;
+  evs["MKN_LIB_PRE"] = pre;
 
   auto check_set = [&](const std::string key) {
     auto cstr = key.c_str();
     if (kul::env::EXISTS(cstr)) evs[key] = kul::env::GET(cstr);
   };
   check_set("MKN_OBJ");
+  check_set("MKN_LIB_EXT");
+  check_set("MKN_LIB_PRE");
 
   if (root[STR_ENV]) {
     if (root[STR_ENV].IsScalar()) {
-      auto ev = maiken::Application::PARSE_ENV_NODE(root[STR_ENV]);
-      evs.emplace(ev.name(), ev.toString());
-      kul::env::SET(ev.name(), ev.toString().c_str());
+      for (auto const& line : kul::String::LINES(root[STR_ENV].Scalar())) {
+        auto copy = decltype(root[STR_ENV]){line};
+        auto ev = maiken::Application::PARSE_ENV_NODE(copy);
+        evs.emplace(ev.name(), ev.toString());
+        kul::env::SET(ev.name(), ev.toString().c_str());
+      }
     } else {
       for (const auto& c : root[STR_ENV]) {
         auto ev = maiken::Application::PARSE_ENV_NODE(c);

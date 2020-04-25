@@ -59,24 +59,8 @@ class CCompiler : public Compiler {
   virtual std::string staticLib(std::string const &lib) const = 0;
   bool sourceIsBin() const override { return false; }
 
-  const std::string oType(std::vector<std::string> const &objs) const {
-    size_t i = 0;
-    std::string most("o");
-    std::unordered_map<std::string, size_t> keys;
-    for (const auto &s : objs) {
-      std::string t(s.substr(s.rfind(".") + 1));
-      if (!keys.count(t)) keys[t] = 0;
-      keys[t]++;
-    }
-    for (const auto &p : keys) {
-      if (p.second > i) {
-        i = p.second;
-        most = p.first;
-      }
-    }
-    return most;
-  }
-  const std::string oStar(std::vector<std::string> const &objs) const { return "*." + oType(objs); }
+  const std::string oType() const { return AppVars::INSTANCE().envVars().at("MKN_OBJ"); }
+  const std::string oStar() const { return "*." + oType(); }
 
   virtual CCompiler_Type type() const = 0;
 

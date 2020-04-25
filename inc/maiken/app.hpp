@@ -262,6 +262,9 @@ class KUL_PUBLISH Application : public Constants {
   const kul::hash::map::S2S &properties() const { return ps; }
   const kul::hash::map::S2T<kul::hash::set::String> &arguments() const { return args; }
 
+  auto &mode() const { return m; }
+  void mode(compiler::Mode mode) { m = mode; }
+
   std::vector<kul::cli::EnvVar> &envVars() { return evs; }
   const std::vector<kul::cli::EnvVar> &envVars() const { return evs; }
 
