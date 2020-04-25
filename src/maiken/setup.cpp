@@ -142,9 +142,19 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
       }
       populateMaps(n);
       popDepOrMod(n, deps, STR_DEP, 0);
+
       if (n[STR_IF_DEP] && n[STR_IF_DEP][KTOSTRING(__KUL_OS__)]) {
-        for (auto const &dep : n[STR_IF_DEP][KTOSTRING(__KUL_OS__)]) getIfMissing(dep, 0);
-        popDepOrMod(n[STR_IF_DEP], deps, KTOSTRING(__KUL_OS__), 0);
+        auto node = n[STR_IF_DEP][KTOSTRING(__KUL_OS__)];
+        if (node.IsScalar()){
+          for (auto const &with_str : kul::cli::asArgs(node.Scalar()))
+            withArgs(with_str, with_nodes, getIfMissing, 1);
+        }
+        else if (n[STR_DEP].IsSequence()){
+          for (auto const &dep : n[STR_IF_DEP][KTOSTRING(__KUL_OS__)]) getIfMissing(dep, 0);
+          popDepOrMod(n[STR_IF_DEP], deps, KTOSTRING(__KUL_OS__), 0);
+        }
+        else
+          KEXCEPTION(STR_DEP) << " is invalid type";
       }
       profile = n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
       c = !profile.empty();
@@ -263,6 +273,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
                           m == compiler::Mode::SHAR && left == STR_SHARED,
                           m == compiler::Mode::STAT && left == STR_STATIC,
                           left == KTOSTRING(__KUL_OS__)};
+
             if (std::any_of(trues.begin(), trues.end(), [](bool b) { return b; })) var += ifArg;
           }
       };

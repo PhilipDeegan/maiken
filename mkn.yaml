@@ -30,7 +30,12 @@ profile:
 - name: mod
   parent: headers
   mode: shared
-  with: parse.yaml[headers]
+  if_dep:
+    win: parse.yaml[shared]
+    nix: parse.yaml[headers]
+    bsd: parse.yaml[headers]
+  if_src:
+    win: src
 
 - name: server
   parent: lib
