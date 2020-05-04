@@ -17,7 +17,7 @@ INCS =  -Iinc \
 		-Iext/mkn/kul/$(KUL_GIT)/os/nixish/inc
 
 YAML = ext/parse/yaml/$(YAML_GIT)/p/bin/libyaml.a
-LDFLAGS = -pthread -ldl
+LDFLAGS = -pthread -ldl -rdynamic
 
 EXE=mkn
 WHICH=which
@@ -31,17 +31,15 @@ entry:
 
 nix:
 	@@echo "Making for nix"
-	$(eval CXXFLAGS := $(CXXFLAGS))
 	$(eval OS := nix)
+	$(eval CXXFLAGS := $(CXXFLAGS))
 	$(MAKE) general OS=$(OS)
-	@@rm -rf ext bin
 
 bsd:
 	@@echo "Making for bsd"
-	$(eval CXXFLAGS := $(CXXFLAGS))
 	$(eval OS := bsd)
+	$(eval CXXFLAGS := $(CXXFLAGS))
 	$(MAKE) general OS=$(OS)
-	@@rm -rf ext bin
 
 prechecks:
 	@if [ -z "$$($(WHICH) git)" ]; then echo "git NOT FOUND - EXITING"; exit 1; fi
@@ -62,7 +60,7 @@ general:
 	@if [ ! -d "ext/parse/yaml/$(YAML_GIT)/p/bin" ]; then \
 		mkdir ext/parse/yaml/$(YAML_GIT)/p/bin; \
 	fi;
-	@if [ ! -f "ext/parse/yaml/$(YAML_GIT)/p/bin/libyaml.a" ]; then \
+	@if [ ! -f "$(YAML)" ]; then \
 		$(MAKE) caml; \
 		$(MAKE) yaml; \
 	fi;
@@ -75,6 +73,7 @@ general:
 	done;
 	@$(CXX) $(CXXFLAGS) $(INCS) -o "bin/mkn.cpp.o" -c "mkn.cpp"
 	$(MAKE) link
+	@@rm -rf ext bin
 
 link:
 	$(eval FILES := $(foreach dir,$(shell find bin -type f -name *.o),$(dir)))
@@ -88,7 +87,7 @@ caml:
 
 yaml:
 	$(eval FILES := $(foreach dir,$(shell find ext/parse/yaml/$(YAML_GIT)/p/bin -type f -name *.o),$(dir)))
-	ar -r ext/parse/yaml/$(YAML_GIT)/p/bin/libyaml.a $(FILES)
+	ar -r $(YAML) $(FILES)
 
 clean:
 	rm -rf bin ext
