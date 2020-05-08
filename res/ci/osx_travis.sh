@@ -6,6 +6,7 @@ CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $CWD/../..
 ROOT=$PWD
 
+
 make bsd CXX="clang++"
-KLOG=3 ./mkn build -dta "-std=c++17 -fPIC" -l "-pthread -ldl" -WOg 0
-./mkn build -dta "-std=c++17 -fPIC" -l "-pthread -ldl" -WOg 0 -p lib
+CXXFLAGS="-std=c++17 -fPIC"
+KLOG=3 ./mkn build -WOdKta "$CXXFLAGS" -g 0
