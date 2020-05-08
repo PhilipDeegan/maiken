@@ -6,11 +6,8 @@ version: master
 property:
   DATE: 01-MAY-2020
 
-parent: lib
-main: mkn.cpp
+parent: bin
 mode: none
-src: src/maiken/create.cpp, -D_MKN_VERSION_=${version}_${DATE}
-test: test/cpp.cpp
 
 profile:
 - name: headers
@@ -20,6 +17,13 @@ profile:
     shared: -DKUL_SHARED -DKUL_EXPORT
     win_shared: -DYAML_CPP_DLL
 
+- name: bin
+  parent: lib
+  main: mkn.cpp
+  src: src/maiken/create.cpp, -D_MKN_VERSION_=${version}_${DATE}
+  mode: static
+  test: test/cpp.cpp
+
 - name: lib
   parent: headers
   src: src
@@ -27,6 +31,10 @@ profile:
   if_link:
     nix: -ldl -pthread -rdynamic
     win_cl: -nodefaultlib:libucrt.lib ucrt.lib
+
+- name: static
+  parent: bin
+  mode: static
 
 - name: mod
   parent: headers
