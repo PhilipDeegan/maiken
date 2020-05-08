@@ -8,5 +8,5 @@ ROOT=$PWD
 
 export MKN_GCC_PREFERRED=1
 make nix CXX="$CXX"
-KLOG=3 ./mkn build -dta "-std=c++17 -fPIC" -l "-pthread -ldl" -WOg 0
-./mkn build -dta "-std=c++17 -fPIC" -l "-pthread -ldl" -WOg 0 -p lib
+CXXFLAGS="-std=c++17 -fPIC"
+KLOG=3 ./mkn build -WOdKta "$CXXFLAGS" -g 0
