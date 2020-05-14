@@ -174,13 +174,20 @@ std::vector<std::pair<maiken::Source, std::string>> maiken::SourceFinder::all_so
   std::vector<std::pair<maiken::Source, std::string>> source_objects;
   auto dryRun = AppVars::INSTANCE().dryRun();
 
-  auto handle_source = [&](auto &s, auto dir) {
+  auto _source = [&](auto &s, auto dir) {
     const kul::File source(s.in());
     if (!app.incSrc(source)) return;
 
     kul::File object(s.object(), dir);
     source_objects.emplace_back(Source(dryRun ? source.esc() : source.escm(), s.args()),
                                 dryRun ? object.esc() : object.escm());
+  };
+
+  auto handle_source = [&](auto &s, auto dir) {
+    const kul::File source(s.in());
+    if (app.main_ && Source(source.real()) == *app.main_) return;
+
+    _source(s, dir);
   };
 
   for (const auto &ft : sources) {
@@ -198,7 +205,7 @@ std::vector<std::pair<maiken::Source, std::string>> maiken::SourceFinder::all_so
     }
   }
 
-  if (app.main_) handle_source(*app.main_, tmpD);
+  if (app.main_) _source(*app.main_, tmpD);
   for (auto const &test : tests()) handle_source(test, tmpD);
   return source_objects;
 }
@@ -207,9 +214,9 @@ void maiken::CompilerValidation::check_compiler_for(const maiken::Application &a
                                                     const maiken::Application::SourceMap &sources) {
   for (const auto &ft : sources) {
     try {
-      if (!(*app.files().find(ft.first)).second.count(STR_COMPILER))
+      if (!app.files().at(ft.first).count(STR_COMPILER))
         KEXIT(1, "No compiler found for filetype " + ft.first);
-      Compilers::INSTANCE().get((*(*app.files().find(ft.first)).second.find(STR_COMPILER)).second);
+      Compilers::INSTANCE().get(app.files().at(ft.first).at(STR_COMPILER));
     } catch (const CompilerNotFoundException &e) {
       KEXIT(1, e.what());
     }
