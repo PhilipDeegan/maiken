@@ -1,0 +1,30 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: allenevans/set-env@v1.0.0
+      with:
+        MKN_CL_PREFERRED: 1
+
+    - run: bash -c "rm /bin/link" # interferes with cl/link.exe
+
+    - shell: cmd
+      run: |
+        call "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+        bash -c ./res/ci/win_build.sh
+        mkn build -dtKOg 0 -a "-std:c++17 -EHsc"
+
+    - uses: actions/upload-artifact@v1
+      with:
+        name: mkn
+        path: bin/build/mkn.exe
