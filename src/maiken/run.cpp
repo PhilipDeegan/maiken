@@ -39,12 +39,12 @@ class Runner : public Constants {
     if (!f) KEXIT(1, "binary does not exist \n" + f.full());
     std::unique_ptr<kul::Process> p;
     if (dbg) {
-      std::string dbg = kul::env::GET("MKN_DBG");
-      if (dbg.empty())
+      std::string dbg_bin = kul::env::GET("MKN_DBG");
+      if (dbg_bin.empty())
         if (Settings::INSTANCE().root()[STR_LOCAL] &&
             Settings::INSTANCE().root()[STR_LOCAL][STR_DEBUGGER])
-          dbg = Settings::INSTANCE().root()[STR_LOCAL][STR_DEBUGGER].Scalar();
-      if (dbg.empty()) {
+          dbg_bin = Settings::INSTANCE().root()[STR_LOCAL][STR_DEBUGGER].Scalar();
+      if (dbg_bin.empty()) {
 #ifdef _WIN32
         p = std::make_unique<kul::Process>("cdb");
         p->arg("-o");
@@ -52,9 +52,9 @@ class Runner : public Constants {
         p = std::make_unique<kul::Process>("gdb");
 #endif
       } else {
-        std::vector<std::string> bits(kul::cli::asArgs(dbg));
+        std::vector<std::string> bits(kul::cli::asArgs(dbg_bin));
         p = std::make_unique<kul::Process>(bits[0]);
-        for (uint16_t i = 1; i < bits.size(); i++) p->arg(bits[i]);
+        for (size_t i = 1; i < bits.size(); i++) p->arg(bits[i]);
       }
       p->arg(f.mini());
     } else

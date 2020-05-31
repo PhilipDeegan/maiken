@@ -50,7 +50,7 @@ class SuperSettings {
 };
 }  // namespace maiken
 
-maiken::Settings::Settings(const std::string &s) : kul::yaml::File(s) {
+maiken::Settings::Settings(const std::string &file_) : kul::yaml::File(file_) {
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_REPO]) {
     kul::Dir d(root()[STR_LOCAL][STR_REPO].Scalar());
     if (!d.is() && !d.mk())

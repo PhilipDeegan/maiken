@@ -136,7 +136,7 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
     }
   };
   std::vector<std::pair<std::string, std::string>> apps;
-  auto lam = [&](const auto &depOrMod) {
+  auto lam = [&](auto const& depOrMod) {
     const kul::Dir &projectDir = resolveDepOrModDirectory(depOrMod, module);
     bool f = false;
     for (const Application *ap : vec)
@@ -148,7 +148,7 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
     const maiken::Project &c(*maiken::Projects::INSTANCE().getOrCreate(projectDir));
 
     auto withoutThis = [=](const std::string &name, const std::string &pro) {
-      for (const auto &wo : AppVars::INSTANCE().withoutParsed()) {
+      for (auto const& wo : AppVars::INSTANCE().withoutParsed()) {
         kul::hash::set::String profiles;
         std::string proName(wo);
         auto lb(wo.find("["));
@@ -156,7 +156,7 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
         if (lb != std::string::npos) {
           if (rb == std::string::npos || rb < lb) KEXIT(1, "Invalid -t argument format provided");
           std::string profile = proName.substr(lb + 1, rb - lb - 1);
-          for (const auto &pr : kul::String::SPLIT(profile, ",")) profiles.insert(pr);
+          for (auto const& pr : kul::String::SPLIT(profile, ",")) profiles.insert(pr);
           proName = proName.substr(0, lb);
         }
         if (name == proName) {
@@ -175,7 +175,7 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
         if (p == "@")
           p = "";
         else
-          for (const auto &node : c.root()[STR_PROFILE])
+          for (auto const& node : c.root()[STR_PROFILE])
             if (node[STR_NAME].Scalar() == p) {
               f = 1;
               break;
@@ -204,12 +204,12 @@ void maiken::Application::popDepOrMod(const YAML::Node &n, std::vector<Applicati
     }
   };
 
-  for (const auto &depOrMod : n[s]) lam(depOrMod);
+  for (auto const& depOrMod : n[s]) lam(depOrMod);
 
   if (!module && n[STR_SELF])
-    for (const auto &s :
+    for (auto const& split :
          kul::String::SPLIT(Properties::RESOLVE(*this, n[STR_SELF].Scalar()), ' ')) {
-      auto *app = Applications::INSTANCE().getOrCreate(project(), s);
+      auto *app = Applications::INSTANCE().getOrCreate(project(), split);
       app->par = this;
       app->scr = scr;
       vec.push_back(app);
