@@ -29,15 +29,18 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
+#include "maiken/graph.hpp"
 
 void includeDependency(const std::string &s, const std::string &p,
                        kul::hash::set::String &include) {
   if (s == "+") {
     include.insert(s);
   } else {
-    std::stringstream ss;
-    ss << s << "[" << p << "]";
-    include.insert(ss.str());
+    for (auto profile : kul::String::SPLIT(p, ' ')) {
+      std::stringstream ss;
+      ss << s << "[" << profile << "]";
+      include.insert(ss.str());
+    }
   }
 }
 
@@ -98,6 +101,7 @@ void maiken::Application::buildDepVec(const std::string &depVal) {
 
   uint16_t i = 0;
   std::unordered_map<uint16_t, std::vector<Application *>> dePs;
+
   for (Application *ap : deps) {
     Application &a(*ap);
     a.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), i, include);
@@ -108,30 +112,12 @@ void maiken::Application::buildDepVec(const std::string &depVal) {
     all.insert(ss.str());
   }
 
-  std::vector<Application *> t;
-  for (size_t i = 0; i < dePs.size(); i++) {
-    for (auto *const ap : dePs[dePs.size() - (1 + i)]) {
-      const std::string &s(ap->project().dir().real()), &p(ap->p);
-      const auto it = std::find_if(t.begin(), t.end(), [&s, &p](Application *const a) {
-        return a->project().dir().real() == s && a->p == p;
-      });
-      if (it != t.end()) t.erase(it);
-      t.push_back(ap);
-    }
-  }
-
-  for (auto app1 = t.rbegin(); app1 != t.rend(); ++app1) {
-    const std::string &s((*app1)->project().dir().real()), &p((*app1)->p);
-    const auto it = std::find_if(deps.begin(), deps.end(), [&s, &p](Application *const a) {
-      return a->project().dir().real() == s && a->p == p;
-    });
-    if (it != deps.end()) deps.erase(it);
-    deps.push_back(*app1);
-  }
   for (const auto &d : include)
     if (!all.count(d) && !ignore.count(d) && !isMod)
       KEXIT(1, "Dependency project specified does not exist: " + d);
   if (include.size() && include.count("+")) this->ig = 1;
+
+  deps = DepGrapher{}.build(*this);
 }
 
 void maiken::Application::buildDepVecRec(
