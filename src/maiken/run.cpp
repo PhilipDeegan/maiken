@@ -50,6 +50,7 @@ class Runner : public Constants {
         p->arg("-o");
 #else
         p = std::make_unique<kul::Process>("gdb");
+        (*p) << "--args";
 #endif
       } else {
         std::vector<std::string> bits(kul::cli::asArgs(dbg_bin));
