@@ -50,8 +50,8 @@ class ProjectException : public kul::Exception {
 class Projects;
 class KUL_PUBLISH Project : public kul::yaml::File, public Constants {
  public:
-  Project(const kul::File &f) : kul::yaml::File(f), m_dir(f.dir()) {}
-  Project(const Project &p) : kul::yaml::File(p), m_dir(p.m_dir) {}
+  Project(const kul::File &f) : kul::yaml::File(f), m_dir(f.dir().real()) {}
+  Project(const Project &p) : kul::yaml::File(p), m_dir(p.m_dir.real()) {}
   const kul::Dir &dir() const { return m_dir; }
   const kul::yaml::Validator validator() const;
 
