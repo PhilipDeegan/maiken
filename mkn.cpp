@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
     KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
   } catch (const kul::Exit &e) {
-    if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e;
+    if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e.stack();
     ret = e.code();
   } catch (const kul::proc::ExitException &e) {
     KERR << e;

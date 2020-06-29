@@ -90,28 +90,6 @@ class KUL_PUBLISH Application : public Constants {
 #endif  //  _MKN_WITH_MKN_RAM_  &&         _MKN_WITH_IO_CEREAL_
 
  protected:
-  bool ig = 1, isMod = 0, ro = 0;
-  const Application *par = nullptr;
-  Application *sup = nullptr;
-  compiler::Mode m;
-  std::string arg, bin, lang, lnk, out, scr, scv;
-  std::optional<Source> main_;
-  const std::string p;
-  kul::Dir bd, inst;
-  std::unordered_map<const This *, YAML::Node> modIArgs, modCArgs, modLArgs, modTArgs, modPArgs;
-  const maiken::Project &proj;
-  kul::hash::map::S2T<kul::hash::map::S2S> fs;
-  kul::hash::map::S2S cArg, cLnk, includeStamps, itss, ps, tests;
-  kul::hash::map::S2T<kul::hash::set::String> args;
-  kul::hash::map::S2T<uint64_t> stss;
-  std::vector<Application *> deps, modDeps, rdeps;
-  std::vector<std::shared_ptr<ModuleLoader>> mods;
-  std::vector<kul::cli::EnvVar> evs;
-  std::vector<std::string> defs, libs, paths;
-  std::vector<std::pair<maiken::Source, bool>> srcs;
-  std::vector<std::pair<std::string, bool>> incs;
-  const kul::SCM *scm = 0;
-
   void buildExecutable(const kul::hash::set::String &objects) KTHROW(kul::Exception);
   CompilerProcessCapture buildLibrary(const kul::hash::set::String &objects) KTHROW(kul::Exception);
   void buildTest(const kul::hash::set::String &objects) KTHROW(kul::Exception);
@@ -282,6 +260,8 @@ class KUL_PUBLISH Application : public Constants {
   void prependCompileString(const std::string &s) { arg = s + " " + arg; }
   void prependLinkString(const std::string &s) { lnk = s + " " + lnk; }
 
+  auto root() const { return ro; }
+
   std::string baseLibFilename() const {
     std::string n = project().root()[STR_NAME].Scalar();
     return out.empty() ? inst ? p.empty() ? n : n + "_" + p : n : out;
@@ -302,6 +282,29 @@ class KUL_PUBLISH Application : public Constants {
   }
 
   CompilationInfo m_cInfo;
+
+ protected:
+  bool ig = 1, isMod = 0, ro = 0;
+  const Application *par = nullptr;
+  Application *sup = nullptr;
+  compiler::Mode m;
+  std::string arg, bin, lang, lnk, out, scr, scv;
+  std::optional<Source> main_;
+  const std::string p;
+  kul::Dir bd, inst;
+  std::unordered_map<const This *, YAML::Node> modIArgs, modCArgs, modLArgs, modTArgs, modPArgs;
+  const maiken::Project &proj;
+  kul::hash::map::S2T<kul::hash::map::S2S> fs;
+  kul::hash::map::S2S cArg, cLnk, includeStamps, itss, ps, tests;
+  kul::hash::map::S2T<kul::hash::set::String> args;
+  kul::hash::map::S2T<uint64_t> stss;
+  std::vector<Application *> deps, modDeps, rdeps;
+  std::vector<std::shared_ptr<ModuleLoader>> mods;
+  std::vector<kul::cli::EnvVar> evs;
+  std::vector<std::string> defs, libs, paths;
+  std::vector<std::pair<maiken::Source, bool>> srcs;
+  std::vector<std::pair<std::string, bool>> incs;
+  const kul::SCM *scm = 0;
 };
 
 class Applications : public Constants {

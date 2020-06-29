@@ -118,6 +118,22 @@ void maiken::Application::buildDepVec(const std::string &depVal) {
   if (include.size() && include.count("+")) this->ig = 1;
 
   deps = DepGrapher{}.build(*this);
+
+  for(auto const * depP : deps) {
+
+      const auto &dep(*depP);
+
+      if (!dep.sources().empty()) {
+        auto lib = dep.baseLibFilename();
+        const auto &it(std::find(libraries().begin(), libraries().end(), lib));
+        if (it != libraries().end()) libs.erase(it);
+        libs.push_back(lib);
+      }
+
+      for (const std::string &s : dep.libraries())
+        if (std::find(libraries().begin(), libraries().end(), s) == libraries().end())
+          libs.push_back(s);
+  }
 }
 
 void maiken::Application::buildDepVecRec(
@@ -134,15 +150,10 @@ void maiken::Application::buildDepVecRec(
 }
 
 void maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception) {
-  auto cmds = maiken::AppVars::INSTANCE().commands();
+
   for (auto depP = dependencies().rbegin(); depP != dependencies().rend(); ++depP) {
+
     const auto &dep(**depP);
-    if (!dep.sources().empty()) {
-      auto lib = dep.baseLibFilename();
-      const auto &it(std::find(libraries().begin(), libraries().end(), lib));
-      if (it != libraries().end()) libs.erase(it);
-      libs.push_back(lib);
-    }
 
     for (const auto &s : dep.includes())
       if (s.second && std::find(includes().begin(), includes().end(), s) == includes().end())
@@ -151,8 +162,6 @@ void maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception) 
     for (const std::string &s : dep.libraryPaths())
       if (std::find(libraryPaths().begin(), libraryPaths().end(), s) == libraryPaths().end())
         paths.push_back(s);
-    for (const std::string &s : dep.libraries())
-      if (std::find(libraries().begin(), libraries().end(), s) == libraries().end())
-        libs.push_back(s);
+
   }
 }
