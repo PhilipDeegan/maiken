@@ -200,6 +200,7 @@ void maiken::Application::setSuper() {
       sup = Applications::INSTANCE().getOrCreate(*maiken::Projects::INSTANCE().getOrCreate(d), "");
       sup->resolveProperties();
     } catch (const std::exception &e) {
+      KLOG(ERR) << e.what();
       KEXIT(1, "Possible super cycle detected: " + project().dir().real());
     }
     auto cycle = sup;
