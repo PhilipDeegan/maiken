@@ -117,23 +117,32 @@ void maiken::Application::buildDepVec(const std::string &depVal) {
       KEXIT(1, "Dependency project specified does not exist: " + d);
   if (include.size() && include.count("+")) this->ig = 1;
 
-  deps = DepGrapher{}.build(*this);
+  std::function<void(Application *)> dep_libs;
 
-  for(auto const * depP : deps) {
+  dep_libs = [&dep_libs](Application * app){
 
-      const auto &dep(*depP);
+    app->deps = DepGrapher{}.build(*app);
 
-      if (!dep.sources().empty()) {
-        auto lib = dep.baseLibFilename();
-        const auto &it(std::find(libraries().begin(), libraries().end(), lib));
-        if (it != libraries().end()) libs.erase(it);
-        libs.push_back(lib);
-      }
+    for(auto* depP : app->deps) {
 
-      for (const std::string &s : dep.libraries())
-        if (std::find(libraries().begin(), libraries().end(), s) == libraries().end())
-          libs.push_back(s);
-  }
+        const auto &dep(*depP);
+
+        if (!dep.sources().empty()) {
+          auto lib = dep.baseLibFilename();
+          const auto &it(std::find(app->libraries().begin(), app->libraries().end(), lib));
+          if (it != app->libraries().end()) app->libs.erase(it);
+          app->libs.push_back(lib);
+        }
+
+        for (const std::string &s : dep.libraries())
+          if (std::find(app->libraries().begin(), app->libraries().end(), s) == app->libraries().end())
+            app->libs.push_back(s);
+
+       dep_libs(depP);
+    }
+  };
+
+  dep_libs(this);
 }
 
 void maiken::Application::buildDepVecRec(
