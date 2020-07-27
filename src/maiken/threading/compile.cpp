@@ -60,6 +60,13 @@ maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
                          AppVars::INSTANCE().dryRun());
 }
 
+
+std::string maiken::CompilationUnit::compileString() const KTHROW(kul::Exception) {
+  kul::os::PushDir pushd(app.project().dir());
+  CompileDAO dao{app, compiler, in, out, args, incs, mode, /*dryRun=*/ true};
+  return comp->compileSource(dao).cmd();
+}
+
 maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const KTHROW(kul::Exception) {
   try {
     kul::os::PushDir pushd(app.project().dir());
