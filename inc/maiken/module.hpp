@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif  //_MKN_DISABLE_MODULES_
 
 #include "maiken/defs.hpp"
+#include "maiken/app.hpp"
 
 // How to create external modules
 /**

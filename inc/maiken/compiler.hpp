@@ -135,19 +135,7 @@ class Compiler {
   }
 };
 
-class CompilationUnit {
- private:
-  const maiken::Application &app;
-  const Compiler *comp;
-  const std::string compiler;
-  const std::vector<std::string> args;
-  const std::vector<std::string> incs;
-  const std::string in;
-  const std::string out;
-  const compiler::Mode mode;
-  const bool dryRun;
-
- public:
+struct CompilationUnit {
   CompilationUnit(const maiken::Application &app, const Compiler *comp, std::string const &compiler,
                   const std::vector<std::string> &args, const std::vector<std::string> &incs,
                   std::string const &in, std::string const &out, const compiler::Mode &mode,
@@ -163,6 +151,18 @@ class CompilationUnit {
         dryRun(dryRun) {}
 
   CompilerProcessCapture compile() const KTHROW(kul::Exception);
+
+  std::string compileString() const KTHROW(kul::Exception);
+
+  maiken::Application const& app;
+  Compiler const *comp;
+  std::string const compiler;
+  std::vector<std::string> const args;
+  std::vector<std::string> const incs;
+  std::string const in;
+  std::string const out;
+  compiler::Mode const mode;
+  bool const dryRun;
 };
 }  // namespace maiken
 #endif /* _MAIKEN_COMPILER_HPP_ */
