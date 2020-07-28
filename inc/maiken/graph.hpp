@@ -71,7 +71,7 @@ class DepGrapher {
   }
 
   void _erase(std::shared_ptr<GraphItem> item, std::shared_ptr<GraphItem> from) {
-    for (auto& [hash, it] : from->next) _erase(item, it);
+    for (auto& pair : from->next) _erase(item, pair.second);
     auto hash = item->app->hash();
     from->next.erase(hash);
   }
@@ -82,7 +82,8 @@ class DepGrapher {
   }
 
   void _prune() {
-    for (auto& [hash, it] : leafs) {
+    for (auto& pair : leafs) {
+      auto& it = pair.second;
       deps.emplace_back(it->app);
       _erase(it, root);
       items.erase(it->app->hash());
@@ -95,7 +96,7 @@ class DepGrapher {
     if (item->next.empty())
       leafs[item->app->hash()] = item;
     else
-      for (auto& [hash, it] : item->next) _leafs(it);
+      for (auto& pair : item->next) _leafs(pair.second);
   }
 
   std::shared_ptr<GraphItem> root;
