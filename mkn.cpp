@@ -37,10 +37,18 @@ int main(int argc, char *argv[]) {
   kul::Signal sig;
   uint8_t ret = 0;
   const auto s = kul::Now::MILLIS();
+
   try {
     for (auto app : maiken::Application::CREATE(argc, argv)) app->process();
-    KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
-    KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
+
+    bool print_build_time = false;
+    for (const auto &key : {"build", "compile", "link"})
+      print_build_time |= maiken::CommandStateMachine::INSTANCE().has(key);
+
+    if (print_build_time) {
+      KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
+      KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
+    }
   } catch (const kul::Exit &e) {
     if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e.stack();
     ret = e.code();

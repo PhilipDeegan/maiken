@@ -389,24 +389,28 @@ class CommandStateMachine {
   friend class maiken::Application;
   friend class maiken::Processor;
 
- private:
-  bool _main = 1;
-  kul::hash::set::String cmds;
-  CommandStateMachine() { reset(); }
+ public:
   static CommandStateMachine &INSTANCE() {
     static CommandStateMachine a;
     return a;
   }
   static bool has(std::string cmd) { return INSTANCE().cmds.count(cmd); }
+  kul::hash::set::String const &commands() const { return cmds; }
+  bool main() const { return _main; }
+
+ private:
+  CommandStateMachine() { reset(); }
+
+  void main(bool m) { _main = m; }
+  void add(const std::string &s) { cmds.insert(s); }
 
   void reset() {
     cmds.clear();
     for (const auto &s : maiken::AppVars::INSTANCE().commands()) cmds.insert(s);
   }
-  void add(const std::string &s) { cmds.insert(s); }
-  const kul::hash::set::String &commands() const { return cmds; }
-  void main(bool m) { _main = m; }
-  bool main() const { return _main; }
+
+  bool _main = 1;
+  kul::hash::set::String cmds;
 };
 
 class BuildRecorder {
