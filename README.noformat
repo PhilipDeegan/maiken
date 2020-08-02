@@ -124,6 +124,8 @@ profiles:
         <directory>, false/no/0     # Don't find sources recursively
         <directory>, true/yes/1     # Find/add sources recursively
         <directory> <file>          # Find/add sources recursively, add file
+        <directory>, 1, -DFlags     # Find/add sources recursively, add -DFlags to file compile commands
+        <file>, -DFlagsForThisFile  # Add <file> and pass -DFlagsForThisFile to compile command
     dep:
       - name: name
         version: version

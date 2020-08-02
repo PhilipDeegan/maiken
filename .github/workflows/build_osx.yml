@@ -12,6 +12,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - uses: allenevans/set-env@v1.0.0
+      with:
+        KUL_GIT_CO: --depth 10 # is added to git clone calls
+
     - run: make bsd
 
     - run: KLOG=3 ./mkn build -dtKOW 9 -g 0 -a "-std=c++17 -fPIC"
