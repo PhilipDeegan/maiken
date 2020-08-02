@@ -1,3 +1,4 @@
+IndentWidth: 2
 BasedOnStyle: 'google'
 ColumnLimit: 100
 SortIncludes: false
