@@ -153,7 +153,8 @@ void maiken::Application::buildTest(const kul::hash::set::String &objects) KTHRO
   auto build_test = [&mute, &cpcs, &starDirs](auto &to, auto &testsD, auto &tmpD, auto *app) {
     kul::hash::set::String cobjects;
     cobjects.insert(kul::File(to.object(), tmpD).escm());
-    auto out = kul::File(to.in()).name();
+    kul::File inFile(to.in());
+    auto out = Application::hash(inFile.dir().real()) + "_" + inFile.name();
     auto cpc = Executioner::build_exe(cobjects, starDirs, to.in(), out, testsD, *app);
     std::lock_guard<std::mutex> lock(mute);
     cpcs.push_back(cpc);

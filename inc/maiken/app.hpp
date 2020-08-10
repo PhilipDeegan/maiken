@@ -274,12 +274,13 @@ class KUL_PUBLISH Application : public Constants {
   static kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const &, Application * = nullptr);
   static kul::cli::EnvVar PARSE_PROFILE_NAME(YAML::Node const &, Application * = nullptr);
 
-  std::string hash() {
+  static std::string hash(std::string in) {
     std::stringstream ss;
-    ss << std::hex << std::hash<std::string>()(project().dir().real());
-    ss << "_" << std::hash<std::string>()(p.empty() ? "@" : p);
+    ss << std::hex << std::hash<std::string>()(in);
     return ss.str();
   }
+
+  std::string hash() { return hash(project().dir().real()) + "_" + hash(p.empty() ? "@" : p); }
 
   CompilationInfo m_cInfo;
 
