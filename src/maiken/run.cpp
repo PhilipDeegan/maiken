@@ -75,6 +75,7 @@ class Runner : public Constants {
       std::string arg;
       for (const auto &s : a.libraryPaths()) arg += s + kul::env::SEP();
       if (!arg.empty()) arg.pop_back();
+#if _MKN_DISABLE_RUN_LIB_PATH_HANDLING_ == 0
 #if defined(__APPLE__)
       kul::cli::EnvVar dy("DYLD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
       KOUT(DBG) << dy.name() << " : " << dy.toString();
@@ -87,6 +88,7 @@ class Runner : public Constants {
 #endif
       KOUT(DBG) << pa.name() << " : " << pa.toString();
       envies.push_back(std::make_pair(pa.name(), pa.toString()));
+#endif  // _MKN_DISABLE_RUN_LIB_PATH_HANDLING_
     }
     for (const auto &ev : envies) {
       p->var(ev.first,

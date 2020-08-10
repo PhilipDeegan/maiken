@@ -709,6 +709,30 @@ Type            flag
 Default         0
 Description     disables modules from executing at any point
 
+Key             _MKN_DISABLE_RUN_LIB_PATH_HANDLING_
+Type            flag
+Default         0
+Description     nix: disables LD_LIBRARY_PATH modifications during "run/dbg" commands
+                bsd:
+                  if osx: disables LD_LIBRARY_PATH/DYLD_LIBRARY_PATH modifications during "run/dbg" commands
+                  else  : disables LD_LIBRARY_PATH modifications during "run/dbg" commands
+                win: disables PATH modifications during "run/dbg" commands
+
+
+Key             _MKN_GIT_DEFAULT_BRANCH_
+Type            string
+Default         master
+Description     default branch for retrieving dependencies if not built with mkn.ram
+
+Key             _MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION_
+Type            uint
+Default         0
+Description     default action deduction for retrieving dependences if built with mkn.ram
+                  0 - get default branch
+                  1 - if has release, get, else if has tag, get, else 0
+
+
+
 
 7. With options
 

@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef _MKN_WITH_MKN_RAM_
 
-bool maiken::Github::GET_DEFAULT_BRANCH(const std::string &owner, const std::string &repo,
+bool maiken::Github::GET_DEFAULT_BRANCH(std::string const &owner, std::string const &repo,
                                         std::string &branch) {
   bool b = 0;
   std::stringstream ss;
@@ -53,7 +53,7 @@ bool maiken::Github::GET_DEFAULT_BRANCH(const std::string &owner, const std::str
   return b;
 }
 
-bool maiken::Github::GET_LATEST_RELEASE(const std::string &owner, const std::string &repo,
+bool maiken::Github::GET_LATEST_RELEASE(std::string const &owner, std::string const &repo,
                                         std::string &branch) {
   bool b = 0;
   std::stringstream ss;
@@ -73,7 +73,7 @@ bool maiken::Github::GET_LATEST_RELEASE(const std::string &owner, const std::str
   return b;
 }
 
-bool maiken::Github::GET_LATEST_TAG(const std::string &owner, const std::string &repo,
+bool maiken::Github::GET_LATEST_TAG(std::string const &owner, std::string const &repo,
                                     std::string &branch) {
   bool b = 0;
   std::stringstream ss;
@@ -99,14 +99,20 @@ bool maiken::Github::GET_LATEST_TAG(const std::string &owner, const std::string 
   return b;
 }
 
-bool maiken::Github::GET_LATEST(const std::string &repo, std::string &branch) {
+bool maiken::Github::GET_LATEST(std::string const &repo, std::string &branch) {
 #ifndef _MKN_DISABLE_SCM_
+
+  std::vector<std::function<decltype(GET_DEFAULT_BRANCH)>> gets{
+      &GET_DEFAULT_BRANCH, &GET_LATEST_RELEASE, &GET_LATEST_TAG};
+  std::vector<size_t> orders{0, 1, 2};
+  if (_MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION_ == 1) orders = {1, 2, 0};
+
   std::vector<std::string> repos;
   if (IS_SOLID(repo))
     repos.push_back(repo);
   else
-    for (const std::string &s : Settings::INSTANCE().remoteRepos()) repos.push_back(s + repo);
-  for (const std::string &s : repos) {
+    for (std::string const &s : Settings::INSTANCE().remoteRepos()) repos.push_back(s + repo);
+  for (std::string const &s : repos) {
     if (s.find("github.com") != std::string::npos) {
       std::string owner = s.substr(s.find("github.com") + 10);
       if (owner[0] != '/' && owner[0] != ':') {
@@ -121,9 +127,8 @@ bool maiken::Github::GET_LATEST(const std::string &repo, std::string &branch) {
         KERR << "Invalid attempt to perform github lookup";
         continue;
       }
-      if (GET_LATEST_RELEASE(owner, repo, branch)) return 1;
-      if (GET_LATEST_TAG(owner, repo, branch)) return 1;
-      if (GET_DEFAULT_BRANCH(owner, repo, branch)) return 1;
+      for (auto const &order : orders)
+        if (gets[order](owner, repo, branch)) return 1;
     }
   }
 #else
