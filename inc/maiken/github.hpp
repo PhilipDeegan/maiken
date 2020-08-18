@@ -40,18 +40,18 @@ namespace maiken {
 
 class Github {
  private:
-  static bool IS_SOLID(const std::string &r) {
+  static bool IS_SOLID(std::string const& r) {
     return r.find("://") != std::string::npos || r.find("@") != std::string::npos;
   }
 
  public:
-  static bool GET_DEFAULT_BRANCH(const std::string &owner, const std::string &repo,
-                                 std::string &branch);
-  static bool GET_LATEST_RELEASE(const std::string &owner, const std::string &repo,
-                                 std::string &branch);
-  static bool GET_LATEST_TAG(const std::string &owner, const std::string &repo,
-                             std::string &branch);
-  static bool GET_LATEST(const std::string &repo, std::string &branch);
+  static bool GET_DEFAULT_BRANCH(std::string const& owner, std::string const& repo,
+                                 std::string& branch);
+  static bool GET_LATEST_RELEASE(std::string const& owner, std::string const& repo,
+                                 std::string& branch);
+  static bool GET_LATEST_TAG(std::string const& owner, std::string const& repo,
+                             std::string& branch);
+  static bool GET_LATEST(std::string const& repo, std::string& branch);
 };
 }  // namespace maiken
 

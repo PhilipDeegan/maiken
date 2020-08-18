@@ -66,11 +66,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _MKN_TIMESTAMPS_ */
 
 #ifndef _MKN_VERSION_
-#define _MKN_VERSION_ master
-#endif /* _MKN_VERSION_ */
-
-#ifndef _MKN_GIT_DEFAULT_BRANCH_
-#define _MKN_GIT_DEFAULT_BRANCH_ master
+#define _MKN_VERSION_ truth
 #endif /* _MKN_VERSION_ */
 
 #ifndef _MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION_
@@ -89,14 +85,13 @@ class Constants {
 
   static constexpr auto STR_BIN = "bin", STR_OBJ = "obj";
 
-  static constexpr auto STR_BUILD = "build", STR_CLEAN = "clean";
+  static constexpr auto STR_BUILD = "build", STR_CLEAN = "clean", STR_CHECK = "check";
   static constexpr auto STR_RUN = "run", STR_DBG = "dbg";
   static constexpr auto STR_DEBUG = "debug";
   static constexpr auto STR_DEBUGGER = "debugger";
   static constexpr auto STR_COMPILE = "compile";
   static constexpr auto STR_HELP = "help", STR_INIT = "init", STR_INFO = "info";
-  static constexpr auto STR_LINK = "link";
-  static constexpr auto STR_PACK = "pack";
+  static constexpr auto STR_LINK = "link", STR_PACK = "pack";
   static constexpr auto STR_THREADS = "threads";
   static constexpr auto STR_TREE = "tree";
 
