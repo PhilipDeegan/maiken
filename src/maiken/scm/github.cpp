@@ -120,13 +120,13 @@ bool maiken::Github::GET_LATEST(std::string const &repo, std::string &branch) {
         continue;
       }
       owner.erase(0, 1);
-      if (owner.find("/") != std::string::npos) {
-        owner = owner.substr(0, owner.find("/"));
-      }
+      if (owner.find("/") != std::string::npos) owner = owner.substr(0, owner.find("/"));
+
       if (owner.empty()) {
         KERR << "Invalid attempt to perform github lookup";
         continue;
       }
+
       for (auto const &order : orders)
         if (gets[order](owner, repo, branch)) return 1;
     }
@@ -139,4 +139,4 @@ bool maiken::Github::GET_LATEST(std::string const &repo, std::string &branch) {
   return 0;
 }
 
-#endif
+#endif /*_MKN_WITH_MKN_RAM_*/

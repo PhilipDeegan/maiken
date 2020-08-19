@@ -65,7 +65,9 @@ void maiken::Application::scmStatus(const bool &deps) KTHROW(kul::scm::Exception
     scm = SCMGetter::GET(this->project().dir(), this->scr, isMod);
   auto dir = this->project().dir().real();
   if (scm && scm->hasChanges(dir)) {
-    KOUT(NON) << "Project: " << project().dir().real();
+    std::stringstream branch;
+    branch << " [" << kul::scm::Git{}.branch(project().dir().real()) << "]";
+    KOUT(NON) << project().dir().real() << branch.str();
     scm->status(dir, /*full =*/0);
     KOUT(NON);
   }
@@ -73,7 +75,7 @@ void maiken::Application::scmStatus(const bool &deps) KTHROW(kul::scm::Exception
 
 void maiken::Application::scmUpdate(const bool &f) KTHROW(kul::scm::Exception) {
   size_t i = 0;
-  const Application *p = this;
+  Application const *p = this;
   while ((p = p->par)) i++;
   if (i > AppVars::INSTANCE().dependencyLevel()) return;
   if (!scm && SCMGetter::HAS(this->project().dir()))
@@ -83,7 +85,7 @@ void maiken::Application::scmUpdate(const bool &f) KTHROW(kul::scm::Exception) {
       KOUT(NON) << "WARNING: ATTEMPTING SCM UPDATE, USER INTERACTION MAY BE "
                    "REQUIRED!";
 
-    const std::string &tscr(
+    std::string const &tscr(
         !this->scr.empty()
             ? this->scr
             : this->project().root()[STR_SCM]

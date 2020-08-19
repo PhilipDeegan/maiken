@@ -97,12 +97,12 @@ bool maiken::SCMGetter::IS_SOLID(const std::string &r) {
 }
 
 std::string maiken::SCMGetter::REPO(const kul::Dir &d, const std::string &r, bool module) {
-  if (INSTANCE().valids.count(d.path())) return (*INSTANCE().valids.find(d.path())).second;
+  if (INSTANCE().valids.count(d.path())) return INSTANCE().valids.at(d.path());
   if (IS_SOLID(r))
     INSTANCE().valids.insert(d.path(), r);
   else
     GET_SCM(d, r, module);
-  if (INSTANCE().valids.count(d.path())) return (*INSTANCE().valids.find(d.path())).second;
+  if (INSTANCE().valids.count(d.path())) return INSTANCE().valids.at(d.path());
   KEXCEPT(Exception, "SCM not discovered for project: " + d.path());
 }
 bool maiken::SCMGetter::HAS(const kul::Dir &d) {
