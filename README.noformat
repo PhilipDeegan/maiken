@@ -718,12 +718,6 @@ Description     nix: disables LD_LIBRARY_PATH modifications during "run/dbg" com
                   else  : disables LD_LIBRARY_PATH modifications during "run/dbg" commands
                 win: disables PATH modifications during "run/dbg" commands
 
-
-Key             _MKN_GIT_DEFAULT_BRANCH_
-Type            string
-Default         master
-Description     default branch for retrieving dependencies if not built with mkn.ram
-
 Key             _MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION_
 Type            uint
 Default         0

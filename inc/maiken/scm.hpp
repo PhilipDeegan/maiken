@@ -50,7 +50,6 @@ class SCMGetter {
   static bool IS_SOLID(const std::string &r);
   static const kul::SCM *GET_SCM(const kul::Dir &d, const std::string &r, bool module);
 
- private:
   kul::hash::map::S2S valids;
 };
 }  // end namespace maiken

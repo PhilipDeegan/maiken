@@ -66,11 +66,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _MKN_TIMESTAMPS_ */
 
 #ifndef _MKN_VERSION_
-#define _MKN_VERSION_ master
-#endif /* _MKN_VERSION_ */
-
-#ifndef _MKN_GIT_DEFAULT_BRANCH_
-#define _MKN_GIT_DEFAULT_BRANCH_ master
+#define _MKN_VERSION_ truth
 #endif /* _MKN_VERSION_ */
 
 #ifndef _MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION_
