@@ -101,13 +101,11 @@ kul::Dir maiken::Application::resolveDepOrModDirectory(const YAML::Node &n, bool
         if (Github::GET_LATEST(depName, version)) return version;
 #endif  //_MKN_WITH_MKN_RAM_
 
-        auto scm =
-            SCMGetter::INSTANCE().GET(kul::Dir::JOIN(d, kul::Dir::JOIN(name, "__unknown__")), name,
-                                      /*module=*/false);
+        auto scm = SCMGetter::INSTANCE().GET(kul::Dir::JOIN(d, kul::Dir::JOIN(name, "__unknown__")),
+                                             name, module);
 
-        return scm->defaultRemoteBranch(
-            SCMGetter::INSTANCE().REPO(kul::Dir::JOIN(d, kul::Dir::JOIN(name, "__unknown__")), name,
-                                       /*module=*/false));
+        return scm->defaultRemoteBranch(SCMGetter::INSTANCE().REPO(
+            kul::Dir::JOIN(d, kul::Dir::JOIN(name, "__unknown__")), name, module));
       };
       std::string version(resolveSCMBranch());
       if (version.empty()) {
