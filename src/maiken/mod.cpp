@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-kul::File maiken::ModuleLoader::FIND(Application &ap)
+kul::File maiken::ModuleLoader::FIND(Application& ap)
 #ifndef _MKN_DISABLE_MODULES_
     KTHROW(kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_
@@ -42,20 +42,20 @@ kul::File maiken::ModuleLoader::FIND(Application &ap)
   std::string file;
   std::vector<kul::File> files;
   if (ap.buildDir())
-    for (const auto &f : ap.buildDir().files(0)) files.emplace_back(f.real());
+    for (auto const& f : ap.buildDir().files(0)) files.emplace_back(f.real());
   else {
     if (!ap.libraries().empty() && !ap.libraryPaths().empty()) {
-      for (const auto &path : ap.libraryPaths())
-        for (const auto &f : kul::Dir(path).files(0)) files.emplace_back(f.real());
+      for (auto const& path : ap.libraryPaths())
+        for (auto const& f : kul::Dir(path).files(0)) files.emplace_back(f.real());
     }
   }
   if (files.empty() && !ap.sources().empty()) {
     ap.process();
     if (ap.buildDir())
-      for (const auto &f : ap.buildDir().files(0)) files.emplace_back(f.real());
+      for (auto const& f : ap.buildDir().files(0)) files.emplace_back(f.real());
   }
-  for (const auto &f : files) {
-    const auto &name(f.name());
+  for (auto const& f : files) {
+    auto const& name(f.name());
     if (name.find(".") != std::string::npos &&
         name.find(ap.project().root()["name"].Scalar()) != std::string::npos
 #ifdef _WIN32
@@ -75,14 +75,14 @@ kul::File maiken::ModuleLoader::FIND(Application &ap)
   return lib;
 }
 
-std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(Application &ap)
+std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(Application& ap)
 #ifndef _MKN_DISABLE_MODULES_
     KTHROW(kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_
 {
-  std::function<void(Application & ap)> global_load = [&](Application &ap) {
+  std::function<void(Application & ap)> global_load = [&](Application& ap) {
     for (auto dep = ap.dependencies().rbegin(); dep != ap.dependencies().rend(); ++dep) {
-      auto &dap = (**dep);
+      auto& dap = (**dep);
       if (!dap.sources().empty()) GlobalModules::INSTANCE().load(dap);
       global_load(dap);
     }

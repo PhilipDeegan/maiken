@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 class Runner : public Constants {
  public:
-  static void RUN(const Application &a, std::string bin, const std::string buildDir,
+  static void RUN(Application const& a, std::string bin, std::string const buildDir,
                   compiler::Mode m, bool dbg = 0) {
     kul::File f(bin, buildDir);
     if (!f) KEXIT(1, "binary does not exist \n" + f.full());
@@ -62,18 +62,18 @@ class Runner : public Constants {
       p = std::make_unique<kul::Process>(f.escm());
 
     if (AppVars::INSTANCE().runArgs().size()) {
-      for (const auto &s : kul::cli::asArgs(AppVars::INSTANCE().runArgs())) p->arg(s);
+      for (auto const& s : kul::cli::asArgs(AppVars::INSTANCE().runArgs())) p->arg(s);
     } else {
-      const auto &cmds = AppVars::INSTANCE().commands();
+      auto const& cmds = AppVars::INSTANCE().commands();
       if (!cmds.count(STR_BUILD) && !cmds.count(STR_COMPILE)) {
-        for (const auto &s : kul::cli::asArgs(AppVars::INSTANCE().args())) p->arg(s);
+        for (auto const& s : kul::cli::asArgs(AppVars::INSTANCE().args())) p->arg(s);
       }
     }
 
     std::vector<std::pair<std::string, std::string> > envies;
     if (m != compiler::Mode::STAT) {
       std::string arg;
-      for (const auto &s : a.libraryPaths()) arg += s + kul::env::SEP();
+      for (auto const& s : a.libraryPaths()) arg += s + kul::env::SEP();
       if (!arg.empty()) arg.pop_back();
 #if _MKN_DISABLE_RUN_LIB_PATH_HANDLING_ == 0
 #if defined(__APPLE__)
@@ -90,13 +90,13 @@ class Runner : public Constants {
       envies.push_back(std::make_pair(pa.name(), pa.toString()));
 #endif  // _MKN_DISABLE_RUN_LIB_PATH_HANDLING_
     }
-    for (const auto &ev : envies) {
+    for (auto const& ev : envies) {
       p->var(ev.first,
              kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
     }
-    for (const auto &ev : AppVars::INSTANCE().envVars()) {
+    for (auto const& ev : AppVars::INSTANCE().envVars()) {
       auto it = std::find_if(envies.begin(), envies.end(),
-                             [&ev](const std::pair<std::string, std::string> &element) {
+                             [&ev](std::pair<std::string, std::string> const& element) {
                                return element.first == ev.first;
                              });
       if (it == envies.end())
@@ -113,7 +113,7 @@ void maiken::Application::test() {
   kul::os::PushDir pushd(this->project().dir());
   kul::Dir testsD(buildDir().join("test"));
   if (testsD) {
-    for (const auto &file : testsD.files()) {
+    for (auto const& file : testsD.files()) {
       if (file) {
 #ifdef _WIN32
         if (file.name().rfind(".exe") == std::string::npos) continue;
@@ -128,7 +128,7 @@ void maiken::Application::test() {
 void maiken::Application::run(bool dbg) {
   if (!main_) return;
   std::string bin;
-  for (const auto &file : buildDir().files(false)) {
+  for (auto const& file : buildDir().files(false)) {
     bin = file.name();
 #if defined(_WIN32)
     if (bin.rfind(".exe") == std::string::npos) continue;

@@ -31,22 +31,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
-    const std::pair<maiken::Source, std::string> &p) const KTHROW(kul::Exception) {
-  const std::string src(p.first.in()), obj(p.second);
-  const std::string &fileType = src.substr(src.rfind(".") + 1);
+    std::pair<maiken::Source, std::string> const& p) const KTHROW(kul::Exception) {
+  std::string const src(p.first.in()), obj(p.second);
+  std::string const& fileType = src.substr(src.rfind(".") + 1);
   if (!(app.files().count(fileType))) KEXCEPTION("NOOOOOOO ") << fileType;
-  const std::string &compiler = (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
-  const std::string &base = maiken::Compilers::INSTANCE().base(compiler);
+  std::string const& compiler = (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
+  std::string const& base = maiken::Compilers::INSTANCE().base(compiler);
   std::vector<std::string> args;
   if (app.arguments().count(fileType) > 0)
-    for (const std::string &o : (*app.arguments().find(fileType)).second)
-      for (const auto &s : kul::cli::asArgs(o)) args.push_back(s);
-  for (const auto &s : kul::cli::asArgs(app.arg)) args.push_back(s);
+    for (std::string const& o : (*app.arguments().find(fileType)).second)
+      for (auto const& s : kul::cli::asArgs(o)) args.push_back(s);
+  for (auto const& s : kul::cli::asArgs(app.arg)) args.push_back(s);
   if (app.cArg.count(base))
-    for (const auto &s : kul::cli::asArgs(app.cArg[base])) args.push_back(s);
+    for (auto const& s : kul::cli::asArgs(app.cArg[base])) args.push_back(s);
   // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
-  auto compilerFlags = [&args](std::string const &as) {
-    for (const auto &s : kul::cli::asArgs(as)) args.push_back(s);
+  auto compilerFlags = [&args](std::string const& as) {
+    for (auto const& s : kul::cli::asArgs(as)) args.push_back(s);
   };
   if (AppVars::INSTANCE().jargs().count(fileType) > 0)
     compilerFlags((*AppVars::INSTANCE().jargs().find(fileType)).second);
@@ -60,10 +60,9 @@ maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
                          AppVars::INSTANCE().dryRun());
 }
 
-
 std::string maiken::CompilationUnit::compileString() const KTHROW(kul::Exception) {
   kul::os::PushDir pushd(app.project().dir());
-  CompileDAO dao{app, compiler, in, out, args, incs, mode, /*dryRun=*/ true};
+  CompileDAO dao{app, compiler, in, out, args, incs, mode, /*dryRun=*/true};
   return comp->compileSource(dao).cmd();
 }
 
@@ -74,7 +73,7 @@ maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const KTHROW(k
     CompileDAO dao{app, compiler, in, out, args, incs, mode, dryRun};
 
     return comp->compileSource(dao);
-  } catch (const std::exception &e) {
+  } catch (const std::exception& e) {
     std::rethrow_exception(std::current_exception());
   }
 }

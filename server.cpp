@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define bzero ZeroMemory
 #endif
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   kul::Signal sig;
   int exit_code = 0;
   try {
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     Args args({}, {Arg('d', maiken::Constants::STR_DIR, ArgType::STRING)});
     try {
       args.process(argc, argv);
-    } catch (const kul::cli::Exception &e) {
+    } catch (const kul::cli::Exception& e) {
       KEXIT(1, e.what());
     }
     if (args.has(maiken::Constants::STR_DIR)) {
@@ -58,15 +58,15 @@ int main(int argc, char *argv[]) {
       exit(2);
     });
     thread.join();
-  } catch (const kul::Exit &e) {
+  } catch (kul::Exit const& e) {
     if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e;
     exit_code = e.code();
-  } catch (const kul::proc::ExitException &e) {
+  } catch (const kul::proc::ExitException& e) {
     exit_code = e.code();
-  } catch (const kul::Exception &e) {
+  } catch (kul::Exception const& e) {
     KERR << e.stack();
     exit_code = 2;
-  } catch (const std::exception &e) {
+  } catch (const std::exception& e) {
     KERR << e.what();
     exit_code = 3;
   }

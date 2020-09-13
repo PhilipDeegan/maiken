@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-maiken::cpp::WINCompiler::WINCompiler(const int &v) : CCompiler(v) {
+maiken::cpp::WINCompiler::WINCompiler(int const& v) : CCompiler(v) {
   m_optimise_c.insert({{0, "-Od"},
                        {1, "-O1"},
                        {2, "-O2"},
@@ -79,18 +79,18 @@ maiken::cpp::WINCompiler::WINCompiler(const int &v) : CCompiler(v) {
                    {9, "-Wall"}});
 }
 
-maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(LinkDAO &dao) const
+maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(LinkDAO& dao) const
     KTHROW(kul::Exception) {
-  auto &app = dao.app;
+  auto& app = dao.app;
   auto &objects = dao.objects, &libs = dao.libs, &libPaths = dao.libPaths;
-  auto &dryRun = dao.dryRun;
+  auto& dryRun = dao.dryRun;
   auto &linker = dao.linker, &linkerEnd = dao.linkerEnd, &out = dao.out;
 
   std::vector<std::string> fobjects;
   kul::hash::set::String dirs;
-  for (auto const &d : dao.stars) {
+  for (auto const& d : dao.stars) {
     dirs.insert(d.real());
-    for (auto const &f : d.files()) fobjects.emplace_back(f.escm());
+    for (auto const& f : d.files()) fobjects.emplace_back(f.escm());
   }
 
   std::string exe = out + ".exe";
@@ -104,16 +104,16 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(LinkDAO
   kul::Process p(cmd);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-OUT:\"" + exe + "\"").arg("-nologo");
-  for (std::string const &path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
-  for (std::string const &d : dirs) p.arg(kul::File(oStar(), d).escm());
-  for (std::string const &o : objects) p << kul::File(o).escm();
-  for (std::string const &lib : libs) p.arg(staticLib(lib));
-  for (std::string const &s : kul::cli::asArgs(linkerEnd)) p.arg(s);
+  for (std::string const& path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
+  for (std::string const& d : dirs) p.arg(kul::File(oStar(), d).escm());
+  for (std::string const& o : objects) p << kul::File(o).escm();
+  for (std::string const& lib : libs) p.arg(staticLib(lib));
+  for (std::string const& s : kul::cli::asArgs(linkerEnd)) p.arg(s);
 
   CompilerProcessCapture pc;
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const kul::proc::Exception &e) {
+  } catch (const kul::proc::Exception& e) {
     pc.exception(std::current_exception());
   }
   pc.file(exe);
@@ -121,21 +121,21 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(LinkDAO
   return pc;
 }
 
-maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(LinkDAO &dao) const
+maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(LinkDAO& dao) const
     KTHROW(kul::Exception) {
-  auto &app = dao.app;
+  auto& app = dao.app;
   auto &objects = dao.objects, &libs = dao.libs, &libPaths = dao.libPaths;
-  auto &dryRun = dao.dryRun;
+  auto& dryRun = dao.dryRun;
   auto &linker = dao.linker, &linkerEnd = dao.linkerEnd;
-  auto &mode = dao.mode;
+  auto& mode = dao.mode;
 
   kul::File out(dao.out);
 
   std::vector<std::string> fobjects;
   kul::hash::set::String dirs;
-  for (auto const &d : dao.stars) {
+  for (auto const& d : dao.stars) {
     dirs.insert(d.real());
-    for (auto const &f : d.files()) fobjects.emplace_back(f.escm());
+    for (auto const& f : d.files()) fobjects.emplace_back(f.escm());
   }
 
   std::string lib = out.dir().join(sharedLib(app, out.name()));
@@ -155,16 +155,16 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(LinkDAO &d
   p.arg("-OUT:\"" + lib + "\"");
   if (mode == compiler::Mode::SHAR) {
     p.arg("-IMPLIB:\"" + imp + "\"").arg("-DLL");
-    for (std::string const &path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
-    for (std::string const &lib : libs) p.arg(staticLib(lib));
+    for (std::string const& path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
+    for (std::string const& lib : libs) p.arg(staticLib(lib));
   }
-  for (std::string const &d : dirs) p.arg(kul::File(oStar(), d).escm());
-  for (std::string const &o : objects) p << kul::File(o).escm();
-  for (std::string const &s : kul::cli::asArgs(linkerEnd)) p.arg(s);
+  for (std::string const& d : dirs) p.arg(kul::File(oStar(), d).escm());
+  for (std::string const& o : objects) p << kul::File(o).escm();
+  for (std::string const& s : kul::cli::asArgs(linkerEnd)) p.arg(s);
   CompilerProcessCapture pc;
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const kul::proc::Exception &e) {
+  } catch (const kul::proc::Exception& e) {
     pc.exception(std::current_exception());
   }
   pc.file(lib);
@@ -172,14 +172,14 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(LinkDAO &d
   return pc;
 }
 
-maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(CompileDAO &dao) const
+maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(CompileDAO& dao) const
     KTHROW(kul::Exception) {
-  auto &app = dao.app;
+  auto& app = dao.app;
   auto &compiler = dao.compiler, &in = dao.in, &out = dao.out;
   auto &args = dao.args, &incs = dao.incs;
-  auto &dryRun = dao.dryRun;
+  auto& dryRun = dao.dryRun;
 
-  const std::string fileType = in.substr(in.rfind(".") + 1);
+  std::string const fileType = in.substr(in.rfind(".") + 1);
 
   std::string cmd;
   if (kul::String::NO_CASE_CMP(fileType, "c"))
@@ -195,16 +195,16 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(CompileDA
   kul::Process p(cmd);
   for (size_t i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-nologo");
-  for (const auto &def : app.defines()) p << std::string("-D" + def);
-  for (std::string const &s : incs) p.arg("-I\"" + s + "\"");
-  for (std::string const &s : args) p.arg(s);
+  for (auto const& def : app.defines()) p << std::string("-D" + def);
+  for (std::string const& s : incs) p.arg("-I\"" + s + "\"");
+  for (std::string const& s : args) p.arg(s);
   p.arg("-c").arg("-Fo\"" + out + "\"").arg("\"" + in + "\"");
   CompilerProcessCapture pc;
   if (!kul::LogMan::INSTANCE().inf()) pc.setProcess(p);
 
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const kul::Exception &e) {
+  } catch (kul::Exception const& e) {
     pc.exception(std::current_exception());
   }
   pc.file(out);

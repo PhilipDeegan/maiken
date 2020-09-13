@@ -40,28 +40,28 @@ maiken::Compilers::Compilers() {
 
   wincs = make_unique<csharp::WINCompiler>();
 
-  cs.insert(std::pair<std::string, Compiler *>("cl", winc.get()));
-  cs.insert(std::pair<std::string, Compiler *>("csc", wincs.get()));
+  cs.insert(std::pair<std::string, Compiler*>("cl", winc.get()));
+  cs.insert(std::pair<std::string, Compiler*>("csc", wincs.get()));
 
-  cs.insert(std::pair<std::string, Compiler *>("clang", clang.get()));
-  cs.insert(std::pair<std::string, Compiler *>("clang++", clang.get()));
+  cs.insert(std::pair<std::string, Compiler*>("clang", clang.get()));
+  cs.insert(std::pair<std::string, Compiler*>("clang++", clang.get()));
 
-  cs.insert(std::pair<std::string, Compiler *>("gcc", gcc.get()));
-  cs.insert(std::pair<std::string, Compiler *>("g++", gcc.get()));
+  cs.insert(std::pair<std::string, Compiler*>("gcc", gcc.get()));
+  cs.insert(std::pair<std::string, Compiler*>("g++", gcc.get()));
 
-  cs.insert(std::pair<std::string, Compiler *>("hcc", hcc.get()));
+  cs.insert(std::pair<std::string, Compiler*>("hcc", hcc.get()));
 
-  cs.insert(std::pair<std::string, Compiler *>("icc", intel.get()));
-  cs.insert(std::pair<std::string, Compiler *>("icpc", intel.get()));
+  cs.insert(std::pair<std::string, Compiler*>("icc", intel.get()));
+  cs.insert(std::pair<std::string, Compiler*>("icpc", intel.get()));
 
-  cs.insert(std::pair<std::string, Compiler *>("nvcc", gcc.get()));
+  cs.insert(std::pair<std::string, Compiler*>("nvcc", gcc.get()));
 }
 
-std::string maiken::Compilers::key(std::string comp, const kul::hash::map::S2T<Compiler *> &map) {
+std::string maiken::Compilers::key(std::string comp, const kul::hash::map::S2T<Compiler*>& map) {
   kul::String::REPLACE_ALL(comp, ".exe", "");
   if (map.count(comp) > 0) return comp;
   if (comp.find(" ") != std::string::npos)
-    for (const std::string &s : kul::String::SPLIT(comp, ' ')) {
+    for (std::string const& s : kul::String::SPLIT(comp, ' ')) {
       if (map.count(s) > 0) return s;
       if (std::string(kul::Dir(s).locl()).find(kul::Dir::SEP()) != std::string::npos)
         if (map.count(s.substr(s.rfind(kul::Dir::SEP()) + 1)))

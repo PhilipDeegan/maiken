@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/dist.hpp"
 
 std::unique_ptr<maiken::dist::SetupRequest> maiken::dist::RemoteCommandManager::build_setup_query(
-    const maiken::Application &a, const kul::cli::Args &args) {
+    maiken::Application const& a, kul::cli::Args const& args) {
   kul::os::PushDir pushd(a.project().dir());
   YAML::Node root;
   root["project"] = a.project().root()["name"].Scalar();
@@ -64,8 +64,8 @@ std::unique_ptr<maiken::dist::SetupRequest> maiken::dist::RemoteCommandManager::
 
 std::unique_ptr<maiken::dist::CompileRequest>
 maiken::dist::RemoteCommandManager::build_compile_request(
-    const std::string &directory,
-    const std::vector<std::pair<std::string, std::string>> &src_objs) {
+    std::string const& directory,
+    const std::vector<std::pair<std::string, std::string>>& src_objs) {
   return std::make_unique<maiken::dist::CompileRequest>(directory, src_objs);
 }
 
@@ -75,7 +75,7 @@ maiken::dist::RemoteCommandManager::build_download_request() {
 }
 
 std::unique_ptr<maiken::dist::LinkRequest> maiken::dist::RemoteCommandManager::build_link_request(
-    const std::string &b) {
+    std::string const& b) {
   return std::make_unique<maiken::dist::LinkRequest>(b);
 }
 

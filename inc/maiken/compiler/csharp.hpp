@@ -38,26 +38,26 @@ namespace csharp {
 
 class Exception : public kul::Exception {
  public:
-  Exception(const char *f, const int l, std::string s) : kul::Exception(f, l, s) {}
+  Exception(char const* f, int const l, std::string s) : kul::Exception(f, l, s) {}
 };
 
 class WINCompiler : public Compiler {
  public:
-  WINCompiler(const int &v = 0) : Compiler(v) {}
+  WINCompiler(int const& v = 0) : Compiler(v) {}
   virtual ~WINCompiler() {}
 
   bool sourceIsBin() const override { return true; }
 
-  CompilerProcessCapture compileSource(CompileDAO &) const override {
+  CompilerProcessCapture compileSource(CompileDAO&) const override {
     KEXCEPTION("Method compileSource is not implemented in C Sharp");
   }
 
-  CompilerProcessCapture buildExecutable(LinkDAO &dao) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture buildExecutable(LinkDAO& dao) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture buildLibrary(LinkDAO &dao) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture buildLibrary(LinkDAO& dao) const KTHROW(kul::Exception) override;
 
-  virtual void preCompileHeader(const std::vector<std::string> &, const std::vector<std::string> &,
-                                std::string const &, std::string const &, bool = false) const
+  void preCompileHeader(std::vector<std::string> const&, std::vector<std::string> const&,
+                                std::string const&, std::string const&, bool = false) const
       KTHROW(kul::Exception) override {
     KEXCEPTION("Method preCompileHeader is not implemented in C Sharp");
   }

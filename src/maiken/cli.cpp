@@ -30,11 +30,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/github.hpp"
 
-void maiken::Application::addCLIArgs(const kul::cli::Args &args) {
-  auto addIncsOrPaths = [&args](Application &a) {
-    auto splitPathAndCheck = [](const std::string &path, const std::string &type) {
-      const auto v(kul::String::SPLIT(path, kul::env::SEP()));
-      for (const auto s : v) {
+void maiken::Application::addCLIArgs(kul::cli::Args const& args) {
+  auto addIncsOrPaths = [&args](Application& a) {
+    auto splitPathAndCheck = [](std::string const& path, std::string const& type) {
+      auto const v(kul::String::SPLIT(path, kul::env::SEP()));
+      for (auto const s : v) {
         kul::Dir d(s);
         if (!d) KEXIT(1, type + " directory does not exist: ") << s;
       }
@@ -42,19 +42,19 @@ void maiken::Application::addCLIArgs(const kul::cli::Args &args) {
     };
 
     if (args.has(STR_FINC))
-      for (const auto &s : splitPathAndCheck(args.get(STR_FINC), "front include"))
+      for (auto const& s : splitPathAndCheck(args.get(STR_FINC), "front include"))
         a.incs.insert(a.incs.begin(), std::make_pair(s, true));
     if (args.has(STR_BINC))
-      for (const auto &s : splitPathAndCheck(args.get(STR_BINC), "back include"))
+      for (auto const& s : splitPathAndCheck(args.get(STR_BINC), "back include"))
         a.incs.push_back(std::make_pair(s, true));
     if (args.has(STR_FPATH))
-      for (const auto &s : splitPathAndCheck(args.get(STR_FPATH), "front path"))
+      for (auto const& s : splitPathAndCheck(args.get(STR_FPATH), "front path"))
         a.paths.insert(a.paths.begin(), s);
     if (args.has(STR_BPATH))
-      for (const auto &s : splitPathAndCheck(args.get(STR_BPATH), "back path"))
+      for (auto const& s : splitPathAndCheck(args.get(STR_BPATH), "back path"))
         a.paths.push_back(s);
   };
 
   addIncsOrPaths(*this);
-  for (auto *d : deps) addIncsOrPaths(*d);
+  for (auto* d : deps) addIncsOrPaths(*d);
 }

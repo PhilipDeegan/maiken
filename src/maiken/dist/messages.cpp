@@ -32,9 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/dist.hpp"
 
-void maiken::dist::SetupRequest::do_response_for(const kul::http::A1_1Request &req,
-                                                 Sessions &sessions,
-                                                 kul::http::_1_1Response &resp) {
+void maiken::dist::SetupRequest::do_response_for(const kul::http::A1_1Request& req,
+                                                 Sessions& sessions,
+                                                 kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD 41");  // resp.withBody("FAILUIRE");
   auto session_id = (*req.headers().find("session")).second;
 
@@ -56,9 +56,9 @@ void maiken::dist::SetupRequest::do_response_for(const kul::http::A1_1Request &r
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::CompileRequest::do_response_for(const kul::http::A1_1Request &req,
-                                                   Sessions &sessions,
-                                                   kul::http::_1_1Response &resp) {
+void maiken::dist::CompileRequest::do_response_for(const kul::http::A1_1Request& req,
+                                                   Sessions& sessions,
+                                                   kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD CompileRequest");
   auto session_id = (*req.headers().find("session")).second;
 
@@ -83,8 +83,8 @@ void maiken::dist::CompileRequest::do_response_for(const kul::http::A1_1Request 
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::LinkRequest::do_response_for(const kul::http::A1_1Request &req,
-                                                Sessions &sessions, kul::http::_1_1Response &resp) {
+void maiken::dist::LinkRequest::do_response_for(const kul::http::A1_1Request& req,
+                                                Sessions& sessions, kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD LinkRequest");
   auto session_id = (*req.headers().find("session")).second;
 
@@ -101,7 +101,7 @@ void maiken::dist::LinkRequest::do_response_for(const kul::http::A1_1Request &re
     sessions[session_id].binary_writer = std::make_unique<kul::io::BinaryWriter>(obj);
   }
 
-  kul::io::BinaryWriter &bw(*sessions[session_id].binary_writer.get());
+  kul::io::BinaryWriter& bw(*sessions[session_id].binary_writer.get());
   bw.write(b.c1, b.len);
   if (b.last_packet) sessions[session_id].binary_writer.reset();
 
@@ -118,16 +118,16 @@ void maiken::dist::LinkRequest::do_response_for(const kul::http::A1_1Request &re
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::DownloadRequest::do_response_for(const kul::http::A1_1Request &req,
-                                                    Sessions &sessions,
-                                                    kul::http::_1_1Response &resp) {
+void maiken::dist::DownloadRequest::do_response_for(const kul::http::A1_1Request& req,
+                                                    Sessions& sessions,
+                                                    kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD DownloadRequest");
   auto session_id = (*req.headers().find("session")).second;
 
-  auto &src_obj = sessions[session_id].m_src_obj;
+  auto& src_obj = sessions[session_id].m_src_obj;
   if (!sessions[session_id].binary_reader) {
     if (!src_obj.empty()) {
-      auto &pair = src_obj[0];
+      auto& pair = src_obj[0];
       kul::File bin(pair.second);
       sessions[session_id].binary_reader = std::make_unique<kul::io::BinaryReader>(bin);
     }
@@ -137,7 +137,7 @@ void maiken::dist::DownloadRequest::do_response_for(const kul::http::A1_1Request
   b.files_left = src_obj.size();
   bzero(b.c1, BUFF_SIZE);
   b.file = src_obj[0].second;
-  auto &br(*sessions[session_id].binary_reader.get());
+  auto& br(*sessions[session_id].binary_reader.get());
   size_t red = b.len = br.read(b.c1, BUFF_SIZE);
   if (red == 0) {
     src_obj.erase(src_obj.begin());

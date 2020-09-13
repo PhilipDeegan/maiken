@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-maiken::Application::Application(const maiken::Project &proj, const std::string &profile)
+maiken::Application::Application(maiken::Project const& proj, std::string const& profile)
     : m(compiler::Mode::NONE), p(profile), proj(proj) {
   ps["MKN_ROOT"] = proj.dir().real();
 }
@@ -40,22 +40,22 @@ maiken::Application::~Application() {
 }
 
 void maiken::Application::resolveLang() KTHROW(maiken::Exception) {
-  const auto &mains(inactiveMains());
+  auto const& mains(inactiveMains());
   if (mains.size())
     lang = (*mains.begin()).substr((*mains.begin()).rfind(".") + 1);
   else if (sources().size()) {
-    const auto srcMM = sourceMap();
+    auto const srcMM = sourceMap();
     std::string maxS;
     kul::hash::map::S2T<size_t> mapS;
     size_t maxI = 0, maxO = 0;
-    for (const auto &ft : srcMM) mapS.insert(ft.first, 0);
-    for (const auto &ft : srcMM) mapS[ft.first] = mapS[ft.first] + ft.second.size();
-    for (const auto &s_i : mapS)
+    for (auto const& ft : srcMM) mapS.insert(ft.first, 0);
+    for (auto const& ft : srcMM) mapS[ft.first] = mapS[ft.first] + ft.second.size();
+    for (auto const& s_i : mapS)
       if (s_i.second > maxI) {
         maxI = s_i.second;
         maxS = s_i.first;
       }
-    for (const auto s_i : mapS)
+    for (auto const s_i : mapS)
       if (s_i.second == maxI) maxO++;
     if (maxO > 1)
       KEXCEPSTREAM << "file type conflict: linker filetype cannot be deduced, "
@@ -70,7 +70,7 @@ kul::hash::set::String maiken::Application::inactiveMains() const {
   std::string p;
   try {
     if (main_) p = kul::Dir::REAL(main_->in());
-  } catch (const kul::Exception &e) {
+  } catch (kul::Exception const& e) {
   }
   std::string f;
   try {
@@ -78,48 +78,48 @@ kul::hash::set::String maiken::Application::inactiveMains() const {
       f = kul::Dir::REAL(project().root()[STR_MAIN].Scalar());
       if (p.compare(f) != 0) iMs.insert(f);
     }
-  } catch (const kul::Exception &e) {
+  } catch (kul::Exception const& e) {
   }
-  for (const YAML::Node &c : project().root()[STR_PROFILE]) {
+  for (YAML::Node const& c : project().root()[STR_PROFILE]) {
     try {
       if (c[STR_MAIN]) {
         f = kul::Dir::REAL(c[STR_MAIN].Scalar());
         if (p.compare(f) != 0) iMs.insert(f);
       }
-    } catch (const kul::Exception &e) {
+    } catch (kul::Exception const& e) {
     }
   }
   return iMs;
 }
 
-void maiken::Application::populateMaps(const YAML::Node &n) KTHROW(kul::Exception) {
+void maiken::Application::populateMaps(YAML::Node const& n) KTHROW(kul::Exception) {
   if (n[STR_ENV]) {
     if (n[STR_ENV].IsScalar())
       evs.emplace_back(PARSE_ENV_NODE(n[STR_ENV], this));
     else
-      for (const auto &c : n[STR_ENV]) evs.emplace_back(PARSE_ENV_NODE(c, this));
+      for (auto const& c : n[STR_ENV]) evs.emplace_back(PARSE_ENV_NODE(c, this));
   }
 
   if (n[STR_ARG])
-    for (const auto &o : kul::String::LINES(n[STR_ARG].Scalar()))
+    for (auto const& o : kul::String::LINES(n[STR_ARG].Scalar()))
       arg += Properties::RESOLVE(*this, o) + " ";
   if (n[STR_LINK])
-    for (const auto &o : kul::String::LINES(n[STR_LINK].Scalar()))
+    for (auto const& o : kul::String::LINES(n[STR_LINK].Scalar()))
       lnk += Properties::RESOLVE(*this, o) + " ";
   try {
     if (n[STR_INC])
-      for (const auto &o : kul::String::LINES(n[STR_INC].Scalar())) addIncludeLine(o);
-  } catch (const kul::StringException &) {
+      for (auto const& o : kul::String::LINES(n[STR_INC].Scalar())) addIncludeLine(o);
+  } catch (const kul::StringException&) {
     KEXIT(1, "include contains invalid bool value\n" + project().dir().path());
   }
   try {
     if (n[STR_SRC])
-      for (const auto &o : kul::String::LINES(n[STR_SRC].Scalar())) addSourceLine(o);
-  } catch (const kul::StringException &) {
+      for (auto const& o : kul::String::LINES(n[STR_SRC].Scalar())) addSourceLine(o);
+  } catch (const kul::StringException&) {
     KEXIT(1, "source contains invalid bool value\n" + project().dir().path());
   }
   if (n[STR_PATH])
-    for (const auto &s : kul::String::SPLIT(n[STR_PATH].Scalar(), ' '))
+    for (auto const& s : kul::String::SPLIT(n[STR_PATH].Scalar(), ' '))
       if (s.size()) {
         kul::Dir d(Properties::RESOLVE(*this, s));
         if (d)
@@ -129,33 +129,33 @@ void maiken::Application::populateMaps(const YAML::Node &n) KTHROW(kul::Exceptio
       }
 
   if (n[STR_LIB])
-    for (const auto &s : kul::String::SPLIT(n[STR_LIB].Scalar(), ' '))
+    for (auto const& s : kul::String::SPLIT(n[STR_LIB].Scalar(), ' '))
       if (s.size())
-        for (const auto &S : kul::String::SPLIT(Properties::RESOLVE(*this, s), ' '))
+        for (auto const& S : kul::String::SPLIT(Properties::RESOLVE(*this, s), ' '))
           if (S.size()) libs.push_back(S);
 
-  for (const std::string &s : libraryPaths())
+  for (std::string const& s : libraryPaths())
     if (!kul::Dir(s).is()) KEXIT(1, s + " is not a valid directory\n" + project().dir().path());
 }
 
 void maiken::Application::cyclicCheck(
-    const std::vector<std::pair<std::string, std::string>> &apps) const KTHROW(kul::Exception) {
+    const std::vector<std::pair<std::string, std::string>>& apps) const KTHROW(kul::Exception) {
   if (par) par->cyclicCheck(apps);
-  for (const auto &pa : apps) {
+  for (auto const& pa : apps) {
     if (project().dir() == pa.first && p == pa.second)
       KEXIT(1, "Cyclical dependency found\n" + project().dir().path());
   }
 }
 
-void maiken::Application::addIncludeLine(const std::string &o) KTHROW(kul::Exception) {
+void maiken::Application::addIncludeLine(std::string const& o) KTHROW(kul::Exception) {
   auto add_if_missing = [&](std::pair<std::string, bool> p) {
     auto it = std::find_if(
         incs.begin(), incs.end(),
-        [&](const std::pair<std::string, bool> &element) { return element.first == p.first; });
+        [&](const std::pair<std::string, bool>& element) { return element.first == p.first; });
     if (it == incs.end()) incs.emplace_back(p);
   };
   if (o.find(',') == std::string::npos) {
-    for (const auto &s : kul::cli::asArgs(o))
+    for (auto const& s : kul::cli::asArgs(o))
       if (s.size()) {
         auto str(Properties::RESOLVE(*this, s));
         kul::Dir d(str);
@@ -199,7 +199,7 @@ void maiken::Application::setSuper() {
     try {
       sup = Applications::INSTANCE().getOrCreate(*maiken::Projects::INSTANCE().getOrCreate(d), "");
       sup->resolveProperties();
-    } catch (const std::exception &e) {
+    } catch (const std::exception& e) {
       KLOG(ERR) << e.what();
       KEXIT(1, "Possible super cycle detected: " + project().dir().real());
     }
@@ -209,9 +209,9 @@ void maiken::Application::setSuper() {
         KEXIT(1, "Super cycle detected: " + project().dir().real());
       cycle = cycle->sup;
     }
-    for (const auto &p : sup->properties())
+    for (auto const& p : sup->properties())
       if (!ps.count(p.first)) ps.insert(p.first, p.second);
   }
-  for (const auto &p : Settings::INSTANCE().properties())
+  for (auto const& p : Settings::INSTANCE().properties())
     if (!ps.count(p.first)) ps.insert(p.first, p.second);
 }

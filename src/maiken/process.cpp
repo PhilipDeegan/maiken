@@ -31,22 +31,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 void maiken::Application::process() KTHROW(kul::Exception) {
-  auto const &cmds = CommandStateMachine::INSTANCE().commands();
+  auto const& cmds = CommandStateMachine::INSTANCE().commands();
 
   kul::os::PushDir pushd(this->project().dir());
-  auto loadModules = [&](Application &app) {
+  auto loadModules = [&](Application& app) {
 #ifndef _MKN_DISABLE_MODULES_
     for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod)
       app.mods.push_back(ModuleLoader::LOAD(**mod));
-    for (auto &modLoader : app.mods) modLoader->module()->init(app, app.modInit(modLoader->app()));
+    for (auto& modLoader : app.mods) modLoader->module()->init(app, app.modInit(modLoader->app()));
 #endif  //_MKN_DISABLE_MODULES_
   };
 
-  std::vector<Application *> apps;
-  std::function<void(Application &, bool)> proc_a;
+  std::vector<Application*> apps;
+  std::function<void(Application&, bool)> proc_a;
   std::function<void()> proc_b = []() {};
 
-  proc_a = [&](Application &app, bool work) {
+  proc_a = [&](Application& app, bool work) {
     kul::env::CWD(app.project().dir());
 
     if (work) {
@@ -64,13 +64,13 @@ void maiken::Application::process() KTHROW(kul::Exception) {
 
     kul::hash::set::String objects;
     if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE)) {
-      for (auto &modLoader : app.mods)
+      for (auto& modLoader : app.mods)
         modLoader->module()->compile(app, app.modCompile(modLoader->app()));
       if (work) app.compile(objects);
     }
     if (cmds.count(STR_BUILD) || cmds.count(STR_LINK)) {
       if (work)
-        for (auto &modLoader : app.mods)
+        for (auto& modLoader : app.mods)
           modLoader->module()->link(app, app.modLink(modLoader->app()));
       app.findObjects(objects);
       app.link(objects);
@@ -79,7 +79,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
 
   char beta[] = "MKN_BETA";
   if (kul::env::EXISTS(beta) && std::string(kul::env::GET(beta)) == "1") {
-    proc_a = [&](Application &app, bool work) {
+    proc_a = [&](Application& app, bool work) {
       if (work) {
         if (!app.buildDir()) app.buildDir().mk();
         if (BuildRecorder::INSTANCE().has(app.buildDir().real())) return;
@@ -91,7 +91,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
   }
 
   auto _mods = ModuleMinimiser::modules(*this);
-  for (auto &mod : ModuleMinimiser::modules(*this)) {
+  for (auto& mod : ModuleMinimiser::modules(*this)) {
     bool build = mod.second->is_build_required();
     bool is_build_stale = mod.second->is_build_stale();
     if (!build && (is_build_stale && !maiken::AppVars::INSTANCE().quiet())) {
@@ -105,7 +105,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     if (build) {
       auto is_main = CommandStateMachine::INSTANCE().main();
       CommandStateMachine::INSTANCE().main(0);
-      for (auto &m : _mods) m.second->process();
+      for (auto& m : _mods) m.second->process();
       CommandStateMachine::INSTANCE().main(is_main);
     }
   }
@@ -123,12 +123,12 @@ void maiken::Application::process() KTHROW(kul::Exception) {
   proc_b();
 
   if (cmds.count(STR_TEST)) {
-    for (auto &modLoader : mods) modLoader->module()->test(*this, this->modTest(modLoader->app()));
+    for (auto& modLoader : mods) modLoader->module()->test(*this, this->modTest(modLoader->app()));
     test();
   }
   if (cmds.count(STR_PACK)) {
     pack();
-    for (auto &modLoader : mods) modLoader->module()->pack(*this, this->modPack(modLoader->app()));
+    for (auto& modLoader : mods) modLoader->module()->pack(*this, this->modPack(modLoader->app()));
   }
   if (CommandStateMachine::INSTANCE().main() && (cmds.count(STR_RUN) || cmds.count(STR_DBG)))
     run(cmds.count(STR_DBG));

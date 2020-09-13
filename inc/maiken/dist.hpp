@@ -62,7 +62,7 @@ const constexpr size_t BUFF_SIZE = (_KUL_TCP_READ_BUFFER_ - 666);
 
 class Exception : public kul::Exception {
  public:
-  Exception(const char *f, const uint16_t &l, const std::string &s) : kul::Exception(f, l, s) {}
+  Exception(char const* f, uint16_t const& l, std::string const& s) : kul::Exception(f, l, s) {}
 };
 class RemoteCommandManager;
 class Server;
@@ -70,10 +70,10 @@ class Server;
 
 class DistLinker {
  public:
-  static void send([[maybe_unused]] const kul::File &bin) {
+  static void send([[maybe_unused]] kul::File const& bin) {
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
     std::vector<std::shared_ptr<maiken::dist::Post>> posts;
-    auto post_lambda = [](const dist::Host &host, const kul::File &bin) {
+    auto post_lambda = [](const dist::Host& host, kul::File const& bin) {
       kul::io::BinaryReader br(bin);
       dist::Blob b;
       b.files_left = 1;
@@ -97,10 +97,10 @@ class DistLinker {
       } while (red > 0);
     };
 
-    auto &hosts(maiken::dist::RemoteCommandManager::INST().hosts());
+    auto& hosts(maiken::dist::RemoteCommandManager::INST().hosts());
     size_t threads = hosts.size();
     kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000, 1000);
-    auto post_ex = [&](const kul::Exception &e) {
+    auto post_ex = [&](kul::Exception const& e) {
       ctp.stop().interrupt();
       throw e;
     };
@@ -129,9 +129,9 @@ class Host {
 
  public:
   Host(std::string host, uint16_t port) : m_port(port), m_host(host) {}
-  const std::string &host() const { return m_host; }
-  const uint16_t &port() const { return m_port; }
-  const std::string session_id() const {
+  std::string const& host() const { return m_host; }
+  uint16_t const& port() const { return m_port; }
+  std::string const session_id() const {
     std::stringstream ss;
     ss << std::hex << m_host << this;
     return ss.str();
@@ -144,29 +144,29 @@ class Post {
 
  public:
   ~Post() {}
-  explicit Post(ARequest *_msg) : msg(std::unique_ptr<ARequest>(_msg)) {}
+  explicit Post(ARequest* _msg) : msg(std::unique_ptr<ARequest>(_msg)) {}
 
   explicit Post(std::unique_ptr<ARequest> _msg) : msg(std::move(_msg)) {}
-  void send(const Host &host) KTHROW(Exception) {
+  void send(const Host& host) KTHROW(Exception) {
     send(host.host(), "res", host.port(), {{"session", host.session_id()}});
   }
-  void send(const std::string &host, const std::string &res, const uint16_t &port,
+  void send(std::string const& host, std::string const& res, uint16_t const& port,
             const std::unordered_map<std::string, std::string> headers = {{}})
       KTHROW(maiken::Exception);
-  ARequest *message() { return msg.get(); }
+  ARequest* message() { return msg.get(); }
 
-  const std::string &body() { return _body; }
+  std::string const& body() { return _body; }
 
   void release() { msg.release(); }
 
  private:
   Post() {}
-  Post(const Post &) = delete;
-  Post(const Post &&) = delete;
-  Post &operator=(const Post &) = delete;
-  Post &operator=(const Post &&) = delete;
+  Post(const Post&) = delete;
+  Post(const Post&&) = delete;
+  Post& operator=(const Post&) = delete;
+  Post& operator=(const Post&&) = delete;
   template <class Archive>
-  void serialize(Archive &ar) {
+  void serialize(Archive& ar) {
     ar(::cereal::make_nvp("msg", msg));
   }
 
@@ -177,32 +177,32 @@ class Post {
 
 class RemoteCommandManager {
  public:
-  static RemoteCommandManager &INST() {
+  static RemoteCommandManager& INST() {
     static RemoteCommandManager inst;
     return inst;
   }
 
-  std::unique_ptr<SetupRequest> build_setup_query(const maiken::Application &a,
-                                                  const kul::cli::Args &args);
+  std::unique_ptr<SetupRequest> build_setup_query(maiken::Application const& a,
+                                                  kul::cli::Args const& args);
 
   std::unique_ptr<CompileRequest> build_compile_request(
-      const std::string &directory,
-      const std::vector<std::pair<std::string, std::string>> &src_obj);
+      std::string const& directory,
+      const std::vector<std::pair<std::string, std::string>>& src_obj);
 
   std::unique_ptr<DownloadRequest> build_download_request();
 
-  std::unique_ptr<LinkRequest> build_link_request(const std::string &b);
+  std::unique_ptr<LinkRequest> build_link_request(std::string const& b);
 
-  void build_hosts(const Settings &settings) KTHROW(kul::Exception) {
+  void build_hosts(const Settings& settings) KTHROW(kul::Exception) {
     if (settings.root()["dist"]) {
       if (settings.root()["dist"]["nodes"]) {
-        for (const auto &node : settings.root()["dist"]["nodes"]) {
+        for (auto const& node : settings.root()["dist"]["nodes"]) {
           m_hosts.emplace_back(node["host"].Scalar(), kul::String::UINT16(node["port"].Scalar()));
         }
       }
     }
   }
-  const std::vector<Host> &hosts() const { return m_hosts; }
+  const std::vector<Host>& hosts() const { return m_hosts; }
 
  private:
   std::vector<Host> m_hosts;

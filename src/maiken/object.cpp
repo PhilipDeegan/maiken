@@ -30,8 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::findObjects(kul::hash::set::String &objects) const {
-  for (const auto &ft : sourceMap()) {
+void maiken::Application::findObjects(kul::hash::set::String& objects) const {
+  for (auto const& ft : sourceMap()) {
     try {
       if (!(*files().find(ft.first)).second.count(STR_COMPILER))
         KEXIT(1, "No compiler found for filetype " + ft.first);
@@ -43,15 +43,15 @@ void maiken::Application::findObjects(kul::hash::set::String &objects) const {
         if (!buildDir().is())
           KEXCEPT(maiken::Exception, "No object directory found.\n" + project().dir().path());
         std::string const oType = "." + AppVars::INSTANCE().envVars().at("MKN_OBJ");
-        for (const kul::File f : objDir.files(true)) {
+        for (kul::File const f : objDir.files(true)) {
           auto file = f.mini();
           if (file.rfind(oType) == file.size() - oType.size()) objects.insert(file);
         }
       } else {
-        for (const auto &kv : ft.second)
-          for (const auto &f : kv.second) objects.insert(kul::File(f.in()).mini());
+        for (auto const& kv : ft.second)
+          for (auto const& f : kv.second) objects.insert(kul::File(f.in()).mini());
       }
-    } catch (const CompilerNotFoundException &e) {
+    } catch (CompilerNotFoundException const& e) {
       KEXIT(1, "No compiler found for filetype " + ft.first);
     }
   }

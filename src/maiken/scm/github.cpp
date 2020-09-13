@@ -32,14 +32,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef _MKN_WITH_MKN_RAM_
 
-bool maiken::Github::GET_DEFAULT_BRANCH(std::string const &owner, std::string const &repo,
-                                        std::string &branch) {
+bool maiken::Github::GET_DEFAULT_BRANCH(std::string const& owner, std::string const& repo,
+                                        std::string& branch) {
   bool b = 0;
   std::stringstream ss;
   ss << "repos/" << owner << "/" << repo;
   kul::https::Get("api.github.com", ss.str())
       .withHeaders({{"User-Agent", "Mozilla not a virus"}, {"Accept", "application/json"}})
-      .withResponse([&b, &branch](const kul::http::Response &r) {
+      .withResponse([&b, &branch](const kul::http::Response& r) {
         if (r.status() == 200) {
           kul::yaml::String yaml(r.body());
           KLOG(OTH) << "Github API default branch response: " << r.body();
@@ -53,14 +53,14 @@ bool maiken::Github::GET_DEFAULT_BRANCH(std::string const &owner, std::string co
   return b;
 }
 
-bool maiken::Github::GET_LATEST_RELEASE(std::string const &owner, std::string const &repo,
-                                        std::string &branch) {
+bool maiken::Github::GET_LATEST_RELEASE(std::string const& owner, std::string const& repo,
+                                        std::string& branch) {
   bool b = 0;
   std::stringstream ss;
   ss << "repos/" << owner << "/" << repo << "/releases/latest";
   kul::https::Get("api.github.com", ss.str())
       .withHeaders({{"User-Agent", "Mozilla not a virus"}, {"Accept", "application/json"}})
-      .withResponse([&b, &branch](const kul::http::Response &r) {
+      .withResponse([&b, &branch](const kul::http::Response& r) {
         if (r.status() == 200) {
           kul::yaml::String yaml(r.body());
           if (yaml.root()["tag_name"]) {
@@ -73,14 +73,14 @@ bool maiken::Github::GET_LATEST_RELEASE(std::string const &owner, std::string co
   return b;
 }
 
-bool maiken::Github::GET_LATEST_TAG(std::string const &owner, std::string const &repo,
-                                    std::string &branch) {
+bool maiken::Github::GET_LATEST_TAG(std::string const& owner, std::string const& repo,
+                                    std::string& branch) {
   bool b = 0;
   std::stringstream ss;
   ss << "repos/" << owner << "/" << repo << "/git/tags";
   kul::https::Get("api.github.com", ss.str())
       .withHeaders({{"User-Agent", "Mozilla not a virus"}, {"Accept", "application/json"}})
-      .withResponse([&b, &branch](const kul::http::Response &r) {
+      .withResponse([&b, &branch](const kul::http::Response& r) {
         if (r.status() == 200) {
           kul::yaml::String yaml(r.body());
           if (yaml.root().Type() == 3) {
@@ -99,7 +99,7 @@ bool maiken::Github::GET_LATEST_TAG(std::string const &owner, std::string const 
   return b;
 }
 
-bool maiken::Github::GET_LATEST(std::string const &repo, std::string &branch) {
+bool maiken::Github::GET_LATEST(std::string const& repo, std::string& branch) {
 #ifndef _MKN_DISABLE_SCM_
 
   std::vector<std::function<decltype(GET_DEFAULT_BRANCH)>> gets{
@@ -111,8 +111,8 @@ bool maiken::Github::GET_LATEST(std::string const &repo, std::string &branch) {
   if (IS_SOLID(repo))
     repos.push_back(repo);
   else
-    for (std::string const &s : Settings::INSTANCE().remoteRepos()) repos.push_back(s + repo);
-  for (std::string const &s : repos) {
+    for (std::string const& s : Settings::INSTANCE().remoteRepos()) repos.push_back(s + repo);
+  for (std::string const& s : repos) {
     if (s.find("github.com") != std::string::npos) {
       std::string owner = s.substr(s.find("github.com") + 10);
       if (owner[0] != '/' && owner[0] != ':') {
@@ -127,7 +127,7 @@ bool maiken::Github::GET_LATEST(std::string const &repo, std::string &branch) {
         continue;
       }
 
-      for (auto const &order : orders)
+      for (auto const& order : orders)
         if (gets[order](owner, repo, branch)) return 1;
     }
   }

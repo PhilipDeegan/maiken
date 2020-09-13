@@ -56,8 +56,8 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     for (std::size_t i = 0; i < project().root()[STR_PROFILE].size(); i++)
       nodes.push_back(project().root()[STR_PROFILE][i]);
 
-  auto getIfMissing = [&](const YAML::Node &n, const bool mod) {
-    const std::string &cwd(kul::env::CWD());
+  auto getIfMissing = [&](YAML::Node const& n, bool const mod) {
+    std::string const& cwd(kul::env::CWD());
     kul::Dir projectDir(resolveDepOrModDirectory(n, mod));
     if (!projectDir.is()) loadDepOrMod(n, projectDir, mod);
     kul::env::CWD(cwd);
@@ -69,24 +69,24 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
   if (this->ro) modArgs(AppVars::INSTANCE().mods(), mod_nodes, getIfMissing);
   while (c) {
     c = 0;
-    for (auto const &n : nodes) {
+    for (auto const& n : nodes) {
       if (n[STR_NAME].Scalar() != profile) continue;
       if (n[STR_MOD]) {
         if (n[STR_MOD].IsScalar()) {
-          for (auto const &mod_str : kul::String::LINES(n[STR_MOD].Scalar()))
+          for (auto const& mod_str : kul::String::LINES(n[STR_MOD].Scalar()))
             modArgs(mod_str, mod_nodes, getIfMissing);
         } else if (n[STR_MOD].IsSequence()) {
           bool moreso = 1, stringo = 0;
-          for (auto const &mod : n[STR_MOD]) {
+          for (auto const& mod : n[STR_MOD]) {
             if (stringo && !mod.IsScalar()) KEXIT(1, "NO");
             if (mod.IsScalar()) {
               stringo = 1, moreso = 0;
-              for (auto const &mod_str : kul::String::LINES(mod.Scalar()))
+              for (auto const& mod_str : kul::String::LINES(mod.Scalar()))
                 modArgs(mod_str, mod_nodes, getIfMissing);
             }
           }
           if (moreso) {
-            for (auto const &mod : n[STR_MOD]) getIfMissing(mod, 1);
+            for (auto const& mod : n[STR_MOD]) getIfMissing(mod, 1);
             popDepOrMod(n, modDeps, STR_MOD, 1);
           }
         } else {
@@ -94,7 +94,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
         }
       }
       if (n[STR_IF_MOD] && n[STR_IF_MOD][KTOSTRING(__KUL_OS__)]) {
-        for (auto const &mod : n[STR_IF_MOD][KTOSTRING(__KUL_OS__)]) getIfMissing(mod, 1);
+        for (auto const& mod : n[STR_IF_MOD][KTOSTRING(__KUL_OS__)]) getIfMissing(mod, 1);
         popDepOrMod(n[STR_IF_MOD], modDeps, KTOSTRING(__KUL_OS__), 1);
       }
       profile = n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
@@ -110,7 +110,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
 
   {
     auto depLevel(AppVars::INSTANCE().dependencyLevel());
-    for (auto *mod : modDeps) {
+    for (auto* mod : modDeps) {
       mod->ig = 0;
       mod->buildDepVec(AppVars::INSTANCE().dependencyString());
     }
@@ -126,17 +126,17 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
   profile = p.size() ? p : project().root()[STR_NAME].Scalar();
   while (c) {
     c = 0;
-    for (auto const &n : nodes) {
+    for (auto const& n : nodes) {
       if (n[STR_NAME].Scalar() != profile) continue;
       if (n[STR_WITH])
-        for (auto const &with_str : kul::cli::asArgs(n[STR_WITH].Scalar()))
+        for (auto const& with_str : kul::cli::asArgs(n[STR_WITH].Scalar()))
           withArgs(with_str, with_nodes, getIfMissing, 0);
       if (n[STR_DEP]) {
         if (n[STR_DEP].IsScalar())
-          for (auto const &with_str : kul::cli::asArgs(n[STR_DEP].Scalar()))
+          for (auto const& with_str : kul::cli::asArgs(n[STR_DEP].Scalar()))
             withArgs(with_str, with_nodes, getIfMissing, 1);
         else if (n[STR_DEP].IsSequence())
-          for (auto const &dep : n[STR_DEP]) getIfMissing(dep, 0);
+          for (auto const& dep : n[STR_DEP]) getIfMissing(dep, 0);
         else
           KEXCEPTION(STR_DEP) << " is invalid type";
       }
@@ -145,15 +145,13 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
 
       if (n[STR_IF_DEP] && n[STR_IF_DEP][KTOSTRING(__KUL_OS__)]) {
         auto node = n[STR_IF_DEP][KTOSTRING(__KUL_OS__)];
-        if (node.IsScalar()){
-          for (auto const &with_str : kul::cli::asArgs(node.Scalar()))
+        if (node.IsScalar()) {
+          for (auto const& with_str : kul::cli::asArgs(node.Scalar()))
             withArgs(with_str, with_nodes, getIfMissing, 1);
-        }
-        else if (n[STR_DEP].IsSequence()){
-          for (auto const &dep : n[STR_IF_DEP][KTOSTRING(__KUL_OS__)]) getIfMissing(dep, 0);
+        } else if (n[STR_DEP].IsSequence()) {
+          for (auto const& dep : n[STR_IF_DEP][KTOSTRING(__KUL_OS__)]) getIfMissing(dep, 0);
           popDepOrMod(n[STR_IF_DEP], deps, KTOSTRING(__KUL_OS__), 0);
-        }
-        else
+        } else
           KEXCEPTION(STR_DEP) << " is invalid type";
       }
       profile = n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
@@ -165,8 +163,8 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
   popDepOrMod(with_node, deps, STR_DEP, 0, 1);
 
   if (Settings::INSTANCE().root()[STR_INC])
-    for (auto const &l : kul::String::LINES(Settings::INSTANCE().root()[STR_INC].Scalar()))
-      for (auto const &s : kul::cli::asArgs(l))
+    for (auto const& l : kul::String::LINES(Settings::INSTANCE().root()[STR_INC].Scalar()))
+      for (auto const& s : kul::cli::asArgs(l))
         if (s.size()) {
           kul::Dir d(Properties::RESOLVE(*this, s));
           if (d)
@@ -175,8 +173,8 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
             KEXIT(1, "include does not exist\n") << d.path() << "\n" << Settings::INSTANCE().file();
         }
   if (Settings::INSTANCE().root()[STR_PATH])
-    for (auto const &l : kul::String::LINES(Settings::INSTANCE().root()[STR_PATH].Scalar()))
-      for (auto const &s : kul::cli::asArgs(l))
+    for (auto const& l : kul::String::LINES(Settings::INSTANCE().root()[STR_PATH].Scalar()))
+      for (auto const& s : kul::cli::asArgs(l))
         if (s.size()) {
           kul::Dir d(Properties::RESOLVE(*this, s));
           if (d)
@@ -188,9 +186,9 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
 
   this->populateMapsFromDependencies();
   std::vector<std::string> fileStrings{STR_ARCHIVER, STR_COMPILER, STR_LINKER};
-  for (auto const &c : Settings::INSTANCE().root()[STR_FILE])
-    for (const std::string &s : fileStrings)
-      for (auto const &t : kul::String::SPLIT(c[STR_TYPE].Scalar(), ':'))
+  for (auto const& c : Settings::INSTANCE().root()[STR_FILE])
+    for (std::string const& s : fileStrings)
+      for (auto const& t : kul::String::SPLIT(c[STR_TYPE].Scalar(), ':'))
         if (fs[t].count(s) == 0 && c[s]) fs[t].insert(s, Properties::RESOLVE(*this, c[s].Scalar()));
 
   this->postSetupValidation();
@@ -200,7 +198,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
 
   while (c) {
     c = 0;
-    for (auto const &n : nodes) {
+    for (auto const& n : nodes) {
       if (n[STR_NAME].Scalar() != profile) continue;
       if (n[STR_MODE] && nm) {
         m = n[STR_MODE].Scalar() == STR_STATIC
@@ -234,7 +232,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
   c = 1;
   while (c) {
     c = 0;
-    for (auto const &n : nodes) {
+    for (auto const& n : nodes) {
       if (n[STR_NAME].Scalar() != profile) continue;
       if (inst.path().empty() && n[STR_INSTALL]) {
         inst = kul::Dir(Properties::RESOLVE(*this, n[STR_INSTALL].Scalar()));
@@ -243,8 +241,8 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
         inst = kul::Dir(inst.real());
       }
 
-      auto ifArgOrLnk = [&](auto const &n, auto const &nName, std::string &var,
-                            kul::hash::map::S2S &cVal) {
+      auto ifArgOrLnk = [&](auto const& n, auto const& nName, std::string& var,
+                            kul::hash::map::S2S& cVal) {
         if (n[nName])
           for (YAML::const_iterator it = n[nName].begin(); it != n[nName].end(); ++it) {
             std::string left(it->first.Scalar());
@@ -256,12 +254,12 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
             }
 
             std::stringstream ifArg_ss;
-            for (auto const &s : kul::cli::asArgs(it->second.Scalar()))
+            for (auto const& s : kul::cli::asArgs(it->second.Scalar()))
               ifArg_ss << Properties::RESOLVE(*this, s) << " ";
             auto ifArg = ifArg_ss.str();
 
             bool isCVal = 0;
-            for (auto const &s : maiken::Compilers::INSTANCE().keys()) {
+            for (auto const& s : maiken::Compilers::INSTANCE().keys()) {
               isCVal = (left == s);
               if (isCVal) break;
             }
@@ -281,13 +279,13 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
       ifArgOrLnk(n, STR_IF_ARG, arg, cArg);
       ifArgOrLnk(n, STR_IF_LNK, lnk, cLnk);
 
-      auto if_inc_src = [&](auto const &node, auto str, auto fn) {
+      auto if_inc_src = [&](auto const& node, auto str, auto fn) {
         try {
           if (node[str])
             for (auto it = node[str].begin(); it != node[str].end(); ++it)
               if (it->first.Scalar() == KTOSTRING(__KUL_OS__))
-                for (auto const &s : kul::String::LINES(it->second.Scalar())) (this->*fn)(s);
-        } catch (const kul::StringException &) {
+                for (auto const& s : kul::String::LINES(it->second.Scalar())) (this->*fn)(s);
+        } catch (const kul::StringException&) {
           KEXIT(1, std::string(str) + " contains invalid bool value\n" + project().dir().path());
         }
       };
@@ -298,7 +296,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
       if (n[STR_IF_LIB])
         for (YAML::const_iterator it = n[STR_IF_LIB].begin(); it != n[STR_IF_LIB].end(); ++it)
           if (it->first.Scalar() == KTOSTRING(__KUL_OS__))
-            for (auto const &s : kul::String::SPLIT(it->second.Scalar(), ' '))
+            for (auto const& s : kul::String::SPLIT(it->second.Scalar(), ' '))
               if (s.size()) libs.push_back(Properties::RESOLVE(*this, s));
 
       profile = n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
@@ -310,10 +308,10 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
   {
     kul::hash::map::S2S n_tests;
     kul::Dir testsD(buildDir().join("test"));
-    for (auto const &pair : tests) {
+    for (auto const& pair : tests) {
       auto files = Regexer::RESOLVE(pair.first);
       if (files.empty()) files.emplace_back(pair.first);
-      for (auto const &file : files) {
+      for (auto const& file : files) {
         auto const fileType = file.substr(file.rfind(".") + 1);
         if (fs.count(fileType) > 0) {
           testsD.mk();
