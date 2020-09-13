@@ -89,6 +89,8 @@ std::vector<maiken::Application*> maiken::Application::CREATE(kul::cli::Args con
   using namespace kul::cli;
 
   kul::File yml("mkn.yaml");
+  if(!yml && kul::File("mkn.yml").is()) yml = "mkn.yml";
+
   if (args.empty() || (args.size() == 1 && args.has(STR_DIR))) {
     if (args.size() == 1 && args.has(STR_DIR)) {
       kul::Dir d(args.get(STR_DIR));

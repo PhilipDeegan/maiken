@@ -150,7 +150,7 @@ void maiken::Application::buildTest(kul::hash::set::String const& objects) KTHRO
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
 
-  auto build_test = [&mute, &cpcs, &starDirs](auto& to, auto& testsD, auto& tmpD, auto* app) {
+  auto build_test = [&](auto& to, auto& testsD, auto& tmpD, auto* app) {
     kul::hash::set::String cobjects;
     cobjects.insert(kul::File(to.object(), tmpD).escm());
     kul::File inFile(to.in());
