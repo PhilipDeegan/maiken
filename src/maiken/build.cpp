@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::link(const kul::hash::set::String &objects) KTHROW(kul::Exception) {
+void maiken::Application::link(kul::hash::set::String const& objects) KTHROW(kul::Exception) {
   showConfig();
   if (objects.size() > 0 || main_) {
     buildDir().mk();
@@ -57,11 +57,11 @@ void maiken::Application::link(const kul::hash::set::String &objects) KTHROW(kul
   delEmpty(kul::Dir(".mkn/log/" + buildDir().name() + "/bin/err"));
 }
 
-void maiken::Application::checkErrors(const CompilerProcessCapture &cpc) KTHROW(kul::Exception) {
-  auto o = [](const std::string &s) {
+void maiken::Application::checkErrors(CompilerProcessCapture const& cpc) KTHROW(kul::Exception) {
+  auto o = [](std::string const& s) {
     if (s.size()) KOUT(NON) << s;
   };
-  auto e = [](const std::string &s) {
+  auto e = [](std::string const& s) {
     if (s.size()) KERR << s;
   };
   if (kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());

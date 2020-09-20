@@ -31,8 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 #include "maiken/graph.hpp"
 
-void includeDependency(const std::string &s, const std::string &p,
-                       kul::hash::set::String &include) {
+void includeDependency(std::string const& s, std::string const& p,
+                       kul::hash::set::String& include) {
   if (s == "+") {
     include.insert(s);
   } else {
@@ -44,11 +44,11 @@ void includeDependency(const std::string &s, const std::string &p,
   }
 }
 
-void maiken::Application::parseDependencyString(std::string s, kul::hash::set::String &include) {
+void maiken::Application::parseDependencyString(std::string s, kul::hash::set::String& include) {
   kul::String::REPLACE_ALL(s, " ", "");
   std::stringstream dep, pro;
   bool lB = 0, rB = 0;
-  for (const auto &c : s) {
+  for (auto const& c : s) {
     if (c == '[' && (lB || rB))
       KEXIT(1, MKN_ERR_SQRBRKT_MISMATCH_DEP_CLI);
     else if (c == '[' && !lB) {
@@ -81,14 +81,14 @@ void maiken::Application::parseDependencyString(std::string s, kul::hash::set::S
   if (lB) KEXIT(1, MKN_ERR_SQRBRKT_MISMATCH_DEP_CLI);
 }
 
-void maiken::Application::buildDepVec(const std::string &depVal) {
+void maiken::Application::buildDepVec(std::string const& depVal) {
   kul::hash::set::String all, ignore, include;
   ignore.insert("+");
 
   if (!depVal.empty()) {
     try {
       AppVars::INSTANCE().dependencyLevel(kul::String::UINT16(depVal));
-    } catch (const kul::StringException &e) {
+    } catch (const kul::StringException& e) {
       AppVars::INSTANCE().dependencyLevel(0);
       parseDependencyString(depVal, include);
     }
@@ -100,45 +100,44 @@ void maiken::Application::buildDepVec(const std::string &depVal) {
   }
 
   uint16_t i = 0;
-  std::unordered_map<uint16_t, std::vector<Application *>> dePs;
+  std::unordered_map<uint16_t, std::vector<Application*>> dePs;
 
-  for (Application *ap : deps) {
-    Application &a(*ap);
+  for (Application* ap : deps) {
+    Application& a(*ap);
     a.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), i, include);
-    const std::string &name(a.project().root()[STR_NAME].Scalar());
+    std::string const& name(a.project().root()[STR_NAME].Scalar());
     std::stringstream ss;
     ss << name << "[" << (a.p.empty() ? "@" : a.p) << "]";
     if (AppVars::INSTANCE().dependencyLevel() || include.count(ss.str())) a.ig = 0;
     all.insert(ss.str());
   }
 
-  for (const auto &d : include)
+  for (auto const& d : include)
     if (!all.count(d) && !ignore.count(d) && !isMod)
       KEXIT(1, "Dependency project specified does not exist: " + d);
   if (include.size() && include.count("+")) this->ig = 1;
 
-  std::function<void(Application *)> dep_libs;
+  std::function<void(Application*)> dep_libs;
 
-  dep_libs = [&dep_libs](Application * app){
-
+  dep_libs = [&dep_libs](Application* app) {
     app->deps = DepGrapher{}.build(*app);
 
-    for(auto* depP : app->deps) {
+    for (auto* depP : app->deps) {
+      auto const& dep(*depP);
 
-        const auto &dep(*depP);
+      if (!dep.sources().empty()) {
+        auto lib = dep.baseLibFilename();
+        auto const& it(std::find(app->libraries().begin(), app->libraries().end(), lib));
+        if (it != app->libraries().end()) app->libs.erase(it);
+        app->libs.push_back(lib);
+      }
 
-        if (!dep.sources().empty()) {
-          auto lib = dep.baseLibFilename();
-          const auto &it(std::find(app->libraries().begin(), app->libraries().end(), lib));
-          if (it != app->libraries().end()) app->libs.erase(it);
-          app->libs.push_back(lib);
-        }
+      for (std::string const& s : dep.libraries())
+        if (std::find(app->libraries().begin(), app->libraries().end(), s) ==
+            app->libraries().end())
+          app->libs.push_back(s);
 
-        for (const std::string &s : dep.libraries())
-          if (std::find(app->libraries().begin(), app->libraries().end(), s) == app->libraries().end())
-            app->libs.push_back(s);
-
-       dep_libs(depP);
+      dep_libs(depP);
     }
   };
 
@@ -146,9 +145,9 @@ void maiken::Application::buildDepVec(const std::string &depVal) {
 }
 
 void maiken::Application::buildDepVecRec(
-    std::unordered_map<uint16_t, std::vector<Application *>> &dePs, int16_t ig, int16_t i,
-    const kul::hash::set::String &inc) {
-  for (auto *const a : deps) {
+    std::unordered_map<uint16_t, std::vector<Application*>>& dePs, int16_t ig, int16_t i,
+    kul::hash::set::String const& inc) {
+  for (auto* const a : deps) {
     auto name = a->project().root()[STR_NAME].Scalar();
     std::stringstream ss;
     ss << name << "[" << (a->p.empty() ? name : a->p) << "]";
@@ -159,18 +158,15 @@ void maiken::Application::buildDepVecRec(
 }
 
 void maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception) {
-
   for (auto depP = dependencies().rbegin(); depP != dependencies().rend(); ++depP) {
+    auto const& dep(**depP);
 
-    const auto &dep(**depP);
-
-    for (const auto &s : dep.includes())
+    for (auto const& s : dep.includes())
       if (s.second && std::find(includes().begin(), includes().end(), s) == includes().end())
         incs.emplace_back(s.first, true);
 
-    for (const std::string &s : dep.libraryPaths())
+    for (std::string const& s : dep.libraryPaths())
       if (std::find(libraryPaths().begin(), libraryPaths().end(), s) == libraryPaths().end())
         paths.push_back(s);
-
   }
 }

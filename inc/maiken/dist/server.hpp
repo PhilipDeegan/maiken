@@ -47,10 +47,10 @@ class ServerSession {
 
  public:
   ServerSession() : start_time(kul::Now::MILLIS()) {}
-  void reset_setup(SetupRequest *request) { setup.reset(request); }
-  SetupRequest *setup_ptr() { return setup.get(); }
-  void set_apps(const std::vector<Application *> &_apps) { this->apps = std::move(_apps); }
-  std::vector<Application *> apps_vector() { return apps; };
+  void reset_setup(SetupRequest* request) { setup.reset(request); }
+  SetupRequest* setup_ptr() { return setup.get(); }
+  void set_apps(const std::vector<Application*>& _apps) { this->apps = std::move(_apps); }
+  std::vector<Application*> apps_vector() { return apps; };
 
  public:
   std::unique_ptr<kul::io::BinaryReader> binary_reader;
@@ -61,7 +61,7 @@ class ServerSession {
  private:
   uint64_t start_time;
   std::unique_ptr<SetupRequest> setup = nullptr;
-  std::vector<Application *> apps;
+  std::vector<Application*> apps;
   SessionState state = SessionState::NON;
 };
 
@@ -69,21 +69,21 @@ class Server : public kul::http::MultiServer, public Constants {
   friend class kul::Thread;
 
  public:
-  Server(const uint16_t port, const kul::Dir &_home, uint16_t threads)
+  Server(uint16_t const port, const kul::Dir& _home, uint16_t threads)
       : kul::http::MultiServer(port, 1, threads), busy(false), m_home(_home) {}
   virtual ~Server() {}
-  kul::http::_1_1Response respond(const kul::http::A1_1Request &req) override;
+  kul::http::_1_1Response respond(const kul::http::A1_1Request& req) override;
 
-  Server(const Server &) = delete;
-  Server(const Server &&) = delete;
-  Server &operator=(const Server &) = delete;
-  Server &operator=(const Server &&) = delete;
+  Server(const Server&) = delete;
+  Server(const Server&&) = delete;
+  Server& operator=(const Server&) = delete;
+  Server& operator=(const Server&&) = delete;
 
  protected:
-  void onConnect(const char *cip, const uint16_t &port) override {
+  void onConnect(char const* cip, uint16_t const& port) override {
     std::string ip(cip);
     if (!sessions.count(std::string(ip))) sessions.emplace();
-    ServerSession &sesh = sessions[ip];
+    ServerSession& sesh = sessions[ip];
     if (sesh.state != SessionState::NON && sesh.setup == nullptr) {
       KLOG(ERR) << "Incoming connection has invalid session state - resetting";
       sessions.erase(ip);

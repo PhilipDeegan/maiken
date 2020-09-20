@@ -32,33 +32,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "kul/signal.hpp"
 #include "maiken.hpp"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   maiken::PROGRAM = argv[0];
   kul::Signal sig;
   uint8_t ret = 0;
-  const auto s = kul::Now::MILLIS();
+  auto const s = kul::Now::MILLIS();
 
   try {
     for (auto app : maiken::Application::CREATE(argc, argv)) app->process();
 
     bool print_build_time = false;
-    for (const auto &key : {"build", "compile", "link"})
+    for (auto const& key : {"build", "compile", "link"})
       print_build_time |= maiken::CommandStateMachine::INSTANCE().has(key);
 
     if (print_build_time) {
       KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
       KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
     }
-  } catch (const kul::Exit &e) {
+  } catch (kul::Exit const& e) {
     if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e.stack();
     ret = e.code();
-  } catch (const kul::proc::ExitException &e) {
+  } catch (const kul::proc::ExitException& e) {
     KERR << e;
     ret = e.code();
-  } catch (const kul::Exception &e) {
+  } catch (kul::Exception const& e) {
     KERR << e.stack();
     ret = 1;
-  } catch (const std::exception &e) {
+  } catch (const std::exception& e) {
     KERR << e.what();
     ret = 1;
   }

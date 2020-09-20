@@ -31,14 +31,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 #include "kul/bon.hpp"
 
-void maiken::Application::modArgs(
-    const std::string mod_str, std::vector<YAML::Node> &mod_nodes,
-    std::function<void(YAML::Node const &, const bool)> getIfMissing) {
+void maiken::Application::modArgs(std::string const mod_str, std::vector<YAML::Node>& mod_nodes,
+                                  std::function<void(YAML::Node const&, const bool)> getIfMissing) {
   if (mod_str.size()) {
     kul::hash::set::String mods;
     std::stringstream ss;
     size_t lb = 0, rb = 0;
-    for (auto &c : mod_str) {
+    for (auto& c : mod_str) {
       rb = c == '}' ? rb + 1 : rb;
       lb = c == '{' ? lb + 1 : lb;
       if ((c == ',' || c == ' ') && rb == lb) {
@@ -55,18 +54,18 @@ void maiken::Application::modArgs(
   }
 }
 
-void maiken::Application::mod(kul::hash::set::String &mods, std::vector<YAML::Node> &mod_nodes,
-                              std::function<void(YAML::Node const &, const bool)> getIfMissing) {
+void maiken::Application::mod(kul::hash::set::String& mods, std::vector<YAML::Node>& mod_nodes,
+                              std::function<void(YAML::Node const&, const bool)> getIfMissing) {
   for (auto mod : mods) {
     kul::String::REPLACE_ALL(mod, kul::os::EOL(), "");
     kul::String::TRIM(mod);
     if (mod.empty()) continue;
 
     mod_nodes.emplace_back();
-    auto &node = mod_nodes.back();
+    auto& node = mod_nodes.back();
     std::string local /*&*/, profiles, proj = mod, version /*#*/, scm, objs;
 
-    auto get_between = [&](auto &var, auto lbrak, auto rbrak) {
+    auto get_between = [&](auto& var, auto lbrak, auto rbrak) {
       auto between = maiken::string::between_rm_str(proj, lbrak, rbrak);
       if (between.found) proj = between.remaining, var = *between.found;
       return !between.error;
@@ -98,7 +97,7 @@ void maiken::Application::mod(kul::hash::set::String &mods, std::vector<YAML::No
       if (am != std::string::npos && ha != std::string::npos)
         if (ha > am) KEXIT(1, "-m invalid, version must before location");
 
-      auto if_set = [&](auto s, auto &v, auto n) {
+      auto if_set = [&](auto s, auto& v, auto n) {
         if (s != std::string::npos) v = proj.substr(s + 1), proj = proj.substr(0, s), n = v;
       };
       if_set(am, local, node[STR_LOCAL]);
@@ -119,8 +118,8 @@ void maiken::Application::mod(kul::hash::set::String &mods, std::vector<YAML::No
     if (!proj.empty()) node[STR_NAME] = proj;
 
     if (objs.size())
-      for (const auto n : kul::bon::from(objs))
-        for (const auto p : n) node[p.first] = p.second;
+      for (auto const n : kul::bon::from(objs))
+        for (auto const p : n) node[p.first] = p.second;
 
     YAML::Emitter out;
     out << node;

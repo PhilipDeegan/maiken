@@ -37,7 +37,7 @@ namespace maiken {
 
 class ProcessException : public kul::Exception {
  public:
-  ProcessException(const char *f, const uint16_t &l, const std::string &s)
+  ProcessException(char const* f, uint16_t const& l, std::string const& s)
       : kul::Exception(f, l, s) {}
 };
 
@@ -54,7 +54,7 @@ class Graph {
 
 class Processor : public Constants {
  public:
-  static void process(std::vector<Application *> apps);
+  static void process(std::vector<Application*> apps);
 };
 
 }  // namespace maiken

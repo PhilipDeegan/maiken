@@ -31,8 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/app.hpp"
 #include "maiken/property.hpp"
 
-maiken::Application *maiken::Applications::getOrCreate(const maiken::Project &proj,
-                                                       const std::string &_profile, bool setup)
+maiken::Application* maiken::Applications::getOrCreate(maiken::Project const& proj,
+                                                       std::string const& _profile, bool setup)
     KTHROW(kul::Exception) {
   std::string pDir(proj.dir().real());
   std::string profile = _profile.empty() ? "@" : _profile;
@@ -49,13 +49,13 @@ maiken::Application *maiken::Applications::getOrCreate(const maiken::Project &pr
   return m_apps[pDir][profile];
 }
 
-maiken::Application *maiken::Applications::getOrCreateRoot(const maiken::Project &proj,
-                                                           const std::string &_profile, bool setup)
+maiken::Application* maiken::Applications::getOrCreateRoot(maiken::Project const& proj,
+                                                           std::string const& _profile, bool setup)
     KTHROW(kul::Exception) {
   std::string pDir(proj.dir().real());
   std::string profile = _profile.empty() ? "@" : _profile;
   if (!m_apps.count(pDir) || !m_apps[pDir].count(profile)) {
-    auto *pp = getOrCreate(proj, _profile, /*setup = */ false);
+    auto* pp = getOrCreate(proj, _profile, /*setup = */ false);
     pp->ro = 1;
     if (setup) {
       kul::os::PushDir pushd(proj.dir());
@@ -65,11 +65,11 @@ maiken::Application *maiken::Applications::getOrCreateRoot(const maiken::Project
   return m_apps[pDir][profile];
 }
 
-maiken::Application *maiken::Applications::getOrNullptr(const std::string &project) {
+maiken::Application* maiken::Applications::getOrNullptr(std::string const& project) {
   uint32_t count = 0;
-  Application *app = nullptr;
-  for (const auto p1 : m_apps)
-    for (const auto p2 : p1.second) {
+  Application* app = nullptr;
+  for (auto const p1 : m_apps)
+    for (auto const p2 : p1.second) {
       if (p2.second->project().root()[STR_NAME].Scalar() == project) {
         count++;
         app = p2.second;
@@ -82,7 +82,7 @@ maiken::Application *maiken::Applications::getOrNullptr(const std::string &proje
   return app;
 }
 
-kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const &n, Application *app) {
+kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const& n, Application* app) {
   using namespace kul::cli;
   if (n.IsScalar()) {
     auto bits = kul::String::ESC_SPLIT(n.Scalar(), '=');
@@ -91,7 +91,7 @@ kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const &n, Applic
       KEXIT(1, "env string is invalid, expects one '=' only, string ")
           << n.Scalar() << "\n in: " << (app ? app->project().file() : "settings file");
 
-    auto replace = [](std::string const &n, std::string &in, std::string f) {
+    auto replace = [](std::string const& n, std::string& in, std::string f) {
       auto pos = in.find(f);
       if (pos != std::string::npos)
         if (pos == 0 || (pos > 0 && in[pos - 1] != '\\'))

@@ -37,7 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 class CompilerPrinter {
  public:
-  static void print_for(const Application &app) {
+  static void print_for(Application const& app) {
     if (!AppVars::INSTANCE().dryRun()) {
       std::stringstream ss;
       ss << MKN_PROJECT << ": " << app.project().dir().path();
@@ -46,21 +46,21 @@ class CompilerPrinter {
     }
     if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && app.includes().size()) {
       KOUT(NON) << "INCLUDES";
-      for (const auto &s : app.includes()) KOUT(NON) << "\t" << s.first;
+      for (auto const& s : app.includes()) KOUT(NON) << "\t" << s.first;
     }
 
     if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf()) {
       if (!app.arg.empty()) KOUT(NON) << "ARGUMENTS\n\t" << app.arg;
       if (app.arguments().size()) {
         KOUT(NON) << "FILE ARGUMENTS";
-        for (const auto &kv : app.arguments())
-          for (const std::string &s : kv.second) KOUT(NON) << "\t" << kv.first << " : " << s;
+        for (auto const& kv : app.arguments())
+          for (std::string const& s : kv.second) KOUT(NON) << "\t" << kv.first << " : " << s;
       }
       if (!AppVars::INSTANCE().args().empty())
         KOUT(NON) << "ADDITIONAL ARGUMENTS: \n\t" << AppVars::INSTANCE().args();
       if (AppVars::INSTANCE().jargs().size()) {
         KOUT(NON) << "ADDITIONAL FILE ARGUMENTS:";
-        for (const auto &kv : AppVars::INSTANCE().jargs())
+        for (auto const& kv : AppVars::INSTANCE().jargs())
           KOUT(NON) << "\t" << kv.first << " : " << kv.second;
       }
     }
@@ -69,7 +69,7 @@ class CompilerPrinter {
 };
 }  // namespace maiken
 
-void maiken::Application::compile(kul::hash::set::String &objects) KTHROW(kul::Exception) {
+void maiken::Application::compile(kul::hash::set::String& objects) KTHROW(kul::Exception) {
   auto sources = sourceMap();
 
   showConfig();
@@ -83,12 +83,12 @@ void maiken::Application::compile(kul::hash::set::String &objects) KTHROW(kul::E
   compile(src_objs, objects, cacheFiles);
 }
 
-void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::string>> &src_objs,
-                                  kul::hash::set::String &objects,
-                                  std::vector<kul::File> &cacheFiles) KTHROW(kul::Exception) {
+void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::string>>& src_objs,
+                                  kul::hash::set::String& objects,
+                                  std::vector<kul::File>& cacheFiles) KTHROW(kul::Exception) {
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   std::vector<std::shared_ptr<maiken::dist::Post>> posts;
-  auto compile_lambda = [](std::shared_ptr<maiken::dist::Post> post, const dist::Host &host) {
+  auto compile_lambda = [](std::shared_ptr<maiken::dist::Post> post, const dist::Host& host) {
     post->send(host);
     dist::FileWriter fw;
     dist::Blob b;
@@ -115,13 +115,13 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
   };
   size_t threads = 0;
 
-  auto &hosts(maiken::dist::RemoteCommandManager::INST().hosts());
+  auto& hosts(maiken::dist::RemoteCommandManager::INST().hosts());
   if (AppVars::INSTANCE().nodes()) {
     threads =
         (hosts.size() < AppVars::INSTANCE().nodes()) ? hosts.size() : AppVars::INSTANCE().nodes();
   }
   kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);
-  auto compile_ex = [&](const kul::Exception &e) {
+  auto compile_ex = [&](kul::Exception const& e) {
     ctp.stop().interrupt();
     throw e;
   };
@@ -146,7 +146,7 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
 
 #endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   std::queue<std::pair<maiken::Source, std::string>> sourceQueue;
-  for (auto &so : src_objs) {
+  for (auto& so : src_objs) {
     sourceQueue.emplace(so.first, so.second);
     kul::File object_file(so.second);
     if (!object_file.dir()) object_file.dir().mk();
@@ -160,9 +160,9 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
   if (_MKN_TIMESTAMPS_) writeTimeStamps(objects, cacheFiles);
 }
 
-void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::string>> &sourceQueue,
-                                  kul::hash::set::String &objects,
-                                  std::vector<kul::File> &cacheFiles) KTHROW(kul::Exception) {
+void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::string>>& sourceQueue,
+                                  kul::hash::set::String& objects,
+                                  std::vector<kul::File>& cacheFiles) KTHROW(kul::Exception) {
   ThreadingCompiler tc(*this);
   kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
   std::vector<maiken::CompilationUnit> c_units;
@@ -174,17 +174,17 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     sourceQueue.pop();
   }
 
-  auto o = [](const std::string &s) {
+  auto o = [](std::string const& s) {
     if (s.size()) KOUT(NON) << s;
   };
-  auto e = [](const std::string &s) {
+  auto e = [](std::string const& s) {
     if (s.size()) KERR << s;
   };
 
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
 
-  auto lambex = [&](const kul::Exception &) {
+  auto lambex = [&](kul::Exception const&) {
     ctp.stop();
     ctp.interrupt();
   };
@@ -193,8 +193,8 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   kul::Dir outLogDir(".mkn/log/" + buildDir().name() + "/obj/out", 1);
   kul::Dir errLogDir(".mkn/log/" + buildDir().name() + "/obj/err", 1);
 
-  auto lambda = [&, o, e](const maiken::CompilationUnit &c_unit) {
-    const CompilerProcessCapture cpc = c_unit.compile();
+  auto lambda = [&, o, e](const maiken::CompilationUnit& c_unit) {
+    CompilerProcessCapture const cpc = c_unit.compile();
     if (!AppVars::INSTANCE().dryRun()) {
       if (kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
       if (kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
@@ -216,21 +216,21 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
       if (!AppVars::INSTANCE().force())
         if (cpc.exception()) std::rethrow_exception(cpc.exception());
 
-    } catch (const kul::Exception &e) {
+    } catch (kul::Exception const& e) {
       lambex(e);
-    } catch (const std::exception &e) {
+    } catch (const std::exception& e) {
       KLOG(ERR) << e.what();
     }
   };
 
-  for (const auto &unit : c_units) {
+  for (auto const& unit : c_units) {
     kul::this_thread::nSleep(5000000);  // dup appears to be overloaded with too many threads
     ctp.async(std::bind(lambda, unit), std::bind(lambex, std::placeholders::_1));
   }
 
   ctp.finish(1000000 * 1000);
 
-  auto delEmpty = [](auto &dir) {
+  auto delEmpty = [](auto& dir) {
     if (dir.files().empty()) dir.rm();
   };
 
@@ -242,7 +242,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     if (ctp.exception()) KEXIT(1, "Compile error detected");
 
   if (!AppVars::INSTANCE().force())
-    for (auto &cpc : cpcs)
+    for (auto& cpc : cpcs)
       if (cpc.exception()) std::rethrow_exception(cpc.exception());
 
   kul::Dir tmpD(buildDir().join("tmp"), 1);

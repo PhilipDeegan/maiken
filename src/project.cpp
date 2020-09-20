@@ -154,9 +154,9 @@ void maiken::NewProject::write() {
 }
 
 #include "maiken/app.hpp"
-std::vector<maiken::Application const *> maiken::Project::getBinaryTargets() const {
-  std::vector<Application const *> ret;
-  for (auto const *app : maiken::Applications::INSTANCE().applicationsFor(*this))
+std::vector<maiken::Application const*> maiken::Project::getBinaryTargets() const {
+  std::vector<Application const*> ret;
+  for (auto const* app : maiken::Applications::INSTANCE().applicationsFor(*this))
     if (app->main()) ret.emplace_back(app);
   return ret;
 }

@@ -38,17 +38,17 @@ namespace maiken {
 
 class SCMGetter {
  public:
-  static SCMGetter &INSTANCE() {
+  static SCMGetter& INSTANCE() {
     static SCMGetter s;
     return s;
   }
-  static bool HAS(const kul::Dir &d);
-  static std::string REPO(const kul::Dir &d, const std::string &r, bool module);
-  static const kul::SCM *GET(const kul::Dir &d, const std::string &r, bool module);
+  static bool HAS(const kul::Dir& d);
+  static std::string REPO(const kul::Dir& d, std::string const& r, bool module);
+  static const kul::SCM* GET(const kul::Dir& d, std::string const& r, bool module);
 
  private:
-  static bool IS_SOLID(const std::string &r);
-  static const kul::SCM *GET_SCM(const kul::Dir &d, const std::string &r, bool module);
+  static bool IS_SOLID(std::string const& r);
+  static const kul::SCM* GET_SCM(const kul::Dir& d, std::string const& r, bool module);
 
   kul::hash::map::S2S valids;
 };

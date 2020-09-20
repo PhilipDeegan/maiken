@@ -56,34 +56,34 @@ enum Mode { NONE = 0, STAT, SHAR };
 }
 
 struct CompileDAO {
-  maiken::Application const &app;
+  maiken::Application const& app;
   std::string const &compiler, &in, &out;
   std::vector<std::string> const &args, &incs;
-  compiler::Mode const &mode;
+  compiler::Mode const& mode;
   bool dryRun = false;
 };
 struct LinkDAO {
-  maiken::Application const &app;
+  maiken::Application const& app;
   std::string const &linker, &linkerEnd, &out;
   std::vector<kul::Dir> stars;
   std::vector<std::string> const &objects, &libs, &libPaths;
-  compiler::Mode const &mode;
+  compiler::Mode const& mode;
   bool dryRun = false;
 };
 
 class CompilerProcessCapture : public kul::ProcessCapture {
  public:
   CompilerProcessCapture() {}
-  CompilerProcessCapture(kul::AProcess &p) : kul::ProcessCapture(p) {}
+  CompilerProcessCapture(kul::AProcess& p) : kul::ProcessCapture(p) {}
 
-  void exception(const std::exception_ptr &e) { ep = e; }
-  const std::exception_ptr &exception() const { return ep; }
+  void exception(std::exception_ptr const& e) { ep = e; }
+  std::exception_ptr const& exception() const { return ep; }
 
-  void cmd(std::string const &cm) { this->c = cm; }
-  std::string const &cmd() const { return c; }
+  void cmd(std::string const& cm) { this->c = cm; }
+  std::string const& cmd() const { return c; }
 
-  void file(std::string const &f) { this->f = f; }
-  std::string const &file() const { return f; }
+  void file(std::string const& f) { this->f = f; }
+  std::string const& file() const { return f; }
 
  private:
   std::exception_ptr ep;
@@ -92,8 +92,8 @@ class CompilerProcessCapture : public kul::ProcessCapture {
 
 class Compiler {
  protected:
-  Compiler(const int &v) : version(v) {}
-  const int version;
+  Compiler(int const& v) : version(v) {}
+  int const version;
   std::unordered_map<uint8_t, std::string> m_optimise_c, m_optimise_l_bin, m_optimise_l_lib,
       m_debug_c, m_debug_l_bin, m_debug_l_lib, m_warn_c;
 
@@ -101,44 +101,44 @@ class Compiler {
   virtual ~Compiler() {}
   virtual bool sourceIsBin() const = 0;
 
-  virtual CompilerProcessCapture compileSource(CompileDAO &dao) const KTHROW(kul::Exception) = 0;
+  virtual CompilerProcessCapture compileSource(CompileDAO& dao) const KTHROW(kul::Exception) = 0;
 
-  virtual CompilerProcessCapture buildExecutable(LinkDAO &dao) const KTHROW(kul::Exception) = 0;
+  virtual CompilerProcessCapture buildExecutable(LinkDAO& dao) const KTHROW(kul::Exception) = 0;
 
-  virtual CompilerProcessCapture buildLibrary(LinkDAO &dao) const KTHROW(kul::Exception) = 0;
+  virtual CompilerProcessCapture buildLibrary(LinkDAO& dao) const KTHROW(kul::Exception) = 0;
 
-  virtual void preCompileHeader(const std::vector<std::string> &incs,
-                                const std::vector<std::string> &args, std::string const &in,
-                                std::string const &out, bool dryRun = false) const
+  virtual void preCompileHeader(std::vector<std::string> const& incs,
+                                std::vector<std::string> const& args, std::string const& in,
+                                std::string const& out, bool dryRun = false) const
       KTHROW(kul::Exception) = 0;
 
-  std::string compilerDebug(const uint8_t &key) const {
+  std::string compilerDebug(uint8_t const& key) const {
     return m_debug_c.count(key) ? m_debug_c.at(key) : "";
   }
-  std::string compilerOptimization(const uint8_t &key) const {
+  std::string compilerOptimization(uint8_t const& key) const {
     return m_optimise_c.count(key) ? m_optimise_c.at(key) : "";
   }
-  std::string compilerWarning(const uint8_t &key) const {
+  std::string compilerWarning(uint8_t const& key) const {
     return m_warn_c.count(key) ? m_warn_c.at(key) : "";
   }
-  std::string linkerDebugBin(const uint8_t &key) const {
+  std::string linkerDebugBin(uint8_t const& key) const {
     return m_debug_l_bin.count(key) ? m_debug_l_bin.at(key) : "";
   }
-  std::string linkerDebugLib(const uint8_t &key) const {
+  std::string linkerDebugLib(uint8_t const& key) const {
     return m_debug_l_lib.count(key) ? m_debug_l_lib.at(key) : "";
   }
-  std::string linkerOptimizationBin(const uint8_t &key) const {
+  std::string linkerOptimizationBin(uint8_t const& key) const {
     return m_optimise_l_bin.count(key) ? m_optimise_l_bin.at(key) : "";
   }
-  std::string linkerOptimizationLib(const uint8_t &key) const {
+  std::string linkerOptimizationLib(uint8_t const& key) const {
     return m_optimise_l_lib.count(key) ? m_optimise_l_lib.at(key) : "";
   }
 };
 
 struct CompilationUnit {
-  CompilationUnit(const maiken::Application &app, const Compiler *comp, std::string const &compiler,
-                  const std::vector<std::string> &args, const std::vector<std::string> &incs,
-                  std::string const &in, std::string const &out, const compiler::Mode &mode,
+  CompilationUnit(maiken::Application const& app, Compiler const* comp, std::string const& compiler,
+                  std::vector<std::string> const& args, std::vector<std::string> const& incs,
+                  std::string const& in, std::string const& out, compiler::Mode const& mode,
                   bool dryRun)
       : app(app),
         comp(comp),
@@ -155,7 +155,7 @@ struct CompilationUnit {
   std::string compileString() const KTHROW(kul::Exception);
 
   maiken::Application const& app;
-  Compiler const *comp;
+  Compiler const* comp;
   std::string const compiler;
   std::vector<std::string> const args;
   std::vector<std::string> const incs;

@@ -33,10 +33,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class LibFinder {
  public:
-  static bool findAdd(const std::string &l, const kul::Dir &i, const kul::Dir &o) {
+  static bool findAdd(std::string const& l, const kul::Dir& i, const kul::Dir& o) {
     bool found = 0;
-    for (const auto &f : i.files(0)) {
-      const auto &fn(f.name());
+    for (auto const& f : i.files(0)) {
+      auto const& fn(f.name());
       if (fn.find(".") == std::string::npos) continue;
 #ifdef _WIN32
       if (fn.substr(0, fn.rfind(".")) == l) {
@@ -69,22 +69,22 @@ void maiken::Application::pack() KTHROW(kul::Exception) {
   kul::Dir lib(pk.join("lib"));
 
   if (main_ || !srcs.empty()) {
-    const auto v((inst ? inst : buildDir()).files(0));
+    auto const v((inst ? inst : buildDir()).files(0));
     if (v.empty()) KEXIT(1, "Current project lib/bin not found during pack");
-    for (const auto &f : v) f.cp(main_ ? bin : lib);
+    for (auto const& f : v) f.cp(main_ ? bin : lib);
   }
 
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
     if (!(*app)->srcs.empty()) {
-      auto &a = **app;
+      auto& a = **app;
       kul::Dir outD(a.inst ? a.inst.real() : a.buildDir());
       std::string n = a.project().root()[STR_NAME].Scalar();
       if (!LibFinder::findAdd(a.baseLibFilename(), outD, lib))
         KEXIT(1, "Depedency Project lib not found, try building: ") << a.buildDir().real();
     }
-  for (const auto &l : libs) {
+  for (auto const& l : libs) {
     bool found = 0;
-    for (const auto &p : paths) {
+    for (auto const& p : paths) {
       kul::Dir path(p);
       if (!path) KEXIT(1, "Path does not exist: ") << pk.path();
       found = LibFinder::findAdd(l, path, lib);

@@ -56,7 +56,7 @@ namespace maiken {
 
 class ModuleException : public kul::Exception {
  public:
-  ModuleException(const char *f, const uint16_t &l, const std::string &s)
+  ModuleException(char const* f, uint16_t const& l, std::string const& s)
       : kul::Exception(f, l, s) {}
 };
 
@@ -68,18 +68,18 @@ class Module {
   friend class ModuleLoader;
 
  private:
-  const Application *app = nullptr;
-  void application(const Application *_app) { app = _app; }
+  Application const* app = nullptr;
+  void application(Application const* _app) { app = _app; }
 
  public:
   virtual ~Module() {}
   Module() KTHROW(ModuleException) {}
 
-  virtual void init(Application &, const YAML::Node &) KTHROW(std::exception) {}
-  virtual void compile(Application &, const YAML::Node &) KTHROW(std::exception) {}
-  virtual void link(Application &, const YAML::Node &) KTHROW(std::exception) {}
-  virtual void test(Application &, const YAML::Node &) KTHROW(std::exception) {}
-  virtual void pack(Application &, const YAML::Node &) KTHROW(std::exception) {}
+  virtual void init(Application&, YAML::Node const&) KTHROW(std::exception) {}
+  virtual void compile(Application&, YAML::Node const&) KTHROW(std::exception) {}
+  virtual void link(Application&, YAML::Node const&) KTHROW(std::exception) {}
+  virtual void test(Application&, YAML::Node const&) KTHROW(std::exception) {}
+  virtual void pack(Application&, YAML::Node const&) KTHROW(std::exception) {}
 };
 
 class GlobalModules;
@@ -92,16 +92,16 @@ class KUL_PUBLISH ModuleLoader
 
  private:
   bool loaded = 0;
-  Module *p = nullptr;
+  Module* p = nullptr;
 
-  static kul::File FIND(Application &a)
+  static kul::File FIND(Application& a)
 #ifndef _MKN_DISABLE_MODULES_
       KTHROW(kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_
           ;
 
  public:
-  ModuleLoader(const Application &ap, const kul::File &f)
+  ModuleLoader(Application const& ap, kul::File const& f)
 #ifndef _MKN_DISABLE_MODULES_
       KTHROW(kul::sys::Exception)
       : kul::sys::SharedClass<maiken::Module>(f, "maiken_module_construct",
@@ -122,10 +122,10 @@ class KUL_PUBLISH ModuleLoader
 #endif  //_MKN_DISABLE_MODULES_
     loaded = 0;
   }
-  Module *module() { return p; }
-  const Application *app() const { return p->app; }
+  Module* module() { return p; }
+  Application const* app() const { return p->app; }
 
-  static std::shared_ptr<ModuleLoader> LOAD(Application &ap)
+  static std::shared_ptr<ModuleLoader> LOAD(Application& ap)
 #ifndef _MKN_DISABLE_MODULES_
       KTHROW(kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_
@@ -136,7 +136,7 @@ class GlobalModules {
   friend class ModuleLoader;
 
  private:
-  static GlobalModules &INSTANCE() {
+  static GlobalModules& INSTANCE() {
     static GlobalModules i;
     return i;
   }
@@ -144,12 +144,12 @@ class GlobalModules {
   kul::hash::map::S2T<std::shared_ptr<kul::sys::SharedLibrary>> libs;
 
   ~GlobalModules() { libs.clear(); }
-  void load(Application &ap) KTHROW(kul::sys::Exception) {
+  void load(Application& ap) KTHROW(kul::sys::Exception) {
     auto lib = std::make_shared<kul::sys::SharedLibrary>(ModuleLoader::FIND(ap));
     libs.insert(std::make_pair(lib->file().dir().real(), lib));
   }
 #else
-  void load(Application &ap) {}
+  void load(Application& ap) {}
 #endif  //_MKN_DISABLE_MODULES_
 };
 }  // namespace maiken

@@ -63,7 +63,7 @@ maiken::AppVars::AppVars() {
   evs["MKN_LIB_EXT"] = ext;
   evs["MKN_LIB_PRE"] = pre;
 
-  auto check_set = [&](const std::string key) {
+  auto check_set = [&](std::string const key) {
     auto cstr = key.c_str();
     if (kul::env::EXISTS(cstr)) evs[key] = kul::env::GET(cstr);
   };

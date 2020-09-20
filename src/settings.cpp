@@ -38,11 +38,11 @@ class SuperSettings {
 
  private:
   kul::hash::set::String files;
-  static SuperSettings &INSTANCE() {
+  static SuperSettings& INSTANCE() {
     static SuperSettings instance;
     return instance;
   }
-  void cycleCheck(const std::string &file) KTHROW(maiken::SettingsException) {
+  void cycleCheck(std::string const& file) KTHROW(maiken::SettingsException) {
     if (files.count(file))
       KEXCEPT(maiken::SettingsException, "Super cycle detected in file: " + file);
     files.insert(file);
@@ -50,7 +50,7 @@ class SuperSettings {
 };
 }  // namespace maiken
 
-maiken::Settings::Settings(const std::string &file_) : kul::yaml::File(file_) {
+maiken::Settings::Settings(std::string const& file_) : kul::yaml::File(file_) {
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_REPO]) {
     kul::Dir d(root()[STR_LOCAL][STR_REPO].Scalar());
     if (!d.is() && !d.mk())
@@ -62,19 +62,19 @@ maiken::Settings::Settings(const std::string &file_) : kul::yaml::File(file_) {
       KEXCEPT(SettingsException, "settings.yaml local/mod-repo is not a valid directory");
   }
   if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_REPO])
-    for (const auto &s : kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
+    for (auto const& s : kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
       rrs.push_back(s);
   {
-    const std::string &rr = _MKN_REMOTE_REPO_;
-    for (const auto &s : kul::String::SPLIT(rr, ' ')) rrs.push_back(s);
+    std::string const& rr = _MKN_REMOTE_REPO_;
+    for (auto const& s : kul::String::SPLIT(rr, ' ')) rrs.push_back(s);
   }
 
   if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_MOD_REPO])
-    for (const auto &s : kul::String::SPLIT(root()[STR_REMOTE][STR_MOD_REPO].Scalar(), ' '))
+    for (auto const& s : kul::String::SPLIT(root()[STR_REMOTE][STR_MOD_REPO].Scalar(), ' '))
       rms.push_back(s);
   {
-    const std::string &rr = _MKN_REMOTE_MOD_;
-    for (const auto &s : kul::String::SPLIT(rr, ' ')) rms.push_back(s);
+    std::string const& rr = _MKN_REMOTE_MOD_;
+    for (auto const& s : kul::String::SPLIT(rr, ' ')) rms.push_back(s);
   }
 
   if (root()[STR_SUPER]) {
@@ -84,21 +84,21 @@ maiken::Settings::Settings(const std::string &file_) : kul::yaml::File(file_) {
       KEXCEPT(SettingsException, "super cannot reference itself\n" + file());
     SuperSettings::INSTANCE().cycleCheck(f.real());
     sup = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
-    for (const auto &p : sup->properties())
+    for (auto const& p : sup->properties())
       if (!ps.count(p.first)) ps.insert(p.first, p.second);
   }
   if (root()[STR_COMPILER] && root()[STR_COMPILER][STR_MASK])
-    for (const auto &k : Compilers::INSTANCE().keys())
+    for (auto const& k : Compilers::INSTANCE().keys())
       if (root()[STR_COMPILER][STR_MASK][k])
-        for (const auto &s : kul::String::SPLIT(root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
+        for (auto const& s : kul::String::SPLIT(root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
           Compilers::INSTANCE().addMask(s, k);
 
   resolveProperties();
 }
 
-maiken::Settings &maiken::Settings::INSTANCE() KTHROW(kul::Exit) {
+maiken::Settings& maiken::Settings::INSTANCE() KTHROW(kul::Exit) {
   if (!instance.get()) {
-    const kul::File f("settings.yaml", kul::user::home("maiken"));
+    kul::File const f("settings.yaml", kul::user::home("maiken"));
     if (!f.dir().is()) f.dir().mk();
     if (!f.is()) {
       write(f);
@@ -121,17 +121,17 @@ void maiken::Settings::resolveProperties() KTHROW(SettingsException) {
   }
 }
 
-std::string maiken::Settings::RESOLVE(const std::string &s) KTHROW(SettingsException) {
+std::string maiken::Settings::RESOLVE(std::string const& s) KTHROW(SettingsException) {
   std::vector<kul::File> pos{kul::File(s), kul::File(s + ".yaml"),
                              kul::File(s, kul::user::home("maiken")),
                              kul::File(s + ".yaml", kul::user::home("maiken"))};
-  for (const auto &f : pos)
+  for (auto const& f : pos)
     if (f.is()) return f.real();
 
   return "";
 }
 
-bool maiken::Settings::SET(const std::string &s) {
+bool maiken::Settings::SET(std::string const& s) {
   std::string file(RESOLVE(s));
   if (file.size()) {
     instance = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(file));
@@ -144,7 +144,7 @@ const kul::yaml::Validator maiken::Settings::validator() const {
   using namespace kul::yaml;
 
   std::vector<NodeValidator> masks;
-  for (const auto &s : Compilers::INSTANCE().keys())
+  for (auto const& s : Compilers::INSTANCE().keys())
     masks.push_back(NodeValidator(s, {}, 0, NodeType::STRING));
 
   return Validator({
@@ -176,7 +176,7 @@ const kul::yaml::Validator maiken::Settings::validator() const {
   });
 }
 
-void maiken::Settings::write(const kul::File &file) KTHROW(kul::Exit) {
+void maiken::Settings::write(kul::File const& file) KTHROW(kul::Exit) {
   kul::io::Writer w(file);
   w.write("\n", true);
 

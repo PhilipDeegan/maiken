@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "lib/b.hpp"
 #include "lib/z.hpp"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   a();
   b();
 

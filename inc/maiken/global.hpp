@@ -77,99 +77,99 @@ class AppVars : public Constants {
   AppVars();
 
  public:
-  const std::string &args() const { return aa; }
-  void args(const std::string &aa) { this->aa = aa; }
+  std::string const& args() const { return aa; }
+  void args(std::string const& aa) { this->aa = aa; }
 
-  const bool &dump() const { return this->du; }
-  void dump(const bool &du) { this->du = du; }
+  bool const& dump() const { return this->du; }
+  void dump(bool const& du) { this->du = du; }
 
-  const bool &force() const { return this->fo; }
-  void force(const bool &fo) { this->fo = fo; }
+  bool const& force() const { return this->fo; }
+  void force(bool const& fo) { this->fo = fo; }
 
-  const std::string &runArgs() const { return ra; }
-  void runArgs(const std::string &ra) { this->ra = ra; }
+  std::string const& runArgs() const { return ra; }
+  void runArgs(std::string const& ra) { this->ra = ra; }
 
-  const kul::hash::map::S2S &jargs() const { return jas; }
-  void jargs(const std::string &a, const std::string &b) { jas[a] = b; }
+  const kul::hash::map::S2S& jargs() const { return jas; }
+  void jargs(std::string const& a, std::string const& b) { jas[a] = b; }
 
-  const std::string &linker() const { return la; }
-  void linker(const std::string &la) { this->la = la; }
+  std::string const& linker() const { return la; }
+  void linker(std::string const& la) { this->la = la; }
 
-  const std::string &allinker() const { return al; }
-  void allinker(const std::string &al) { this->al = al; }
+  std::string const& allinker() const { return al; }
+  void allinker(std::string const& al) { this->al = al; }
 
-  const bool &dryRun() const { return this->dr; }
-  void dryRun(const bool &dr) { this->dr = dr; }
+  bool const& dryRun() const { return this->dr; }
+  void dryRun(bool const& dr) { this->dr = dr; }
 
-  const bool &quiet() const { return this->q; }
-  void quiet(const bool &q) { this->q = q; }
+  bool const& quiet() const { return this->q; }
+  void quiet(bool const& q) { this->q = q; }
 
-  const bool &update() const { return this->u; }
-  void update(const bool &u) { this->u = u; }
+  bool const& update() const { return this->u; }
+  void update(bool const& u) { this->u = u; }
 
-  const bool &fupdate() const { return this->fu; }
-  void fupdate(const bool &fu) { this->fu = fu; }
+  bool const& fupdate() const { return this->fu; }
+  void fupdate(bool const& fu) { this->fu = fu; }
 
-  const bool &show() const { return this->s; }
-  void show(const bool &s) { this->s = s; }
+  bool const& show() const { return this->s; }
+  void show(bool const& s) { this->s = s; }
 
-  const bool &shar() const { return this->sh; }
-  void shar(const bool &sh) { this->sh = sh; }
+  bool const& shar() const { return this->sh; }
+  void shar(bool const& sh) { this->sh = sh; }
 
-  const bool &stat() const { return this->st; }
-  void stat(const bool &st) { this->st = st; }
+  bool const& stat() const { return this->st; }
+  void stat(bool const& st) { this->st = st; }
 
-  const std::string &dependencyString() const { return dep; }
-  void dependencyString(const std::string &dep) { this->dep = dep; }
+  std::string const& dependencyString() const { return dep; }
+  void dependencyString(std::string const& dep) { this->dep = dep; }
 
-  const uint16_t &debug() const { return de; }
-  void debug(const uint16_t &de) { this->de = de; }
+  uint16_t const& debug() const { return de; }
+  void debug(uint16_t const& de) { this->de = de; }
 
-  const uint16_t &optimise() const { return op; }
-  void optimise(const uint16_t &op) { this->op = op; }
+  uint16_t const& optimise() const { return op; }
+  void optimise(uint16_t const& op) { this->op = op; }
 
-  const uint16_t &warn() const { return wa; }
-  void warn(const uint16_t &wa) { this->wa = wa; }
+  uint16_t const& warn() const { return wa; }
+  void warn(uint16_t const& wa) { this->wa = wa; }
 
-  const uint16_t &dependencyLevel() const { return dl; }
-  void dependencyLevel(const uint16_t &dl) { this->dl = dl; }
+  uint16_t const& dependencyLevel() const { return dl; }
+  void dependencyLevel(uint16_t const& dl) { this->dl = dl; }
 
-  const uint16_t &threads() const { return ts; }
-  void threads(const uint16_t &t) { this->ts = t; }
+  uint16_t const& threads() const { return ts; }
+  void threads(uint16_t const& t) { this->ts = t; }
 
-  const kul::hash::map::S2S &properkeys() const { return pks; }
-  void properkeys(const std::string &k, const std::string &v) { pks[k] = v; }
+  const kul::hash::map::S2S& properkeys() const { return pks; }
+  void properkeys(std::string const& k, std::string const& v) { pks[k] = v; }
 
-  const kul::hash::map::S2S &envVars() const { return evs; }
-  std::string envVar(const std::string &&k) const { return (*evs.find(k)).second; }
-  void envVar(const std::string &k, const std::string &v) { evs[k] = v; }
+  const kul::hash::map::S2S& envVars() const { return evs; }
+  std::string envVar(std::string const&& k) const { return (*evs.find(k)).second; }
+  void envVar(std::string const& k, std::string const& v) { evs[k] = v; }
 
-  void command(const std::string &s) { cmds.insert(s); }
-  const kul::hash::set::String &commands() const { return cmds; }
+  void command(std::string const& s) { cmds.insert(s); }
+  kul::hash::set::String const& commands() const { return cmds; }
 
-  const std::string &with() const { return wi; }
-  void with(const std::string &wi) { this->wi = wi; }
+  std::string const& with() const { return wi; }
+  void with(std::string const& wi) { this->wi = wi; }
 
-  const std::string &mods() const { return mo; }
-  void mods(const std::string &mo) { this->mo = mo; }
+  std::string const& mods() const { return mo; }
+  void mods(std::string const& mo) { this->mo = mo; }
 
-  const std::string &without() const { return wo; }
-  void without(const std::string &wo) { this->wo = wo; }
+  std::string const& without() const { return wo; }
+  void without(std::string const& wo) { this->wo = wo; }
 
-  const kul::hash::set::String &withoutParsed() const { return wop; }
-  void withoutParsed(const kul::hash::set::String &wop) { this->wop = wop; }
+  kul::hash::set::String const& withoutParsed() const { return wop; }
+  void withoutParsed(kul::hash::set::String const& wop) { this->wop = wop; }
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-  const uint16_t &nodes() const { return no; }
-  void nodes(const uint16_t &no) { this->no = no; }
+  uint16_t const& nodes() const { return no; }
+  void nodes(uint16_t const& no) { this->no = no; }
 
-  static AppVars &SET(std::shared_ptr<AppVars> update) {
+  static AppVars& SET(std::shared_ptr<AppVars> update) {
     if (instance == nullptr) instance = std::move(update);
     return *instance;
   }
 
   template <class Archive>
-  void save(Archive &ar) const {
+  void save(Archive& ar) const {
     ar(dr, f, q, s, sh, st, u);
 
     ar(de, dl, op, ts, wa);
@@ -178,15 +178,15 @@ class AppVars : public Constants {
     ar(no);
 
     auto convert_to_std_set =
-        [](const kul::hash::set::String &s) -> std::unordered_set<std::string> {
+        [](kul::hash::set::String const& s) -> std::unordered_set<std::string> {
       std::unordered_set<std::string> ret;
-      for (const auto &p : s) ret.emplace(p);
+      for (auto const& p : s) ret.emplace(p);
       return ret;
     };
     auto convert_to_std_map =
-        [](const kul::hash::map::S2S &s) -> std::unordered_map<std::string, std::string> {
+        [](const kul::hash::map::S2S& s) -> std::unordered_map<std::string, std::string> {
       std::unordered_map<std::string, std::string> ret;
-      for (const auto &p : s) ret.emplace(p.first, p.second);
+      for (auto const& p : s) ret.emplace(p.first, p.second);
       return ret;
     };
 
@@ -194,7 +194,7 @@ class AppVars : public Constants {
     ar(convert_to_std_map(evs), convert_to_std_map(jas), convert_to_std_map(pks));
   }
   template <class Archive>
-  void load(Archive &ar) {
+  void load(Archive& ar) {
     ar(dr, f, q, s, sh, st, u);
 
     ar(de, dl, op, ts, wa);
@@ -203,15 +203,15 @@ class AppVars : public Constants {
     ar(no);
 
     auto convert_to_kul_set =
-        [](const std::unordered_set<std::string> &s) -> kul::hash::set::String {
+        [](const std::unordered_set<std::string>& s) -> kul::hash::set::String {
       kul::hash::set::String ret;
-      for (const auto &p : s) ret.insert(p);
+      for (auto const& p : s) ret.insert(p);
       return ret;
     };
     auto convert_to_kul_map =
-        [](const std::unordered_map<std::string, std::string> &s) -> kul::hash::map::S2S {
+        [](const std::unordered_map<std::string, std::string>& s) -> kul::hash::map::S2S {
       kul::hash::map::S2S ret;
-      for (const auto &p : s) ret.insert(p.first, p.second);
+      for (auto const& p : s) ret.insert(p.first, p.second);
       return ret;
     };
     std::unordered_set<std::string> _cmds, _wop;
@@ -229,7 +229,7 @@ class AppVars : public Constants {
 
 #endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
 
-  static AppVars &INSTANCE() {
+  static AppVars& INSTANCE() {
     if (instance == nullptr) instance.reset(new AppVars);
     return *instance;
   }

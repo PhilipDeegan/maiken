@@ -31,13 +31,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/app.hpp"
 
 void maiken::Application::withArgs(
-    const std::string with_str, std::vector<YAML::Node> &with_nodes,
-    std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool dep) {
+    std::string const with_str, std::vector<YAML::Node>& with_nodes,
+    std::function<void(YAML::Node const& n, bool const mod)> getIfMissing, bool dep) {
   if (with_str.size()) {
     kul::hash::set::String withs;
     try {
       parseDependencyString(with_str, withs);
-    } catch (const kul::Exception &e) {
+    } catch (kul::Exception const& e) {
       if (with_str[0] == '[' && with_str[with_str.size() - 1] == ']')
         withs.insert(this->project().root()[STR_NAME].Scalar() + with_str);
       else
@@ -48,13 +48,13 @@ void maiken::Application::withArgs(
 }
 
 void maiken::Application::with(
-    kul::hash::set::String &withs, std::vector<YAML::Node> &with_nodes,
-    std::function<void(const YAML::Node &n, const bool mod)> getIfMissing, bool dep) {
-  for (const auto &with : withs) {
+    kul::hash::set::String& withs, std::vector<YAML::Node>& with_nodes,
+    std::function<void(YAML::Node const& n, bool const mod)> getIfMissing, bool dep) {
+  for (auto const& with : withs) {
     YAML::Node node;
     std::string local /*&*/, profiles, proj = with, version /*#*/, scm;
 
-    auto get_between = [&](auto &var, auto lbrak, auto rbrak) {
+    auto get_between = [&](auto& var, auto lbrak, auto rbrak) {
       auto between = maiken::string::between_rm_str(proj, lbrak, rbrak);
       if (between.found) proj = between.remaining, var = *between.found;
       return !between.error;
@@ -79,7 +79,7 @@ void maiken::Application::with(
     if (am != std::string::npos && ha != std::string::npos)
       if (ha > am) KEXIT(1, "-w invalid, version must before location");
 
-    auto if_set = [&](auto s, auto &v, auto n) {
+    auto if_set = [&](auto s, auto& v, auto n) {
       if (s != std::string::npos) v = proj.substr(s + 1), proj = proj.substr(0, s), n = v;
     };
     if_set(am, local, node[STR_LOCAL]);

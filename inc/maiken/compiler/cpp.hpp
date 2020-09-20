@@ -41,26 +41,26 @@ namespace cpp {
 
 class Exception : public kul::Exception {
  public:
-  Exception(const char *f, const int l, std::string s) : kul::Exception(f, l, s) {}
+  Exception(char const* f, int const l, std::string s) : kul::Exception(f, l, s) {}
 };
 
 enum class CCompiler_Type : uint16_t { NON = 0, GCC = 1, CLANG = 2, ICC = 3, HCC = 4, WIN = 5 };
 
 class CCompiler : public Compiler {
  protected:
-  CCompiler(const int &v) : Compiler(v) {}
+  CCompiler(int const& v) : Compiler(v) {}
 
  public:
   virtual ~CCompiler() {}
   virtual std::string cc() const = 0;
   virtual std::string cxx() const = 0;
-  virtual std::string defaultSharedLib(std::string const &lib) const;
-  virtual std::string sharedLib(Application const &app, std::string const &lib) const;
-  virtual std::string staticLib(std::string const &lib) const = 0;
+  virtual std::string defaultSharedLib(std::string const& lib) const;
+  virtual std::string sharedLib(Application const& app, std::string const& lib) const;
+  virtual std::string staticLib(std::string const& lib) const = 0;
   bool sourceIsBin() const override { return false; }
 
-  const std::string oType() const { return AppVars::INSTANCE().envVars().at("MKN_OBJ"); }
-  const std::string oStar() const { return "*." + oType(); }
+  std::string const oType() const { return AppVars::INSTANCE().envVars().at("MKN_OBJ"); }
+  std::string const oStar() const { return "*." + oType(); }
 
   virtual CCompiler_Type type() const = 0;
 
@@ -77,35 +77,35 @@ class CCompiler : public Compiler {
 
 class GccCompiler : public CCompiler {
  public:
-  GccCompiler(const int &v = 0);
+  GccCompiler(int const& v = 0);
   virtual ~GccCompiler() {}
 
-  std::string staticLib(std::string const &lib) const override { return "lib" + lib + ".a"; }
+  std::string staticLib(std::string const& lib) const override { return "lib" + lib + ".a"; }
 
   virtual std::string cc() const override { return CC("gcc"); }
   virtual std::string cxx() const override { return CXX("g++"); }
 
-  CompilerProcessCapture compileSource(CompileDAO &dao) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture compileSource(CompileDAO& dao) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture buildExecutable(LinkDAO &dao) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture buildExecutable(LinkDAO& dao) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture buildLibrary(LinkDAO &dao) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture buildLibrary(LinkDAO& dao) const KTHROW(kul::Exception) override;
 
-  virtual void preCompileHeader(std::vector<std::string> const &incs,
-                                std::vector<std::string> const &args, std::string const &in,
-                                std::string const &out, bool dryRun = false) const
+  virtual void preCompileHeader(std::vector<std::string> const& incs,
+                                std::vector<std::string> const& args, std::string const& in,
+                                std::string const& out, bool dryRun = false) const
       KTHROW(kul::Exception) override;
 
   CCompiler_Type type() const override { return CCompiler_Type::GCC; }
 
-  void rpathing(maiken::Application const &app, kul::Process &p, const kul::File &out,
-                std::vector<std::string> const &libs,
-                std::vector<std::string> const &libPaths) const;
+  void rpathing(maiken::Application const& app, kul::Process& p, kul::File const& out,
+                std::vector<std::string> const& libs,
+                std::vector<std::string> const& libPaths) const;
 };
 
 class ClangCompiler : public GccCompiler {
  public:
-  ClangCompiler(const int &v = 0) : GccCompiler(v) {}
+  ClangCompiler(int const& v = 0) : GccCompiler(v) {}
   std::string cc() const override { return CC("clang"); }
   std::string cxx() const override { return CXX("clang++"); }
   CCompiler_Type type() const override { return CCompiler_Type::CLANG; }
@@ -113,7 +113,7 @@ class ClangCompiler : public GccCompiler {
 
 class HccCompiler : public GccCompiler {
  public:
-  HccCompiler(const int &v = 0) : GccCompiler(v) {}
+  HccCompiler(int const& v = 0) : GccCompiler(v) {}
   std::string cc() const override { return CC("hcc"); }
   std::string cxx() const override { return CXX("h++"); }
   CCompiler_Type type() const override { return CCompiler_Type::HCC; }
@@ -121,7 +121,7 @@ class HccCompiler : public GccCompiler {
 
 class IntelCompiler : public GccCompiler {
  public:
-  IntelCompiler(const int &v = 0) : GccCompiler(v) {}
+  IntelCompiler(int const& v = 0) : GccCompiler(v) {}
   std::string cc() const override { return CC("icc"); }
   std::string cxx() const override { return CXX("icpc"); }
   CCompiler_Type type() const override { return CCompiler_Type::ICC; }
@@ -130,22 +130,22 @@ class IntelCompiler : public GccCompiler {
 class WINCompiler : public CCompiler {
  protected:
  public:
-  WINCompiler(const int &v = 0);
+  WINCompiler(int const& v = 0);
   virtual ~WINCompiler() {}
 
   std::string cc() const override { return CC("cl"); }
   std::string cxx() const override { return CXX("cl"); }
 
-  std::string staticLib(std::string const &lib) const override { return lib + ".lib"; }
+  std::string staticLib(std::string const& lib) const override { return lib + ".lib"; }
 
-  CompilerProcessCapture compileSource(CompileDAO &dao) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture compileSource(CompileDAO& dao) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture buildExecutable(LinkDAO &dao) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture buildExecutable(LinkDAO& dao) const KTHROW(kul::Exception) override;
 
-  CompilerProcessCapture buildLibrary(LinkDAO &dao) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture buildLibrary(LinkDAO& dao) const KTHROW(kul::Exception) override;
 
-  virtual void preCompileHeader(std::vector<std::string> const &, std::vector<std::string> const &,
-                                std::string const &, std::string const &, bool = false) const
+  virtual void preCompileHeader(std::vector<std::string> const&, std::vector<std::string> const&,
+                                std::string const&, std::string const&, bool = false) const
       KTHROW(kul::Exception) override {
     KEXCEPTION("Method is not implemented");
   }

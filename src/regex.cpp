@@ -48,13 +48,13 @@ std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(kul::E
   for (size_t i = 1; i < bits.size() - 1; i++) d = d.join(bits[i]);
 
   auto regexer = [&](auto items) {
-    for (const auto &item : items) {
+    for (auto const& item : items) {
       try {
         std::regex re(str);
         std::smatch match;
         std::string subject(item.real());
         if (std::regex_search(subject, match, re) && match.size() > 1) RESOLVE_REC(item.real(), v);
-      } catch (std::regex_error &e) {
+      } catch (std::regex_error& e) {
         KEXIT(1, "Regex Failure:\n") << e.what();
       }
     }
@@ -63,7 +63,7 @@ std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(kul::E
   return v;
 }
 
-void maiken::Regexer::RESOLVE_REC(const std::string &i, std::vector<std::string> &v)
+void maiken::Regexer::RESOLVE_REC(std::string const& i, std::vector<std::string>& v)
     KTHROW(kul::Exception) {
   if (kul::File(i).is() && !kul::Dir(i).is()) {
     v.push_back(i);

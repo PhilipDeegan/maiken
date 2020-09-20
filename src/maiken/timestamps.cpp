@@ -30,19 +30,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::writeTimeStamps(kul::hash::set::String &objects,
-                                          std::vector<kul::File> &cacheFiles) {
-  const std::string oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
+void maiken::Application::writeTimeStamps(kul::hash::set::String& objects,
+                                          std::vector<kul::File>& cacheFiles) {
+  std::string const oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
   kul::Dir mkn(buildDir().join(".mkn"), 1);
   kul::File srcStamps("src_stamp", mkn);
   kul::File incStamps("inc_stamp", mkn);
-  for (const auto &src : stss)
+  for (auto const& src : stss)
     if (std::find(cacheFiles.begin(), cacheFiles.end(), src.first) == cacheFiles.end())
       cacheFiles.push_back(src.first);
-  kul::hash::map::S2T<const Compiler *> compilers;
-  for (const auto &f : cacheFiles) {
+  kul::hash::map::S2T<Compiler const*> compilers;
+  for (auto const& f : cacheFiles) {
     std::string ft = f.name().substr(f.name().rfind(".") + 1);
-    const Compiler *compiler;
+    Compiler const* compiler;
     if (compilers.count(ft))
       compiler = (*compilers.find(ft)).second;
     else {
@@ -53,15 +53,15 @@ void maiken::Application::writeTimeStamps(kul::hash::set::String &objects,
       if (std::find(objects.begin(), objects.end(), f.escm()) == objects.end())
         objects.insert(f.escm());
   }
-  for (const auto &f : buildDir().files(1))
+  for (auto const& f : buildDir().files(1))
     if (f.name().size() > 4 && f.name().substr(f.name().size() - 4) == oType)
       if (std::find(objects.begin(), objects.end(), f.escm()) == objects.end())
         objects.insert(f.escm());
 
   kul::io::Writer srcW(srcStamps);
   kul::io::Writer incW(incStamps);
-  for (const auto &i : includeStamps) incW << i.first << " " << i.second << kul::os::EOL();
-  for (const auto &src : cacheFiles)
+  for (auto const& i : includeStamps) incW << i.first << " " << i.second << kul::os::EOL();
+  for (auto const& src : cacheFiles)
     if (!(*compilers.find(src.name().substr(src.name().rfind(".") + 1))).second->sourceIsBin())
       srcW << src.mini() << " " << src.timeStamps().modified() << kul::os::EOL();
 }
@@ -72,7 +72,7 @@ void maiken::Application::loadTimeStamps() KTHROW(kul::StringException) {
     kul::File src("src_stamp", mkn);
     if (mkn && src) {
       kul::io::Reader r(src);
-      const char *c = 0;
+      char const* c = 0;
       while ((c = r.readLine())) {
         std::string s(c);
         if (s.size() == 0) continue;
@@ -81,7 +81,7 @@ void maiken::Application::loadTimeStamps() KTHROW(kul::StringException) {
         if (bits.size() != 2) KEXIT(1, "timestamp file invalid format\n" + src.full());
         try {
           stss.insert(bits[0], kul::String::UINT64(bits[1]));
-        } catch (const kul::StringException &e) {
+        } catch (const kul::StringException& e) {
           KEXIT(1, "timestamp file invalid format\n" + src.full());
         }
       }
@@ -89,7 +89,7 @@ void maiken::Application::loadTimeStamps() KTHROW(kul::StringException) {
     kul::File inc("inc_stamp", mkn);
     if (mkn && inc) {
       kul::io::Reader r(inc);
-      const char *c = 0;
+      char const* c = 0;
       while ((c = r.readLine())) {
         std::string s(c);
         if (s.size() == 0) continue;
@@ -99,10 +99,10 @@ void maiken::Application::loadTimeStamps() KTHROW(kul::StringException) {
         itss.insert(bits[0], bits[1]);
       }
     }
-    for (const auto &i : includes()) {
+    for (auto const& i : includes()) {
       kul::Dir inc(i.first);
       uint64_t includeStamp = inc.timeStamps().modified();
-      for (const auto fi : inc.files(1)) includeStamp += fi.timeStamps().modified();
+      for (auto const fi : inc.files(1)) includeStamp += fi.timeStamps().modified();
       std::ostringstream os;
       os << std::hex << includeStamp;
       includeStamps.insert(inc.mini(), os.str());

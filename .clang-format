@@ -2,3 +2,6 @@ IndentWidth: 2
 BasedOnStyle: 'google'
 ColumnLimit: 100
 SortIncludes: false
+UseTab: Never
+DerivePointerAlignment: false
+PointerAlignment: Left
