@@ -18,7 +18,7 @@ jobs:
 
     - run: make nix
 
-    - run: KLOG=3 ./mkn build -dtKOW 9 -g 0 -a "-std=c++17 -fPIC"
+    - run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9
 
     - uses: actions/upload-artifact@v1
       with:
