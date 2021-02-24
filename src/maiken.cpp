@@ -55,7 +55,7 @@ void maiken::Application::resolveLang() KTHROW(maiken::Exception) {
         maxI = s_i.second;
         maxS = s_i.first;
       }
-    for (auto const s_i : mapS)
+    for (auto const& s_i : mapS)
       if (s_i.second == maxI) maxO++;
     if (maxO > 1)
       KEXCEPSTREAM << "file type conflict: linker filetype cannot be deduced, "

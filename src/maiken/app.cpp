@@ -68,8 +68,8 @@ maiken::Application* maiken::Applications::getOrCreateRoot(maiken::Project const
 maiken::Application* maiken::Applications::getOrNullptr(std::string const& project) {
   uint32_t count = 0;
   Application* app = nullptr;
-  for (auto const p1 : m_apps)
-    for (auto const p2 : p1.second) {
+  for (auto const& p1 : m_apps)
+    for (auto const& p2 : p1.second) {
       if (p2.second->project().root()[STR_NAME].Scalar() == project) {
         count++;
         app = p2.second;
