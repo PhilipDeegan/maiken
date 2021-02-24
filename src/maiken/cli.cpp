@@ -34,7 +34,7 @@ void maiken::Application::addCLIArgs(kul::cli::Args const& args) {
   auto addIncsOrPaths = [&args](Application& a) {
     auto splitPathAndCheck = [](std::string const& path, std::string const& type) {
       auto const v(kul::String::SPLIT(path, kul::env::SEP()));
-      for (auto const s : v) {
+      for (auto const& s : v) {
         kul::Dir d(s);
         if (!d) KEXIT(1, type + " directory does not exist: ") << s;
       }

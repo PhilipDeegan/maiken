@@ -81,7 +81,7 @@ class Validator : public maiken::Constants {
   static void POST_BUILD(maiken::Application const& a, YAML::Node const& n)
       KTHROW(maiken::Exception) {
     std::stringstream ss;
-    for (auto const f : a.files()) ss << f.first << " ";
+    for (auto const& f : a.files()) ss << f.first << " ";
     if (n[STR_MAIN] &&
         !a.files().count(n[STR_MAIN].Scalar().substr(n[STR_MAIN].Scalar().rfind(".") + 1)))
       KEXIT(1, "main tag invalid type, valid types are\n" + ss.str() + "\n" +

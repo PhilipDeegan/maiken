@@ -43,7 +43,7 @@ void maiken::Application::findObjects(kul::hash::set::String& objects) const {
         if (!buildDir().is())
           KEXCEPT(maiken::Exception, "No object directory found.\n" + project().dir().path());
         std::string const oType = "." + AppVars::INSTANCE().envVars().at("MKN_OBJ");
-        for (kul::File const f : objDir.files(true)) {
+        for (kul::File const& f : objDir.files(true)) {
           auto file = f.mini();
           if (file.rfind(oType) == file.size() - oType.size()) objects.insert(file);
         }

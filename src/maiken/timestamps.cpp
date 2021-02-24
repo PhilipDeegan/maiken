@@ -102,7 +102,7 @@ void maiken::Application::loadTimeStamps() KTHROW(kul::StringException) {
     for (auto const& i : includes()) {
       kul::Dir inc(i.first);
       uint64_t includeStamp = inc.timeStamps().modified();
-      for (auto const fi : inc.files(1)) includeStamp += fi.timeStamps().modified();
+      for (auto const& fi : inc.files(1)) includeStamp += fi.timeStamps().modified();
       std::ostringstream os;
       os << std::hex << includeStamp;
       includeStamps.insert(inc.mini(), os.str());
