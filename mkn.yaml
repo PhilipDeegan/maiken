@@ -4,7 +4,7 @@ name: mkn
 scm: https://github.com/dekken/maiken
 version: master
 property:
-  DATE: 13-SEP-2020
+  DATE: 03-APR-2021
 
 parent: bin
 mode: none

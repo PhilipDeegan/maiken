@@ -288,7 +288,7 @@ class KUL_PUBLISH Application : public Constants {
   bool ig = 1, isMod = 0, ro = 0;
   Application const* par = nullptr;
   Application* sup = nullptr;
-  compiler::Mode m;
+  compiler::Mode m{compiler::Mode::SHAR};
   std::string arg, bin, lang, lnk, out, scr, scv;
   std::optional<Source> main_;
   std::string const p;

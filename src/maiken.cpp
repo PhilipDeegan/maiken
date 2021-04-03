@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 maiken::Application::Application(maiken::Project const& proj, std::string const& profile)
-    : m(compiler::Mode::NONE), p(profile), proj(proj) {
+    : p(profile), proj(proj) {
   ps["MKN_ROOT"] = proj.dir().real();
 }
 
