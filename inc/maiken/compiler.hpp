@@ -53,6 +53,14 @@ struct CompilationInfo {
 
 namespace compiler {
 enum Mode { NONE = 0, STAT, SHAR };
+
+inline auto mode_from(std::string const& mode){
+  if(mode == Constants::STR_SHARED)
+      return Mode::SHAR;
+  if(mode == Constants::STR_STATIC)
+      return Mode::STAT;
+  return Mode::NONE;
+}
 }
 
 struct CompileDAO {

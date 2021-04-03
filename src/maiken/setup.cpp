@@ -201,9 +201,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     for (auto const& n : nodes) {
       if (n[STR_NAME].Scalar() != profile) continue;
       if (n[STR_MODE] && nm) {
-        m = n[STR_MODE].Scalar() == STR_STATIC
-                ? compiler::Mode::STAT
-                : n[STR_MODE].Scalar() == STR_SHARED ? compiler::Mode::SHAR : compiler::Mode::NONE;
+        this->mode(compiler::mode_from(n[STR_MODE].Scalar()));
         nm = 0;
       }
       if (out.empty() && n[STR_OUT]) out = Properties::RESOLVE(*this, n[STR_OUT].Scalar());
@@ -228,6 +226,7 @@ void maiken::Application::setup() KTHROW(kul::Exception) {
     else if (AppVars::INSTANCE().stat())
       m = compiler::Mode::STAT;
   }
+
   profile = p.size() ? p : project().root()[STR_NAME].Scalar();
   c = 1;
   while (c) {

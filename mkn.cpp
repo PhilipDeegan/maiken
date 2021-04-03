@@ -28,6 +28,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "kul/all.hpp"
 #include "kul/log.hpp"
 #include "kul/signal.hpp"
 #include "maiken.hpp"
@@ -41,9 +42,10 @@ int main(int argc, char* argv[]) {
   try {
     for (auto app : maiken::Application::CREATE(argc, argv)) app->process();
 
-    bool print_build_time = false;
-    for (auto const& key : {"build", "compile", "link"})
-      print_build_time |= maiken::CommandStateMachine::INSTANCE().has(key);
+    bool print_build_time = kul::any_of(
+        std::vector<std::string>{"build", "compile", "link"},
+        [](auto const& key){
+           return maiken::CommandStateMachine::INSTANCE().has(key); });
 
     if (print_build_time) {
       KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
@@ -62,6 +64,5 @@ int main(int argc, char* argv[]) {
     KERR << e.what();
     ret = 1;
   }
-  maiken::Applications::INSTANCE().clear();
   return ret;
 }
