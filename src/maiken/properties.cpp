@@ -88,7 +88,7 @@ std::string maiken::Properties::RESOLVE(Application const& app, std::string cons
   return r;
 }
 
-std::string maiken::Properties::RESOLVE(const Settings& set, std::string const& s)
+std::string maiken::Properties::RESOLVE(Settings const& set, std::string const& s)
     KTHROW(kul::Exception) {
   std::string r = s;
   std::shared_ptr<std::tuple<std::string, int, int>> t = KEY(set.properties(), s);
