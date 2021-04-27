@@ -74,14 +74,14 @@ std::string maiken::Properties::RESOLVE(Application const& app, std::string cons
     int const& rb = std::get<2>(*t);
 
     if (AppVars::INSTANCE().properkeys().count(k))
-      k = (*AppVars::INSTANCE().properkeys().find(k)).second;
+      k = AppVars::INSTANCE().properkeys().at(k);
     else if (app.properties().count(k) == 0) {
       if (app.project().root()[k] && app.project().root()[k].Type() == 2)
         k = app.project().root()[k].Scalar();
       else
         KEXIT(1, "Property : '" + k + "' has not been defined");
     } else
-      k = (*app.properties().find(k)).second;
+      k = app.properties().at(k);
     r = Properties::RESOLVE(app, r.substr(0, lb) + k + r.substr(rb + 1));
   }
   kul::String::TRIM(r);
@@ -98,9 +98,9 @@ std::string maiken::Properties::RESOLVE(Settings const& set, std::string const& 
     int const& rb = std::get<2>(*t);
 
     if (AppVars::INSTANCE().properkeys().count(k))
-      k = (*AppVars::INSTANCE().properkeys().find(k)).second;
+      k = AppVars::INSTANCE().properkeys().at(k);
     else if (set.properties().count(k) > 0)
-      k = (*set.properties().find(k)).second;
+      k = set.properties().at(k);
     else
       KEXIT(1, "Property : '" + k + "' has not been defined");
     r = Properties::RESOLVE(set, r.substr(0, lb) + k + r.substr(rb + 1));
