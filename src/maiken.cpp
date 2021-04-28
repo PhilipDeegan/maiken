@@ -95,9 +95,9 @@ kul::hash::set::String maiken::Application::inactiveMains() const {
 void maiken::Application::populateMaps(YAML::Node const& n) KTHROW(kul::Exception) {
   if (n[STR_ENV]) {
     if (n[STR_ENV].IsScalar())
-      evs.emplace_back(PARSE_ENV_NODE(n[STR_ENV], this));
+      evs.emplace_back(PARSE_ENV_NODE(n[STR_ENV], *this));
     else
-      for (auto const& c : n[STR_ENV]) evs.emplace_back(PARSE_ENV_NODE(c, this));
+      for (auto const& c : n[STR_ENV]) evs.emplace_back(PARSE_ENV_NODE(c, *this));
   }
 
   if (n[STR_ARG])

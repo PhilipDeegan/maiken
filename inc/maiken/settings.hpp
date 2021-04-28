@@ -68,6 +68,8 @@ class Settings : public kul::yaml::File, public Constants {
   static Settings& INSTANCE() KTHROW(kul::Exit);
   static bool SET(std::string const& s);
   static std::string RESOLVE(std::string const& s) KTHROW(SettingsException);
+
+  static kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const&, Settings const&);
 };
 }  // namespace maiken
 #endif /* _MAIKEN_SETTINGS_HPP_ */

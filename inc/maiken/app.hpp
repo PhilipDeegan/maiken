@@ -271,7 +271,7 @@ class KUL_PUBLISH Application : public Constants {
   static std::vector<Application*> CREATE(kul::cli::Args const& args) KTHROW(kul::Exception);
   static std::vector<Application*> CREATE(int16_t argc, char* argv[]) KTHROW(kul::Exception);
 
-  static kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const&, Application* = nullptr);
+  static kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const&, Application const&);
   static kul::cli::EnvVar PARSE_PROFILE_NAME(YAML::Node const&, Application* = nullptr);
 
   static std::string hash(std::string in) {

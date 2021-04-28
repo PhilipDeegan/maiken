@@ -75,13 +75,13 @@ maiken::AppVars::AppVars() {
     if (root[STR_ENV].IsScalar()) {
       for (auto const& line : kul::String::LINES(root[STR_ENV].Scalar())) {
         auto copy = decltype(root[STR_ENV]){line};
-        auto ev = maiken::Application::PARSE_ENV_NODE(copy);
+        auto ev = maiken::Settings::PARSE_ENV_NODE(copy, Settings::INSTANCE());
         evs.emplace(ev.name(), ev.toString());
         kul::env::SET(ev.name(), ev.toString().c_str());
       }
     } else {
       for (const auto& c : root[STR_ENV]) {
-        auto ev = maiken::Application::PARSE_ENV_NODE(c);
+        auto ev = maiken::Settings::PARSE_ENV_NODE(c, Settings::INSTANCE());
         evs.emplace(ev.name(), ev.toString());
         kul::env::SET(ev.name(), ev.toString().c_str());
       }

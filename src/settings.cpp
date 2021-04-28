@@ -29,6 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
+#include "maiken/env.hpp"
 
 std::unique_ptr<maiken::Settings> maiken::Settings::instance;
 
@@ -290,4 +291,8 @@ void maiken::Settings::write(kul::File const& file) KTHROW(kul::Exit) {
   w.write("#- type: cs", true);
   w.write("#  compiler: csc", true);
   w.write("#  linker: csc", true);
+}
+
+kul::cli::EnvVar maiken::Settings::PARSE_ENV_NODE(YAML::Node const& n, Settings const& settings) {
+  return maiken::PARSE_ENV_NODE(n, settings, "settings file");
 }
