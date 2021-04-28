@@ -95,6 +95,7 @@ maiken::Settings::Settings(std::string const& file_) : kul::yaml::File(file_) {
           Compilers::INSTANCE().addMask(s, k);
 
   resolveProperties();
+
 }
 
 maiken::Settings& maiken::Settings::INSTANCE() KTHROW(kul::Exit) {
@@ -295,4 +296,29 @@ void maiken::Settings::write(kul::File const& file) KTHROW(kul::Exit) {
 
 kul::cli::EnvVar maiken::Settings::PARSE_ENV_NODE(YAML::Node const& n, Settings const& settings) {
   return maiken::PARSE_ENV_NODE(n, settings, "settings file");
+}
+
+void maiken::Settings::POST_CONSTRUCT() {
+
+  auto& settings = Settings::INSTANCE();
+  auto& root = settings.root();
+  auto& appVars = AppVars::INSTANCE();
+
+  if (root[STR_ENV]) {
+    if (root[STR_ENV].IsScalar()) {
+      auto lines = kul::String::LINES(root[STR_ENV].Scalar());
+      for (auto const& line : lines) {
+        auto copy = decltype(root[STR_ENV]){line};
+        auto ev = maiken::Settings::PARSE_ENV_NODE(copy, settings);
+        appVars.envVar(ev.name(), ev.toString());
+        kul::env::SET(ev.name(), ev.toString().c_str());
+      }
+    } else {
+      for (const auto& c : root[STR_ENV]) {
+        auto ev = maiken::Settings::PARSE_ENV_NODE(c, settings);
+        appVars.envVar(ev.name(), ev.toString());
+        kul::env::SET(ev.name(), ev.toString().c_str());
+      }
+    }
+  }
 }
