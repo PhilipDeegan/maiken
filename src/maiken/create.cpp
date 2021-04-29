@@ -200,6 +200,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(kul::cli::Args con
     KEXIT(1, "Unable to set specific settings files");
   else
     Settings::INSTANCE();
+  Settings::POST_CONSTRUCT();
 
   if (args.has(STR_DUMP)) AppVars::INSTANCE().dump(true);
   if (args.has(STR_FORCE)) AppVars::INSTANCE().force(true);
