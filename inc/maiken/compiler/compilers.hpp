@@ -53,6 +53,7 @@ std::unique_ptr<T> make_unique(Args&&... args) {
   return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
+
 class Compilers {
  public:
   static Compilers& INSTANCE() {
@@ -85,7 +86,7 @@ class Compilers {
   }
 
  private:
-  std::unique_ptr<Compiler> hcc, gcc, clang, intel, winc, wincs;
+  std::unique_ptr<Compiler> hcc, gcc, clang, intel, winc, wincs, pgcc;
   kul::hash::map::S2T<Compiler*> cs, masks;
 
  private:

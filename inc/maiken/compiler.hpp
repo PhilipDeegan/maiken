@@ -101,7 +101,10 @@ class CompilerProcessCapture : public kul::ProcessCapture {
 class Compiler {
  protected:
   Compiler(int const& v) : version(v) {}
-  int const version;
+  Compiler(){}
+
+  int const version = 0;
+
   std::unordered_map<uint8_t, std::string> m_optimise_c, m_optimise_l_bin, m_optimise_l_lib,
       m_debug_c, m_debug_l_bin, m_debug_l_lib, m_warn_c;
 

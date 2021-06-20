@@ -44,10 +44,10 @@ class Exception : public kul::Exception {
   Exception(char const* f, int const l, std::string s) : kul::Exception(f, l, s) {}
 };
 
-enum class CCompiler_Type : uint16_t { NON = 0, GCC = 1, CLANG = 2, ICC = 3, HCC = 4, WIN = 5 };
 
 class CCompiler : public Compiler {
  protected:
+  CCompiler(){}
   CCompiler(int const& v) : Compiler(v) {}
 
  public:
@@ -62,8 +62,6 @@ class CCompiler : public Compiler {
   std::string const oType() const { return AppVars::INSTANCE().envVars().at("MKN_OBJ"); }
   std::string const oStar() const { return "*." + oType(); }
 
-  virtual CCompiler_Type type() const = 0;
-
   static std::string CC(std::string deFault) {
     return kul::env::EXISTS("CC") ? kul::env::GET("CC") : deFault;
   }
@@ -77,7 +75,8 @@ class CCompiler : public Compiler {
 
 class GccCompiler : public CCompiler {
  public:
-  GccCompiler(int const& v = 0);
+  GccCompiler(){}
+  GccCompiler(int const& v);
   virtual ~GccCompiler() {}
 
   std::string staticLib(std::string const& lib) const override { return "lib" + lib + ".a"; }
@@ -96,8 +95,6 @@ class GccCompiler : public CCompiler {
                                 std::string const& out, bool dryRun = false) const
       KTHROW(kul::Exception) override;
 
-  CCompiler_Type type() const override { return CCompiler_Type::GCC; }
-
   void rpathing(maiken::Application const& app, kul::Process& p, kul::File const& out,
                 std::vector<std::string> const& libs,
                 std::vector<std::string> const& libPaths) const;
@@ -108,7 +105,6 @@ class ClangCompiler : public GccCompiler {
   ClangCompiler(int const& v = 0) : GccCompiler(v) {}
   std::string cc() const override { return CC("clang"); }
   std::string cxx() const override { return CXX("clang++"); }
-  CCompiler_Type type() const override { return CCompiler_Type::CLANG; }
 };
 
 class HccCompiler : public GccCompiler {
@@ -116,7 +112,6 @@ class HccCompiler : public GccCompiler {
   HccCompiler(int const& v = 0) : GccCompiler(v) {}
   std::string cc() const override { return CC("hcc"); }
   std::string cxx() const override { return CXX("h++"); }
-  CCompiler_Type type() const override { return CCompiler_Type::HCC; }
 };
 
 class IntelCompiler : public GccCompiler {
@@ -124,7 +119,13 @@ class IntelCompiler : public GccCompiler {
   IntelCompiler(int const& v = 0) : GccCompiler(v) {}
   std::string cc() const override { return CC("icc"); }
   std::string cxx() const override { return CXX("icpc"); }
-  CCompiler_Type type() const override { return CCompiler_Type::ICC; }
+};
+
+class PGCC_Compiler : public GccCompiler {
+ public:
+  PGCC_Compiler();
+  std::string cc() const override { return CC("pgcc"); }
+  std::string cxx() const override { return CXX("pgc++"); }
 };
 
 class WINCompiler : public CCompiler {
@@ -149,7 +150,7 @@ class WINCompiler : public CCompiler {
       KTHROW(kul::Exception) override {
     KEXCEPTION("Method is not implemented");
   }
-  CCompiler_Type type() const override { return CCompiler_Type::WIN; }
+  // CCompiler_Type type() const override { return CCompiler_Type::WIN; }
 };
 }  // namespace cpp
 }  // namespace maiken

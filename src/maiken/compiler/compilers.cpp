@@ -37,24 +37,28 @@ maiken::Compilers::Compilers() {
 
   intel = make_unique<cpp::IntelCompiler>();
   winc = make_unique<cpp::WINCompiler>();
+  pgcc = make_unique<cpp::PGCC_Compiler>();
 
   wincs = make_unique<csharp::WINCompiler>();
 
-  cs.insert(std::pair<std::string, Compiler*>("cl", winc.get()));
-  cs.insert(std::pair<std::string, Compiler*>("csc", wincs.get()));
+  cs.emplace("cl", winc.get());
+  cs.emplace("csc", wincs.get());
 
-  cs.insert(std::pair<std::string, Compiler*>("clang", clang.get()));
-  cs.insert(std::pair<std::string, Compiler*>("clang++", clang.get()));
+  cs.emplace("clang", clang.get());
+  cs.emplace("clang++", clang.get());
 
-  cs.insert(std::pair<std::string, Compiler*>("gcc", gcc.get()));
-  cs.insert(std::pair<std::string, Compiler*>("g++", gcc.get()));
+  cs.emplace("gcc", gcc.get());
+  cs.emplace("g++", gcc.get());
 
-  cs.insert(std::pair<std::string, Compiler*>("hcc", hcc.get()));
+  cs.emplace("hcc", hcc.get());
 
-  cs.insert(std::pair<std::string, Compiler*>("icc", intel.get()));
-  cs.insert(std::pair<std::string, Compiler*>("icpc", intel.get()));
+  cs.emplace("icc", intel.get());
+  cs.emplace("icpc", intel.get());
 
-  cs.insert(std::pair<std::string, Compiler*>("nvcc", gcc.get()));
+  cs.emplace("nvcc", gcc.get());
+
+  cs.emplace("pgcc", pgcc.get());
+  cs.emplace("pgc++", pgcc.get());
 }
 
 std::string maiken::Compilers::key(std::string comp, const kul::hash::map::S2T<Compiler*>& map) {
