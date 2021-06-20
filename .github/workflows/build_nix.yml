@@ -18,6 +18,7 @@ jobs:
 
     - uses: actions/upload-artifact@v1
       env:
+        MKN_GCC_PREFERRED: 1
         KUL_GIT_CO: --depth 10
       with:
         name: mkn
