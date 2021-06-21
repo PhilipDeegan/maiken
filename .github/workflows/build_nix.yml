@@ -14,11 +14,12 @@ jobs:
 
     - run: make nix
 
-    - run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9
+    - env:
+        MKN_GCC_PREFERRED: 1
+        KUL_GIT_CO: --depth 1
+      run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9
 
     - uses: actions/upload-artifact@v1
-      env:
-        KUL_GIT_CO: --depth 10
       with:
         name: mkn
         path: bin/build/mkn
