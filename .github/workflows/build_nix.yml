@@ -12,6 +12,25 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: dbg
+      run: |
+        set -x
+        ld -v
+        ldd --version
+        g++ -v
+
+    - name: upgrade
+      run: |
+        sudo apt-get update
+        sudo apt-get dist-upgrade -y
+
+    - name: dbg
+      run: |
+        set -x
+        ld -v
+        ldd --version
+        g++ -v
+
     - run: make nix
 
     - env:
