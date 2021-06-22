@@ -12,12 +12,22 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: dbg
+      run: |
+        set -x
+        ld -v
+        ldd --version
+        g++ -v
+
     - run: make nix
 
     - env:
         MKN_GCC_PREFERRED: 1
         KUL_GIT_CO: --depth 1
-      run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9
+      run: |
+        ldd mkn
+        KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9
+        ldd bin/build/mkn
 
     - uses: actions/upload-artifact@v1
       with:
