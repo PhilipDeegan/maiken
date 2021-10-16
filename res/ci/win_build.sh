@@ -10,7 +10,7 @@ ROOT=$PWD
 
 EXE=mkn
 KUL_GIT=master
-YAML_GIT=master
+YAML_GIT=pr
 
 YAML_INC="ext/parse/yaml/$YAML_GIT/p/include"
 INC=""
