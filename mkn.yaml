@@ -27,7 +27,7 @@ profile:
 - name: lib
   parent: headers
   src: src
-  dep: parse.yaml
+  dep: parse.yaml#pr
   if_link:
     nix: -ldl -pthread -rdynamic
     win_cl: -nodefaultlib:libucrt.lib ucrt.lib
