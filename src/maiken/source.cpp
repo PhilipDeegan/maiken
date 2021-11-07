@@ -31,14 +31,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 #include "maiken/regex.hpp"
 
-void maiken::Application::addMainLine(std::string const& o) KTHROW(kul::Exception) {
-  std::vector<std::string> v(kul::String::SPLIT(o, ","));
+void maiken::Application::addMainLine(std::string const& o) KTHROW(mkn::kul::Exception) {
+  std::vector<std::string> v(mkn::kul::String::SPLIT(o, ","));
   if (v.size() == 0 || v.size() > 2) KEXIT(1, "main invalid format\n" + project().dir().path());
-  kul::File f(Properties::RESOLVE(*this, v.front()));
+  mkn::kul::File f(Properties::RESOLVE(*this, v.front()));
   main_ = Source(f.real(), v.size() == 2 ? Properties::RESOLVE(*this, v[1]) : "");
 }
 
-void maiken::Application::addSourceLine(std::string const& s) KTHROW(kul::Exception) {
+void maiken::Application::addSourceLine(std::string const& s) KTHROW(mkn::kul::Exception) {
   auto check_replace = [&](std::string const& str, bool recurse_dir, std::string args) {
     auto it = std::find_if(srcs.begin(), srcs.end(), [&](const std::pair<Source, bool>& element) {
       return element.first == Source(str);
@@ -54,11 +54,11 @@ void maiken::Application::addSourceLine(std::string const& s) KTHROW(kul::Except
   auto do_resolve = [&](std::string const& str, bool recurse_dir = true, std::string args = "") {
     args = Properties::RESOLVE(*this, args);
     std::string pResolved(Properties::RESOLVE(*this, str));
-    kul::Dir d(pResolved);
+    mkn::kul::Dir d(pResolved);
     if (d.is())
       check_replace(d.real(), recurse_dir, args);
     else {
-      kul::File f(pResolved);
+      mkn::kul::File f(pResolved);
       if (f)
         check_replace(f.real(), false, args);
       else {
@@ -71,23 +71,23 @@ void maiken::Application::addSourceLine(std::string const& s) KTHROW(kul::Except
   };
 
   std::string o = s;
-  kul::String::TRIM(o);
+  mkn::kul::String::TRIM(o);
   if (o.find(',') == std::string::npos) {
-    for (auto const& str : kul::cli::asArgs(o)) do_resolve(str);
+    for (auto const& str : mkn::kul::cli::asArgs(o)) do_resolve(str);
   } else {
-    std::vector<std::string> v(kul::String::SPLIT(o, ","));
-    kul::Dir d(Properties::RESOLVE(*this, v[0]));
+    std::vector<std::string> v(mkn::kul::String::SPLIT(o, ","));
+    mkn::kul::Dir d(Properties::RESOLVE(*this, v[0]));
     size_t max = d ? 3 : 2;
     if (v.size() == 0 || v.size() > max)
       KEXIT(1, "source invalid format\n" + project().dir().path());
-    do_resolve(v[0], d && kul::String::BOOL(v[1]), v.size() == max ? v[max - 1] : "");
+    do_resolve(v[0], d && mkn::kul::String::BOOL(v[1]), v.size() == max ? v[max - 1] : "");
   }
 }
 
-kul::hash::map::S2T<kul::hash::map::S2T<std::vector<maiken::Source>>>
+mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2T<std::vector<maiken::Source>>>
 maiken::Application::sourceMap() const {
-  kul::hash::set::String const iMs = inactiveMains();
-  kul::hash::map::S2T<kul::hash::map::S2T<std::vector<maiken::Source>>> sm;
+  mkn::kul::hash::set::String const iMs = inactiveMains();
+  mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2T<std::vector<maiken::Source>>> sm;
 
   auto check_replace = [&](std::string const& src, std::string args,
                            std::vector<maiken::Source>& v) {
@@ -103,14 +103,14 @@ maiken::Application::sourceMap() const {
   };
 
   for (auto const& sourceDir : sources()) {
-    std::vector<kul::File> files;
+    std::vector<mkn::kul::File> files;
     std::string in(sourceDir.first.in());
-    kul::Dir d(in);
+    mkn::kul::Dir d(in);
     if (d)
       for (auto const& f : d.files(sourceDir.second)) files.push_back(f);
     else
       files.push_back(in);
-    for (kul::File const& file : files) {
+    for (mkn::kul::File const& file : files) {
       if (file.name().find(".") == std::string::npos || file.name().substr(0, 1).compare(".") == 0)
         continue;
       std::string const ft = file.name().substr(file.name().rfind(".") + 1);
@@ -128,7 +128,7 @@ maiken::Application::sourceMap() const {
   return sm;
 }
 
-bool maiken::Application::incSrc(kul::File const& file) const {
+bool maiken::Application::incSrc(mkn::kul::File const& file) const {
   bool c = 1;
   if (_MKN_TIMESTAMPS_) {
     std::string const& rl(file.mini());
@@ -137,7 +137,7 @@ bool maiken::Application::incSrc(kul::File const& file) const {
       size_t const mod = file.timeStamps().modified();
       if (mod == (*stss.find(rl)).second) {
         for (auto const& i : includes()) {
-          kul::Dir inc(i.first);
+          mkn::kul::Dir inc(i.first);
           if (itss.count(inc.mini()) && includeStamps.count(inc.mini())) {
             if ((*includeStamps.find(inc.mini())).second != (*itss.find(inc.mini())).second) c = 1;
           } else
@@ -156,7 +156,7 @@ std::vector<maiken::Source> maiken::SourceFinder::tests() {
   for (auto const& p : app.tests) {
     auto& file = p.first;
     if (app.fs.count(file.substr(file.rfind(".") + 1)) == 0) continue;
-    testV.emplace_back(kul::File(file).real());
+    testV.emplace_back(mkn::kul::File(file).real());
   }
   return testV;
 }
@@ -168,23 +168,23 @@ maiken::SourceFinder::SourceFinder(maiken::Application const& _app)
       tmpD(_app.buildDir().join("tmp"), 1) {}
 
 std::vector<std::pair<maiken::Source, std::string>> maiken::SourceFinder::all_sources_from(
-    SourceMap const& sources, kul::hash::set::String& objects, std::vector<kul::File>& cacheFiles) {
-  kul::os::PushDir pushd(app.project().dir());
+    SourceMap const& sources, mkn::kul::hash::set::String& objects, std::vector<mkn::kul::File>& cacheFiles) {
+  mkn::kul::os::PushDir pushd(app.project().dir());
 
   std::vector<std::pair<maiken::Source, std::string>> source_objects;
   auto dryRun = AppVars::INSTANCE().dryRun();
 
   auto _source = [&](auto& s, auto dir) {
-    kul::File const source(s.in());
+    mkn::kul::File const source(s.in());
     if (!app.incSrc(source)) return;
 
-    kul::File object(s.object(), dir);
+    mkn::kul::File object(s.object(), dir);
     source_objects.emplace_back(Source(dryRun ? source.esc() : source.escm(), s.args()),
                                 dryRun ? object.esc() : object.escm());
   };
 
   auto handle_source = [&](auto& s, auto dir) {
-    kul::File const source(s.in());
+    mkn::kul::File const source(s.in());
     if (app.main_ && Source(source.real()) == *app.main_) return;
 
     _source(s, dir);
@@ -195,7 +195,7 @@ std::vector<std::pair<maiken::Source, std::string>> maiken::SourceFinder::all_so
     if (compiler->sourceIsBin()) {
       for (auto const& kv : ft.second)
         for (auto const& s : kv.second) {
-          kul::File source(s.in());
+          mkn::kul::File source(s.in());
           objects.insert(source.escm());
           cacheFiles.push_back(source);
         }
@@ -224,7 +224,7 @@ void maiken::CompilerValidation::check_compiler_for(
 }
 
 std::string maiken::Source::object() const {
-  kul::File const source(m_in);
+  mkn::kul::File const source(m_in);
   std::string const oType = "." + AppVars::INSTANCE().envVars().at("MKN_OBJ");
   std::stringstream ss, os;
   ss << std::hex << std::hash<std::string>()(source.real());

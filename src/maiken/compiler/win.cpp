@@ -80,14 +80,14 @@ maiken::cpp::WINCompiler::WINCompiler(int const& v) : CCompiler(v) {
 }
 
 maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(LinkDAO& dao) const
-    KTHROW(kul::Exception) {
+    KTHROW(mkn::kul::Exception) {
   auto& app = dao.app;
   auto &objects = dao.objects, &libs = dao.libs, &libPaths = dao.libPaths;
   auto& dryRun = dao.dryRun;
   auto &linker = dao.linker, &linkerEnd = dao.linkerEnd, &out = dao.out;
 
   std::vector<std::string> fobjects;
-  kul::hash::set::String dirs;
+  mkn::kul::hash::set::String dirs;
   for (auto const& d : dao.stars) {
     dirs.insert(d.real());
     for (auto const& f : d.files()) fobjects.emplace_back(f.escm());
@@ -98,22 +98,22 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(LinkDAO
   std::string cmd = LD(linker);
   std::vector<std::string> bits;
   if (cmd == linker && linker.find(" ") != std::string::npos) {
-    bits = kul::cli::asArgs(linker);
+    bits = mkn::kul::cli::asArgs(linker);
     cmd = bits[0];
   }
-  kul::Process p(cmd);
+  mkn::kul::Process p(cmd);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-OUT:\"" + exe + "\"").arg("-nologo");
   for (std::string const& path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
-  for (std::string const& d : dirs) p.arg(kul::File(oStar(), d).escm());
-  for (std::string const& o : objects) p << kul::File(o).escm();
+  for (std::string const& d : dirs) p.arg(mkn::kul::File(oStar(), d).escm());
+  for (std::string const& o : objects) p << mkn::kul::File(o).escm();
   for (std::string const& lib : libs) p.arg(staticLib(lib));
-  for (std::string const& s : kul::cli::asArgs(linkerEnd)) p.arg(s);
+  for (std::string const& s : mkn::kul::cli::asArgs(linkerEnd)) p.arg(s);
 
   CompilerProcessCapture pc;
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const kul::proc::Exception& e) {
+  } catch (const mkn::kul::proc::Exception& e) {
     pc.exception(std::current_exception());
   }
   pc.file(exe);
@@ -122,17 +122,17 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(LinkDAO
 }
 
 maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(LinkDAO& dao) const
-    KTHROW(kul::Exception) {
+    KTHROW(mkn::kul::Exception) {
   auto& app = dao.app;
   auto &objects = dao.objects, &libs = dao.libs, &libPaths = dao.libPaths;
   auto& dryRun = dao.dryRun;
   auto &linker = dao.linker, &linkerEnd = dao.linkerEnd;
   auto& mode = dao.mode;
 
-  kul::File out(dao.out);
+  mkn::kul::File out(dao.out);
 
   std::vector<std::string> fobjects;
-  kul::hash::set::String dirs;
+  mkn::kul::hash::set::String dirs;
   for (auto const& d : dao.stars) {
     dirs.insert(d.real());
     for (auto const& f : d.files()) fobjects.emplace_back(f.escm());
@@ -145,10 +145,10 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(LinkDAO& d
   if (mode == compiler::Mode::SHAR) cmd = LD(linker);
   std::vector<std::string> bits;
   if (cmd == linker && linker.find(" ") != std::string::npos) {
-    bits = kul::cli::asArgs(linker);
+    bits = mkn::kul::cli::asArgs(linker);
     cmd = bits[0];
   }
-  kul::Process p(cmd);
+  mkn::kul::Process p(cmd);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-nologo");
   if (mode == compiler::Mode::STAT) p.arg("-LTCG");
@@ -158,13 +158,13 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(LinkDAO& d
     for (std::string const& path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
     for (std::string const& lib : libs) p.arg(staticLib(lib));
   }
-  for (std::string const& d : dirs) p.arg(kul::File(oStar(), d).escm());
-  for (std::string const& o : objects) p << kul::File(o).escm();
-  for (std::string const& s : kul::cli::asArgs(linkerEnd)) p.arg(s);
+  for (std::string const& d : dirs) p.arg(mkn::kul::File(oStar(), d).escm());
+  for (std::string const& o : objects) p << mkn::kul::File(o).escm();
+  for (std::string const& s : mkn::kul::cli::asArgs(linkerEnd)) p.arg(s);
   CompilerProcessCapture pc;
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const kul::proc::Exception& e) {
+  } catch (const mkn::kul::proc::Exception& e) {
     pc.exception(std::current_exception());
   }
   pc.file(lib);
@@ -173,7 +173,7 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(LinkDAO& d
 }
 
 maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(CompileDAO& dao) const
-    KTHROW(kul::Exception) {
+    KTHROW(mkn::kul::Exception) {
   auto& app = dao.app;
   auto &compiler = dao.compiler, &in = dao.in, &out = dao.out;
   auto &args = dao.args, &incs = dao.incs;
@@ -182,17 +182,17 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(CompileDA
   std::string const fileType = in.substr(in.rfind(".") + 1);
 
   std::string cmd;
-  if (kul::String::NO_CASE_CMP(fileType, "c"))
+  if (mkn::kul::String::NO_CASE_CMP(fileType, "c"))
     cmd = CC(compiler);
   else
     cmd = CXX(compiler);
 
   std::vector<std::string> bits;
   if (cmd == compiler && compiler.find(" ") != std::string::npos) {
-    bits = kul::cli::asArgs(compiler);
+    bits = mkn::kul::cli::asArgs(compiler);
     cmd = bits[0];
   }
-  kul::Process p(cmd);
+  mkn::kul::Process p(cmd);
   for (size_t i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-nologo");
   for (auto const& def : app.defines()) p << std::string("-D" + def);
@@ -200,11 +200,11 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::compileSource(CompileDA
   for (std::string const& s : args) p.arg(s);
   p.arg("-c").arg("-Fo\"" + out + "\"").arg("\"" + in + "\"");
   CompilerProcessCapture pc;
-  if (!kul::LogMan::INSTANCE().inf()) pc.setProcess(p);
+  if (!mkn::kul::LogMan::INSTANCE().inf()) pc.setProcess(p);
 
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (kul::Exception const& e) {
+  } catch (mkn::kul::Exception const& e) {
     pc.exception(std::current_exception());
   }
   pc.file(out);

@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
-    std::pair<maiken::Source, std::string> const& p) const KTHROW(kul::Exception) {
+    std::pair<maiken::Source, std::string> const& p) const KTHROW(mkn::kul::Exception) {
   std::string const src(p.first.in()), obj(p.second);
   std::string const& fileType = src.substr(src.rfind(".") + 1);
   if (!(app.files().count(fileType))) KEXCEPTION("NOOOOOOO ") << fileType;
@@ -40,13 +40,13 @@ maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
   std::vector<std::string> args;
   if (app.arguments().count(fileType) > 0)
     for (std::string const& o : (*app.arguments().find(fileType)).second)
-      for (auto const& s : kul::cli::asArgs(o)) args.push_back(s);
-  for (auto const& s : kul::cli::asArgs(app.arg)) args.push_back(s);
+      for (auto const& s : mkn::kul::cli::asArgs(o)) args.push_back(s);
+  for (auto const& s : mkn::kul::cli::asArgs(app.arg)) args.push_back(s);
   if (app.cArg.count(base))
-    for (auto const& s : kul::cli::asArgs(app.cArg[base])) args.push_back(s);
+    for (auto const& s : mkn::kul::cli::asArgs(app.cArg[base])) args.push_back(s);
   // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
   auto compilerFlags = [&args](std::string const& as) {
-    for (auto const& s : kul::cli::asArgs(as)) args.push_back(s);
+    for (auto const& s : mkn::kul::cli::asArgs(as)) args.push_back(s);
   };
   if (AppVars::INSTANCE().jargs().count(fileType) > 0)
     compilerFlags((*AppVars::INSTANCE().jargs().find(fileType)).second);
@@ -60,15 +60,15 @@ maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
                          AppVars::INSTANCE().dryRun());
 }
 
-std::string maiken::CompilationUnit::compileString() const KTHROW(kul::Exception) {
-  kul::os::PushDir pushd(app.project().dir());
+std::string maiken::CompilationUnit::compileString() const KTHROW(mkn::kul::Exception) {
+  mkn::kul::os::PushDir pushd(app.project().dir());
   CompileDAO dao{app, compiler, in, out, args, incs, mode, /*dryRun=*/true};
   return comp->compileSource(dao).cmd();
 }
 
-maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const KTHROW(kul::Exception) {
+maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const KTHROW(mkn::kul::Exception) {
   try {
-    kul::os::PushDir pushd(app.project().dir());
+    mkn::kul::os::PushDir pushd(app.project().dir());
 
     CompileDAO dao{app, compiler, in, out, args, incs, mode, dryRun};
 

@@ -32,9 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/dist.hpp"
 
-void maiken::dist::SetupRequest::do_response_for(const kul::http::A1_1Request& req,
+void maiken::dist::SetupRequest::do_response_for(const mkn::kul::http::A1_1Request& req,
                                                  Sessions& sessions,
-                                                 kul::http::_1_1Response& resp) {
+                                                 mkn::kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD 41");  // resp.withBody("FAILUIRE");
   auto session_id = (*req.headers().find("session")).second;
 
@@ -56,15 +56,15 @@ void maiken::dist::SetupRequest::do_response_for(const kul::http::A1_1Request& r
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::CompileRequest::do_response_for(const kul::http::A1_1Request& req,
+void maiken::dist::CompileRequest::do_response_for(const mkn::kul::http::A1_1Request& req,
                                                    Sessions& sessions,
-                                                   kul::http::_1_1Response& resp) {
+                                                   mkn::kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD CompileRequest");
   auto session_id = (*req.headers().find("session")).second;
 
-  kul::env::CWD(this->m_directory);
+  mkn::kul::env::CWD(this->m_directory);
 
-  std::vector<kul::File> cacheFiles;
+  std::vector<mkn::kul::File> cacheFiles;
   sessions[session_id].apps_vector()[0]->compile(this->m_src_obj, sessions[session_id].objects,
                                                  cacheFiles);
 
@@ -83,8 +83,8 @@ void maiken::dist::CompileRequest::do_response_for(const kul::http::A1_1Request&
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::LinkRequest::do_response_for(const kul::http::A1_1Request& req,
-                                                Sessions& sessions, kul::http::_1_1Response& resp) {
+void maiken::dist::LinkRequest::do_response_for(const mkn::kul::http::A1_1Request& req,
+                                                Sessions& sessions, mkn::kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD LinkRequest");
   auto session_id = (*req.headers().find("session")).second;
 
@@ -94,14 +94,14 @@ void maiken::dist::LinkRequest::do_response_for(const kul::http::A1_1Request& re
     cereal::PortableBinaryInputArchive iarchive(iss);
     iarchive(b);
   }
-  kul::File obj(b.file);
-  if (obj) obj = kul::File(std::string(b.file + ".new"));
+  mkn::kul::File obj(b.file);
+  if (obj) obj = mkn::kul::File(std::string(b.file + ".new"));
   if (!sessions[session_id].binary_writer) {
     obj.rm();
-    sessions[session_id].binary_writer = std::make_unique<kul::io::BinaryWriter>(obj);
+    sessions[session_id].binary_writer = std::make_unique<mkn::kul::io::BinaryWriter>(obj);
   }
 
-  kul::io::BinaryWriter& bw(*sessions[session_id].binary_writer.get());
+  mkn::kul::io::BinaryWriter& bw(*sessions[session_id].binary_writer.get());
   bw.write(b.c1, b.len);
   if (b.last_packet) sessions[session_id].binary_writer.reset();
 
@@ -118,9 +118,9 @@ void maiken::dist::LinkRequest::do_response_for(const kul::http::A1_1Request& re
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::DownloadRequest::do_response_for(const kul::http::A1_1Request& req,
+void maiken::dist::DownloadRequest::do_response_for(const mkn::kul::http::A1_1Request& req,
                                                     Sessions& sessions,
-                                                    kul::http::_1_1Response& resp) {
+                                                    mkn::kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD DownloadRequest");
   auto session_id = (*req.headers().find("session")).second;
 
@@ -128,8 +128,8 @@ void maiken::dist::DownloadRequest::do_response_for(const kul::http::A1_1Request
   if (!sessions[session_id].binary_reader) {
     if (!src_obj.empty()) {
       auto& pair = src_obj[0];
-      kul::File bin(pair.second);
-      sessions[session_id].binary_reader = std::make_unique<kul::io::BinaryReader>(bin);
+      mkn::kul::File bin(pair.second);
+      sessions[session_id].binary_reader = std::make_unique<mkn::kul::io::BinaryReader>(bin);
     }
   }
 

@@ -28,12 +28,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "kul/string.hpp"
+#include "mkn/kul/string.hpp"
 #include "maiken.hpp"
 
 class LibFinder {
  public:
-  static bool findAdd(std::string const& l, const kul::Dir& i, const kul::Dir& o) {
+  static bool findAdd(std::string const& l, const mkn::kul::Dir& i, const mkn::kul::Dir& o) {
     bool found = 0;
     for (auto const& f : i.files(0)) {
       auto const& fn(f.name());
@@ -42,8 +42,8 @@ class LibFinder {
       if (fn.substr(0, fn.rfind(".")) == l) {
 #else
       if (fn.size() > (3 + l.size()) && fn.substr(0, 3) == "lib" &&
-          kul::String::NO_CASE_CMP(fn.substr(3, l.size()), l)) {
-        auto bits(kul::String::SPLIT(fn.substr(3 + l.size()), '.'));
+          mkn::kul::String::NO_CASE_CMP(fn.substr(3, l.size()), l)) {
+        auto bits(mkn::kul::String::SPLIT(fn.substr(3 + l.size()), '.'));
 #ifdef __APPLE__
         if (bits[bits.size() - 1] != "dyn"
 #else
@@ -61,12 +61,12 @@ class LibFinder {
   }
 };
 
-void maiken::Application::pack() KTHROW(kul::Exception) {
-  kul::Dir pk(buildDir().join("pack"));
+void maiken::Application::pack() KTHROW(mkn::kul::Exception) {
+  mkn::kul::Dir pk(buildDir().join("pack"));
   if (!pk && !pk.mk()) KEXIT(1, "Cannot create: " + pk.path());
 
-  kul::Dir bin(pk.join("bin"), main_.has_value());
-  kul::Dir lib(pk.join("lib"));
+  mkn::kul::Dir bin(pk.join("bin"), main_.has_value());
+  mkn::kul::Dir lib(pk.join("lib"));
 
   if (main_ || !srcs.empty()) {
     auto const v((inst ? inst : buildDir()).files(0));
@@ -77,7 +77,7 @@ void maiken::Application::pack() KTHROW(kul::Exception) {
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app)
     if (!(*app)->srcs.empty()) {
       auto& a = **app;
-      kul::Dir outD(a.inst ? a.inst.real() : a.buildDir());
+      mkn::kul::Dir outD(a.inst ? a.inst.real() : a.buildDir());
       std::string n = a.project().root()[STR_NAME].Scalar();
       if (!LibFinder::findAdd(a.baseLibFilename(), outD, lib))
         KEXIT(1, "Depedency Project lib not found, try building: ") << a.buildDir().real();
@@ -85,7 +85,7 @@ void maiken::Application::pack() KTHROW(kul::Exception) {
   for (auto const& l : libs) {
     bool found = 0;
     for (auto const& p : paths) {
-      kul::Dir path(p);
+      mkn::kul::Dir path(p);
       if (!path) KEXIT(1, "Path does not exist: ") << pk.path();
       found = LibFinder::findAdd(l, path, lib);
       if (found) break;

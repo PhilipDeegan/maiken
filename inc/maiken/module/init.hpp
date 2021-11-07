@@ -36,6 +36,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define KUL_EXPORT
 #undef _KUL_DEFS_HPP_
 #undef _KUL_OS_DEF_HPP_
-#include "kul/defs.hpp"
+#include "mkn/kul/defs.hpp"
 
 #endif /* _MAIKEN_MODULE_INIT_HPP_ */

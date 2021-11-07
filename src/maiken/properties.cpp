@@ -44,7 +44,7 @@ void maiken::Application::resolveProperties() KTHROW(maiken::Exception) {
 }
 
 std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(
-    kul::hash::map::S2S const& /*ps*/, std::string const& s) KTHROW(kul::Exception) {
+    mkn::kul::hash::map::S2S const& /*ps*/, std::string const& s) KTHROW(mkn::kul::Exception) {
   std::string r = s;
   int lb = s.find("${");
   int clb = s.find("\\${");
@@ -65,7 +65,7 @@ std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(
 }
 
 std::string maiken::Properties::RESOLVE(Application const& app, std::string const& s)
-    KTHROW(kul::Exception) {
+    KTHROW(mkn::kul::Exception) {
   std::string r = s;
   std::shared_ptr<std::tuple<std::string, int, int>> t = KEY(app.properties(), s);
   if (t) {
@@ -84,12 +84,12 @@ std::string maiken::Properties::RESOLVE(Application const& app, std::string cons
       k = app.properties().at(k);
     r = Properties::RESOLVE(app, r.substr(0, lb) + k + r.substr(rb + 1));
   }
-  kul::String::TRIM(r);
+  mkn::kul::String::TRIM(r);
   return r;
 }
 
 std::string maiken::Properties::RESOLVE(Settings const& set, std::string const& s)
-    KTHROW(kul::Exception) {
+    KTHROW(mkn::kul::Exception) {
   std::string r = s;
   std::shared_ptr<std::tuple<std::string, int, int>> t = KEY(set.properties(), s);
   if (t) {
@@ -105,6 +105,6 @@ std::string maiken::Properties::RESOLVE(Settings const& set, std::string const& 
       KEXIT(1, "Property : '" + k + "' has not been defined");
     r = Properties::RESOLVE(set, r.substr(0, lb) + k + r.substr(rb + 1));
   }
-  kul::String::TRIM(r);
+  mkn::kul::String::TRIM(r);
   return r;
 }

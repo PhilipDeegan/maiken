@@ -31,11 +31,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_MODULE_HPP_
 #define _MAIKEN_MODULE_HPP_
 
-#include "kul/log.hpp"
-#include "kul/os.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/os.hpp"
 
 #ifndef _MKN_DISABLE_MODULES_
-#include "kul/sys.hpp"
+#include "mkn/kul/sys.hpp"
 #endif  //_MKN_DISABLE_MODULES_
 
 #include "maiken/defs.hpp"
@@ -54,10 +54,10 @@ void maiken_module_destruct(maiken::Plugin* p);
 
 namespace maiken {
 
-class ModuleException : public kul::Exception {
+class ModuleException : public mkn::kul::Exception {
  public:
   ModuleException(char const* f, uint16_t const& l, std::string const& s)
-      : kul::Exception(f, l, s) {}
+      : mkn::kul::Exception(f, l, s) {}
 };
 
 enum MODULE_PHASE { COMPILE = 0, LINK, PACK };
@@ -85,7 +85,7 @@ class Module {
 class GlobalModules;
 class KUL_PUBLISH ModuleLoader
 #ifndef _MKN_DISABLE_MODULES_
-    : public kul::sys::SharedClass<maiken::Module>
+    : public mkn::kul::sys::SharedClass<maiken::Module>
 #endif  //_MKN_DISABLE_MODULES_
 {
   friend class GlobalModules;
@@ -94,17 +94,17 @@ class KUL_PUBLISH ModuleLoader
   bool loaded = 0;
   Module* p = nullptr;
 
-  static kul::File FIND(Application& a)
+  static mkn::kul::File FIND(Application& a)
 #ifndef _MKN_DISABLE_MODULES_
-      KTHROW(kul::sys::Exception)
+      KTHROW(mkn::kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_
           ;
 
  public:
-  ModuleLoader(Application const& ap, kul::File const& f)
+  ModuleLoader(Application const& ap, mkn::kul::File const& f)
 #ifndef _MKN_DISABLE_MODULES_
-      KTHROW(kul::sys::Exception)
-      : kul::sys::SharedClass<maiken::Module>(f, "maiken_module_construct",
+      KTHROW(mkn::kul::sys::Exception)
+      : mkn::kul::sys::SharedClass<maiken::Module>(f, "maiken_module_construct",
                                               "maiken_module_destruct") {
     construct(p);
     p->application(&ap);
@@ -127,7 +127,7 @@ class KUL_PUBLISH ModuleLoader
 
   static std::shared_ptr<ModuleLoader> LOAD(Application& ap)
 #ifndef _MKN_DISABLE_MODULES_
-      KTHROW(kul::sys::Exception)
+      KTHROW(mkn::kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_
           ;
 };
@@ -141,11 +141,11 @@ class GlobalModules {
     return i;
   }
 #ifndef _MKN_DISABLE_MODULES_
-  kul::hash::map::S2T<std::shared_ptr<kul::sys::SharedLibrary>> libs;
+  mkn::kul::hash::map::S2T<std::shared_ptr<mkn::kul::sys::SharedLibrary>> libs;
 
   ~GlobalModules() { libs.clear(); }
-  void load(Application& ap) KTHROW(kul::sys::Exception) {
-    auto lib = std::make_shared<kul::sys::SharedLibrary>(ModuleLoader::FIND(ap));
+  void load(Application& ap) KTHROW(mkn::kul::sys::Exception) {
+    auto lib = std::make_shared<mkn::kul::sys::SharedLibrary>(ModuleLoader::FIND(ap));
     libs.insert(std::make_pair(lib->file().dir().real(), lib));
   }
 #else

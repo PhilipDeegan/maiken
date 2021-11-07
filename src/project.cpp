@@ -28,13 +28,13 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "kul/io.hpp"
+#include "mkn/kul/io.hpp"
 
 #include "maiken/defs.hpp"
 #include "maiken/project.hpp"
 
-const kul::yaml::Validator maiken::Project::validator() const {
-  using namespace kul::yaml;
+const mkn::kul::yaml::Validator maiken::Project::validator() const {
+  using namespace mkn::kul::yaml;
 
   std::vector<NodeValidator> depVals{NodeValidator("name"), NodeValidator("version"),
                                      NodeValidator("profile"), NodeValidator("scm"),
@@ -134,14 +134,14 @@ const kul::yaml::Validator maiken::Project::validator() const {
 
 void maiken::NewProject::write() {
   {
-    kul::io::Writer w(file());
+    mkn::kul::io::Writer w(file());
     w.write("\n", true);
     w.write("name: hello_world", true);
     w.write("#inc: ./inc\n#src: ./src", true);
     w.write("main: cpp.cpp", true);
   }
   {
-    kul::io::Writer w("cpp.cpp");
+    mkn::kul::io::Writer w("cpp.cpp");
     w.write("\n\n#include <iostream>", true);
     w.write("\n", true);
     w.write("int main(int argc, char* argv[]){", true);

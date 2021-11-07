@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::link(kul::hash::set::String const& objects) KTHROW(kul::Exception) {
+void maiken::Application::link(mkn::kul::hash::set::String const& objects) KTHROW(mkn::kul::Exception) {
   showConfig();
   if (objects.size() > 0 || main_) {
     buildDir().mk();
@@ -38,12 +38,12 @@ void maiken::Application::link(kul::hash::set::String const& objects) KTHROW(kul
       buildExecutable(objects);
     else
       buildLibrary(objects);
-    kul::os::PushDir pushd(this->project().dir());
-    kul::Dir build(".mkn/build");
+    mkn::kul::os::PushDir pushd(this->project().dir());
+    mkn::kul::Dir build(".mkn/build");
     build.mk();
-    kul::File ts("timestamp", build);
+    mkn::kul::File ts("timestamp", build);
     if (ts) ts.rm();
-    kul::io::Writer(ts) << kul::Now::MILLIS();
+    mkn::kul::io::Writer(ts) << mkn::kul::Now::MILLIS();
   }
   if (CommandStateMachine::INSTANCE().commands().count(STR_TEST) && !tests.empty())
     buildTest(objects);
@@ -52,38 +52,38 @@ void maiken::Application::link(kul::hash::set::String const& objects) KTHROW(kul
     if (dir && dir.files().empty()) dir.rm();
   };
 
-  delEmpty(kul::Dir(".mkn/log/" + buildDir().name() + "/bin/cmd"));
-  delEmpty(kul::Dir(".mkn/log/" + buildDir().name() + "/bin/out"));
-  delEmpty(kul::Dir(".mkn/log/" + buildDir().name() + "/bin/err"));
+  delEmpty(mkn::kul::Dir(".mkn/log/" + buildDir().name() + "/bin/cmd"));
+  delEmpty(mkn::kul::Dir(".mkn/log/" + buildDir().name() + "/bin/out"));
+  delEmpty(mkn::kul::Dir(".mkn/log/" + buildDir().name() + "/bin/err"));
 }
 
-void maiken::Application::checkErrors(CompilerProcessCapture const& cpc) KTHROW(kul::Exception) {
+void maiken::Application::checkErrors(CompilerProcessCapture const& cpc) KTHROW(mkn::kul::Exception) {
   auto o = [](std::string const& s) {
     if (s.size()) KOUT(NON) << s;
   };
   auto e = [](std::string const& s) {
     if (s.size()) KERR << s;
   };
-  if (kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
-  if (kul::LogMan::INSTANCE().err() || cpc.exception()) e(cpc.errs());
+  if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
+  if (mkn::kul::LogMan::INSTANCE().err() || cpc.exception()) e(cpc.errs());
   if (cpc.exception()) std::rethrow_exception(cpc.exception());
 }
 
 bool maiken::Application::is_build_required() {
-  kul::os::PushDir pushd(this->project().dir());
-  kul::Dir bDir(".mkn/build");
+  mkn::kul::os::PushDir pushd(this->project().dir());
+  mkn::kul::Dir bDir(".mkn/build");
   return !bDir || bDir.files().size() == 0 || buildDir().dirs().size() == 0 ||
          buildDir().files().size() == 0;
 }
 
 bool maiken::Application::is_build_stale() {
-  kul::os::PushDir pushd(this->project().dir());
-  kul::Dir d(".mkn/build");
-  kul::File f("timestamp", d);
+  mkn::kul::os::PushDir pushd(this->project().dir());
+  mkn::kul::Dir d(".mkn/build");
+  mkn::kul::File f("timestamp", d);
   if (!d || !f) return true;
   size_t then = size_t{43200} * size_t{60} * size_t{1000};
-  size_t now = kul::Now::MILLIS();
-  size_t timestamp = kul::String::UINT64(std::string(kul::io::Reader(f).readLine()));
+  size_t now = mkn::kul::Now::MILLIS();
+  size_t timestamp = mkn::kul::String::UINT64(std::string(mkn::kul::io::Reader(f).readLine()));
   if (now - then > timestamp) return true;
   return false;
 }

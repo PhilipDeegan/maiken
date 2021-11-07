@@ -57,18 +57,18 @@ maiken::Compilers::Compilers() {
   cs.insert(std::pair<std::string, Compiler*>("nvcc", gcc.get()));
 }
 
-std::string maiken::Compilers::key(std::string comp, const kul::hash::map::S2T<Compiler*>& map) {
-  kul::String::REPLACE_ALL(comp, ".exe", "");
+std::string maiken::Compilers::key(std::string comp, const mkn::kul::hash::map::S2T<Compiler*>& map) {
+  mkn::kul::String::REPLACE_ALL(comp, ".exe", "");
   if (map.count(comp) > 0) return comp;
   if (comp.find(" ") != std::string::npos)
-    for (std::string const& s : kul::String::SPLIT(comp, ' ')) {
+    for (std::string const& s : mkn::kul::String::SPLIT(comp, ' ')) {
       if (map.count(s) > 0) return s;
-      if (std::string(kul::Dir(s).locl()).find(kul::Dir::SEP()) != std::string::npos)
-        if (map.count(s.substr(s.rfind(kul::Dir::SEP()) + 1)))
-          return s.substr(s.rfind(kul::Dir::SEP()) + 1);
+      if (std::string(mkn::kul::Dir(s).locl()).find(mkn::kul::Dir::SEP()) != std::string::npos)
+        if (map.count(s.substr(s.rfind(mkn::kul::Dir::SEP()) + 1)))
+          return s.substr(s.rfind(mkn::kul::Dir::SEP()) + 1);
     }
-  if (std::string(kul::Dir(comp).locl()).find(kul::Dir::SEP()) != std::string::npos) {
-    comp = comp.substr(comp.rfind(kul::Dir::SEP()) + 1);
+  if (std::string(mkn::kul::Dir(comp).locl()).find(mkn::kul::Dir::SEP()) != std::string::npos) {
+    comp = comp.substr(comp.rfind(mkn::kul::Dir::SEP()) + 1);
     if (map.count(comp)) return comp;
   }
   return comp;

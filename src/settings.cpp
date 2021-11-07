@@ -38,7 +38,7 @@ class SuperSettings {
   friend class maiken::Settings;
 
  private:
-  kul::hash::set::String files;
+  mkn::kul::hash::set::String files;
   static SuperSettings& INSTANCE() {
     static SuperSettings instance;
     return instance;
@@ -51,61 +51,61 @@ class SuperSettings {
 };
 }  // namespace maiken
 
-maiken::Settings::Settings(std::string const& file_) : kul::yaml::File(file_) {
+maiken::Settings::Settings(std::string const& file_) : mkn::kul::yaml::File(file_) {
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_REPO]) {
-    kul::Dir d(root()[STR_LOCAL][STR_REPO].Scalar());
+    mkn::kul::Dir d(root()[STR_LOCAL][STR_REPO].Scalar());
     if (!d.is() && !d.mk())
       KEXCEPT(SettingsException, "settings.yaml local/repo is not a valid directory");
   }
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_MOD_REPO]) {
-    kul::Dir d(root()[STR_LOCAL][STR_MOD_REPO].Scalar());
+    mkn::kul::Dir d(root()[STR_LOCAL][STR_MOD_REPO].Scalar());
     if (!d.is() && !d.mk())
       KEXCEPT(SettingsException, "settings.yaml local/mod-repo is not a valid directory");
   }
   if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_REPO])
-    for (auto const& s : kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
+    for (auto const& s : mkn::kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
       rrs.push_back(s);
   {
     std::string const& rr = _MKN_REMOTE_REPO_;
-    for (auto const& s : kul::String::SPLIT(rr, ' ')) rrs.push_back(s);
+    for (auto const& s : mkn::kul::String::SPLIT(rr, ' ')) rrs.push_back(s);
   }
 
   if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_MOD_REPO])
-    for (auto const& s : kul::String::SPLIT(root()[STR_REMOTE][STR_MOD_REPO].Scalar(), ' '))
+    for (auto const& s : mkn::kul::String::SPLIT(root()[STR_REMOTE][STR_MOD_REPO].Scalar(), ' '))
       rms.push_back(s);
   {
     std::string const& rr = _MKN_REMOTE_MOD_;
-    for (auto const& s : kul::String::SPLIT(rr, ' ')) rms.push_back(s);
+    for (auto const& s : mkn::kul::String::SPLIT(rr, ' ')) rms.push_back(s);
   }
 
   if (root()[STR_SUPER]) {
-    kul::File f(RESOLVE(root()[STR_SUPER].Scalar()));
+    mkn::kul::File f(RESOLVE(root()[STR_SUPER].Scalar()));
     if (!f) KEXCEPT(SettingsException, "super file not found\n" + file());
-    if (f.real() == kul::File(file()).real())
+    if (f.real() == mkn::kul::File(file()).real())
       KEXCEPT(SettingsException, "super cannot reference itself\n" + file());
     SuperSettings::INSTANCE().cycleCheck(f.real());
-    sup = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
+    sup = std::make_unique<Settings>(mkn::kul::yaml::File::CREATE<Settings>(f.full()));
     for (auto const& p : sup->properties())
       if (!ps.count(p.first)) ps.insert(p.first, p.second);
   }
   if (root()[STR_COMPILER] && root()[STR_COMPILER][STR_MASK])
     for (auto const& k : Compilers::INSTANCE().keys())
       if (root()[STR_COMPILER][STR_MASK][k])
-        for (auto const& s : kul::String::SPLIT(root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
+        for (auto const& s : mkn::kul::String::SPLIT(root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
           Compilers::INSTANCE().addMask(s, k);
 
   resolveProperties();
 
 }
 
-maiken::Settings& maiken::Settings::INSTANCE() KTHROW(kul::Exit) {
+maiken::Settings& maiken::Settings::INSTANCE() KTHROW(mkn::kul::Exit) {
   if (!instance.get()) {
-    kul::File const f("settings.yaml", kul::user::home("maiken"));
+    mkn::kul::File const f("settings.yaml", mkn::kul::user::home("maiken"));
     if (!f.dir().is()) f.dir().mk();
     if (!f.is()) {
       write(f);
     }
-    instance = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(f.full()));
+    instance = std::make_unique<Settings>(mkn::kul::yaml::File::CREATE<Settings>(f.full()));
   }
   return *instance.get();
 }
@@ -124,9 +124,9 @@ void maiken::Settings::resolveProperties() KTHROW(SettingsException) {
 }
 
 std::string maiken::Settings::RESOLVE(std::string const& s) KTHROW(SettingsException) {
-  std::vector<kul::File> pos{kul::File(s), kul::File(s + ".yaml"),
-                             kul::File(s, kul::user::home("maiken")),
-                             kul::File(s + ".yaml", kul::user::home("maiken"))};
+  std::vector<mkn::kul::File> pos{mkn::kul::File(s), mkn::kul::File(s + ".yaml"),
+                             mkn::kul::File(s, mkn::kul::user::home("maiken")),
+                             mkn::kul::File(s + ".yaml", mkn::kul::user::home("maiken"))};
   for (auto const& f : pos)
     if (f.is()) return f.real();
 
@@ -136,14 +136,14 @@ std::string maiken::Settings::RESOLVE(std::string const& s) KTHROW(SettingsExcep
 bool maiken::Settings::SET(std::string const& s) {
   std::string file(RESOLVE(s));
   if (file.size()) {
-    instance = std::make_unique<Settings>(kul::yaml::File::CREATE<Settings>(file));
+    instance = std::make_unique<Settings>(mkn::kul::yaml::File::CREATE<Settings>(file));
     return 1;
   }
   return 0;
 }
 
-const kul::yaml::Validator maiken::Settings::validator() const {
-  using namespace kul::yaml;
+const mkn::kul::yaml::Validator maiken::Settings::validator() const {
+  using namespace mkn::kul::yaml;
 
   std::vector<NodeValidator> masks;
   for (auto const& s : Compilers::INSTANCE().keys())
@@ -178,26 +178,26 @@ const kul::yaml::Validator maiken::Settings::validator() const {
   });
 }
 
-void maiken::Settings::write(kul::File const& file) KTHROW(kul::Exit) {
-  kul::io::Writer w(file);
+void maiken::Settings::write(mkn::kul::File const& file) KTHROW(mkn::kul::Exit) {
+  mkn::kul::io::Writer w(file);
   w.write("\n", true);
 
-  bool c = kul::env::WHICH("clang") || kul::env::WHICH("clang.exe");
-  bool g = kul::env::WHICH("gcc") || kul::env::WHICH("gcc.exe");
+  bool c = mkn::kul::env::WHICH("clang") || mkn::kul::env::WHICH("clang.exe");
+  bool g = mkn::kul::env::WHICH("gcc") || mkn::kul::env::WHICH("gcc.exe");
   {
-    auto gcc_pref(kul::env::GET("MKN_GCC_PREFERRED"));
-    bool use_gcc = gcc_pref.empty() ? 0 : kul::String::BOOL(gcc_pref);
+    auto gcc_pref(mkn::kul::env::GET("MKN_GCC_PREFERRED"));
+    bool use_gcc = gcc_pref.empty() ? 0 : mkn::kul::String::BOOL(gcc_pref);
     if (c && g && use_gcc) c = 0;
   }
 
   w.write("#local:", true);
   w.write("## Optionnaly override local repository directory", true);
   w.write("#  repo: <directory>", true);
-  w << kul::os::EOL();
+  w << mkn::kul::os::EOL();
 
 #ifdef _WIN32
-  auto cl_pref(kul::env::GET("MKN_CL_PREFERRED"));
-  bool use_cl = cl_pref.empty() ? 0 : kul::String::BOOL(cl_pref);
+  auto cl_pref(mkn::kul::env::GET("MKN_CL_PREFERRED"));
+  bool use_cl = cl_pref.empty() ? 0 : mkn::kul::String::BOOL(cl_pref);
   if (!use_cl && (c || g)) {
 #else
   if (c || g) {
@@ -206,7 +206,7 @@ void maiken::Settings::write(kul::File const& file) KTHROW(kul::Exit) {
     w.write("#inc: <directory>", true);
     w.write("## Add library paths when linking every binary", true);
     w.write("#path:    <directory>\n", true);
-    w << kul::os::EOL();
+    w << mkn::kul::os::EOL();
 
     w.write(
         "## Modify environement variables for application commands - excludes "
@@ -216,58 +216,58 @@ void maiken::Settings::write(kul::File const& file) KTHROW(kul::Exit) {
     w.write("#- name: VAR", true);
     w.write("#  mode: prepend", true);
     w.write("#  value: value", true);
-    w << kul::os::EOL();
+    w << mkn::kul::os::EOL();
 
     w.write("file:", true);
     w.write("- type: c:S", true);
     w.write("  archiver: ar -cr", true);
-    w << "  compiler: " << (c ? "clang" : "gcc") << kul::os::EOL();
-    w << "  linker: " << (c ? "clang" : "gcc") << kul::os::EOL();
+    w << "  compiler: " << (c ? "clang" : "gcc") << mkn::kul::os::EOL();
+    w << "  linker: " << (c ? "clang" : "gcc") << mkn::kul::os::EOL();
     w.write("- type: cpp:cxx:cc", true);
     w.write("  archiver: ar -cr", true);
-    w << "  compiler: " << (c ? "clan" : "") << "g++" << kul::os::EOL();
-    w << "  linker: " << (c ? "clan" : "") << "g++" << kul::os::EOL();
-    w << kul::os::EOL();
+    w << "  compiler: " << (c ? "clan" : "") << "g++" << mkn::kul::os::EOL();
+    w << "  linker: " << (c ? "clan" : "") << "g++" << mkn::kul::os::EOL();
+    w << mkn::kul::os::EOL();
   }
 
 #ifdef _WIN32
 
   if (use_cl || (!c && !g)) {
-    auto cl(kul::env::WHERE("cl.exe"));
-    auto inc(kul::env::GET("INCLUDE"));
-    auto lib(kul::env::GET("LIB"));
+    auto cl(mkn::kul::env::WHERE("cl.exe"));
+    auto inc(mkn::kul::env::GET("INCLUDE"));
+    auto lib(mkn::kul::env::GET("LIB"));
 
     if (cl.empty() || inc.empty() || lib.empty()) {
       w.flush().close();
       file.rm();
       KEXIT(1, "gcc or clang not found, vcvars not detected")
-          << kul::os::EOL()
+          << mkn::kul::os::EOL()
           << "\tRun vcvarsall.bat or view mkn wiki to see how to configure "
              "maiken settings.yaml"
-          << kul::os::EOL() << "\t@ https://github.com/mkn/mkn/wiki";
+          << mkn::kul::os::EOL() << "\t@ https://github.com/mkn/mkn/wiki";
     }
 
     w.write("inc: ", true);
-    for (auto s : kul::String::SPLIT(inc, kul::env::SEP())) {
-      kul::String::REPLACE_ALL(s, "\\", "/");
-      kul::String::REPLACE_ALL(s, " ", "\\ ");
-      w << "  " << s << kul::os::EOL();
+    for (auto s : mkn::kul::String::SPLIT(inc, mkn::kul::env::SEP())) {
+      mkn::kul::String::REPLACE_ALL(s, "\\", "/");
+      mkn::kul::String::REPLACE_ALL(s, " ", "\\ ");
+      w << "  " << s << mkn::kul::os::EOL();
     }
-    w << kul::os::EOL();
+    w << mkn::kul::os::EOL();
 
     w.write("path: ", true);
-    for (auto s : kul::String::SPLIT(lib, kul::env::SEP())) {
-      kul::String::REPLACE_ALL(s, "\\", "/");
-      kul::String::REPLACE_ALL(s, " ", "\\ ");
-      w << "  " << s << kul::os::EOL();
+    for (auto s : mkn::kul::String::SPLIT(lib, mkn::kul::env::SEP())) {
+      mkn::kul::String::REPLACE_ALL(s, "\\", "/");
+      mkn::kul::String::REPLACE_ALL(s, " ", "\\ ");
+      w << "  " << s << mkn::kul::os::EOL();
     }
-    w << kul::os::EOL();
+    w << mkn::kul::os::EOL();
 
     w.write("env:", true);
     w.write("- name: PATH", true);
     w.write("  mode: prepend", true);
-    w << "  value: " << kul::File(cl).dir().real() << kul::os::EOL();
-    w << kul::os::EOL();
+    w << "  value: " << mkn::kul::File(cl).dir().real() << mkn::kul::os::EOL();
+    w << mkn::kul::os::EOL();
 
     w.write("file:", true);
     w.write("- type: cpp:cxx:cc:c", true);
@@ -276,7 +276,7 @@ void maiken::Settings::write(kul::File const& file) KTHROW(kul::Exit) {
     w.write("  linker: link", true);
   }
 #endif
-  w << kul::os::EOL();
+  w << mkn::kul::os::EOL();
 
   w.write("# Other examples", true);
   w.write("#- type: cu", true);
@@ -294,7 +294,7 @@ void maiken::Settings::write(kul::File const& file) KTHROW(kul::Exit) {
   w.write("#  linker: csc", true);
 }
 
-kul::cli::EnvVar maiken::Settings::PARSE_ENV_NODE(YAML::Node const& n, Settings const& settings) {
+mkn::kul::cli::EnvVar maiken::Settings::PARSE_ENV_NODE(YAML::Node const& n, Settings const& settings) {
   return maiken::PARSE_ENV_NODE(n, settings, "settings file");
 }
 
@@ -306,18 +306,18 @@ void maiken::Settings::POST_CONSTRUCT() {
 
   if (root[STR_ENV]) {
     if (root[STR_ENV].IsScalar()) {
-      auto lines = kul::String::LINES(root[STR_ENV].Scalar());
+      auto lines = mkn::kul::String::LINES(root[STR_ENV].Scalar());
       for (auto const& line : lines) {
         auto copy = decltype(root[STR_ENV]){line};
         auto ev = maiken::Settings::PARSE_ENV_NODE(copy, settings);
         appVars.envVar(ev.name(), ev.toString());
-        kul::env::SET(ev.name(), ev.toString().c_str());
+        mkn::kul::env::SET(ev.name(), ev.toString().c_str());
       }
     } else {
       for (const auto& c : root[STR_ENV]) {
         auto ev = maiken::Settings::PARSE_ENV_NODE(c, settings);
         appVars.envVar(ev.name(), ev.toString());
-        kul::env::SET(ev.name(), ev.toString().c_str());
+        mkn::kul::env::SET(ev.name(), ev.toString().c_str());
       }
     }
   }

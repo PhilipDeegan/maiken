@@ -32,53 +32,53 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/scm.hpp"
 #include "maiken/settings.hpp"
 
-const kul::SCM* maiken::SCMGetter::GET_SCM(const kul::Dir& d, std::string const& r, bool module) {
+const mkn::kul::SCM* maiken::SCMGetter::GET_SCM(mkn::kul::Dir const& d, std::string const& r, bool module) {
   std::vector<std::string> repos;
   if (IS_SOLID(r))
     repos.push_back(r);
   else if (module)
-    for (std::string const& s : Settings::INSTANCE().remoteModules()) repos.push_back(s + r);
+    for (auto const& s : Settings::INSTANCE().remoteModules()) repos.push_back(s + r);
   else
-    for (std::string const& s : Settings::INSTANCE().remoteRepos()) repos.push_back(s + r);
+    for (auto const& s : Settings::INSTANCE().remoteRepos()) repos.push_back(s + r);
 #ifndef _MKN_DISABLE_SCM_
   for (auto const& repo : repos) {
 #ifndef _MKN_DISABLE_GIT_
     try {
-      kul::Process g("git");
-      kul::ProcessCapture gp(g);
+      mkn::kul::Process g("git");
+      mkn::kul::ProcessCapture gp(g);
       std::string r1(repo);
       if (repo.find("http") != std::string::npos && repo.find("@") == std::string::npos)
         r1 = repo.substr(0, repo.find("//") + 2) + "u:p@" + repo.substr(repo.find("//") + 2);
       g.arg("ls-remote").arg(r1);
       g.start();
       auto errs(gp.errs());
-      kul::String::TRIM(errs);
-      auto lines(kul::String::LINES(errs));
+      mkn::kul::String::TRIM(errs);
+      auto lines(mkn::kul::String::LINES(errs));
       if (errs.empty()) lines.clear();
       bool allwarn = true;
       for (auto const& line : lines)
         if (line.find("warning") == std::string::npos) allwarn = false;
       if (lines.empty() || (lines.size() && allwarn)) {
         INSTANCE().valids.insert(d.path(), repo);
-        return &kul::scm::Manager::INSTANCE().get("git");
+        return &mkn::kul::scm::Manager::INSTANCE().get("git");
       }
       KLOG(DBG) << gp.outs();
       KLOG(DBG) << gp.errs();
-    } catch (const kul::proc::ExitException& e) {
+    } catch (const mkn::kul::proc::ExitException& e) {
       KLOG(ERR) << e.stack();
     }
 #endif  //_MKN_DISABLE_GIT_
         // SVN NOT YET SUPPORTED
         // #ifndef _MKN_DISABLE_SVN_
         //                 try{
-        //                    kul::Process s("svn");
-        //                    kul::ProcessCapture sp(s);
+        //                    mkn::kul::Process s("svn");
+        //                    mkn::kul::ProcessCapture sp(s);
         //                    s.arg("ls").arg(repo).start();
         //                    if(!sp.errs().size()) {
         //                        INSTANCE().valids.insert(d.path(), repo);
-    //                        return &kul::scm::Manager::INSTANCE().get("svn");
+    //                        return &mkn::kul::scm::Manager::INSTANCE().get("svn");
     //                    }
-    //                 }catch(const kul::proc::ExitException& e){}
+    //                 }catch(const mkn::kul::proc::ExitException& e){}
     // #endif//_MKN_DISABLE_SVN_
   }
 #else
@@ -96,7 +96,7 @@ bool maiken::SCMGetter::IS_SOLID(std::string const& r) {
   return r.find("://") != std::string::npos || r.find("@") != std::string::npos;
 }
 
-std::string maiken::SCMGetter::REPO(const kul::Dir& d, std::string const& r, bool module) {
+std::string maiken::SCMGetter::REPO(const mkn::kul::Dir& d, std::string const& r, bool module) {
   if (INSTANCE().valids.count(d.path())) return INSTANCE().valids.at(d.path());
   if (IS_SOLID(r))
     INSTANCE().valids.insert(d.path(), r);
@@ -105,12 +105,12 @@ std::string maiken::SCMGetter::REPO(const kul::Dir& d, std::string const& r, boo
   if (INSTANCE().valids.count(d.path())) return INSTANCE().valids.at(d.path());
   KEXCEPT(Exception, "SCM not discovered for project: " + d.path());
 }
-bool maiken::SCMGetter::HAS(const kul::Dir& d) {
-  return (kul::Dir(d.join(".git")) || kul::Dir(d.join(".svn")));
+bool maiken::SCMGetter::HAS(const mkn::kul::Dir& d) {
+  return (mkn::kul::Dir(d.join(".git")) || mkn::kul::Dir(d.join(".svn")));
 }
-const kul::SCM* maiken::SCMGetter::GET(const kul::Dir& d, std::string const& r, bool module) {
+const mkn::kul::SCM* maiken::SCMGetter::GET(const mkn::kul::Dir& d, std::string const& r, bool module) {
   if (IS_SOLID(r)) INSTANCE().valids.insert(d.path(), r);
-  if (kul::Dir(d.join(".git"))) return &kul::scm::Manager::INSTANCE().get("git");
-  if (kul::Dir(d.join(".svn"))) return &kul::scm::Manager::INSTANCE().get("svn");
+  if (mkn::kul::Dir(d.join(".git"))) return &mkn::kul::scm::Manager::INSTANCE().get("git");
+  if (mkn::kul::Dir(d.join(".svn"))) return &mkn::kul::scm::Manager::INSTANCE().get("svn");
   return r.size() ? GET_SCM(d, r, module) : 0;
 }

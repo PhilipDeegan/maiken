@@ -34,10 +34,10 @@ void maiken::Application::withArgs(
     std::string const with_str, std::vector<YAML::Node>& with_nodes,
     std::function<void(YAML::Node const& n, bool const mod)> getIfMissing, bool dep) {
   if (with_str.size()) {
-    kul::hash::set::String withs;
+    mkn::kul::hash::set::String withs;
     try {
       parseDependencyString(with_str, withs);
-    } catch (kul::Exception const& e) {
+    } catch (mkn::kul::Exception const& e) {
       if (with_str[0] == '[' && with_str[with_str.size() - 1] == ']')
         withs.insert(this->project().root()[STR_NAME].Scalar() + with_str);
       else
@@ -48,7 +48,7 @@ void maiken::Application::withArgs(
 }
 
 void maiken::Application::with(
-    kul::hash::set::String& withs, std::vector<YAML::Node>& with_nodes,
+    mkn::kul::hash::set::String& withs, std::vector<YAML::Node>& with_nodes,
     std::function<void(YAML::Node const& n, bool const mod)> getIfMissing, bool dep) {
   for (auto const& with : withs) {
     YAML::Node node;
@@ -64,7 +64,7 @@ void maiken::Application::with(
     if (!node[STR_SCM]) node[STR_SCM] = scm;
 
     if (!get_between(profiles, "[", "]")) KEXIT(1, "Invalid -w - missing right ] bracket");
-    kul::String::REPLACE_ALL(profiles, ",", " ");
+    mkn::kul::String::REPLACE_ALL(profiles, ",", " ");
     if (!node[STR_PROFILE]) node[STR_PROFILE] = profiles;
 
     auto am = proj.find("&"), ha = proj.find("#");
@@ -92,16 +92,16 @@ void maiken::Application::with(
         scm = proj;
         node[STR_SCM] = scm;
       }
-      proj = kul::String::SPLIT(proj, "/").back();
+      proj = mkn::kul::String::SPLIT(proj, "/").back();
     } else if (proj.empty() && !scm.empty()) {
-      proj = kul::String::SPLIT(scm, "/").back();
+      proj = mkn::kul::String::SPLIT(scm, "/").back();
     }
     if (!proj.empty()) node[STR_NAME] = proj;
 
     with_nodes.push_back(node);
     if (!dep && !proj.empty()) {
       std::stringstream with_define;
-      kul::String::REPLACE_ALL(proj, ".", "_");
+      mkn::kul::String::REPLACE_ALL(proj, ".", "_");
       std::transform(proj.begin(), proj.end(), proj.begin(), ::toupper);
       with_define << " -D_MKN_WITH_" << proj << "_ ";
       arg += with_define.str();

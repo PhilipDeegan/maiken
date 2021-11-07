@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 maiken::Application* maiken::Applications::getOrCreate(maiken::Project const& proj,
                                                        std::string const& _profile, bool setup)
-    KTHROW(kul::Exception) {
+    KTHROW(mkn::kul::Exception) {
   std::string pDir(proj.dir().real());
   std::string profile = _profile.empty() ? "@" : _profile;
   if (!m_apps.count(pDir) || !m_apps[pDir].count(profile)) {
@@ -42,7 +42,7 @@ maiken::Application* maiken::Applications::getOrCreate(maiken::Project const& pr
     m_appPs.push_back(std::move(app));
     m_apps[pDir][profile] = pp;
     if (setup) {
-      kul::os::PushDir pushd(proj.dir());
+      mkn::kul::os::PushDir pushd(proj.dir());
       pp->setup();
     }
   }
@@ -51,14 +51,14 @@ maiken::Application* maiken::Applications::getOrCreate(maiken::Project const& pr
 
 maiken::Application* maiken::Applications::getOrCreateRoot(maiken::Project const& proj,
                                                            std::string const& _profile, bool setup)
-    KTHROW(kul::Exception) {
+    KTHROW(mkn::kul::Exception) {
   std::string pDir(proj.dir().real());
   std::string profile = _profile.empty() ? "@" : _profile;
   if (!m_apps.count(pDir) || !m_apps[pDir].count(profile)) {
     auto* pp = getOrCreate(proj, _profile, /*setup = */ false);
     pp->ro = 1;
     if (setup) {
-      kul::os::PushDir pushd(proj.dir());
+      mkn::kul::os::PushDir pushd(proj.dir());
       pp->setup();
     }
   }
@@ -82,7 +82,7 @@ maiken::Application* maiken::Applications::getOrNullptr(std::string const& proje
   return app;
 }
 
-kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const& n, Application const& app) {
+mkn::kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const& n, Application const& app) {
   return maiken::PARSE_ENV_NODE(n, app, app.project().file());
 }
 

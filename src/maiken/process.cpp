@@ -30,10 +30,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::process() KTHROW(kul::Exception) {
+void maiken::Application::process() KTHROW(mkn::kul::Exception) {
   auto const& cmds = CommandStateMachine::INSTANCE().commands();
 
-  kul::os::PushDir pushd(this->project().dir());
+  mkn::kul::os::PushDir pushd(this->project().dir());
   auto loadModules = [&](Application& app) {
 #ifndef _MKN_DISABLE_MODULES_
     for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod)
@@ -47,14 +47,14 @@ void maiken::Application::process() KTHROW(kul::Exception) {
   std::function<void()> proc_b = []() {};
 
   proc_a = [&](Application& app, bool work) {
-    kul::env::CWD(app.project().dir());
+    mkn::kul::env::CWD(app.project().dir());
 
     if (work) {
       if (!app.buildDir()) app.buildDir().mk();
       if (BuildRecorder::INSTANCE().has(app.buildDir().real())) return;
       BuildRecorder::INSTANCE().add(app.buildDir().real());
     }
-    kul::Dir mkn(app.buildDir().join(".mkn"));
+    mkn::kul::Dir mkn(app.buildDir().join(".mkn"));
 
     if (cmds.count(STR_CLEAN) && app.buildDir().is()) {
       app.buildDir().rm();
@@ -62,7 +62,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
     }
     app.loadTimeStamps();
 
-    kul::hash::set::String objects;
+    mkn::kul::hash::set::String objects;
     if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE)) {
       for (auto& modLoader : app.mods)
         modLoader->module()->compile(app, app.modCompile(modLoader->app()));
@@ -78,7 +78,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
   };
 
   char beta[] = "MKN_BETA";
-  if (kul::env::EXISTS(beta) && std::string(kul::env::GET(beta)) == "1") {
+  if (mkn::kul::env::EXISTS(beta) && std::string(mkn::kul::env::GET(beta)) == "1") {
     proc_a = [&](Application& app, bool work) {
       if (work) {
         if (!app.buildDir()) app.buildDir().mk();
@@ -100,7 +100,7 @@ void maiken::Application::process() KTHROW(kul::Exception) {
       ss << "\tWould you like to build it (Y/n) - this message can be removed "
             "with -q"
          << std::endl;
-      build = kul::String::BOOL(kul::cli::receive(ss.str()));
+      build = mkn::kul::String::BOOL(mkn::kul::cli::receive(ss.str()));
     }
     if (build) {
       auto is_main = CommandStateMachine::INSTANCE().main();

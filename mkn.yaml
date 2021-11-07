@@ -27,7 +27,7 @@ profile:
 - name: lib
   parent: headers
   src: src
-  dep: parse.yaml#pr
+  dep: parse.yaml
   if_link:
     nix: -ldl -pthread -rdynamic
     win_cl: -nodefaultlib:libucrt.lib ucrt.lib
@@ -48,7 +48,7 @@ profile:
 
 - name: server
   parent: lib
-  with: io.cereal mkn.ram[https]
+  with: io.cereal mkn.ram#${version}[https]
   main: src/server.cpp
   mode: none
 

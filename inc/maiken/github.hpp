@@ -33,8 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken.hpp"
 #ifdef _MKN_WITH_MKN_RAM_
-#include "kul/https.hpp"
-#include "kul/yaml.hpp"
+#include "mkn/kul/yaml.hpp"
+#include "mkn/ram/https.hpp"
 
 namespace maiken {
 

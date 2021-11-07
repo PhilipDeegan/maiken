@@ -37,15 +37,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken {
 namespace compiler {
-class Exception : public kul::Exception {
+class Exception : public mkn::kul::Exception {
  public:
-  Exception(char const* f, int const l, std::string s) : kul::Exception(f, l, s) {}
+  Exception(char const* f, int const l, std::string s) : mkn::kul::Exception(f, l, s) {}
 };
 }  // namespace compiler
 
-class CompilerNotFoundException : public kul::Exception {
+class CompilerNotFoundException : public mkn::kul::Exception {
  public:
-  CompilerNotFoundException(char const* f, int const l, std::string s) : kul::Exception(f, l, s) {}
+  CompilerNotFoundException(char const* f, int const l, std::string s) : mkn::kul::Exception(f, l, s) {}
 };
 
 template <typename T, typename... Args>
@@ -86,11 +86,11 @@ class Compilers {
 
  private:
   std::unique_ptr<Compiler> hcc, gcc, clang, intel, winc, wincs;
-  kul::hash::map::S2T<Compiler*> cs, masks;
+  mkn::kul::hash::map::S2T<Compiler*> cs, masks;
 
  private:
   Compilers();
-  std::string key(std::string comp, const kul::hash::map::S2T<Compiler*>& map);
+  std::string key(std::string comp, const mkn::kul::hash::map::S2T<Compiler*>& map);
 };
 }  // namespace maiken
 #endif /* _MAIKEN_CODE_COMPILERS_HPP_ */

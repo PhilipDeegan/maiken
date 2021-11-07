@@ -37,11 +37,11 @@ bool maiken::Github::GET_DEFAULT_BRANCH(std::string const& owner, std::string co
   bool b = 0;
   std::stringstream ss;
   ss << "repos/" << owner << "/" << repo;
-  kul::https::Get("api.github.com", ss.str())
+  mkn::ram::https::Get("api.github.com", ss.str())
       .withHeaders({{"User-Agent", "Mozilla not a virus"}, {"Accept", "application/json"}})
-      .withResponse([&b, &branch](const kul::http::Response& r) {
+      .withResponse([&b, &branch](auto const& r) {
         if (r.status() == 200) {
-          kul::yaml::String yaml(r.body());
+          mkn::kul::yaml::String yaml(r.body());
           KLOG(OTH) << "Github API default branch response: " << r.body();
           if (yaml.root() && yaml.root()["default_branch"]) {
             branch = yaml.root()["default_branch"].Scalar();
@@ -58,11 +58,11 @@ bool maiken::Github::GET_LATEST_RELEASE(std::string const& owner, std::string co
   bool b = 0;
   std::stringstream ss;
   ss << "repos/" << owner << "/" << repo << "/releases/latest";
-  kul::https::Get("api.github.com", ss.str())
+  mkn::ram::https::Get("api.github.com", ss.str())
       .withHeaders({{"User-Agent", "Mozilla not a virus"}, {"Accept", "application/json"}})
-      .withResponse([&b, &branch](const kul::http::Response& r) {
+      .withResponse([&b, &branch](auto const& r) {
         if (r.status() == 200) {
-          kul::yaml::String yaml(r.body());
+          mkn::kul::yaml::String yaml(r.body());
           if (yaml.root()["tag_name"]) {
             branch = yaml.root()["tag_name"].Scalar();
             b = 1;
@@ -78,11 +78,11 @@ bool maiken::Github::GET_LATEST_TAG(std::string const& owner, std::string const&
   bool b = 0;
   std::stringstream ss;
   ss << "repos/" << owner << "/" << repo << "/git/tags";
-  kul::https::Get("api.github.com", ss.str())
+  mkn::ram::https::Get("api.github.com", ss.str())
       .withHeaders({{"User-Agent", "Mozilla not a virus"}, {"Accept", "application/json"}})
-      .withResponse([&b, &branch](const kul::http::Response& r) {
+      .withResponse([&b, &branch](auto const& r) {
         if (r.status() == 200) {
-          kul::yaml::String yaml(r.body());
+          mkn::kul::yaml::String yaml(r.body());
           if (yaml.root().Type() == 3) {
             if (yaml.root()["ref"]) {
               branch = yaml.root()["ref"].Scalar();
@@ -93,7 +93,7 @@ bool maiken::Github::GET_LATEST_TAG(std::string const& owner, std::string const&
       })
       .send();
   if (b == 1) {
-    auto bits(kul::String::SPLIT(branch, "/"));
+    auto bits(mkn::kul::String::SPLIT(branch, "/"));
     branch = bits[bits.size() - 1];
   }
   return b;

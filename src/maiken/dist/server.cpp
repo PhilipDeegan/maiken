@@ -33,8 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iomanip>
 #include "maiken/dist.hpp"
 
-kul::http::_1_1Response maiken::dist::Server::respond(const kul::http::A1_1Request& req) {
-  kul::http::_1_1Response r;
+mkn::kul::http::_1_1Response maiken::dist::Server::respond(const mkn::kul::http::A1_1Request& req) {
+  mkn::kul::http::_1_1Response r;
   // check session exists - if not error
   if (!sessions.count(req.ip())) {
     r.withBody("ruh roh");

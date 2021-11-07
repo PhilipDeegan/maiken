@@ -52,18 +52,18 @@ class Source {
 
 class SourceFinder : public Constants {
  public:
-  using SourceMap = kul::hash::map::S2T<kul::hash::map::S2T<std::vector<maiken::Source>>>;
+  using SourceMap = mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2T<std::vector<maiken::Source>>>;
   SourceFinder(maiken::Application const& _app);
   std::vector<std::pair<maiken::Source, std::string>> all_sources_from(
-      SourceMap const& sources, kul::hash::set::String& objects,
-      std::vector<kul::File>& cacheFiles);
+      SourceMap const& sources, mkn::kul::hash::set::String& objects,
+      std::vector<mkn::kul::File>& cacheFiles);
 
   std::vector<maiken::Source> tests();
 
  private:
   maiken::Application const& app;
   std::string const oType;
-  kul::Dir objD, tmpD;
+  mkn::kul::Dir objD, tmpD;
 };
 }  // end namespace maiken
 

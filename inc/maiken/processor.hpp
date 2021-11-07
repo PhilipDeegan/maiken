@@ -35,10 +35,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken {
 
-class ProcessException : public kul::Exception {
+class ProcessException : public mkn::kul::Exception {
  public:
   ProcessException(char const* f, uint16_t const& l, std::string const& s)
-      : kul::Exception(f, l, s) {}
+      : mkn::kul::Exception(f, l, s) {}
 };
 
 class Application;

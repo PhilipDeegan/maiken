@@ -29,12 +29,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
-#include "kul/bon.hpp"
+#include "mkn/kul/bon.hpp"
 
 void maiken::Application::modArgs(std::string const mod_str, std::vector<YAML::Node>& mod_nodes,
                                   std::function<void(YAML::Node const&, const bool)> getIfMissing) {
   if (mod_str.size()) {
-    kul::hash::set::String mods;
+    mkn::kul::hash::set::String mods;
     std::stringstream ss;
     size_t lb = 0, rb = 0;
     for (auto& c : mod_str) {
@@ -54,11 +54,11 @@ void maiken::Application::modArgs(std::string const mod_str, std::vector<YAML::N
   }
 }
 
-void maiken::Application::mod(kul::hash::set::String& mods, std::vector<YAML::Node>& mod_nodes,
+void maiken::Application::mod(mkn::kul::hash::set::String& mods, std::vector<YAML::Node>& mod_nodes,
                               std::function<void(YAML::Node const&, const bool)> getIfMissing) {
   for (auto mod : mods) {
-    kul::String::REPLACE_ALL(mod, kul::os::EOL(), "");
-    kul::String::TRIM(mod);
+    mkn::kul::String::REPLACE_ALL(mod, mkn::kul::os::EOL(), "");
+    mkn::kul::String::TRIM(mod);
     if (mod.empty()) continue;
 
     mod_nodes.emplace_back();
@@ -75,7 +75,7 @@ void maiken::Application::mod(kul::hash::set::String& mods, std::vector<YAML::No
     if (!node[STR_SCM]) node[STR_SCM] = scm;
 
     if (!get_between(profiles, "[", "]")) KEXIT(1, "Invalid -m - missing right ] bracket");
-    kul::String::REPLACE_ALL(profiles, ",", " ");
+    mkn::kul::String::REPLACE_ALL(profiles, ",", " ");
     if (!node[STR_PROFILE] && profiles.size()) node[STR_PROFILE] = profiles;
 
     {
@@ -111,14 +111,14 @@ void maiken::Application::mod(kul::hash::set::String& mods, std::vector<YAML::No
         scm = proj;
         node[STR_SCM] = scm;
       }
-      proj = kul::String::SPLIT(proj, "/").back();
+      proj = mkn::kul::String::SPLIT(proj, "/").back();
     } else if (proj.empty() && !scm.empty()) {
-      proj = kul::String::SPLIT(scm, "/").back();
+      proj = mkn::kul::String::SPLIT(scm, "/").back();
     }
     if (!proj.empty()) node[STR_NAME] = proj;
 
     if (objs.size())
-      for (auto const n : kul::bon::from(objs))
+      for (auto const n : mkn::kul::bon::from(objs))
         for (auto const p : n) node[p.first] = p.second;
 
     YAML::Emitter out;

@@ -32,11 +32,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/graph.hpp"
 
 void includeDependency(std::string const& s, std::string const& p,
-                       kul::hash::set::String& include) {
+                       mkn::kul::hash::set::String& include) {
   if (s == "+") {
     include.insert(s);
   } else {
-    for (auto profile : kul::String::SPLIT(p, ' ')) {
+    for (auto profile : mkn::kul::String::SPLIT(p, ' ')) {
       std::stringstream ss;
       ss << s << "[" << profile << "]";
       include.insert(ss.str());
@@ -44,8 +44,8 @@ void includeDependency(std::string const& s, std::string const& p,
   }
 }
 
-void maiken::Application::parseDependencyString(std::string s, kul::hash::set::String& include) {
-  kul::String::REPLACE_ALL(s, " ", "");
+void maiken::Application::parseDependencyString(std::string s, mkn::kul::hash::set::String& include) {
+  mkn::kul::String::REPLACE_ALL(s, " ", "");
   std::stringstream dep, pro;
   bool lB = 0, rB = 0;
   for (auto const& c : s) {
@@ -82,13 +82,13 @@ void maiken::Application::parseDependencyString(std::string s, kul::hash::set::S
 }
 
 void maiken::Application::buildDepVec(std::string const& depVal) {
-  kul::hash::set::String all, ignore, include;
+  mkn::kul::hash::set::String all, ignore, include;
   ignore.insert("+");
 
   if (!depVal.empty()) {
     try {
-      AppVars::INSTANCE().dependencyLevel(kul::String::UINT16(depVal));
-    } catch (const kul::StringException& e) {
+      AppVars::INSTANCE().dependencyLevel(mkn::kul::String::UINT16(depVal));
+    } catch (const mkn::kul::StringException& e) {
       AppVars::INSTANCE().dependencyLevel(0);
       parseDependencyString(depVal, include);
     }
@@ -146,7 +146,7 @@ void maiken::Application::buildDepVec(std::string const& depVal) {
 
 void maiken::Application::buildDepVecRec(
     std::unordered_map<uint16_t, std::vector<Application*>>& dePs, int16_t ig, int16_t i,
-    kul::hash::set::String const& inc) {
+    mkn::kul::hash::set::String const& inc) {
   for (auto* const a : deps) {
     auto name = a->project().root()[STR_NAME].Scalar();
     std::stringstream ss;
@@ -157,7 +157,7 @@ void maiken::Application::buildDepVecRec(
   }
 }
 
-void maiken::Application::populateMapsFromDependencies() KTHROW(kul::Exception) {
+void maiken::Application::populateMapsFromDependencies() KTHROW(mkn::kul::Exception) {
   for (auto depP = dependencies().rbegin(); depP != dependencies().rend(); ++depP) {
     auto const& dep(**depP);
 

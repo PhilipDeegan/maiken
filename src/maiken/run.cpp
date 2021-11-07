@@ -35,56 +35,56 @@ class Runner : public Constants {
  public:
   static void RUN(Application const& a, std::string bin, std::string const buildDir,
                   compiler::Mode m, bool dbg = 0) {
-    kul::File f(bin, buildDir);
+    mkn::kul::File f(bin, buildDir);
     if (!f) KEXIT(1, "binary does not exist \n" + f.full());
-    std::unique_ptr<kul::Process> p;
+    std::unique_ptr<mkn::kul::Process> p;
     if (dbg) {
-      std::string dbg_bin = kul::env::GET("MKN_DBG");
+      std::string dbg_bin = mkn::kul::env::GET("MKN_DBG");
       if (dbg_bin.empty())
         if (Settings::INSTANCE().root()[STR_LOCAL] &&
             Settings::INSTANCE().root()[STR_LOCAL][STR_DEBUGGER])
           dbg_bin = Settings::INSTANCE().root()[STR_LOCAL][STR_DEBUGGER].Scalar();
       if (dbg_bin.empty()) {
 #ifdef _WIN32
-        p = std::make_unique<kul::Process>("cdb");
+        p = std::make_unique<mkn::kul::Process>("cdb");
         p->arg("-o");
 #else
-        p = std::make_unique<kul::Process>("gdb");
+        p = std::make_unique<mkn::kul::Process>("gdb");
         (*p) << "--args";
 #endif
       } else {
-        std::vector<std::string> bits(kul::cli::asArgs(dbg_bin));
-        p = std::make_unique<kul::Process>(bits[0]);
+        std::vector<std::string> bits(mkn::kul::cli::asArgs(dbg_bin));
+        p = std::make_unique<mkn::kul::Process>(bits[0]);
         for (size_t i = 1; i < bits.size(); i++) p->arg(bits[i]);
       }
       p->arg(f.mini());
     } else
-      p = std::make_unique<kul::Process>(f.escm());
+      p = std::make_unique<mkn::kul::Process>(f.escm());
 
     if (AppVars::INSTANCE().runArgs().size()) {
-      for (auto const& s : kul::cli::asArgs(AppVars::INSTANCE().runArgs())) p->arg(s);
+      for (auto const& s : mkn::kul::cli::asArgs(AppVars::INSTANCE().runArgs())) p->arg(s);
     } else {
       auto const& cmds = AppVars::INSTANCE().commands();
       if (!cmds.count(STR_BUILD) && !cmds.count(STR_COMPILE)) {
-        for (auto const& s : kul::cli::asArgs(AppVars::INSTANCE().args())) p->arg(s);
+        for (auto const& s : mkn::kul::cli::asArgs(AppVars::INSTANCE().args())) p->arg(s);
       }
     }
 
     std::vector<std::pair<std::string, std::string> > envies;
     if (m != compiler::Mode::STAT) {
       std::string arg;
-      for (auto const& s : a.libraryPaths()) arg += s + kul::env::SEP();
+      for (auto const& s : a.libraryPaths()) arg += s + mkn::kul::env::SEP();
       if (!arg.empty()) arg.pop_back();
 #if _MKN_DISABLE_RUN_LIB_PATH_HANDLING_ == 0
 #if defined(__APPLE__)
-      kul::cli::EnvVar dy("DYLD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
+      mkn::kul::cli::EnvVar dy("DYLD_LIBRARY_PATH", arg, mkn::kul::cli::EnvVarMode::PREP);
       KOUT(DBG) << dy.name() << " : " << dy.toString();
       envies.push_back(std::make_pair(dy.name(), dy.toString()));
 #endif
 #ifdef _WIN32
-      kul::cli::EnvVar pa("PATH", arg, kul::cli::EnvVarMode::PREP);
+      mkn::kul::cli::EnvVar pa("PATH", arg, mkn::kul::cli::EnvVarMode::PREP);
 #else
-      kul::cli::EnvVar pa("LD_LIBRARY_PATH", arg, kul::cli::EnvVarMode::PREP);
+      mkn::kul::cli::EnvVar pa("LD_LIBRARY_PATH", arg, mkn::kul::cli::EnvVarMode::PREP);
 #endif
       KOUT(DBG) << pa.name() << " : " << pa.toString();
       envies.push_back(std::make_pair(pa.name(), pa.toString()));
@@ -92,7 +92,7 @@ class Runner : public Constants {
     }
     for (auto const& ev : envies) {
       p->var(ev.first,
-             kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
+             mkn::kul::cli::EnvVar(ev.first, ev.second, mkn::kul::cli::EnvVarMode::PREP).toString());
     }
     for (auto const& ev : AppVars::INSTANCE().envVars()) {
       auto it = std::find_if(envies.begin(), envies.end(),
@@ -101,7 +101,7 @@ class Runner : public Constants {
                              });
       if (it == envies.end())
         p->var(ev.first,
-               kul::cli::EnvVar(ev.first, ev.second, kul::cli::EnvVarMode::PREP).toString());
+               mkn::kul::cli::EnvVar(ev.first, ev.second, mkn::kul::cli::EnvVarMode::PREP).toString());
     }
     KOUT(DBG) << (*p);
     if (!AppVars::INSTANCE().dryRun()) p->set(a.envVars()).start();
@@ -110,8 +110,8 @@ class Runner : public Constants {
 }  // namespace maiken
 
 void maiken::Application::test() {
-  kul::os::PushDir pushd(this->project().dir());
-  kul::Dir testsD(buildDir().join("test"));
+  mkn::kul::os::PushDir pushd(this->project().dir());
+  mkn::kul::Dir testsD(buildDir().join("test"));
   if (testsD) {
     for (auto const& file : testsD.files()) {
       if (file) {
@@ -120,7 +120,7 @@ void maiken::Application::test() {
 #endif
         Runner::RUN(*this, file.name(), testsD.real(), m);
       } else
-        Runner::RUN(*this, kul::File(file.full(), testsD).real(), buildDir().real(), m);
+        Runner::RUN(*this, mkn::kul::File(file.full(), testsD).real(), buildDir().real(), m);
     }
   }
 }

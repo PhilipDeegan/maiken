@@ -31,12 +31,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_COMPILER_HPP_
 #define _MAIKEN_COMPILER_HPP_
 
-#include "kul/cli.hpp"
-#include "kul/except.hpp"
-#include "kul/map.hpp"
-#include "kul/os.hpp"
-#include "kul/proc.hpp"
-#include "kul/string.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/proc.hpp"
+#include "mkn/kul/string.hpp"
 
 #include "maiken/global.hpp"
 
@@ -73,16 +73,16 @@ struct CompileDAO {
 struct LinkDAO {
   maiken::Application const& app;
   std::string const &linker, &linkerEnd, &out;
-  std::vector<kul::Dir> stars;
+  std::vector<mkn::kul::Dir> stars;
   std::vector<std::string> const &objects, &libs, &libPaths;
   compiler::Mode const& mode;
   bool dryRun = false;
 };
 
-class CompilerProcessCapture : public kul::ProcessCapture {
+class CompilerProcessCapture : public mkn::kul::ProcessCapture {
  public:
   CompilerProcessCapture() {}
-  CompilerProcessCapture(kul::AProcess& p) : kul::ProcessCapture(p) {}
+  CompilerProcessCapture(mkn::kul::AProcess& p) : mkn::kul::ProcessCapture(p) {}
 
   void exception(std::exception_ptr const& e) { ep = e; }
   std::exception_ptr const& exception() const { return ep; }
@@ -109,16 +109,16 @@ class Compiler {
   virtual ~Compiler() {}
   virtual bool sourceIsBin() const = 0;
 
-  virtual CompilerProcessCapture compileSource(CompileDAO& dao) const KTHROW(kul::Exception) = 0;
+  virtual CompilerProcessCapture compileSource(CompileDAO& dao) const KTHROW(mkn::kul::Exception) = 0;
 
-  virtual CompilerProcessCapture buildExecutable(LinkDAO& dao) const KTHROW(kul::Exception) = 0;
+  virtual CompilerProcessCapture buildExecutable(LinkDAO& dao) const KTHROW(mkn::kul::Exception) = 0;
 
-  virtual CompilerProcessCapture buildLibrary(LinkDAO& dao) const KTHROW(kul::Exception) = 0;
+  virtual CompilerProcessCapture buildLibrary(LinkDAO& dao) const KTHROW(mkn::kul::Exception) = 0;
 
   virtual void preCompileHeader(std::vector<std::string> const& incs,
                                 std::vector<std::string> const& args, std::string const& in,
                                 std::string const& out, bool dryRun = false) const
-      KTHROW(kul::Exception) = 0;
+      KTHROW(mkn::kul::Exception) = 0;
 
   std::string compilerDebug(uint8_t const& key) const {
     return m_debug_c.count(key) ? m_debug_c.at(key) : "";
@@ -158,9 +158,9 @@ struct CompilationUnit {
         mode(mode),
         dryRun(dryRun) {}
 
-  CompilerProcessCapture compile() const KTHROW(kul::Exception);
+  CompilerProcessCapture compile() const KTHROW(mkn::kul::Exception);
 
-  std::string compileString() const KTHROW(kul::Exception);
+  std::string compileString() const KTHROW(mkn::kul::Exception);
 
   maiken::Application const& app;
   Compiler const* comp;
