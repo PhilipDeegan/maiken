@@ -36,7 +36,7 @@ namespace dist {
 
 class FileWriter {
  public:
-  std::unique_ptr<kul::io::BinaryWriter> bw;
+  std::unique_ptr<mkn::kul::io::BinaryWriter> bw;
 };
 
 enum class SessionState : uint16_t { NON = 0, ONE, TWO };
@@ -46,17 +46,17 @@ class ServerSession {
   friend class Server;
 
  public:
-  ServerSession() : start_time(kul::Now::MILLIS()) {}
+  ServerSession() : start_time(mkn::kul::Now::MILLIS()) {}
   void reset_setup(SetupRequest* request) { setup.reset(request); }
   SetupRequest* setup_ptr() { return setup.get(); }
   void set_apps(const std::vector<Application*>& _apps) { this->apps = std::move(_apps); }
   std::vector<Application*> apps_vector() { return apps; };
 
  public:
-  std::unique_ptr<kul::io::BinaryReader> binary_reader;
-  std::unique_ptr<kul::io::BinaryWriter> binary_writer;
+  std::unique_ptr<mkn::kul::io::BinaryReader> binary_reader;
+  std::unique_ptr<mkn::kul::io::BinaryWriter> binary_writer;
   std::vector<std::pair<std::string, std::string>> m_src_obj;
-  kul::hash::set::String objects;
+  mkn::kul::hash::set::String objects;
 
  private:
   uint64_t start_time;
@@ -65,14 +65,14 @@ class ServerSession {
   SessionState state = SessionState::NON;
 };
 
-class Server : public kul::http::MultiServer, public Constants {
-  friend class kul::Thread;
+class Server : public mkn::kul::http::MultiServer, public Constants {
+  friend class mkn::kul::Thread;
 
  public:
-  Server(uint16_t const port, const kul::Dir& _home, uint16_t threads)
-      : kul::http::MultiServer(port, 1, threads), busy(false), m_home(_home) {}
+  Server(uint16_t const port, const mkn::kul::Dir& _home, uint16_t threads)
+      : mkn::kul::http::MultiServer(port, 1, threads), busy(false), m_home(_home) {}
   virtual ~Server() {}
-  kul::http::_1_1Response respond(const kul::http::A1_1Request& req) override;
+  mkn::kul::http::_1_1Response respond(const mkn::kul::http::A1_1Request& req) override;
 
   Server(const Server&) = delete;
   Server(const Server&&) = delete;
@@ -96,7 +96,7 @@ class Server : public kul::http::MultiServer, public Constants {
 
  private:
   std::atomic<bool> busy;
-  kul::Dir m_home;
+  mkn::kul::Dir m_home;
   FileWriter fw;
   std::unordered_map<std::string, ServerSession> sessions;
 };

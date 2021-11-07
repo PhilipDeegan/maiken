@@ -28,36 +28,36 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "kul/all.hpp"
-#include "kul/log.hpp"
-#include "kul/signal.hpp"
+#include "mkn/kul/all.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/signal.hpp"
 #include "maiken.hpp"
 
 int main(int argc, char* argv[]) {
   maiken::PROGRAM = argv[0];
-  kul::Signal sig;
+  mkn::kul::Signal sig;
   uint8_t ret = 0;
-  auto const s = kul::Now::MILLIS();
+  auto const s = mkn::kul::Now::MILLIS();
 
   try {
     for (auto app : maiken::Application::CREATE(argc, argv)) app->process();
 
-    bool print_build_time = kul::any_of(
+    bool print_build_time = mkn::kul::any_of(
         std::vector<std::string>{"build", "compile", "link"},
         [](auto const& key){
            return maiken::CommandStateMachine::INSTANCE().has(key); });
 
     if (print_build_time) {
-      KOUT(NON) << "BUILD TIME: " << (kul::Now::MILLIS() - s) << " ms";
-      KOUT(NON) << "FINISHED:   " << kul::DateTime::NOW();
+      KOUT(NON) << "BUILD TIME: " << (mkn::kul::Now::MILLIS() - s) << " ms";
+      KOUT(NON) << "FINISHED:   " << mkn::kul::DateTime::NOW();
     }
-  } catch (kul::Exit const& e) {
-    if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e.stack();
+  } catch (mkn::kul::Exit const& e) {
+    if (e.code() != 0) KERR << mkn::kul::os::EOL() << "ERROR: " << e.stack();
     ret = e.code();
-  } catch (const kul::proc::ExitException& e) {
+  } catch (const mkn::kul::proc::ExitException& e) {
     KERR << e;
     ret = e.code();
-  } catch (kul::Exception const& e) {
+  } catch (mkn::kul::Exception const& e) {
     KERR << e.stack();
     ret = 1;
   } catch (const std::exception& e) {

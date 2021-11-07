@@ -36,9 +36,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 namespace csharp {
 
-class Exception : public kul::Exception {
+class Exception : public mkn::kul::Exception {
  public:
-  Exception(char const* f, int const l, std::string s) : kul::Exception(f, l, s) {}
+  Exception(char const* f, int const l, std::string s) : mkn::kul::Exception(f, l, s) {}
 };
 
 class WINCompiler : public Compiler {
@@ -52,13 +52,13 @@ class WINCompiler : public Compiler {
     KEXCEPTION("Method compileSource is not implemented in C Sharp");
   }
 
-  CompilerProcessCapture buildExecutable(LinkDAO& dao) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture buildExecutable(LinkDAO& dao) const KTHROW(mkn::kul::Exception) override;
 
-  CompilerProcessCapture buildLibrary(LinkDAO& dao) const KTHROW(kul::Exception) override;
+  CompilerProcessCapture buildLibrary(LinkDAO& dao) const KTHROW(mkn::kul::Exception) override;
 
   void preCompileHeader(std::vector<std::string> const&, std::vector<std::string> const&,
                                 std::string const&, std::string const&, bool = false) const
-      KTHROW(kul::Exception) override {
+      KTHROW(mkn::kul::Exception) override {
     KEXCEPTION("Method preCompileHeader is not implemented in C Sharp");
   }
 };

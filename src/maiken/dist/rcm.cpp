@@ -34,16 +34,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/dist.hpp"
 
 std::unique_ptr<maiken::dist::SetupRequest> maiken::dist::RemoteCommandManager::build_setup_query(
-    maiken::Application const& a, kul::cli::Args const& args) {
-  kul::os::PushDir pushd(a.project().dir());
+    maiken::Application const& a, mkn::kul::cli::Args const& args) {
+  mkn::kul::os::PushDir pushd(a.project().dir());
   YAML::Node root;
   root["project"] = a.project().root()["name"].Scalar();
   root["directory"] = a.project().dir().real();
 
   if (a.project().root()["scm"]) {
     root["scm"] = a.project().root()["scm"].Scalar();
-  } else if (kul::Dir(".git")) {
-    root["scm"] = kul::scm::Git().origin(kul::env::CWD());
+  } else if (mkn::kul::Dir(".git")) {
+    root["scm"] = mkn::kul::scm::Git().origin(mkn::kul::env::CWD());
   }
 
   std::string project_string, settings_string;

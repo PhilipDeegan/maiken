@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::findObjects(kul::hash::set::String& objects) const {
+void maiken::Application::findObjects(mkn::kul::hash::set::String& objects) const {
   for (auto const& ft : sourceMap()) {
     try {
       if (!(*files().find(ft.first)).second.count(STR_COMPILER))
@@ -39,17 +39,17 @@ void maiken::Application::findObjects(kul::hash::set::String& objects) const {
       if (!compiler->sourceIsBin()) {
         if (!buildDir().is())
           KEXCEPT(maiken::Exception, "Cannot link without compiling.\n" + project().dir().path());
-        kul::Dir objDir("obj", buildDir());
+        mkn::kul::Dir objDir("obj", buildDir());
         if (!buildDir().is())
           KEXCEPT(maiken::Exception, "No object directory found.\n" + project().dir().path());
         std::string const oType = "." + AppVars::INSTANCE().envVars().at("MKN_OBJ");
-        for (kul::File const& f : objDir.files(true)) {
+        for (mkn::kul::File const& f : objDir.files(true)) {
           auto file = f.mini();
           if (file.rfind(oType) == file.size() - oType.size()) objects.insert(file);
         }
       } else {
         for (auto const& kv : ft.second)
-          for (auto const& f : kv.second) objects.insert(kul::File(f.in()).mini());
+          for (auto const& f : kv.second) objects.insert(mkn::kul::File(f.in()).mini());
       }
     } catch (CompilerNotFoundException const& e) {
       KEXIT(1, "No compiler found for filetype " + ft.first);

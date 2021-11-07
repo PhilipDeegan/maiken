@@ -1,6 +1,6 @@
 
 KUL_GIT=master
-YAML_GIT=pr
+YAML_GIT=master
 
 CWD:=$(CURDIR)
 ifeq ($(strip $(CURDIR)),)

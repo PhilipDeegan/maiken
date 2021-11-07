@@ -31,15 +31,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_REGEX_HPP_
 #define _MAIKEN_REGEX_HPP_
 
-#include "kul/os.hpp"
+#include "mkn/kul/os.hpp"
 
 namespace maiken {
 
 class Regexer {
  public:
-  static std::vector<std::string> RESOLVE(std::string str) KTHROW(kul::Exception);
+  static std::vector<std::string> RESOLVE(std::string str) KTHROW(mkn::kul::Exception);
 
-  static void RESOLVE_REC(std::string const& i, std::vector<std::string>& v) KTHROW(kul::Exception);
+  static void RESOLVE_REC(std::string const& i, std::vector<std::string>& v) KTHROW(mkn::kul::Exception);
 };
 }  // end namespace maiken
 

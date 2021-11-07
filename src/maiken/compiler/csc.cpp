@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(LinkDAO& dao) const
-    KTHROW(kul::Exception) {
+    KTHROW(mkn::kul::Exception) {
   auto& app = dao.app;
   auto &objects = dao.objects, &libs = dao.libs, &libPaths = dao.libPaths;
   auto& dryRun = dao.dryRun;
@@ -41,10 +41,10 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(Link
   std::string cmd = linker;
   std::vector<std::string> bits;
   if (linker.find(" ") != std::string::npos) {
-    bits = kul::String::SPLIT(linker, ' ');
+    bits = mkn::kul::String::SPLIT(linker, ' ');
     cmd = bits[0];
   }
-  kul::Process p(cmd);
+  mkn::kul::Process p(cmd);
   CompilerProcessCapture pc(p);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("/NOLOGO").arg("/OUT:" + exe);
@@ -63,13 +63,13 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(Link
 
   for (std::string const& o : objects) p << o;
   if (linkerEnd.find(" ") != std::string::npos)
-    for (std::string const& s : kul::String::SPLIT(linkerEnd, ' ')) p.arg(s);
+    for (std::string const& s : mkn::kul::String::SPLIT(linkerEnd, ' ')) p.arg(s);
   else
     p.arg(linkerEnd);
 
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const kul::proc::Exception& e) {
+  } catch (const mkn::kul::proc::Exception& e) {
     pc.exception(std::current_exception());
   }
   pc.file(exe);
@@ -78,30 +78,30 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(Link
 }
 
 maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildLibrary(LinkDAO& dao) const
-    KTHROW(kul::Exception) {
+    KTHROW(mkn::kul::Exception) {
   auto& app = dao.app;
   auto& objects = dao.objects;
   auto& dryRun = dao.dryRun;
   auto &linker = dao.linker, &linkerEnd = dao.linkerEnd;
 
-  kul::File out(dao.out);
+  mkn::kul::File out(dao.out);
 
   std::string dll = out.full() + ".dll";
   std::string cmd = linker;
   std::vector<std::string> bits;
   if (linker.find(" ") != std::string::npos) {
-    bits = kul::String::SPLIT(linker, ' ');
+    bits = mkn::kul::String::SPLIT(linker, ' ');
     cmd = bits[0];
   }
-  kul::Process p(cmd);
+  mkn::kul::Process p(cmd);
   p.arg("/target:library").arg("/OUT:" + dll).arg("/nologo");
   CompilerProcessCapture pc(p);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   for (std::string const& o : objects) p << o;
-  for (std::string const& s : kul::String::SPLIT(linkerEnd, ' ')) p.arg(s);
+  for (std::string const& s : mkn::kul::String::SPLIT(linkerEnd, ' ')) p.arg(s);
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const kul::proc::Exception& e) {
+  } catch (const mkn::kul::proc::Exception& e) {
     pc.exception(std::current_exception());
   }
   pc.file(dll);

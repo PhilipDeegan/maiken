@@ -30,12 +30,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/github.hpp"
 
-void maiken::Application::addCLIArgs(kul::cli::Args const& args) {
+void maiken::Application::addCLIArgs(mkn::kul::cli::Args const& args) {
   auto addIncsOrPaths = [&args](Application& a) {
     auto splitPathAndCheck = [](std::string const& path, std::string const& type) {
-      auto const v(kul::String::SPLIT(path, kul::env::SEP()));
+      auto const v(mkn::kul::String::SPLIT(path, mkn::kul::env::SEP()));
       for (auto const& s : v) {
-        kul::Dir d(s);
+        mkn::kul::Dir d(s);
         if (!d) KEXIT(1, type + " directory does not exist: ") << s;
       }
       return v;

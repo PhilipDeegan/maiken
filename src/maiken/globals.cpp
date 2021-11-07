@@ -35,23 +35,23 @@ std::shared_ptr<AppVars> AppVars::instance;
 }
 
 maiken::AppVars::AppVars() {
-  pks["OS"] = KTOSTRING(__KUL_OS__);
-  pks["HOME"] = kul::user::home().path();
-  pks["MKN_HOME"] = kul::user::home(STR_MAIKEN).path();
+  pks["OS"] = KTOSTRING(__MKN_KUL_OS__);
+  pks["HOME"] = mkn::kul::user::home().path();
+  pks["MKN_HOME"] = mkn::kul::user::home(STR_MAIKEN).path();
 
-  pks["DATETIME"] = kul::DateTime::NOW();
+  pks["DATETIME"] = mkn::kul::DateTime::NOW();
   pks["TIMESTAMP"] = std::time(NULL);
   auto root = Settings::INSTANCE().root();
 
   if (root[STR_LOCAL]) {
     auto const& local = root[STR_LOCAL];
-    if (local[STR_REPO]) pks["MKN_REPO"] = kul::Dir(local[STR_REPO].Scalar()).real();
-    if (local[STR_MOD_REPO]) pks["MKN_MOD_REPO"] = kul::Dir(local[STR_MOD_REPO].Scalar()).real();
+    if (local[STR_REPO]) pks["MKN_REPO"] = mkn::kul::Dir(local[STR_REPO].Scalar()).real();
+    if (local[STR_MOD_REPO]) pks["MKN_MOD_REPO"] = mkn::kul::Dir(local[STR_MOD_REPO].Scalar()).real();
   }
   if (!pks.count("MKN_REPO"))
-    pks["MKN_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
+    pks["MKN_REPO"] = mkn::kul::user::home(mkn::kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
   if (!pks.count("MKN_MOD_REPO"))
-    pks["MKN_MOD_REPO"] = kul::user::home(kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
+    pks["MKN_MOD_REPO"] = mkn::kul::user::home(mkn::kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 
   std::string ext, pre;
 #if KUL_IS_WIN
@@ -65,7 +65,7 @@ maiken::AppVars::AppVars() {
 
   auto check_set = [&](std::string const key) {
     auto cstr = key.c_str();
-    if (kul::env::EXISTS(cstr)) evs[key] = kul::env::GET(cstr);
+    if (mkn::kul::env::EXISTS(cstr)) evs[key] = mkn::kul::env::GET(cstr);
   };
   check_set("MKN_OBJ");
   check_set("MKN_LIB_EXT");

@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class UpdateTracker {
  private:
-  kul::hash::set::String paths;
+  mkn::kul::hash::set::String paths;
 
  public:
   bool has(std::string const& path) { return paths.count(path); }
@@ -45,7 +45,7 @@ class UpdateTracker {
   }
 };
 
-void maiken::Application::scmStatus(bool const& deps) KTHROW(kul::scm::Exception) {
+void maiken::Application::scmStatus(bool const& deps) KTHROW(mkn::kul::scm::Exception) {
   std::vector<Application*> v;
 
   auto add_if_on = [&](auto& apps) {
@@ -66,14 +66,14 @@ void maiken::Application::scmStatus(bool const& deps) KTHROW(kul::scm::Exception
   auto dir = this->project().dir().real();
   if (scm && scm->hasChanges(dir)) {
     std::stringstream branch;
-    branch << " [" << kul::scm::Git{}.branch(project().dir().real()) << "]";
+    branch << " [" << mkn::kul::scm::Git{}.branch(project().dir().real()) << "]";
     KOUT(NON) << project().dir().real() << branch.str();
     scm->status(dir, /*full =*/0);
     KOUT(NON);
   }
 }
 
-void maiken::Application::scmUpdate(bool const& f) KTHROW(kul::scm::Exception) {
+void maiken::Application::scmUpdate(bool const& f) KTHROW(mkn::kul::scm::Exception) {
   size_t i = 0;
   Application const* p = this;
   while ((p = p->par)) i++;
@@ -97,8 +97,8 @@ void maiken::Application::scmUpdate(bool const& f) KTHROW(kul::scm::Exception) {
   }
 }
 
-void maiken::Application::scmUpdate(bool const& f, const kul::SCM* scm, std::string const& url)
-    KTHROW(kul::scm::Exception) {
+void maiken::Application::scmUpdate(bool const& f, const mkn::kul::SCM* scm, std::string const& url)
+    KTHROW(mkn::kul::scm::Exception) {
   std::string const& ver(!this->scv.empty() ? this->scv
                                             : this->project().root()[STR_VERSION]
                                                   ? this->project().root()[STR_VERSION].Scalar()
@@ -114,16 +114,16 @@ void maiken::Application::scmUpdate(bool const& f, const kul::SCM* scm, std::str
     if (!c)
       KOUT(NON) << "CURRENT VERSION MATCHES REMOTE VERSION: SKIPPING";
     else
-      c = kul::String::BOOL(kul::cli::receive(ss.str()));
+      c = mkn::kul::String::BOOL(mkn::kul::cli::receive(ss.str()));
   }
   if (f || c) {
     std::stringstream ss;
     if (url.size()) ss << " FROM " << url;
     KOUT(NON) << "UPDATING: " << this->project().dir().real() << ss.str();
     scm->up(this->project().dir().real(), url, ver);
-    kul::os::PushDir pushd(this->project().dir());
-    kul::Dir build(".mkn/build");
-    kul::File ts("timestamp", build);
+    mkn::kul::os::PushDir pushd(this->project().dir());
+    mkn::kul::Dir build(".mkn/build");
+    mkn::kul::File ts("timestamp", build);
     if (build && ts) ts.rm();
   }
 }

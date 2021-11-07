@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_GLOBALS_HPP_
 #define _MAIKEN_GLOBALS_HPP_
 
-#include "kul/map.hpp"
+#include "mkn/kul/map.hpp"
 
 #include "maiken/settings.hpp"
 
@@ -65,8 +65,8 @@ class AppVars : public Constants {
   bool dr = 0, du = 0, fo = 0, fu = 0, q = 0, s = 0, sh = 0, st = 0, u = 0;
   uint16_t de = -1, dl = 0, op = -1, ts = 1, wa = -1;
   std::string aa, al, dep, la, mo, ra, wi, wo;
-  kul::hash::set::String cmds, wop;
-  kul::hash::map::S2S evs, jas, pks;
+  mkn::kul::hash::set::String cmds, wop;
+  mkn::kul::hash::map::S2S evs, jas, pks;
 
   static std::shared_ptr<AppVars> instance;
 
@@ -89,7 +89,7 @@ class AppVars : public Constants {
   std::string const& runArgs() const { return ra; }
   void runArgs(std::string const& ra) { this->ra = ra; }
 
-  const kul::hash::map::S2S& jargs() const { return jas; }
+  const mkn::kul::hash::map::S2S& jargs() const { return jas; }
   void jargs(std::string const& a, std::string const& b) { jas[a] = b; }
 
   std::string const& linker() const { return la; }
@@ -137,15 +137,15 @@ class AppVars : public Constants {
   uint16_t const& threads() const { return ts; }
   void threads(uint16_t const& t) { this->ts = t; }
 
-  const kul::hash::map::S2S& properkeys() const { return pks; }
+  const mkn::kul::hash::map::S2S& properkeys() const { return pks; }
   void properkeys(std::string const& k, std::string const& v) { pks[k] = v; }
 
-  const kul::hash::map::S2S& envVars() const { return evs; }
+  const mkn::kul::hash::map::S2S& envVars() const { return evs; }
   std::string envVar(std::string const&& k) const { return (*evs.find(k)).second; }
   void envVar(std::string const& k, std::string const& v) { evs[k] = v; }
 
   void command(std::string const& s) { cmds.insert(s); }
-  kul::hash::set::String const& commands() const { return cmds; }
+  mkn::kul::hash::set::String const& commands() const { return cmds; }
 
   std::string const& with() const { return wi; }
   void with(std::string const& wi) { this->wi = wi; }
@@ -156,8 +156,8 @@ class AppVars : public Constants {
   std::string const& without() const { return wo; }
   void without(std::string const& wo) { this->wo = wo; }
 
-  kul::hash::set::String const& withoutParsed() const { return wop; }
-  void withoutParsed(kul::hash::set::String const& wop) { this->wop = wop; }
+  mkn::kul::hash::set::String const& withoutParsed() const { return wop; }
+  void withoutParsed(mkn::kul::hash::set::String const& wop) { this->wop = wop; }
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   uint16_t const& nodes() const { return no; }
@@ -178,13 +178,13 @@ class AppVars : public Constants {
     ar(no);
 
     auto convert_to_std_set =
-        [](kul::hash::set::String const& s) -> std::unordered_set<std::string> {
+        [](mkn::kul::hash::set::String const& s) -> std::unordered_set<std::string> {
       std::unordered_set<std::string> ret;
       for (auto const& p : s) ret.emplace(p);
       return ret;
     };
     auto convert_to_std_map =
-        [](const kul::hash::map::S2S& s) -> std::unordered_map<std::string, std::string> {
+        [](const mkn::kul::hash::map::S2S& s) -> std::unordered_map<std::string, std::string> {
       std::unordered_map<std::string, std::string> ret;
       for (auto const& p : s) ret.emplace(p.first, p.second);
       return ret;
@@ -203,14 +203,14 @@ class AppVars : public Constants {
     ar(no);
 
     auto convert_to_kul_set =
-        [](const std::unordered_set<std::string>& s) -> kul::hash::set::String {
-      kul::hash::set::String ret;
+        [](const std::unordered_set<std::string>& s) -> mkn::kul::hash::set::String {
+      mkn::kul::hash::set::String ret;
       for (auto const& p : s) ret.insert(p);
       return ret;
     };
     auto convert_to_kul_map =
-        [](const std::unordered_map<std::string, std::string>& s) -> kul::hash::map::S2S {
-      kul::hash::map::S2S ret;
+        [](const std::unordered_map<std::string, std::string>& s) -> mkn::kul::hash::map::S2S {
+      mkn::kul::hash::map::S2S ret;
       for (auto const& p : s) ret.insert(p.first, p.second);
       return ret;
     };

@@ -31,13 +31,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_EXCEPT_HPP_
 #define _MAIKEN_EXCEPT_HPP_
 
-#include "kul/except.hpp"
+#include "mkn/kul/except.hpp"
 
 namespace maiken {
 
-class Exception : public kul::Exception {
+class Exception : public mkn::kul::Exception {
  public:
-  Exception(char const* f, uint16_t const& l, std::string const& s) : kul::Exception(f, l, s) {}
+  Exception(char const* f, uint16_t const& l, std::string const& s) : mkn::kul::Exception(f, l, s) {}
 };
 }  // end namespace maiken
 

@@ -30,9 +30,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/regex.hpp"
 #include <regex>
-#include "kul/log.hpp"
+#include "mkn/kul/log.hpp"
 
-std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(kul::Exception) {
+std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(mkn::kul::Exception) {
   std::vector<std::string> v;
   auto posL = str.find("(");
   auto posR = str.find(")");
@@ -40,11 +40,11 @@ std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(kul::E
   if (posL == std::string::npos || posR == std::string::npos) return v;
   if (str.size() > 1 && str.substr(0, 2) == "./") str = str.substr(2);
 
-  auto bits = kul::String::SPLIT(str, "/");
+  auto bits = mkn::kul::String::SPLIT(str, "/");
   str = bits[bits.size() - 1];
-  kul::Dir d(kul::env::CWD());
+  mkn::kul::Dir d(mkn::kul::env::CWD());
 
-  if (bits.size() > 1) d = kul::Dir(bits[0]);
+  if (bits.size() > 1) d = mkn::kul::Dir(bits[0]);
   for (size_t i = 1; i < bits.size() - 1; i++) d = d.join(bits[i]);
 
   auto regexer = [&](auto items) {
@@ -64,8 +64,8 @@ std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(kul::E
 }
 
 void maiken::Regexer::RESOLVE_REC(std::string const& i, std::vector<std::string>& v)
-    KTHROW(kul::Exception) {
-  if (kul::File(i).is() && !kul::Dir(i).is()) {
+    KTHROW(mkn::kul::Exception) {
+  if (mkn::kul::File(i).is() && !mkn::kul::Dir(i).is()) {
     v.push_back(i);
     return;
   }

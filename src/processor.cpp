@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <mutex>
 
 struct ProcInfo {
-  kul::hash::set::String objects;
+  mkn::kul::hash::set::String objects;
   maiken::ThreadingCompiler tc;
 
   ProcInfo(maiken::Application& app) : tc(app) {}
@@ -55,18 +55,18 @@ void maiken::Processor::process(std::vector<Application*> apps) {
 
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
-  kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
+  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
   std::vector<maiken::CompilationUnit> c_units;
 
-  auto lambex = [&](kul::Exception const&) {
+  auto lambex = [&](mkn::kul::Exception const&) {
     ctp.stop();
     ctp.interrupt();
   };
   auto lambda = [o, e, &mute, &lambex, &cpcs](maiken::CompilationUnit const& c_unit) {
     CompilerProcessCapture const cpc = c_unit.compile();
     if (!AppVars::INSTANCE().dryRun()) {
-      if (kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
-      if (kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
+      if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
+      if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
       KOUT(INF) << cpc.cmd();
     } else
       KOUT(NON) << cpc.cmd();
@@ -74,7 +74,7 @@ void maiken::Processor::process(std::vector<Application*> apps) {
     cpcs.push_back(cpc);
     try {
       if (cpc.exception()) std::rethrow_exception(cpc.exception());
-    } catch (kul::Exception const& e) {
+    } catch (mkn::kul::Exception const& e) {
       lambex(e);
     } catch (const std::exception& e) {
       KLOG(ERR) << e.what();
@@ -84,7 +84,7 @@ void maiken::Processor::process(std::vector<Application*> apps) {
   if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE))
     for (auto* apP : apps) {
       auto& app = *apP;
-      kul::os::PushDir pushd(app.project().dir());
+      mkn::kul::os::PushDir pushd(app.project().dir());
 
       for (auto& modLoader : app.mods)
         modLoader->module()->compile(app, app.modCompile(modLoader->app()));
@@ -92,7 +92,7 @@ void maiken::Processor::process(std::vector<Application*> apps) {
       app_info.emplace(apP, std::make_shared<ProcInfo>(app));
 
       if (cmds.count(STR_CLEAN) && app.buildDir().is()) {
-        kul::Dir(app.buildDir().join(".mkn")).rm();
+        mkn::kul::Dir(app.buildDir().join(".mkn")).rm();
         app.buildDir().rm();
       }
       app.loadTimeStamps();
@@ -100,11 +100,11 @@ void maiken::Processor::process(std::vector<Application*> apps) {
       SourceFinder s_finder(app);
       auto sources = app.sourceMap();
       CompilerValidation::check_compiler_for(app, sources);
-      std::vector<kul::File> cacheFiles;
+      std::vector<mkn::kul::File> cacheFiles;
       auto& objects = app_info.at(apP)->objects;
       for (auto const& pair : s_finder.all_sources_from(sources, objects, cacheFiles)) {
         auto unit = app_info[apP]->tc.compilationUnit(pair);
-        kul::this_thread::nSleep(5000000);  // dup appears to be overloaded with too many threads
+        mkn::kul::this_thread::nSleep(5000000);  // dup appears to be overloaded with too many threads
         ctp.async(std::bind(lambda, unit), std::bind(lambex, std::placeholders::_1));
       }
     }

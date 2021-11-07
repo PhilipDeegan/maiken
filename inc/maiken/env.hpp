@@ -38,11 +38,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 
 template <typename HasProperties>
-kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const& n, HasProperties const& hasProperties, std::string hasProperties_id) {
+mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const& n, HasProperties const& hasProperties, std::string hasProperties_id) {
 
-  using namespace kul::cli;
+  using namespace mkn::kul::cli;
   if (n.IsScalar()) {
-    auto bits = kul::String::ESC_SPLIT(n.Scalar(), '=');
+    auto bits = mkn::kul::String::ESC_SPLIT(n.Scalar(), '=');
 
     if (bits.size() != 2)
       KEXIT(1, "env string is invalid, expects one '=' only, string ")
@@ -52,7 +52,7 @@ kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const& n, HasProperties const& hasPro
       auto pos = in.find(f);
       if (pos != std::string::npos)
         if (pos == 0 || (pos > 0 && in[pos - 1] != '\\'))
-          kul::String::REPLACE(in, f, std::string(kul::env::GET(n.c_str())));
+          mkn::kul::String::REPLACE(in, f, std::string(mkn::kul::env::GET(n.c_str())));
     };
     replace(bits[0], bits[1], "$" + bits[0]);
     replace(bits[0], bits[1], "${" + bits[0] + "}");

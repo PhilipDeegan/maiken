@@ -30,23 +30,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-kul::File maiken::ModuleLoader::FIND(Application& ap)
+mkn::kul::File maiken::ModuleLoader::FIND(Application& ap)
 #ifndef _MKN_DISABLE_MODULES_
-    KTHROW(kul::sys::Exception)
+    KTHROW(mkn::kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_
 {
 #ifdef _MKN_DISABLE_MODULES_
-  KEXCEPT(kul::Exception, "Modules are disabled: ") << ap.project().dir();
+  KEXCEPT(mkn::kul::Exception, "Modules are disabled: ") << ap.project().dir();
 #endif  //_MKN_DISABLE_MODULES_
 
   std::string file;
-  std::vector<kul::File> files;
+  std::vector<mkn::kul::File> files;
   if (ap.buildDir())
     for (auto const& f : ap.buildDir().files(0)) files.emplace_back(f.real());
   else {
     if (!ap.libraries().empty() && !ap.libraryPaths().empty()) {
       for (auto const& path : ap.libraryPaths())
-        for (auto const& f : kul::Dir(path).files(0)) files.emplace_back(f.real());
+        for (auto const& f : mkn::kul::Dir(path).files(0)) files.emplace_back(f.real());
     }
   }
   if (files.empty() && !ap.sources().empty()) {
@@ -67,17 +67,17 @@ kul::File maiken::ModuleLoader::FIND(Application& ap)
       break;
     }
   }
-  kul::File lib(file);
+  mkn::kul::File lib(file);
 #ifndef _MKN_DISABLE_MODULES_
   if (!lib)
-    KEXCEPT(kul::sys::Exception, "No loadable library found for project: ") << ap.project().dir();
+    KEXCEPT(mkn::kul::sys::Exception, "No loadable library found for project: ") << ap.project().dir();
 #endif  //_MKN_DISABLE_MODULES_
   return lib;
 }
 
 std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(Application& ap)
 #ifndef _MKN_DISABLE_MODULES_
-    KTHROW(kul::sys::Exception)
+    KTHROW(mkn::kul::sys::Exception)
 #endif  //_MKN_DISABLE_MODULES_
 {
   std::function<void(Application & ap)> global_load = [&](Application& ap) {

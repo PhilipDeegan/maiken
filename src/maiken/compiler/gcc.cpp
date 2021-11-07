@@ -71,24 +71,24 @@ maiken::cpp::GccCompiler::GccCompiler(int const& v) : CCompiler(v) {
                    {9, "-Wall -Wextra -pedantic -Werror"}});
 }
 
-void maiken::cpp::GccCompiler::rpathing(maiken::Application const& app, kul::Process& p,
-                                        [[maybe_unused]] kul::File const& out,
+void maiken::cpp::GccCompiler::rpathing(maiken::Application const& app, mkn::kul::Process& p,
+                                        [[maybe_unused]] mkn::kul::File const& out,
                                         std::vector<std::string> const& libs,
                                         std::vector<std::string> const& libPaths) const {
   std::unordered_set<std::string> rpaths;
   for (std::string const& path : libPaths) {
     for (std::string const& lib : libs) {
-      kul::File lib_file(sharedLib(app, lib), path), def(defaultSharedLib(lib), path);
+      mkn::kul::File lib_file(sharedLib(app, lib), path), def(defaultSharedLib(lib), path);
       if (!lib_file && def) lib_file = def;
       if (lib_file) rpaths.emplace(lib_file.dir().real());
     }
   }
   for (auto const& rpath : rpaths) {
-    kul::Dir path(rpath);
+    mkn::kul::Dir path(rpath);
     std::stringstream loader;
 #if defined(__APPLE__)
     loader << "-Wl,-rpath," << path.esc();
-    kul::File tmp_out(out);
+    mkn::kul::File tmp_out(out);
     tmp_out.mk();
     loader << " -Wl,-rpath,@loader_path/" << tmp_out.relative(path);
     tmp_out.rm();
@@ -100,7 +100,7 @@ void maiken::cpp::GccCompiler::rpathing(maiken::Application const& app, kul::Pro
 }
 
 maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(LinkDAO& dao) const
-    KTHROW(kul::Exception) {
+    KTHROW(mkn::kul::Exception) {
   auto& app = dao.app;
   auto &objects = dao.objects, &libs = dao.libs, &libPaths = dao.libPaths;
   auto& dryRun = dao.dryRun;
@@ -108,7 +108,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(LinkDAO
   auto& mode = dao.mode;
 
   std::vector<std::string> fobjects;
-  kul::hash::set::String dirs;
+  mkn::kul::hash::set::String dirs;
   for (auto const& d : dao.stars) {
     dirs.insert(d.real());
     for (auto const& f : d.files()) fobjects.emplace_back(f.escm());
@@ -117,34 +117,34 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(LinkDAO
   std::string cmd = LD(linker);
   std::vector<std::string> bits;
   if (cmd == linker && linker.find(" ") != std::string::npos) {
-    bits = kul::cli::asArgs(linker);
+    bits = mkn::kul::cli::asArgs(linker);
     cmd = bits[0];
   }
-  kul::Process p(cmd);
+  mkn::kul::Process p(cmd);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   for (std::string const& path : libPaths) p.arg("-L" + path);
   if (mode == compiler::Mode::STAT) p.arg("-static");
   {
-    auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
+    auto ll(mkn::kul::env::GET("MKN_LIB_LINK_LIB"));
     if ((ll.size())) {
       if (mode == compiler::Mode::SHAR || mode == compiler::Mode::NONE) {
-        kul::File file(out);
+        mkn::kul::File file(out);
         rpathing(app, p, file, libs, libPaths);
       }
     }
   }
   std::string exe = out;
-  if (KTOSTRING(__KUL_OS__) == std::string("win")) exe += ".exe";
+  if (KTOSTRING(__MKN_KUL_OS__) == std::string("win")) exe += ".exe";
   p.arg("-o").arg(exe);
-  for (std::string const& d : dirs) p << kul::File(oStar(), d).escm();
-  for (std::string const& o : objects) p << kul::File(o).escm();
+  for (std::string const& d : dirs) p << mkn::kul::File(oStar(), d).escm();
+  for (std::string const& o : objects) p << mkn::kul::File(o).escm();
   for (std::string const& lib : libs) p.arg("-l" + lib);
-  for (std::string const& s : kul::cli::asArgs(linkerEnd)) p << s;
+  for (std::string const& s : mkn::kul::cli::asArgs(linkerEnd)) p << s;
 
   CompilerProcessCapture pc;
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const kul::proc::Exception& e) {
+  } catch (const mkn::kul::proc::Exception& e) {
     pc.exception(std::current_exception());
   }
   pc.file(out);
@@ -153,17 +153,17 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(LinkDAO
 }
 
 maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(LinkDAO& dao) const
-    KTHROW(kul::Exception) {
+    KTHROW(mkn::kul::Exception) {
   auto& app = dao.app;
   auto &objects = dao.objects, &libs = dao.libs, &libPaths = dao.libPaths;
   auto& dryRun = dao.dryRun;
   auto &linker = dao.linker, &linkerEnd = dao.linkerEnd;
   auto& mode = dao.mode;
 
-  kul::File out(dao.out);
+  mkn::kul::File out(dao.out);
 
   std::vector<std::string> fobjects;
-  kul::hash::set::String dirs;
+  mkn::kul::hash::set::String dirs;
   for (auto const& d : dao.stars) {
     dirs.insert(d.real());
     for (auto const& f : d.files()) fobjects.emplace_back(f.escm());
@@ -172,25 +172,25 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(LinkDAO& d
   std::string lib = out.dir().join(sharedLib(app, out.name()));
 
   if (mode == compiler::Mode::STAT) lib = out.dir().join(staticLib(out.name()));
-  lib = kul::File(lib).esc();
+  lib = mkn::kul::File(lib).esc();
   std::string cmd = linker;
   if (mode == compiler::Mode::SHAR) cmd = LD(linker);
   std::vector<std::string> bits;
   if (cmd == linker && linker.find(" ") != std::string::npos) {
-    bits = kul::cli::asArgs(linker);
+    bits = mkn::kul::cli::asArgs(linker);
     cmd = bits[0];
   }
-  kul::Process p(cmd);
+  mkn::kul::Process p(cmd);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   if (mode == compiler::Mode::SHAR) p.arg("-shared").arg("-o");
   p.arg(lib);
-  for (std::string const& d : dirs) p.arg(kul::File(oStar(), d).escm());
-  for (std::string const& o : objects) p << kul::File(o).escm();
+  for (std::string const& d : dirs) p.arg(mkn::kul::File(oStar(), d).escm());
+  for (std::string const& o : objects) p << mkn::kul::File(o).escm();
 
   {
-    auto ll(kul::env::GET("MKN_LIB_LINK_LIB"));
+    auto ll(mkn::kul::env::GET("MKN_LIB_LINK_LIB"));
     if (ll.size() && mode == compiler::Mode::SHAR) {
-      uint16_t llv = kul::String::UINT16(ll);
+      uint16_t llv = mkn::kul::String::UINT16(ll);
       for (std::string const& path : libPaths) p.arg("-L" + path);
       if (llv == 1) {
         for (std::string const& lib : libs) p.arg("-l" + lib);
@@ -198,23 +198,23 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(LinkDAO& d
       } else {
         for (std::string const& path : libPaths) {
           for (std::string const& lib : libs) {
-            kul::File lib_file(sharedLib(app, lib), path);
+            mkn::kul::File lib_file(sharedLib(app, lib), path);
             if (lib_file) p << lib_file.escm();
           }
         }
       }
 #if defined(__APPLE__)
       std::stringstream loader;
-      loader << "-Wl,-install_name,@rpath/" << kul::File(lib).name();
+      loader << "-Wl,-install_name,@rpath/" << mkn::kul::File(lib).name();
       p << loader.str();
 #endif
     }
   }
-  for (std::string const& s : kul::cli::asArgs(linkerEnd)) p.arg(s);
+  for (std::string const& s : mkn::kul::cli::asArgs(linkerEnd)) p.arg(s);
   CompilerProcessCapture pc;
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const kul::proc::Exception& e) {
+  } catch (const mkn::kul::proc::Exception& e) {
     pc.exception(std::current_exception());
   }
   pc.file(lib);
@@ -223,7 +223,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(LinkDAO& d
 }
 
 maiken::CompilerProcessCapture maiken::cpp::GccCompiler::compileSource(CompileDAO& dao) const
-    KTHROW(kul::Exception) {
+    KTHROW(mkn::kul::Exception) {
   auto& app = dao.app;
   auto &compiler = dao.compiler, &in = dao.in, &out = dao.out;
   auto &args = dao.args, &incs = dao.incs;
@@ -232,21 +232,21 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::compileSource(CompileDA
   std::string const fileType = in.substr(in.rfind(".") + 1);
 
   std::string cmd;
-  if (kul::String::NO_CASE_CMP(fileType, "c"))
+  if (mkn::kul::String::NO_CASE_CMP(fileType, "c"))
     cmd = CC(compiler);
   else
     cmd = CXX(compiler);
 
   std::vector<std::string> bits;
   if (cmd == compiler && compiler.find(" ") != std::string::npos) {
-    bits = kul::cli::asArgs(compiler);
+    bits = mkn::kul::cli::asArgs(compiler);
     cmd = bits[0];
   }
-  kul::Process p(cmd);
+  mkn::kul::Process p(cmd);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   for (auto const& def : app.defines()) p << std::string("-D" + def);
   for (std::string const& s : incs) {
-    kul::Dir d(s);
+    mkn::kul::Dir d(s);
     if (d)
       p.arg("-I" + s);
     else
@@ -255,10 +255,10 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::compileSource(CompileDA
   for (std::string const& s : args) p.arg(s);
   p.arg("-o").arg(out).arg("-c").arg(in);
   CompilerProcessCapture pc;
-  if (!kul::LogMan::INSTANCE().inf()) pc.setProcess(p);
+  if (!mkn::kul::LogMan::INSTANCE().inf()) pc.setProcess(p);
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const kul::proc::Exception& e) {
+  } catch (const mkn::kul::proc::Exception& e) {
     pc.exception(std::current_exception());
   }
   pc.file(out);
@@ -269,7 +269,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::compileSource(CompileDA
 void maiken::cpp::GccCompiler::preCompileHeader(std::vector<std::string> const& incs,
                                                 std::vector<std::string> const& args,
                                                 std::string const& in, std::string const& out,
-                                                bool dryRun) const KTHROW(kul::Exception) {
+                                                bool dryRun) const KTHROW(mkn::kul::Exception) {
   if (in.rfind(".") == std::string::npos) KEXCEPT(Exception, "Unknown header type");
 
   std::string cmd;  // = compiler + " -x";
@@ -286,5 +286,5 @@ void maiken::cpp::GccCompiler::preCompileHeader(std::vector<std::string> const& 
   for (std::string const& s : incs) cmd += "-I" + s + " ";
 
   cmd += " -o " + out;
-  if (!dryRun && kul::os::exec(cmd) != 0) KEXCEPT(Exception, "Failed to pre-compile header");
+  if (!dryRun && mkn::kul::os::exec(cmd) != 0) KEXCEPT(Exception, "Failed to pre-compile header");
 }

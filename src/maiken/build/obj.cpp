@@ -44,12 +44,12 @@ class CompilerPrinter {
       if (app.profile().size() > 0) ss << " [" << app.profile() << "]";
       KOUT(NON) << ss.str();
     }
-    if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf() && app.includes().size()) {
+    if (!AppVars::INSTANCE().dryRun() && mkn::kul::LogMan::INSTANCE().inf() && app.includes().size()) {
       KOUT(NON) << "INCLUDES";
       for (auto const& s : app.includes()) KOUT(NON) << "\t" << s.first;
     }
 
-    if (!AppVars::INSTANCE().dryRun() && kul::LogMan::INSTANCE().inf()) {
+    if (!AppVars::INSTANCE().dryRun() && mkn::kul::LogMan::INSTANCE().inf()) {
       if (!app.arg.empty()) KOUT(NON) << "ARGUMENTS\n\t" << app.arg;
       if (app.arguments().size()) {
         KOUT(NON) << "FILE ARGUMENTS";
@@ -69,7 +69,7 @@ class CompilerPrinter {
 };
 }  // namespace maiken
 
-void maiken::Application::compile(kul::hash::set::String& objects) KTHROW(kul::Exception) {
+void maiken::Application::compile(mkn::kul::hash::set::String& objects) KTHROW(mkn::kul::Exception) {
   auto sources = sourceMap();
 
   showConfig();
@@ -77,15 +77,15 @@ void maiken::Application::compile(kul::hash::set::String& objects) KTHROW(kul::E
 
   SourceFinder s_finder(*this);
   CompilerValidation::check_compiler_for(*this, sources);
-  std::vector<kul::File> cacheFiles;
+  std::vector<mkn::kul::File> cacheFiles;
   auto src_objs = s_finder.all_sources_from(sources, objects, cacheFiles);
 
   compile(src_objs, objects, cacheFiles);
 }
 
 void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::string>>& src_objs,
-                                  kul::hash::set::String& objects,
-                                  std::vector<kul::File>& cacheFiles) KTHROW(kul::Exception) {
+                                  mkn::kul::hash::set::String& objects,
+                                  std::vector<mkn::kul::File>& cacheFiles) KTHROW(mkn::kul::Exception) {
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   std::vector<std::shared_ptr<maiken::dist::Post>> posts;
   auto compile_lambda = [](std::shared_ptr<maiken::dist::Post> post, const dist::Host& host) {
@@ -104,9 +104,9 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
       }
       if (!b.file.empty()) {
         if (!fw.bw) {
-          kul::File obj(b.file);
-          if (obj) obj = kul::File(std::string(b.file + ".new"));
-          fw.bw = std::make_unique<kul::io::BinaryWriter>(obj);
+          mkn::kul::File obj(b.file);
+          if (obj) obj = mkn::kul::File(std::string(b.file + ".new"));
+          fw.bw = std::make_unique<mkn::kul::io::BinaryWriter>(obj);
         }
         fw.bw->write(b.c1, b.len);
       }
@@ -120,8 +120,8 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
     threads =
         (hosts.size() < AppVars::INSTANCE().nodes()) ? hosts.size() : AppVars::INSTANCE().nodes();
   }
-  kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);
-  auto compile_ex = [&](kul::Exception const& e) {
+  mkn::kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);
+  auto compile_ex = [&](mkn::kul::Exception const& e) {
     ctp.stop().interrupt();
     throw e;
   };
@@ -148,7 +148,7 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
   std::queue<std::pair<maiken::Source, std::string>> sourceQueue;
   for (auto& so : src_objs) {
     sourceQueue.emplace(so.first, so.second);
-    kul::File object_file(so.second);
+    mkn::kul::File object_file(so.second);
     if (!object_file.dir()) object_file.dir().mk();
   }
   if (!src_objs.empty()) compile(sourceQueue, objects, cacheFiles);
@@ -161,10 +161,10 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
 }
 
 void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::string>>& sourceQueue,
-                                  kul::hash::set::String& objects,
-                                  std::vector<kul::File>& cacheFiles) KTHROW(kul::Exception) {
+                                  mkn::kul::hash::set::String& objects,
+                                  std::vector<mkn::kul::File>& cacheFiles) KTHROW(mkn::kul::Exception) {
   ThreadingCompiler tc(*this);
-  kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
+  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
   std::vector<maiken::CompilationUnit> c_units;
   std::queue<std::pair<maiken::Source, std::string>> cQueue;
 
@@ -184,29 +184,29 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
 
-  auto lambex = [&](kul::Exception const&) {
+  auto lambex = [&](mkn::kul::Exception const&) {
     ctp.stop();
     ctp.interrupt();
   };
 
-  kul::Dir cmdLogDir(".mkn/log/" + buildDir().name() + "/obj/cmd", 1);
-  kul::Dir outLogDir(".mkn/log/" + buildDir().name() + "/obj/out", 1);
-  kul::Dir errLogDir(".mkn/log/" + buildDir().name() + "/obj/err", 1);
+  mkn::kul::Dir cmdLogDir(".mkn/log/" + buildDir().name() + "/obj/cmd", 1);
+  mkn::kul::Dir outLogDir(".mkn/log/" + buildDir().name() + "/obj/out", 1);
+  mkn::kul::Dir errLogDir(".mkn/log/" + buildDir().name() + "/obj/err", 1);
 
   auto lambda = [&, o, e](const maiken::CompilationUnit& c_unit) {
     CompilerProcessCapture const cpc = c_unit.compile();
     if (!AppVars::INSTANCE().dryRun()) {
-      if (kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
-      if (kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
+      if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
+      if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
       KOUT(INF) << cpc.cmd();
     } else
       KOUT(NON) << cpc.cmd();
 
     if (AppVars::INSTANCE().dump()) {
-      std::string base = kul::File(cpc.file()).name();
-      kul::io::Writer(kul::File(base + ".txt", cmdLogDir)) << cpc.cmd();
-      if (cpc.outs().size()) kul::io::Writer(kul::File(base + ".txt", outLogDir)) << cpc.outs();
-      if (cpc.errs().size()) kul::io::Writer(kul::File(base + ".txt", errLogDir)) << cpc.errs();
+      std::string base = mkn::kul::File(cpc.file()).name();
+      mkn::kul::io::Writer(mkn::kul::File(base + ".txt", cmdLogDir)) << cpc.cmd();
+      if (cpc.outs().size()) mkn::kul::io::Writer(mkn::kul::File(base + ".txt", outLogDir)) << cpc.outs();
+      if (cpc.errs().size()) mkn::kul::io::Writer(mkn::kul::File(base + ".txt", errLogDir)) << cpc.errs();
     }
 
     std::lock_guard<std::mutex> lock(mute);
@@ -216,7 +216,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
       if (!AppVars::INSTANCE().force())
         if (cpc.exception()) std::rethrow_exception(cpc.exception());
 
-    } catch (kul::Exception const& e) {
+    } catch (mkn::kul::Exception const& e) {
       lambex(e);
     } catch (const std::exception& e) {
       KLOG(ERR) << e.what();
@@ -224,7 +224,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   };
 
   for (auto const& unit : c_units) {
-    kul::this_thread::nSleep(5000000);  // dup appears to be overloaded with too many threads
+    mkn::kul::this_thread::nSleep(5000000);  // dup appears to be overloaded with too many threads
     ctp.async(std::bind(lambda, unit), std::bind(lambex, std::placeholders::_1));
   }
 
@@ -245,12 +245,12 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     for (auto& cpc : cpcs)
       if (cpc.exception()) std::rethrow_exception(cpc.exception());
 
-  kul::Dir tmpD(buildDir().join("tmp"), 1);
+  mkn::kul::Dir tmpD(buildDir().join("tmp"), 1);
   while (cQueue.size()) {
-    kul::Dir dir(kul::File(cQueue.front().second).dir());
+    mkn::kul::Dir dir(mkn::kul::File(cQueue.front().second).dir());
     if (dir.real() != tmpD.real()) {
       objects.insert(cQueue.front().second);
-      cacheFiles.emplace_back(kul::File(cQueue.front().first.in()));
+      cacheFiles.emplace_back(mkn::kul::File(cQueue.front().first.in()));
     }
     cQueue.pop();
   }

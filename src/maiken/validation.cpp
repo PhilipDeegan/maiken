@@ -28,7 +28,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-// #include "kul/log.hpp"
+// #include "mkn/kul/log.hpp"
 
 #include "maiken.hpp"
 
@@ -50,7 +50,7 @@ class Validator : public maiken::Constants {
   }
   static void IF_VALUEDATER(maiken::Application const& a, YAML::Node const& n, std::string const& s,
                             std::vector<std::string> const& lefts) {
-    kul::hash::set::String keys;
+    mkn::kul::hash::set::String keys;
     for (YAML::const_iterator it = n.begin(); it != n.end(); ++it) {
       if (std::find(lefts.begin(), lefts.end(), it->first.Scalar()) == lefts.end())
         KEXIT(1, "malformed " + s + " key, \n" + a.project().dir().path());
@@ -108,7 +108,7 @@ class Validator : public maiken::Constants {
                          std::vector<std::string> const& profiles) {
     if (n[STR_SELF])
       for (auto const& s :
-           kul::String::SPLIT(maiken::Properties::RESOLVE(a, n[STR_SELF].Scalar()), ' '))
+           mkn::kul::String::SPLIT(maiken::Properties::RESOLVE(a, n[STR_SELF].Scalar()), ' '))
         if (std::find(profiles.begin(), profiles.end(), s) == profiles.end())
           KEXIT(1, "Self tag references unknown profile: \"" + s + "\" in " +
                        a.project().dir().path());
@@ -117,7 +117,7 @@ class Validator : public maiken::Constants {
 
 void maiken::Application::preSetupValidation() KTHROW(maiken::Exception) {
   {
-    kul::hash::set::String keys;
+    mkn::kul::hash::set::String keys;
     for (YAML::const_iterator it = project().root()[STR_PROPERTY].begin();
          it != project().root()[STR_PROPERTY].end(); ++it) {
       if (keys.count(it->first.Scalar()))

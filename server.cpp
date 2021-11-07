@@ -25,8 +25,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "kul/cli.hpp"
-#include "kul/signal.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/signal.hpp"
 #include "maiken/dist.hpp"
 
 #if defined(_WIN32) && !defined(bzero)
@@ -34,36 +34,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 int main(int argc, char* argv[]) {
-  kul::Signal sig;
+  mkn::kul::Signal sig;
   int exit_code = 0;
   try {
-    using namespace kul::cli;
-    kul::Dir d = kul::user::home(kul::Dir::JOIN(maiken::Constants::STR_MAIKEN, "server"));
+    using namespace mkn::kul::cli;
+    mkn::kul::Dir d = mkn::kul::user::home(mkn::kul::Dir::JOIN(maiken::Constants::STR_MAIKEN, "server"));
     Args args({}, {Arg('d', maiken::Constants::STR_DIR, ArgType::STRING)});
     try {
       args.process(argc, argv);
-    } catch (const kul::cli::Exception& e) {
+    } catch (const mkn::kul::cli::Exception& e) {
       KEXIT(1, e.what());
     }
     if (args.has(maiken::Constants::STR_DIR)) {
-      d = kul::Dir(args.get(maiken::Constants::STR_DIR));
+      d = mkn::kul::Dir(args.get(maiken::Constants::STR_DIR));
       if (!d && !d.mk())
-        KEXCEPT(kul::Exception, "diretory provided does not exist or cannot be created");
+        KEXCEPT(mkn::kul::Exception, "diretory provided does not exist or cannot be created");
     }
     maiken::dist::Server serv(8888, d, 3);
-    kul::Thread thread(std::ref(serv));
+    mkn::kul::Thread thread(std::ref(serv));
     sig.intr([&](int16_t) {
       KERR << "Interrupted";
       thread.interrupt();
       exit(2);
     });
     thread.join();
-  } catch (kul::Exit const& e) {
-    if (e.code() != 0) KERR << kul::os::EOL() << "ERROR: " << e;
+  } catch (mkn::kul::Exit const& e) {
+    if (e.code() != 0) KERR << mkn::kul::os::EOL() << "ERROR: " << e;
     exit_code = e.code();
-  } catch (const kul::proc::ExitException& e) {
+  } catch (const mkn::kul::proc::ExitException& e) {
     exit_code = e.code();
-  } catch (kul::Exception const& e) {
+  } catch (mkn::kul::Exception const& e) {
     KERR << e.stack();
     exit_code = 2;
   } catch (const std::exception& e) {

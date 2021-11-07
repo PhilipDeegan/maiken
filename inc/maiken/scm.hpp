@@ -31,8 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_SCM_HPP_
 #define _MAIKEN_SCM_HPP_
 
-#include "kul/os.hpp"
-#include "kul/scm/man.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/scm/man.hpp"
 
 namespace maiken {
 
@@ -42,15 +42,15 @@ class SCMGetter {
     static SCMGetter s;
     return s;
   }
-  static bool HAS(const kul::Dir& d);
-  static std::string REPO(const kul::Dir& d, std::string const& r, bool module);
-  static const kul::SCM* GET(const kul::Dir& d, std::string const& r, bool module);
+  static bool HAS(const mkn::kul::Dir& d);
+  static std::string REPO(const mkn::kul::Dir& d, std::string const& r, bool module);
+  static const mkn::kul::SCM* GET(const mkn::kul::Dir& d, std::string const& r, bool module);
 
  private:
   static bool IS_SOLID(std::string const& r);
-  static const kul::SCM* GET_SCM(const kul::Dir& d, std::string const& r, bool module);
+  static const mkn::kul::SCM* GET_SCM(const mkn::kul::Dir& d, std::string const& r, bool module);
 
-  kul::hash::map::S2S valids;
+  mkn::kul::hash::map::S2S valids;
 };
 }  // end namespace maiken
 
