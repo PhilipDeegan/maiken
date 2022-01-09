@@ -26,6 +26,8 @@ profile:
   src: src/maiken/create.cpp, -D_MKN_VERSION_=${version}_${DATE}
   mode: static
   test: test/cpp.cpp
+  if_link:
+    nix: -rdynamic
 
 - name: lib
   parent: compiled
