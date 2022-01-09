@@ -2,9 +2,9 @@
 
 name: mkn
 scm: https://github.com/dekken/maiken
-version: mod
+version: master
 property:
-  DATE: 20-JUN-2021
+  DATE: 09-FEB-2022
 
 parent: bin
 mode: none
@@ -69,7 +69,7 @@ profile:
 - name: format
   mod:
   - name: clang.format
-    version: master #  ${version}
+    version: ${version}
     init:
       style: file
       paths: .
