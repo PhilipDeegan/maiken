@@ -17,11 +17,13 @@ jobs:
     - shell: cmd
       env:
         MKN_CL_PREFERRED: 1
-        KUL_GIT_CO: --depth 10
+        KUL_GIT_CO: --depth 1
       run: |
         call "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
         bash -c ./res/ci/win_build.sh
         mkn build -dtKOg 0 -a "-std:c++17 -EHsc"
+        mkn build -dtOp test_mod -a "-std:c++17 -EHsc"
+        mkn build test pack -Op test -a "-std:c++17 -EHsc"
 
     - uses: actions/upload-artifact@v1
       with:

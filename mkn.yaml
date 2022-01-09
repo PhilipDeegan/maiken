@@ -2,7 +2,7 @@
 
 name: mkn
 scm: https://github.com/dekken/maiken
-version: master
+version: mod
 property:
   DATE: 20-JUN-2021
 
@@ -12,7 +12,10 @@ mode: none
 profile:
 - name: headers
   inc: inc
-  dep: mkn.kul#${version}
+  dep: mkn.kul
+
+- name: compiled
+  parent: headers
   if_arg:
     shared: -DKUL_SHARED -DKUL_EXPORT
     win_shared: -DYAML_CPP_DLL
@@ -25,33 +28,49 @@ profile:
   test: test/cpp.cpp
 
 - name: lib
-  parent: headers
-  src: src
+  parent: compiled
   dep: parse.yaml
+  src: src
   if_link:
-    nix: -ldl -pthread -rdynamic
+    nix: -ldl -pthread
+    nix_shared: -rdynamic
     win_cl: -nodefaultlib:libucrt.lib ucrt.lib
 
 - name: static
   parent: bin
   mode: static
 
+- name: test_mod
+  parent: mod
+  src: test/mod/mod.cpp
+  mode: shared
+  if_arg:
+      win_shared: -DYAML_CPP_DLL
+      shared: -DKUL_SHARED
+
+- name: test
+  src: test/mod/lib.cpp
+  mod: mkn[test_mod]
+
 - name: mod
   parent: headers
   mode: shared
   if_dep:
-    win: parse.yaml[shared]
+    bsd: parse.yaml[shared]  mkn[lib]
     nix: parse.yaml[headers]
-    bsd: parse.yaml[headers]
-  if_src:
-    win: src
+    win: parse.yaml[shared]  mkn[lib]
 
 - name: server
   parent: lib
-  with: io.cereal mkn.ram#${version}[https]
+  with: io.cereal mkn.ram[https]
   main: src/server.cpp
   mode: none
 
 - name: format
-  mod: |
-    clang.format{init{style: file, paths: .}}
+  mod:
+  - name: clang.format
+    version: master #  ${version}
+    init:
+      style: file
+      paths: .
+

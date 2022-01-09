@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,8 @@ mkn::kul::File maiken::ModuleLoader::FIND(Application& ap)
   mkn::kul::File lib(file);
 #ifndef _MKN_DISABLE_MODULES_
   if (!lib)
-    KEXCEPT(mkn::kul::sys::Exception, "No loadable library found for project: ") << ap.project().dir();
+    KEXCEPT(mkn::kul::sys::Exception, "No loadable library found for project: ")
+        << ap.project().dir();
 #endif  //_MKN_DISABLE_MODULES_
   return lib;
 }

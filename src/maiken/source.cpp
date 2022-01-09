@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -168,7 +168,8 @@ maiken::SourceFinder::SourceFinder(maiken::Application const& _app)
       tmpD(_app.buildDir().join("tmp"), 1) {}
 
 std::vector<std::pair<maiken::Source, std::string>> maiken::SourceFinder::all_sources_from(
-    SourceMap const& sources, mkn::kul::hash::set::String& objects, std::vector<mkn::kul::File>& cacheFiles) {
+    SourceMap const& sources, mkn::kul::hash::set::String& objects,
+    std::vector<mkn::kul::File>& cacheFiles) {
   mkn::kul::os::PushDir pushd(app.project().dir());
 
   std::vector<std::pair<maiken::Source, std::string>> source_objects;

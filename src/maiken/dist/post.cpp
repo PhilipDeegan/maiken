@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,8 @@ void maiken::dist::Post::send(std::string const& host, std::string const& res, u
   mkn::kul::http::_1_1PostRequest(host, res, port)
       .withBody(s1)
       .withHeaders(headers)
-      .withResponse([&](const mkn::kul::http::_1_1Response& r) { this->_body = std::move(r.body()); })
+      .withResponse(
+          [&](const mkn::kul::http::_1_1Response& r) { this->_body = std::move(r.body()); })
       .send();
 }
 

@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -46,12 +46,14 @@ maiken::AppVars::AppVars() {
   if (root[STR_LOCAL]) {
     auto const& local = root[STR_LOCAL];
     if (local[STR_REPO]) pks["MKN_REPO"] = mkn::kul::Dir(local[STR_REPO].Scalar()).real();
-    if (local[STR_MOD_REPO]) pks["MKN_MOD_REPO"] = mkn::kul::Dir(local[STR_MOD_REPO].Scalar()).real();
+    if (local[STR_MOD_REPO])
+      pks["MKN_MOD_REPO"] = mkn::kul::Dir(local[STR_MOD_REPO].Scalar()).real();
   }
   if (!pks.count("MKN_REPO"))
     pks["MKN_REPO"] = mkn::kul::user::home(mkn::kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
   if (!pks.count("MKN_MOD_REPO"))
-    pks["MKN_MOD_REPO"] = mkn::kul::user::home(mkn::kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
+    pks["MKN_MOD_REPO"] =
+        mkn::kul::user::home(mkn::kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 
   std::string ext, pre;
 #if KUL_IS_WIN

@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,8 @@ class Executioner : public Constants {
       if (!app.lnk.empty()) linkEnd += " " + app.lnk;
       if (!dryRun && mkn::kul::LogMan::INSTANCE().inf() && linkEnd.size())
         KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
-      std::string bin(dryRun ? mkn::kul::File(outD.join(out)).esc() : mkn::kul::File(outD.join(out)).escm());
+      std::string bin(dryRun ? mkn::kul::File(outD.join(out)).esc()
+                             : mkn::kul::File(outD.join(out)).escm());
       std::vector<std::string> obV;
       for (auto const& o : objects) obV.emplace_back(o);
       auto const& base(Compilers::INSTANCE().base(app.files().at(fileType).at(STR_COMPILER)));
@@ -101,8 +102,10 @@ class Executioner : public Constants {
       if (AppVars::INSTANCE().dump()) {
         std::string base = mkn::kul::File(cpc.file()).name();
         mkn::kul::io::Writer(mkn::kul::File(base + ".txt", cmdLogDir)) << cpc.cmd();
-        if (cpc.outs().size()) mkn::kul::io::Writer(mkn::kul::File(base + ".txt", outLogDir)) << cpc.outs();
-        if (cpc.errs().size()) mkn::kul::io::Writer(mkn::kul::File(base + ".txt", errLogDir)) << cpc.errs();
+        if (cpc.outs().size())
+          mkn::kul::io::Writer(mkn::kul::File(base + ".txt", outLogDir)) << cpc.outs();
+        if (cpc.errs().size())
+          mkn::kul::io::Writer(mkn::kul::File(base + ".txt", errLogDir)) << cpc.errs();
       }
 
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
@@ -139,7 +142,8 @@ void maiken::Application::buildExecutable(mkn::kul::hash::set::String const& obj
   Executioner::print(cpc, *this);
 }
 
-void maiken::Application::buildTest(mkn::kul::hash::set::String const& objects) KTHROW(mkn::kul::Exception) {
+void maiken::Application::buildTest(mkn::kul::hash::set::String const& objects)
+    KTHROW(mkn::kul::Exception) {
   mkn::kul::Dir objD(buildDir().join("obj"));
   mkn::kul::Dir tmpD(buildDir().join("tmp"), 1);
   mkn::kul::Dir testsD(buildDir().join("test"), 1);

@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -67,9 +67,10 @@ void maiken::Application::loadDepOrMod(YAML::Node const& node, const mkn::kul::D
 #else
     if (mkn::kul::File("mkn." + std::string(KTOSTRING(__MKN_KUL_OS__)) + ".sh").is() &&
         mkn::kul::proc::Call("./mkn." + std::string(KTOSTRING(__MKN_KUL_OS__)) + ".sh",
-                        AppVars::INSTANCE().envVars())
+                             AppVars::INSTANCE().envVars())
             .run())
-      KEXIT(1, "ERROR in " + depOrMod.path() + "mkn." + std::string(KTOSTRING(__MKN_KUL_OS__)) + ".sh");
+      KEXIT(1, "ERROR in " + depOrMod.path() + "mkn." + std::string(KTOSTRING(__MKN_KUL_OS__)) +
+                   ".sh");
     else if (mkn::kul::File("mkn.sh").is() &&
              mkn::kul::proc::Call("./mkn.sh", AppVars::INSTANCE().envVars()).run())
       KEXIT(1, "ERROR in " + depOrMod.path() + "/mkn.sh");
@@ -168,8 +169,8 @@ void maiken::Application::popDepOrMod(YAML::Node const& n, std::vector<Applicati
     };
 
     if (depOrMod[STR_PROFILE]) {
-      for (auto p :
-           mkn::kul::String::SPLIT(Properties::RESOLVE(*this, depOrMod[STR_PROFILE].Scalar()), ' ')) {
+      for (auto p : mkn::kul::String::SPLIT(
+               Properties::RESOLVE(*this, depOrMod[STR_PROFILE].Scalar()), ' ')) {
         if (p.empty()) continue;
         f = 0;
         if (p == "@")

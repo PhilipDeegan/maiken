@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -105,7 +105,7 @@ class KUL_PUBLISH ModuleLoader
 #ifndef _MKN_DISABLE_MODULES_
       KTHROW(mkn::kul::sys::Exception)
       : mkn::kul::sys::SharedClass<maiken::Module>(f, "maiken_module_construct",
-                                              "maiken_module_destruct") {
+                                                   "maiken_module_destruct") {
     construct(p);
     p->application(&ap);
 #else

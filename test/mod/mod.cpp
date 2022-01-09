@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,37 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "maiken/module/init.hpp"
 
-#include <iostream>
+namespace maiken::test {
 
-int main(int argc, char* argv[]) {
-  std::cout << "HELLO WORLD!" << std::endl;
+class MaikenModule : public maiken::Module {
+ public:
+  void init(Application&, YAML::Node const&) KTHROW(std::exception) override { init_ = 1; }
+  void compile(Application&, YAML::Node const&) KTHROW(std::exception) override { compile_ = 1; }
+  void link(Application&, YAML::Node const&) KTHROW(std::exception) override { link_ = 1; }
+  void test(Application&, YAML::Node const&) KTHROW(std::exception) override { test_ = 1; }
+  void pack(Application&, YAML::Node const&) KTHROW(std::exception) override { pack_ = 1; }
 
-  return 0;
+  ~MaikenModule() {
+    auto const vec = {
+        init_, compile_, link_, test_, pack_,
+    };
+    if (!std::all_of(vec.begin(), vec.end(), [](auto& v) { return v == 1; })) std::abort();
+  };
+
+ private:
+  bool init_ = 0;
+  bool compile_ = 0;
+  bool link_ = 0;
+  bool test_ = 0;
+  bool pack_ = 0;
+};
+
+}  // namespace maiken::test
+
+extern "C" KUL_PUBLISH maiken::Module* maiken_module_construct() {
+  return new maiken ::test ::MaikenModule;
 }
+
+extern "C" KUL_PUBLISH void maiken_module_destruct(maiken::Module* p) { delete p; }

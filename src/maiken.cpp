@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -135,11 +135,12 @@ void maiken::Application::populateMaps(YAML::Node const& n) KTHROW(mkn::kul::Exc
           if (S.size()) libs.push_back(S);
 
   for (std::string const& s : libraryPaths())
-    if (!mkn::kul::Dir(s).is()) KEXIT(1, s + " is not a valid directory\n" + project().dir().path());
+    if (!mkn::kul::Dir(s).is())
+      KEXIT(1, s + " is not a valid directory\n" + project().dir().path());
 }
 
-void maiken::Application::cyclicCheck(
-    const std::vector<std::pair<std::string, std::string>>& apps) const KTHROW(mkn::kul::Exception) {
+void maiken::Application::cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps)
+    const KTHROW(mkn::kul::Exception) {
   if (par) par->cyclicCheck(apps);
   for (auto const& pa : apps) {
     if (project().dir() == pa.first && p == pa.second)

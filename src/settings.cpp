@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -91,11 +91,11 @@ maiken::Settings::Settings(std::string const& file_) : mkn::kul::yaml::File(file
   if (root()[STR_COMPILER] && root()[STR_COMPILER][STR_MASK])
     for (auto const& k : Compilers::INSTANCE().keys())
       if (root()[STR_COMPILER][STR_MASK][k])
-        for (auto const& s : mkn::kul::String::SPLIT(root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
+        for (auto const& s :
+             mkn::kul::String::SPLIT(root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
           Compilers::INSTANCE().addMask(s, k);
 
   resolveProperties();
-
 }
 
 maiken::Settings& maiken::Settings::INSTANCE() KTHROW(mkn::kul::Exit) {
@@ -125,8 +125,8 @@ void maiken::Settings::resolveProperties() KTHROW(SettingsException) {
 
 std::string maiken::Settings::RESOLVE(std::string const& s) KTHROW(SettingsException) {
   std::vector<mkn::kul::File> pos{mkn::kul::File(s), mkn::kul::File(s + ".yaml"),
-                             mkn::kul::File(s, mkn::kul::user::home("maiken")),
-                             mkn::kul::File(s + ".yaml", mkn::kul::user::home("maiken"))};
+                                  mkn::kul::File(s, mkn::kul::user::home("maiken")),
+                                  mkn::kul::File(s + ".yaml", mkn::kul::user::home("maiken"))};
   for (auto const& f : pos)
     if (f.is()) return f.real();
 
@@ -294,12 +294,12 @@ void maiken::Settings::write(mkn::kul::File const& file) KTHROW(mkn::kul::Exit) 
   w.write("#  linker: csc", true);
 }
 
-mkn::kul::cli::EnvVar maiken::Settings::PARSE_ENV_NODE(YAML::Node const& n, Settings const& settings) {
+mkn::kul::cli::EnvVar maiken::Settings::PARSE_ENV_NODE(YAML::Node const& n,
+                                                       Settings const& settings) {
   return maiken::PARSE_ENV_NODE(n, settings, "settings file");
 }
 
 void maiken::Settings::POST_CONSTRUCT() {
-
   auto& settings = Settings::INSTANCE();
   auto& root = settings.root();
   auto& appVars = AppVars::INSTANCE();

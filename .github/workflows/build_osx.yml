@@ -13,8 +13,17 @@ jobs:
     - uses: actions/checkout@v2
 
     - run: make bsd
+    - run: brew install ccache
 
-    - run: KLOG=3 ./mkn build -dtKOW 9 -g 0 -a "-std=c++17 -fPIC"
+    - env:
+        MKN_LIB_LINK_LIB: 1
+        KUL_GIT_CO: --depth 1
+      run: |
+        mkdir ~/.maiken
+        cp res/mkn/clang.yml ~/.maiken/settings.yaml
+        KLOG=3 ./mkn build -dtKOW 9 -g 0
+        KLOG=3 ./mkn build -dtOp test_mod
+        KLOG=3 ./mkn build test pack -Op test
 
     - uses: actions/upload-artifact@v1
       env:

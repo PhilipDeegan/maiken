@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/scm.hpp"
 #include "maiken/settings.hpp"
 
-const mkn::kul::SCM* maiken::SCMGetter::GET_SCM(mkn::kul::Dir const& d, std::string const& r, bool module) {
+const mkn::kul::SCM* maiken::SCMGetter::GET_SCM(mkn::kul::Dir const& d, std::string const& r,
+                                                bool module) {
   std::vector<std::string> repos;
   if (IS_SOLID(r))
     repos.push_back(r);
@@ -108,7 +109,8 @@ std::string maiken::SCMGetter::REPO(const mkn::kul::Dir& d, std::string const& r
 bool maiken::SCMGetter::HAS(const mkn::kul::Dir& d) {
   return (mkn::kul::Dir(d.join(".git")) || mkn::kul::Dir(d.join(".svn")));
 }
-const mkn::kul::SCM* maiken::SCMGetter::GET(const mkn::kul::Dir& d, std::string const& r, bool module) {
+const mkn::kul::SCM* maiken::SCMGetter::GET(const mkn::kul::Dir& d, std::string const& r,
+                                            bool module) {
   if (IS_SOLID(r)) INSTANCE().valids.insert(d.path(), r);
   if (mkn::kul::Dir(d.join(".git"))) return &mkn::kul::scm::Manager::INSTANCE().get("git");
   if (mkn::kul::Dir(d.join(".svn"))) return &mkn::kul::scm::Manager::INSTANCE().get("svn");

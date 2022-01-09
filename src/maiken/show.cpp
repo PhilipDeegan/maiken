@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,8 @@ void maiken::Application::showConfig(bool force) {
           std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe")
                               ? f.name().substr(0, f.name().size() - 4)
                               : f.name();
-          if (!a && c[STR_ARCHIVER] && b == mkn::kul::String::SPLIT(c[STR_ARCHIVER].Scalar(), " ")[0]) {
+          if (!a && c[STR_ARCHIVER] &&
+              b == mkn::kul::String::SPLIT(c[STR_ARCHIVER].Scalar(), " ")[0]) {
             KOUT(NON) << "ARCHIVER: " << f.full();
             a = 1;
             break;

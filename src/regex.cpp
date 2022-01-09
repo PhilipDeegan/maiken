@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2018, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

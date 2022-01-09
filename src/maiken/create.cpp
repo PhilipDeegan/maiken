@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -59,12 +59,12 @@ class CLIHandler : public Constants {
   };
   std::vector<mkn::kul::cli::Cmd> cmdV{Cmd(STR_INIT),     Cmd(STR_INC),     Cmd(STR_SRC),
 #ifndef _MKN_DISABLE_MODULES_
-                                  Cmd(STR_MODS),
+                                       Cmd(STR_MODS),
 #endif  //_MKN_DISABLE_MODULES_
-                                  Cmd(STR_CLEAN),    Cmd(STR_DEPS),    Cmd(STR_BUILD),
-                                  Cmd(STR_RUN),      Cmd(STR_COMPILE), Cmd(STR_LINK),
-                                  Cmd(STR_PROFILES), Cmd(STR_DBG),     Cmd(STR_PACK),
-                                  Cmd(STR_INFO),     Cmd(STR_TREE),    Cmd(STR_TEST)};
+                                       Cmd(STR_CLEAN),    Cmd(STR_DEPS),    Cmd(STR_BUILD),
+                                       Cmd(STR_RUN),      Cmd(STR_COMPILE), Cmd(STR_LINK),
+                                       Cmd(STR_PROFILES), Cmd(STR_DBG),     Cmd(STR_PACK),
+                                       Cmd(STR_INFO),     Cmd(STR_TREE),    Cmd(STR_TEST)};
 
  public:
   std::vector<mkn::kul::cli::Arg> args() { return argV; }
@@ -89,7 +89,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
   using namespace mkn::kul::cli;
 
   mkn::kul::File yml("mkn.yaml");
-  if(!yml && mkn::kul::File("mkn.yml").is()) yml = "mkn.yml";
+  if (!yml && mkn::kul::File("mkn.yml").is()) yml = "mkn.yml";
 
   if (args.empty() || (args.size() == 1 && args.has(STR_DIR))) {
     if (args.size() == 1 && args.has(STR_DIR)) {
@@ -345,7 +345,8 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
   }
   if (mkn::kul::env::EXISTS("MKN_COMPILE_THREADS")) {
     try {
-      AppVars::INSTANCE().threads(mkn::kul::String::UINT16(mkn::kul::env::GET("MKN_COMPILE_THREADS")));
+      AppVars::INSTANCE().threads(
+          mkn::kul::String::UINT16(mkn::kul::env::GET("MKN_COMPILE_THREADS")));
     } catch (const mkn::kul::StringException& e) {
       KEXIT(1, "MKN_COMPILE_THREADS is invalid");
     } catch (mkn::kul::Exception const& e) {

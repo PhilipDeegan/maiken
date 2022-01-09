@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,8 @@ maiken::Compilers::Compilers() {
   cs.insert(std::pair<std::string, Compiler*>("nvcc", gcc.get()));
 }
 
-std::string maiken::Compilers::key(std::string comp, const mkn::kul::hash::map::S2T<Compiler*>& map) {
+std::string maiken::Compilers::key(std::string comp,
+                                   const mkn::kul::hash::map::S2T<Compiler*>& map) {
   mkn::kul::String::REPLACE_ALL(comp, ".exe", "");
   if (map.count(comp) > 0) return comp;
   if (comp.find(" ") != std::string::npos)
