@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@ class Properties : public Constants {
       KTHROW(mkn::kul::Exception);
 
  public:
-  static std::string RESOLVE(Application const& app, std::string const& s) KTHROW(mkn::kul::Exception);
+  static std::string RESOLVE(Application const& app, std::string const& s)
+      KTHROW(mkn::kul::Exception);
   static std::string RESOLVE(const Settings& app, std::string const& s) KTHROW(mkn::kul::Exception);
 };
 }  // namespace maiken

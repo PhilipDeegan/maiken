@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -84,7 +84,8 @@ void maiken::dist::CompileRequest::do_response_for(const mkn::kul::http::A1_1Req
 }
 
 void maiken::dist::LinkRequest::do_response_for(const mkn::kul::http::A1_1Request& req,
-                                                Sessions& sessions, mkn::kul::http::_1_1Response& resp) {
+                                                Sessions& sessions,
+                                                mkn::kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD LinkRequest");
   auto session_id = (*req.headers().find("session")).second;
 

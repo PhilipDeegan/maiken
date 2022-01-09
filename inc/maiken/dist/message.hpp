@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,8 @@ class SetupRequest : public ARequest {
 
  public:
   SetupRequest() {}
-  SetupRequest(std::string const& project, std::string const& settings, mkn::kul::cli::Args const& args)
+  SetupRequest(std::string const& project, std::string const& settings,
+               mkn::kul::cli::Args const& args)
       : m_project_yaml(project), m_settings_yaml(settings), m_args(args) {}
 
   void do_response_for(const mkn::kul::http::A1_1Request& req, Sessions& sessions,

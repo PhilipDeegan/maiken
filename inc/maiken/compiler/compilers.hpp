@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,8 @@ class Exception : public mkn::kul::Exception {
 
 class CompilerNotFoundException : public mkn::kul::Exception {
  public:
-  CompilerNotFoundException(char const* f, int const l, std::string s) : mkn::kul::Exception(f, l, s) {}
+  CompilerNotFoundException(char const* f, int const l, std::string s)
+      : mkn::kul::Exception(f, l, s) {}
 };
 
 template <typename T, typename... Args>

@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -54,14 +54,12 @@ struct CompilationInfo {
 namespace compiler {
 enum Mode { NONE = 0, STAT, SHAR };
 
-inline auto mode_from(std::string const& mode){
-  if(mode == Constants::STR_SHARED)
-      return Mode::SHAR;
-  if(mode == Constants::STR_STATIC)
-      return Mode::STAT;
+inline auto mode_from(std::string const& mode) {
+  if (mode == Constants::STR_SHARED) return Mode::SHAR;
+  if (mode == Constants::STR_STATIC) return Mode::STAT;
   return Mode::NONE;
 }
-}
+}  // namespace compiler
 
 struct CompileDAO {
   maiken::Application const& app;
@@ -109,9 +107,11 @@ class Compiler {
   virtual ~Compiler() {}
   virtual bool sourceIsBin() const = 0;
 
-  virtual CompilerProcessCapture compileSource(CompileDAO& dao) const KTHROW(mkn::kul::Exception) = 0;
+  virtual CompilerProcessCapture compileSource(CompileDAO& dao) const
+      KTHROW(mkn::kul::Exception) = 0;
 
-  virtual CompilerProcessCapture buildExecutable(LinkDAO& dao) const KTHROW(mkn::kul::Exception) = 0;
+  virtual CompilerProcessCapture buildExecutable(LinkDAO& dao) const
+      KTHROW(mkn::kul::Exception) = 0;
 
   virtual CompilerProcessCapture buildLibrary(LinkDAO& dao) const KTHROW(mkn::kul::Exception) = 0;
 

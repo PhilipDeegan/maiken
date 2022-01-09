@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::link(mkn::kul::hash::set::String const& objects) KTHROW(mkn::kul::Exception) {
+void maiken::Application::link(mkn::kul::hash::set::String const& objects)
+    KTHROW(mkn::kul::Exception) {
   showConfig();
   if (objects.size() > 0 || main_) {
     buildDir().mk();
@@ -57,7 +58,8 @@ void maiken::Application::link(mkn::kul::hash::set::String const& objects) KTHRO
   delEmpty(mkn::kul::Dir(".mkn/log/" + buildDir().name() + "/bin/err"));
 }
 
-void maiken::Application::checkErrors(CompilerProcessCapture const& cpc) KTHROW(mkn::kul::Exception) {
+void maiken::Application::checkErrors(CompilerProcessCapture const& cpc)
+    KTHROW(mkn::kul::Exception) {
   auto o = [](std::string const& s) {
     if (s.size()) KOUT(NON) << s;
   };

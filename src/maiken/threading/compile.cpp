@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,8 @@ std::string maiken::CompilationUnit::compileString() const KTHROW(mkn::kul::Exce
   return comp->compileSource(dao).cmd();
 }
 
-maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const KTHROW(mkn::kul::Exception) {
+maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const
+    KTHROW(mkn::kul::Exception) {
   try {
     mkn::kul::os::PushDir pushd(app.project().dir());
 

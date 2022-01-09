@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,8 @@ const constexpr size_t BUFF_SIZE = (_KUL_TCP_READ_BUFFER_ - 666);
 
 class Exception : public mkn::kul::Exception {
  public:
-  Exception(char const* f, uint16_t const& l, std::string const& s) : mkn::kul::Exception(f, l, s) {}
+  Exception(char const* f, uint16_t const& l, std::string const& s)
+      : mkn::kul::Exception(f, l, s) {}
 };
 class RemoteCommandManager;
 class Server;
@@ -197,7 +198,8 @@ class RemoteCommandManager {
     if (settings.root()["dist"]) {
       if (settings.root()["dist"]["nodes"]) {
         for (auto const& node : settings.root()["dist"]["nodes"]) {
-          m_hosts.emplace_back(node["host"].Scalar(), mkn::kul::String::UINT16(node["port"].Scalar()));
+          m_hosts.emplace_back(node["host"].Scalar(),
+                               mkn::kul::String::UINT16(node["port"].Scalar()));
         }
       }
     }

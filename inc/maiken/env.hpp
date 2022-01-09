@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,12 +34,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/app.hpp"
 #include "maiken/property.hpp"
 
-
 namespace maiken {
 
 template <typename HasProperties>
-mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const& n, HasProperties const& hasProperties, std::string hasProperties_id) {
-
+mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const& n, HasProperties const& hasProperties,
+                                     std::string hasProperties_id) {
   using namespace mkn::kul::cli;
   if (n.IsScalar()) {
     auto bits = mkn::kul::String::ESC_SPLIT(n.Scalar(), '=');
@@ -69,7 +68,8 @@ mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const& n, HasProperties const& h
     else if (n[Constants::STR_MODE].Scalar().compare(Constants::STR_REPLACE) == 0)
       mode = EnvVarMode::REPL;
   }
-  return EnvVar(n[Constants::STR_NAME].Scalar(), Properties::RESOLVE(hasProperties, n[Constants::STR_VALUE].Scalar()) , mode);
+  return EnvVar(n[Constants::STR_NAME].Scalar(),
+                Properties::RESOLVE(hasProperties, n[Constants::STR_VALUE].Scalar()), mode);
 }
 
 }  // namespace maiken

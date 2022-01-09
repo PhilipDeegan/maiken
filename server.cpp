@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -38,7 +38,8 @@ int main(int argc, char* argv[]) {
   int exit_code = 0;
   try {
     using namespace mkn::kul::cli;
-    mkn::kul::Dir d = mkn::kul::user::home(mkn::kul::Dir::JOIN(maiken::Constants::STR_MAIKEN, "server"));
+    mkn::kul::Dir d =
+        mkn::kul::user::home(mkn::kul::Dir::JOIN(maiken::Constants::STR_MAIKEN, "server"));
     Args args({}, {Arg('d', maiken::Constants::STR_DIR, ArgType::STRING)});
     try {
       args.process(argc, argv);

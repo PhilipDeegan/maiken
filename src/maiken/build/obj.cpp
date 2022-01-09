@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,8 @@ class CompilerPrinter {
       if (app.profile().size() > 0) ss << " [" << app.profile() << "]";
       KOUT(NON) << ss.str();
     }
-    if (!AppVars::INSTANCE().dryRun() && mkn::kul::LogMan::INSTANCE().inf() && app.includes().size()) {
+    if (!AppVars::INSTANCE().dryRun() && mkn::kul::LogMan::INSTANCE().inf() &&
+        app.includes().size()) {
       KOUT(NON) << "INCLUDES";
       for (auto const& s : app.includes()) KOUT(NON) << "\t" << s.first;
     }
@@ -69,7 +70,8 @@ class CompilerPrinter {
 };
 }  // namespace maiken
 
-void maiken::Application::compile(mkn::kul::hash::set::String& objects) KTHROW(mkn::kul::Exception) {
+void maiken::Application::compile(mkn::kul::hash::set::String& objects)
+    KTHROW(mkn::kul::Exception) {
   auto sources = sourceMap();
 
   showConfig();
@@ -85,7 +87,8 @@ void maiken::Application::compile(mkn::kul::hash::set::String& objects) KTHROW(m
 
 void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::string>>& src_objs,
                                   mkn::kul::hash::set::String& objects,
-                                  std::vector<mkn::kul::File>& cacheFiles) KTHROW(mkn::kul::Exception) {
+                                  std::vector<mkn::kul::File>& cacheFiles)
+    KTHROW(mkn::kul::Exception) {
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   std::vector<std::shared_ptr<maiken::dist::Post>> posts;
   auto compile_lambda = [](std::shared_ptr<maiken::dist::Post> post, const dist::Host& host) {
@@ -162,7 +165,8 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
 
 void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::string>>& sourceQueue,
                                   mkn::kul::hash::set::String& objects,
-                                  std::vector<mkn::kul::File>& cacheFiles) KTHROW(mkn::kul::Exception) {
+                                  std::vector<mkn::kul::File>& cacheFiles)
+    KTHROW(mkn::kul::Exception) {
   ThreadingCompiler tc(*this);
   mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
   std::vector<maiken::CompilationUnit> c_units;
@@ -205,8 +209,10 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     if (AppVars::INSTANCE().dump()) {
       std::string base = mkn::kul::File(cpc.file()).name();
       mkn::kul::io::Writer(mkn::kul::File(base + ".txt", cmdLogDir)) << cpc.cmd();
-      if (cpc.outs().size()) mkn::kul::io::Writer(mkn::kul::File(base + ".txt", outLogDir)) << cpc.outs();
-      if (cpc.errs().size()) mkn::kul::io::Writer(mkn::kul::File(base + ".txt", errLogDir)) << cpc.errs();
+      if (cpc.outs().size())
+        mkn::kul::io::Writer(mkn::kul::File(base + ".txt", outLogDir)) << cpc.outs();
+      if (cpc.errs().size())
+        mkn::kul::io::Writer(mkn::kul::File(base + ".txt", errLogDir)) << cpc.errs();
     }
 
     std::lock_guard<std::mutex> lock(mute);

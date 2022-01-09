@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -91,7 +91,8 @@ class KUL_PUBLISH Application : public Constants {
 
  protected:
   void buildExecutable(mkn::kul::hash::set::String const& objects) KTHROW(mkn::kul::Exception);
-  CompilerProcessCapture buildLibrary(mkn::kul::hash::set::String const& objects) KTHROW(mkn::kul::Exception);
+  CompilerProcessCapture buildLibrary(mkn::kul::hash::set::String const& objects)
+      KTHROW(mkn::kul::Exception);
   void buildTest(mkn::kul::hash::set::String const& objects) KTHROW(mkn::kul::Exception);
   void checkErrors(CompilerProcessCapture const& cpc) KTHROW(mkn::kul::Exception);
 
@@ -131,7 +132,8 @@ class KUL_PUBLISH Application : public Constants {
       KTHROW(mkn::kul::Exception);
   void showProfiles();
 
-  void writeTimeStamps(mkn::kul::hash::set::String& objects, std::vector<mkn::kul::File>& cacheFiles);
+  void writeTimeStamps(mkn::kul::hash::set::String& objects,
+                       std::vector<mkn::kul::File>& cacheFiles);
   void loadTimeStamps() KTHROW(mkn::kul::StringException);
 
   void buildDepVec(std::string const& depVal);
@@ -268,7 +270,8 @@ class KUL_PUBLISH Application : public Constants {
   }
   SourceMap sourceMap() const;
 
-  static std::vector<Application*> CREATE(mkn::kul::cli::Args const& args) KTHROW(mkn::kul::Exception);
+  static std::vector<Application*> CREATE(mkn::kul::cli::Args const& args)
+      KTHROW(mkn::kul::Exception);
   static std::vector<Application*> CREATE(int16_t argc, char* argv[]) KTHROW(mkn::kul::Exception);
 
   static mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const&, Application const&);

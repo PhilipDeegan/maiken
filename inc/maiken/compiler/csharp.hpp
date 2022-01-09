@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ class WINCompiler : public Compiler {
   CompilerProcessCapture buildLibrary(LinkDAO& dao) const KTHROW(mkn::kul::Exception) override;
 
   void preCompileHeader(std::vector<std::string> const&, std::vector<std::string> const&,
-                                std::string const&, std::string const&, bool = false) const
+                        std::string const&, std::string const&, bool = false) const
       KTHROW(mkn::kul::Exception) override {
     KEXCEPTION("Method preCompileHeader is not implemented in C Sharp");
   }

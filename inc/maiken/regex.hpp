@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,8 @@ class Regexer {
  public:
   static std::vector<std::string> RESOLVE(std::string str) KTHROW(mkn::kul::Exception);
 
-  static void RESOLVE_REC(std::string const& i, std::vector<std::string>& v) KTHROW(mkn::kul::Exception);
+  static void RESOLVE_REC(std::string const& i, std::vector<std::string>& v)
+      KTHROW(mkn::kul::Exception);
 };
 }  // end namespace maiken
 

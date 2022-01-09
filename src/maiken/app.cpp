@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -82,9 +82,7 @@ maiken::Application* maiken::Applications::getOrNullptr(std::string const& proje
   return app;
 }
 
-mkn::kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const& n, Application const& app) {
+mkn::kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const& n,
+                                                          Application const& app) {
   return maiken::PARSE_ENV_NODE(n, app, app.project().file());
 }
-
-
-

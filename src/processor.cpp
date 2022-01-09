@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -104,7 +104,8 @@ void maiken::Processor::process(std::vector<Application*> apps) {
       auto& objects = app_info.at(apP)->objects;
       for (auto const& pair : s_finder.all_sources_from(sources, objects, cacheFiles)) {
         auto unit = app_info[apP]->tc.compilationUnit(pair);
-        mkn::kul::this_thread::nSleep(5000000);  // dup appears to be overloaded with too many threads
+        mkn::kul::this_thread::nSleep(
+            5000000);  // dup appears to be overloaded with too many threads
         ctp.async(std::bind(lambda, unit), std::bind(lambex, std::placeholders::_1));
       }
     }

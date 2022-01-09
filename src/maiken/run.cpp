@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -91,8 +91,9 @@ class Runner : public Constants {
 #endif  // _MKN_DISABLE_RUN_LIB_PATH_HANDLING_
     }
     for (auto const& ev : envies) {
-      p->var(ev.first,
-             mkn::kul::cli::EnvVar(ev.first, ev.second, mkn::kul::cli::EnvVarMode::PREP).toString());
+      p->var(
+          ev.first,
+          mkn::kul::cli::EnvVar(ev.first, ev.second, mkn::kul::cli::EnvVarMode::PREP).toString());
     }
     for (auto const& ev : AppVars::INSTANCE().envVars()) {
       auto it = std::find_if(envies.begin(), envies.end(),
@@ -100,8 +101,9 @@ class Runner : public Constants {
                                return element.first == ev.first;
                              });
       if (it == envies.end())
-        p->var(ev.first,
-               mkn::kul::cli::EnvVar(ev.first, ev.second, mkn::kul::cli::EnvVarMode::PREP).toString());
+        p->var(
+            ev.first,
+            mkn::kul::cli::EnvVar(ev.first, ev.second, mkn::kul::cli::EnvVarMode::PREP).toString());
     }
     KOUT(DBG) << (*p);
     if (!AppVars::INSTANCE().dryRun()) p->set(a.envVars()).start();

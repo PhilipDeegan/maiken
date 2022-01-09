@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,8 @@ void includeDependency(std::string const& s, std::string const& p,
   }
 }
 
-void maiken::Application::parseDependencyString(std::string s, mkn::kul::hash::set::String& include) {
+void maiken::Application::parseDependencyString(std::string s,
+                                                mkn::kul::hash::set::String& include) {
   mkn::kul::String::REPLACE_ALL(s, " ", "");
   std::stringstream dep, pro;
   bool lB = 0, rB = 0;

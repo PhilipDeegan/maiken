@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2017, Philip Deegan.
+Copyright (c) 2022, Philip Deegan.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,7 @@ int main(int argc, char* argv[]) {
 
     bool print_build_time = mkn::kul::any_of(
         std::vector<std::string>{"build", "compile", "link"},
-        [](auto const& key){
-           return maiken::CommandStateMachine::INSTANCE().has(key); });
+        [](auto const& key) { return maiken::CommandStateMachine::INSTANCE().has(key); });
 
     if (print_build_time) {
       KOUT(NON) << "BUILD TIME: " << (mkn::kul::Now::MILLIS() - s) << " ms";

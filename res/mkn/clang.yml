@@ -1,0 +1,15 @@
+
+# local:
+#   repo: /mkn/r
+#   mod-repo: /mkn/m
+
+remote:
+  repo: git@github.com:mkn/
+  mod-repo: git@github.com:mkn-mod/
+
+file:
+  - type: cpp:cxx:cc
+    archiver: ar -cr
+    compiler: ccache clang++ -std=c++17 -fPIC
+    linker: g++
+
