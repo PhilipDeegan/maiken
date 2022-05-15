@@ -14,12 +14,15 @@ jobs:
 
     - run: bash -c "rm /bin/link" # interferes with cl/link.exe
 
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+
     - shell: cmd
       env:
         MKN_CL_PREFERRED: 1
         KUL_GIT_CO: --depth 1
       run: |
-        call "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
         bash -c ./res/ci/win_build.sh
         mkn build -dtKOg 0 -a "-std:c++17 -EHsc"
         mkn build -dtOp test_mod -a "-std:c++17 -EHsc"
