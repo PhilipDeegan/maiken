@@ -84,44 +84,67 @@ std::vector<maiken::Application*> maiken::Application::CREATE(int16_t argc, char
   }
   return CREATE(args);
 }
+
+auto find_mkn_file(mkn::kul::cli::Args const& args, std::string const& str_dir) {
+  if (args.has(str_dir)) {
+    mkn::kul::File f(args.get(str_dir));
+    if (f) return f;
+  }
+
+  std::vector<std::string> const file_names{"mkn.yml", "mkn.yaml", ".mkn.yml", ".mkn.yaml"};
+  std::unordered_map<std::string, mkn::kul::File> files;
+
+  if (args.has(str_dir)) {
+    mkn::kul::Dir d(args.get(str_dir));
+    if (!d) KEXIT(1, "Invalid -C argument, no such item: " + args.get(str_dir));
+    for (auto& file_name : file_names) {
+      mkn::kul::File f(file_name, d.real());
+      if (f) files.emplace(file_name, f);
+    }
+  } else {
+    for (auto& file_name : file_names) {
+      mkn::kul::File f(file_name);
+      if (f) files.emplace(file_name, f);
+    }
+  }
+
+  std::string file_list;
+  for (auto& file_name : file_names) file_list += file_name + ", ";
+  file_list.pop_back();
+  file_list.pop_back();
+  if (files.size() == 0)
+    KEXIT(1, "No configuration file found, expects one of: (" + file_list + "). or run 'mkn init'");
+  if (files.size() > 1)
+    KEXIT(1, "Too many configuration files found, expects only one of: (" + file_list +
+                 "). or use '-C $FILE'");
+  return files.begin()->second;
+}
+
+std::string get_first_line_of(mkn::kul::File const& yml) {
+  mkn::kul::io::Reader reader(yml);
+  char const* c = reader.readLine();
+  return c ? c : "";
+}
+
 std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Args const& args)
     KTHROW(mkn::kul::Exception) {
   using namespace mkn::kul::cli;
 
-  mkn::kul::File yml("mkn.yaml");
-  if (!yml && mkn::kul::File("mkn.yml").is()) yml = "mkn.yml";
+  mkn::kul::File yml = find_mkn_file(args, STR_DIR);
+  mkn::kul::env::CWD(yml.dir());
 
   if (args.empty() || (args.size() == 1 && args.has(STR_DIR))) {
-    if (args.size() == 1 && args.has(STR_DIR)) {
-      mkn::kul::Dir d(args.get(STR_DIR));
-      mkn::kul::File f(args.get(STR_DIR));
-      if (!d && !f) KEXIT(1, "Invalid -C argument, no such item: " + args.get(STR_DIR));
-      if (f) {
-        yml = f;
-        d = f.dir();
-      } else {
-        if (mkn::kul::File("mkn.yaml", d.real()).is()) yml = mkn::kul::File("mkn.yaml", d.real());
-        if (mkn::kul::File("mkn.yml", d.real()).is()) yml = mkn::kul::File("mkn.yml", d.real());
-      }
-      mkn::kul::env::CWD(d);
-    }
-    if (yml) {
-      mkn::kul::io::Reader reader(yml);
-      char const* c = reader.readLine();
-      std::string const s(c ? c : "");
-      if (s.size() > 3 && s.substr(0, 3) == "#! ") {
-        std::string line(s.substr(3));
-        if (!line.empty()) {
-          std::vector<std::string> lineArgs(mkn::kul::cli::asArgs(line));
-          std::vector<char*> lineV;
-          lineV.push_back(const_cast<char*>(maiken::PROGRAM.c_str()));
-          for (size_t i = 0; i < lineArgs.size(); i++) lineV.push_back(&lineArgs[i][0]);
-          return CREATE(lineV.size(), &lineV[0]);
-        }
+    std::string const s = get_first_line_of(yml);
+    if (s.size() > 3 && s.substr(0, 3) == "#! ") {
+      std::string line(s.substr(3));
+      if (!line.empty()) {
+        std::vector<std::string> lineArgs(mkn::kul::cli::asArgs(line));
+        std::vector<char*> lineV;
+        lineV.push_back(const_cast<char*>(maiken::PROGRAM.c_str()));
+        for (size_t i = 0; i < lineArgs.size(); i++) lineV.push_back(&lineArgs[i][0]);
+        return CREATE(lineV.size(), &lineV[0]);
       }
     }
-    showHelp();
-    KEXIT(0, "");
   }
   if (args.empty() || args.has(STR_HELP)) {
     showHelp();
@@ -152,22 +175,9 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     KOUT(NON) << ss.str();
     KEXIT(0, "");
   }
-  if (args.has(STR_DIR)) {
-    mkn::kul::Dir d(args.get(STR_DIR));
-    mkn::kul::File f(args.get(STR_DIR));
-    if (!d && !f) KEXIT(1, "Invalid -C argument, no such item: " + args.get(STR_DIR));
-    if (f) {
-      yml = f;
-      d = f.dir();
-    } else {
-      if (mkn::kul::File("mkn.yaml", d.real()).is()) yml = mkn::kul::File("mkn.yaml", d.real());
-      if (mkn::kul::File("mkn.yml", d.real()).is()) yml = mkn::kul::File("mkn.yml", d.real());
-    }
-    mkn::kul::env::CWD(d);
-  }
+
   if (args.has(STR_INIT)) NewProject{};
 
-  if (!yml && mkn::kul::File("mkn.yml").is()) yml = mkn::kul::File("mkn.yml");
   Project const& project(*Projects::INSTANCE().getOrCreate(yml));
 
   std::vector<std::string> profiles;

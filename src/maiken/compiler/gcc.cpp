@@ -50,7 +50,7 @@ maiken::cpp::GccCompiler::GccCompiler(int const& v) : CCompiler(v) {
                     {6, "-g3"},
                     {7, "-g3"},
                     {8, "-g3"},
-                    {9, "-g3 -pg"}});
+                    {9, "-g3 -pg -fno-omit-frame-pointer"}});
   m_optimise_l_bin.insert(
       {{0, ""}, {1, ""}, {2, ""}, {3, ""}, {4, ""}, {5, ""}, {6, ""}, {7, ""}, {8, ""}, {9, ""}});
   m_optimise_l_lib.insert(

@@ -1,11 +1,4 @@
 
-
-| Operating system  | Build Status |
-| ------------- | -------------
-| Linux/Mac  | [![Linux/Mac Build](https://travis-ci.org/Dekken/maiken.svg?branch=master)](https://travis-ci.org/Dekken/maiken)  |
-| Windows  | [![Windows Build](https://ci.appveyor.com/api/projects/status/tsfqtewavevo0a8y/branch/master?svg=true)](https://ci.appveyor.com/project/Dekken/maiken)  |
-
-
 # maiken
 
 **Cross platform build tool for C/C++/Obj-C/C#/CUDA/opencl**
@@ -15,11 +8,9 @@
 
   Windows  : Visual C++ 2019 / Windows SDK 10+ / git 2.0
 
-[README](https://raw.githubusercontent.com/Dekken/maiken/master/README.noformat)
+[README](https://raw.githubusercontent.com/mkn/mkn/master/README.noformat)
 
-[Binaries available](https://github.com/Dekken/maiken/tree/binaries)
-
-[Latest Windows build @ appveyor](https://ci.appveyor.com/project/Dekken/maiken/build/artifacts)
+[Binaries available](https://github.com/mkn/mkn/releases/tag/latest)
 
 Testers/comments/suggestions/feature requests welcome. Email me or make an issue. Or head on over to [/r/mkn](http://reddit.com/r/mkn)
 
@@ -46,15 +37,15 @@ mkn run
 
 GCC Debian
 
-![GCC Debian](https://raw.githubusercontent.com/Dekken/maiken/wiki/mkn_nix.png)
+![GCC Debian](https://raw.githubusercontent.com/PhilipDeegan/maiken/wiki/mkn_nix.png)
 
 MSVC Windows
 
-![MSVC Windows](https://raw.githubusercontent.com/Dekken/maiken/wiki/mkn_win.png)
+![MSVC Windows](https://raw.githubusercontent.com/PhilipDeegan/maiken/wiki/mkn_win.png)
 
 Init example
 
-![MSVC Windows](https://raw.githubusercontent.com/Dekken/maiken/wiki/mkn_init.png)
+![MSVC Windows](https://raw.githubusercontent.com/PhilipDeegan/maiken/wiki/mkn_init.png)
 
 
 ## Official plugins
