@@ -90,6 +90,10 @@ class Runner : public Constants {
       envies.push_back(std::make_pair(pa.name(), pa.toString()));
 #endif  // _MKN_DISABLE_RUN_LIB_PATH_HANDLING_
     }
+
+    if (mkn::kul::env::EXISTS("MKN_LD_PRELOAD"))
+      envies.emplace_back("LD_PRELOAD", mkn::kul::env::GET("MKN_LD_PRELOAD"));
+
     for (auto const& ev : envies) {
       p->var(
           ev.first,
