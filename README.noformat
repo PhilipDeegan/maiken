@@ -641,6 +641,12 @@ Default         #ifdef _WIN32 evs["MKN_LIB_PRE"] = "";
 Description     The file prefix of shared objects being created.
 
 
+Key             MKN_LD_PRELOAD
+Type            string
+Default         not set
+Description     Forwards MKN_LD_PRELOAD as LD_PRELOAD for run/dbg
+
+
 7. Switches
 
 Key             _MKN_REP_NAME_DOT_
