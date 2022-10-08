@@ -130,22 +130,6 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     KTHROW(mkn::kul::Exception) {
   using namespace mkn::kul::cli;
 
-  mkn::kul::File yml = find_mkn_file(args, STR_DIR);
-  mkn::kul::env::CWD(yml.dir());
-
-  if (args.empty() || (args.size() == 1 && args.has(STR_DIR))) {
-    std::string const s = get_first_line_of(yml);
-    if (s.size() > 3 && s.substr(0, 3) == "#! ") {
-      std::string line(s.substr(3));
-      if (!line.empty()) {
-        std::vector<std::string> lineArgs(mkn::kul::cli::asArgs(line));
-        std::vector<char*> lineV;
-        lineV.push_back(const_cast<char*>(maiken::PROGRAM.c_str()));
-        for (size_t i = 0; i < lineArgs.size(); i++) lineV.push_back(&lineArgs[i][0]);
-        return CREATE(lineV.size(), &lineV[0]);
-      }
-    }
-  }
   if (args.empty() || args.has(STR_HELP)) {
     showHelp();
     KEXIT(0, "");
@@ -177,6 +161,23 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
   }
 
   if (args.has(STR_INIT)) NewProject{};
+
+  mkn::kul::File yml = find_mkn_file(args, STR_DIR);
+  mkn::kul::env::CWD(yml.dir());
+
+  if (args.empty() || (args.size() == 1 && args.has(STR_DIR))) {
+    std::string const s = get_first_line_of(yml);
+    if (s.size() > 3 && s.substr(0, 3) == "#! ") {
+      std::string line(s.substr(3));
+      if (!line.empty()) {
+        std::vector<std::string> lineArgs(mkn::kul::cli::asArgs(line));
+        std::vector<char*> lineV;
+        lineV.push_back(const_cast<char*>(maiken::PROGRAM.c_str()));
+        for (size_t i = 0; i < lineArgs.size(); i++) lineV.push_back(&lineArgs[i][0]);
+        return CREATE(lineV.size(), &lineV[0]);
+      }
+    }
+  }
 
   Project const& project(*Projects::INSTANCE().getOrCreate(yml));
 
