@@ -86,11 +86,10 @@ void maiken::Application::scmUpdate(bool const& f) KTHROW(mkn::kul::scm::Excepti
                    "REQUIRED!";
 
     std::string const& tscr(
-        !this->scr.empty()
-            ? this->scr
-            : this->project().root()[STR_SCM]
-                  ? Properties::RESOLVE(*this, this->project().root()[STR_SCM].Scalar())
-                  : this->project().root()[STR_NAME].Scalar());
+        !this->scr.empty() ? this->scr
+        : this->project().root()[STR_SCM]
+            ? Properties::RESOLVE(*this, this->project().root()[STR_SCM].Scalar())
+            : this->project().root()[STR_NAME].Scalar());
 
     scmUpdate(f, scm, SCMGetter::REPO(this->project().dir(), tscr, isMod));
     UpdateTracker::INSTANCE().add(this->project().dir().real());
@@ -100,9 +99,9 @@ void maiken::Application::scmUpdate(bool const& f) KTHROW(mkn::kul::scm::Excepti
 void maiken::Application::scmUpdate(bool const& f, const mkn::kul::SCM* scm, std::string const& url)
     KTHROW(mkn::kul::scm::Exception) {
   std::string const& ver(!this->scv.empty() ? this->scv
-                                            : this->project().root()[STR_VERSION]
-                                                  ? this->project().root()[STR_VERSION].Scalar()
-                                                  : "");
+                         : this->project().root()[STR_VERSION]
+                             ? this->project().root()[STR_VERSION].Scalar()
+                             : "");
   bool c = true;
   if (!f) {
     KOUT(NON) << "CHECKING: " << this->project().dir().real() << " FROM " << url;
