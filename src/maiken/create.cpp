@@ -28,6 +28,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <optional>
+
 #include "maiken.hpp"
 #include "maiken/dist.hpp"
 
@@ -85,7 +87,8 @@ std::vector<maiken::Application*> maiken::Application::CREATE(int16_t argc, char
   return CREATE(args);
 }
 
-auto find_mkn_file(mkn::kul::cli::Args const& args, std::string const& str_dir) {
+std::optional<mkn::kul::File> find_mkn_file(mkn::kul::cli::Args const& args,
+                                            std::string const& str_dir) {
   if (args.has(str_dir)) {
     mkn::kul::File f(args.get(str_dir));
     if (f) return f;
@@ -112,8 +115,7 @@ auto find_mkn_file(mkn::kul::cli::Args const& args, std::string const& str_dir) 
   for (auto& file_name : file_names) file_list += file_name + ", ";
   file_list.pop_back();
   file_list.pop_back();
-  if (files.size() == 0)
-    KEXIT(1, "No configuration file found, expects one of: (" + file_list + "). or run 'mkn init'");
+  if (files.size() == 0) return std::nullopt;
   if (files.size() > 1)
     KEXIT(1, "Too many configuration files found, expects only one of: (" + file_list +
                  "). or use '-C $FILE'");
@@ -126,43 +128,56 @@ std::string get_first_line_of(mkn::kul::File const& yml) {
   return c ? c : "";
 }
 
+auto version_string() {
+  std::stringstream ss, mod;
+  ss << KTOSTRING(_MKN_VERSION_) << " (" << KTOSTRING(__MKN_KUL_OS__) << ") w/[";
+  if (_MKN_REMOTE_EXEC_) mod << "exec,";
+#ifndef _MKN_DISABLE_MODULES_
+  mod << "mod,";
+#endif  //_MKN_DISABLE_MODULES_
+#ifdef _MKN_WITH_MKN_RAM_
+#if defined(_MKN_WITH_IO_CEREAL_)
+  mod << "dist,";
+#endif  //_MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+  mod << "ram,";
+#endif  //_MKN_WITH_MKN_RAM_
+#ifdef _MKN_WITH_GOOGLE_SPARSEHASH_
+  mod << "sparsehash,";
+#endif  //_MKN_WITH_GOOGLE_SPARSEHASH_
+
+  if (_MKN_TIMESTAMPS_) mod << "ts,";
+  if (mod.str().size()) mod.seekp(-1, mod.cur);
+  mod << "]";
+  ss << mod.str();
+  return ss.str();
+}
+
 std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Args const& args)
     KTHROW(mkn::kul::Exception) {
   using namespace mkn::kul::cli;
 
-  if (args.empty() || args.has(STR_HELP)) {
+  auto help_exit = [&]() {
     showHelp();
     KEXIT(0, "");
-  }
-  if (args.has(STR_QUIET)) AppVars::INSTANCE().quiet(true);
-  if (args.has(STR_VERSION)) {
-    std::stringstream ss, mod;
-    ss << KTOSTRING(_MKN_VERSION_) << " (" << KTOSTRING(__MKN_KUL_OS__) << ") w/[";
-    if (_MKN_REMOTE_EXEC_) mod << "exec,";
-#ifndef _MKN_DISABLE_MODULES_
-    mod << "mod,";
-#endif  //_MKN_DISABLE_MODULES_
-#ifdef _MKN_WITH_MKN_RAM_
-#if defined(_MKN_WITH_IO_CEREAL_)
-    mod << "dist,";
-#endif  //_MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
-    mod << "ram,";
-#endif  //_MKN_WITH_MKN_RAM_
-#ifdef _MKN_WITH_GOOGLE_SPARSEHASH_
-    mod << "sparsehash,";
-#endif  //_MKN_WITH_GOOGLE_SPARSEHASH_
+  };
 
-    if (_MKN_TIMESTAMPS_) mod << "ts,";
-    if (mod.str().size()) mod.seekp(-1, mod.cur);
-    mod << "]";
-    ss << mod.str();
-    KOUT(NON) << ss.str();
+  if (args.has(STR_HELP)) help_exit();
+
+  if (args.has(STR_VERSION)) {
+    KOUT(NON) << version_string();
     KEXIT(0, "");
   }
 
+  if (args.has(STR_QUIET)) AppVars::INSTANCE().quiet(true);
   if (args.has(STR_INIT)) NewProject{};
 
-  mkn::kul::File yml = find_mkn_file(args, STR_DIR);
+  std::optional<mkn::kul::File> yml_opt = find_mkn_file(args, STR_DIR);
+  if (!yml_opt) {
+    KOUT(NON) << "No mkn.yml file found, run 'mkn -h' or 'mkn init'";
+    KEXIT(0, "");
+  }
+
+  auto& yml = *yml_opt;
   mkn::kul::env::CWD(yml.dir());
 
   if (args.empty() || (args.size() == 1 && args.has(STR_DIR))) {
@@ -256,13 +271,13 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     };
 
     getSet(STR_DEBUG, "-g", 9,
-           std::bind((void (AppVars::*)(uint16_t const&)) & AppVars::debug,
+           std::bind((void(AppVars::*)(uint16_t const&)) & AppVars::debug,
                      std::ref(AppVars::INSTANCE()), std::placeholders::_1));
     getSet(STR_OPT, "-O", 9,
-           std::bind((void (AppVars::*)(uint16_t const&)) & AppVars::optimise,
+           std::bind((void(AppVars::*)(uint16_t const&)) & AppVars::optimise,
                      std::ref(AppVars::INSTANCE()), std::placeholders::_1));
     getSet(STR_WARN, "-W", 8,
-           std::bind((void (AppVars::*)(uint16_t const&)) & AppVars::warn,
+           std::bind((void(AppVars::*)(uint16_t const&)) & AppVars::warn,
                      std::ref(AppVars::INSTANCE()), std::placeholders::_1));
   }
   {
@@ -280,12 +295,12 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
       splitArgs(
           args.get(STR_PROPERTY), "property",
           std::bind(
-              (void (AppVars::*)(std::string const&, std::string const&)) & AppVars::properkeys,
+              (void(AppVars::*)(std::string const&, std::string const&)) & AppVars::properkeys,
               std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
     if (args.has(STR_ENV))
       splitArgs(
           args.get(STR_ENV), "environment",
-          std::bind((void (AppVars::*)(std::string const&, std::string const&)) & AppVars::envVar,
+          std::bind((void(AppVars::*)(std::string const&, std::string const&)) & AppVars::envVar,
                     std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
   }
 
