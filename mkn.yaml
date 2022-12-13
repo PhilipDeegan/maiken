@@ -4,7 +4,7 @@ name: mkn
 # scm: https://github.com/mkn/mkn
 version: master
 property:
-  DATE: 17-OCT-2022
+  DATE: 12-DEC-2022
 
 parent: bin
 mode: none

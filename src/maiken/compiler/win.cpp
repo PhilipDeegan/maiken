@@ -149,12 +149,19 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(LinkDAO& d
     cmd = bits[0];
   }
   mkn::kul::Process p(cmd);
+
+  auto out_file = mkn::kul::File{lib};
+  out_file.dir().mk();
+
+  auto imp_file = mkn::kul::File{imp};
+  imp_file.dir().mk();
+
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
   p.arg("-nologo");
   if (mode == compiler::Mode::STAT) p.arg("-LTCG");
-  p.arg("-OUT:\"" + lib + "\"");
+  p.arg("-OUT:\"" + out_file.escm() + "\"");
   if (mode == compiler::Mode::SHAR) {
-    p.arg("-IMPLIB:\"" + imp + "\"").arg("-DLL");
+    p.arg("-IMPLIB:\"" + imp_file.escm() + "\"").arg("-DLL");
     for (std::string const& path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
     for (std::string const& lib : libs) p.arg(staticLib(lib));
   }
