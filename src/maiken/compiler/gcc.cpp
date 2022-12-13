@@ -135,6 +135,9 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(LinkDAO
   }
   std::string exe = out;
   if (KTOSTRING(__MKN_KUL_OS__) == std::string("win")) exe += ".exe";
+
+  mkn::kul::File(exe).dir().mk();
+
   p.arg("-o").arg(exe);
   for (std::string const& d : dirs) p << mkn::kul::File(oStar(), d).escm();
   for (std::string const& o : objects) p << mkn::kul::File(o).escm();
@@ -171,8 +174,13 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(LinkDAO& d
 
   std::string lib = out.dir().join(sharedLib(app, out.name()));
 
+
   if (mode == compiler::Mode::STAT) lib = out.dir().join(staticLib(out.name()));
-  lib = mkn::kul::File(lib).esc();
+
+  mkn::kul::File out_file(lib);
+  out_file.dir().mk();
+
+  lib = out_file.esc();
   std::string cmd = linker;
   if (mode == compiler::Mode::SHAR) cmd = LD(linker);
   std::vector<std::string> bits;
