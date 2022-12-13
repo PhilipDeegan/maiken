@@ -95,6 +95,9 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(LinkDAO
 
   std::string exe = out + ".exe";
 
+  mkn::kul::File out_file(exe);
+  out_file.dir().mk();
+
   std::string cmd = LD(linker);
   std::vector<std::string> bits;
   if (cmd == linker && linker.find(" ") != std::string::npos) {
@@ -103,7 +106,7 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(LinkDAO
   }
   mkn::kul::Process p(cmd);
   for (unsigned int i = 1; i < bits.size(); i++) p.arg(bits[i]);
-  p.arg("-OUT:\"" + exe + "\"").arg("-nologo");
+  p.arg("-OUT:\"" + out_file.escm() + "\"").arg("-nologo");
   for (std::string const& path : libPaths) p.arg("-LIBPATH:\"" + path + "\"");
   for (std::string const& d : dirs) p.arg(mkn::kul::File(oStar(), d).escm());
   for (std::string const& o : objects) p << mkn::kul::File(o).escm();
