@@ -130,7 +130,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     KTHROW(mkn::kul::Exception) {
   using namespace mkn::kul::cli;
 
-  if (args.empty() || args.has(STR_HELP)) {
+  if (args.has(STR_HELP)) {
     showHelp();
     KEXIT(0, "");
   }
@@ -177,6 +177,11 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
         return CREATE(lineV.size(), &lineV[0]);
       }
     }
+  }
+
+  if (args.empty()) {
+    showHelp();
+    KEXIT(0, "");
   }
 
   Project const& project(*Projects::INSTANCE().getOrCreate(yml));
