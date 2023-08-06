@@ -1,9 +1,0 @@
-path_classifiers:
-  tag:
-    exclude: "ext"
-queries:
-  exclude: "ext"
-extraction:
-  cpp:
-    index:
-      build_command: "make nix"

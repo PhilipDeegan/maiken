@@ -43,9 +43,7 @@ mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const& n, HasProperties const& h
   if (n.IsScalar()) {
     auto bits = mkn::kul::String::ESC_SPLIT(n.Scalar(), '=');
 
-    if (bits.size() != 2)
-      KEXIT(1, "env string is invalid, expects one '=' only, string ")
-          << n.Scalar() << "\n in: " << hasProperties_id;
+    for (std::size_t i = 2; i < bits.size(); ++i) bits[1] += "=" + bits[i];
 
     auto replace = [](std::string const& n, std::string& in, std::string f) {
       auto pos = in.find(f);
