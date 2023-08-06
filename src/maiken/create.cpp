@@ -81,7 +81,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(int16_t argc, char
   Args args(cli.cmds(), cli.args());
   try {
     args.process(argc, argv);
-  } catch (const mkn::kul::cli::Exception& e) {
+  } catch (mkn::kul::cli::Exception const& e) {
     KEXIT(1, e.what());
   }
   return CREATE(args);

@@ -41,11 +41,16 @@ std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(mkn::k
   if (str.size() > 1 && str.substr(0, 2) == "./") str = str.substr(2);
 
   auto bits = mkn::kul::String::SPLIT(str, "/");
-  str = bits[bits.size() - 1];
-  mkn::kul::Dir d(mkn::kul::env::CWD());
 
+  mkn::kul::Dir d(mkn::kul::env::CWD());
   if (bits.size() > 1) d = mkn::kul::Dir(bits[0]);
-  for (size_t i = 1; i < bits.size() - 1; i++) d = d.join(bits[i]);
+
+  str = bits[bits.size() - 1];
+
+  for (size_t i = 1; i < bits.size() - 1; i++) {
+    if (bits[i].find("(") != std::string::npos && bits[i].find(")") != std::string::npos) break;
+    d = d.join(bits[i]);
+  }
 
   auto regexer = [&](auto items) {
     for (auto const& item : items) {
@@ -59,7 +64,7 @@ std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(mkn::k
       }
     }
   };
-  regexer(d.files(1));
+  regexer(d.files(/*recursive=*/true));
   return v;
 }
 
