@@ -38,7 +38,7 @@ namespace maiken {
 
 template <typename HasProperties>
 mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const& n, HasProperties const& hasProperties,
-                                     std::string hasProperties_id) {
+                                     std::string /*hasProperties_id*/) {
   using namespace mkn::kul::cli;
   if (n.IsScalar()) {
     auto bits = mkn::kul::String::ESC_SPLIT(n.Scalar(), '=');
