@@ -81,7 +81,7 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: maiken-ubuntu
+        name: maiken-manylinux-latest
         path: bin/build/mkn_manylinux
         retention-days: 1
 
@@ -105,4 +105,4 @@ jobs:
             maiken-windows-latest/mkn.exe
             maiken-macos-latest/mkn_osx
             maiken-ubuntu-latest/mkn_nix
-            maiken-ubuntu/mkn_manylinux
+            maiken-manylinux-latest/mkn_manylinux
