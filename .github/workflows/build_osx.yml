@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - run: make bsd
     - run: brew install ccache
@@ -23,7 +23,7 @@ jobs:
         KLOG=3 ./mkn build -dtOp test_mod
         KLOG=3 ./mkn build test pack -Op test
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       env:
         KUL_GIT_CO: --depth 10
       with:
