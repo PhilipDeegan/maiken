@@ -88,7 +88,7 @@ jobs:
 
   release:
     name: "Prelease"
-    needs: build
+    needs: [build, build_many_linux]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v3
