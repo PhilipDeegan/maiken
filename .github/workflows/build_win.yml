@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - run: bash -c "rm /bin/link" # interferes with cl/link.exe
 
@@ -26,7 +26,7 @@ jobs:
         mkn build -dtOp test_mod -a "-std:c++17 -EHsc"
         mkn build test pack -Op test -a "-std:c++17 -EHsc"
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v3
       with:
         name: mkn
         path: bin/build/mkn.exe

@@ -11,7 +11,7 @@ jobs:
           os: [ubuntu-latest, windows-latest, macos-latest]
       runs-on: ${{ matrix.os }}
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
 
         - if: matrix.os == 'windows-latest'
           run: bash -c "rm /bin/link" # interferes with cl/link.exe
@@ -47,32 +47,51 @@ jobs:
 
 
         - if: matrix.os == 'ubuntu-latest'
-          uses: actions/upload-artifact@v2
+          uses: actions/upload-artifact@v3
           with:
             name: maiken-${{ matrix.os }}
             path: bin/build/mkn_nix
             retention-days: 1
 
         - if: matrix.os == 'windows-latest'
-          uses: actions/upload-artifact@v2
+          uses: actions/upload-artifact@v3
           with:
             name: maiken-${{ matrix.os }}
             path: bin/build/mkn.exe
             retention-days: 1
 
         - if: matrix.os == 'macos-latest'
-          uses: actions/upload-artifact@v2
+          uses: actions/upload-artifact@v3
           with:
             name: maiken-${{ matrix.os }}
             path: bin/build/mkn_osx
             retention-days: 1
+
+  build_many_linux:
+    runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux2014_x86_64
+    steps:
+    - uses: actions/checkout@v3
+    - run: make nix
+    - env:
+        MKN_GCC_PREFERRED: 1
+        KUL_GIT_CO: --depth 1
+      run: |
+        KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_nix
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: maiken-ubuntu
+        path: bin/build/mkn_manylinux
+        retention-days: 1
+
 
   release:
     name: "Prelease"
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
       - name: Display fetched artifacts
         run: ls -R
       - name: Emit a Github Release
@@ -86,4 +105,4 @@ jobs:
             maiken-windows-latest/mkn.exe
             maiken-macos-latest/mkn_osx
             maiken-ubuntu-latest/mkn_nix
-
+            maiken-ubuntu/mkn_manylinux
