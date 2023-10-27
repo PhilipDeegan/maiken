@@ -35,6 +35,7 @@ namespace maiken {
 class Application;
 }
 
+#include <cstdint>
 #include <optional>
 
 #include "maiken/defs.hpp"
