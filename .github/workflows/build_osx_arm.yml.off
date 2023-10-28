@@ -1,4 +1,4 @@
-name: macos-latest
+name: macos-arm
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -8,9 +8,12 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  KLOG: 3
+
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: self-hosted
     steps:
     - uses: actions/checkout@v3
 
@@ -23,9 +26,9 @@ jobs:
       run: |
         mkdir ~/.maiken
         cp res/mkn/clang.yml ~/.maiken/settings.yaml
-        KLOG=3 ./mkn build -dtKO 2 -W 9 -g 0
-        KLOG=3 ./mkn build -dtOp test_mod
-        KLOG=3 ./mkn build test pack -Op test
+        ./mkn build -dtKO 2 -W 9 -g 0
+        ./mkn build -dtOp test_mod
+        ./mkn build test pack -Op test
 
     - uses: actions/upload-artifact@v3
       env:
