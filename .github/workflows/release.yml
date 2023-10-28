@@ -5,14 +5,12 @@ on:
   workflow_dispatch:
 jobs:
   build:
-      # Build on Linux, Windows and MacOS
       strategy:
         matrix:
           os: [ubuntu-latest, windows-latest, macos-latest]
       runs-on: ${{ matrix.os }}
       steps:
         - uses: actions/checkout@v3
-
         - if: matrix.os == 'windows-latest'
           run: bash -c "rm /bin/link" # interferes with cl/link.exe
         - if: matrix.os == 'windows-latest'
@@ -28,7 +26,6 @@ jobs:
             bash -c ./res/ci/win_build.sh
             mkn build -dtKOg 0 -a "-std:c++17 -EHsc"
 
-
         - if: matrix.os == 'ubuntu-latest'
           env:
             MKN_GCC_PREFERRED: 1
@@ -37,14 +34,12 @@ jobs:
             make nix
             KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_nix
 
-
         - if: matrix.os == 'macos-latest'
           env:
             KUL_GIT_CO: --depth 1
           run: |
             make bsd
-            KLOG=3 ./mkn build -dtKOW 9 -g 0 -a "-std=c++17 -fPIC" -o mkn_osx
-
+            KLOG=3 ./mkn build -dtKW 9 -O 2 -g 0 -a "-std=c++17 -fPIC" -o mkn_osx
 
         - if: matrix.os == 'ubuntu-latest'
           uses: actions/upload-artifact@v3
@@ -76,14 +71,28 @@ jobs:
     - env:
         MKN_GCC_PREFERRED: 1
         KUL_GIT_CO: --depth 1
-      run: |
-        KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_manylinux
-
+      run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_manylinux
     - uses: actions/upload-artifact@v3
       with:
         name: maiken-manylinux-latest
         path: bin/build/mkn_manylinux
         retention-days: 1
+
+  ## not yet configured
+  # build_arm_macos:
+  #   runs-on: self-hosted
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - run: make bsd
+  #   - env:
+  #       MKN_GCC_PREFERRED: 1
+  #       KUL_GIT_CO: --depth 1
+  #     run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_arm_osx
+  #   - uses: actions/upload-artifact@v3
+  #     with:
+  #       name: maiken-macos-arm-latest
+  #       path: bin/build/mkn_arm_osx
+  #       retention-days: 1
 
 
   release:
@@ -106,3 +115,4 @@ jobs:
             maiken-macos-latest/mkn_osx
             maiken-ubuntu-latest/mkn_nix
             maiken-manylinux-latest/mkn_manylinux
+#maiken-macos-arm-latest/mkn_arm_osx
