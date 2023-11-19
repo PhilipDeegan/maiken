@@ -53,13 +53,13 @@ int main(int argc, char* argv[]) {
   } catch (mkn::kul::Exit const& e) {
     if (e.code() != 0) KERR << mkn::kul::os::EOL() << "ERROR: " << e.stack();
     ret = e.code();
-  } catch (const mkn::kul::proc::ExitException& e) {
+  } catch (mkn::kul::proc::ExitException const& e) {
     KERR << e;
     ret = e.code();
   } catch (mkn::kul::Exception const& e) {
     KERR << e.stack();
     ret = 1;
-  } catch (const std::exception& e) {
+  } catch (std::exception const& e) {
     KERR << e.what();
     ret = 1;
   }

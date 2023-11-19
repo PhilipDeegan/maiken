@@ -81,7 +81,7 @@ void maiken::Application::loadTimeStamps() KTHROW(mkn::kul::StringException) {
         if (bits.size() != 2) KEXIT(1, "timestamp file invalid format\n" + src.full());
         try {
           stss.insert(bits[0], mkn::kul::String::UINT64(bits[1]));
-        } catch (const mkn::kul::StringException& e) {
+        } catch (mkn::kul::StringException const& e) {
           KEXIT(1, "timestamp file invalid format\n" + src.full());
         }
       }

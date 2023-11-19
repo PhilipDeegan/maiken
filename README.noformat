@@ -588,6 +588,7 @@ mkn clean build -dtKa -DARG          - clean/compile with optimal threads passin
 mkn clean build -dtKa "-DARG -DARG1" - clean/compile with optimal threads passing -DARG and -DARG1/link everything statically
 mkn clean build -d 1 -t 2 -u         - update/clean/compile with two threads/link project and immediate dependencies
 mkn -ds                              - Display "${scm} status" for everything
+mkn run -- arg0 arg1 arg2            - Execute binary passing arguments to main as argc/argv
 
 6. Environment Variables
 
@@ -628,13 +629,13 @@ Type            bool
 Default         false
 Description     Windows only: when attempting automatic settings.yaml creation, use cl even if clang/gcc are found
 
-Key             MKN_LIB_EXT_DEF
+Key             MKN_LIB_EXT
 Type            string
 Default         #ifdef _WIN32 evs["MKN_LIB_EXT"] = "dll";
                 #else         evs["MKN_LIB_EXT"] = "so";
 Description     The file extention of shared objects being created.
 
-Key             MKN_LIB_PRE_DEF
+Key             MKN_LIB_PRE
 Type            string
 Default         #ifdef _WIN32 evs["MKN_LIB_PRE"] = "";
                 #else         evs["MKN_LIB_PRE"] = "lib";

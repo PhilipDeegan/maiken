@@ -120,7 +120,7 @@ class KUL_PUBLISH Application : public Constants {
 
   void scmStatus(bool const& deps = false) KTHROW(mkn::kul::scm::Exception);
   void scmUpdate(bool const& f) KTHROW(mkn::kul::scm::Exception);
-  void scmUpdate(bool const& f, const mkn::kul::SCM* scm, std::string const& repo)
+  void scmUpdate(bool const& f, mkn::kul::SCM const* scm, std::string const& repo)
       KTHROW(mkn::kul::scm::Exception);
 
   void setup() KTHROW(mkn::kul::Exception);
@@ -128,7 +128,7 @@ class KUL_PUBLISH Application : public Constants {
   void showConfig(bool force = 0);
   void showTree() const;
   void showTreeRecursive(uint8_t i) const;
-  void cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps) const
+  void cyclicCheck(std::vector<std::pair<std::string, std::string>> const& apps) const
       KTHROW(mkn::kul::Exception);
   void showProfiles();
 
@@ -142,7 +142,7 @@ class KUL_PUBLISH Application : public Constants {
 
   void populateMapsFromDependencies() KTHROW(mkn::kul::Exception);
 
-  void loadDepOrMod(YAML::Node const& node, const mkn::kul::Dir& depOrMod, bool module)
+  void loadDepOrMod(YAML::Node const& node, mkn::kul::Dir const& depOrMod, bool module)
       KTHROW(mkn::kul::Exception);
   mkn::kul::Dir resolveDepOrModDirectory(YAML::Node const& d, bool module);
   void popDepOrMod(YAML::Node const& n, std::vector<Application*>& vec, std::string const& s,
@@ -226,27 +226,27 @@ class KUL_PUBLISH Application : public Constants {
 
   auto& main() const { return main_; }
   virtual void process() KTHROW(mkn::kul::Exception);
-  const mkn::kul::Dir& buildDir() const { return bd; }
+  mkn::kul::Dir const& buildDir() const { return bd; }
   std::string const& binary() const { return bin; }
   std::string const& profile() const { return p; }
   maiken::Project const& project() const { return proj; }
-  const std::vector<Application*>& dependencies() const { return deps; }
-  const std::vector<Application*>& revendencies() const { return rdeps; }
-  const std::vector<Application*>& moduleDependencies() const { return modDeps; }
-  const std::vector<std::shared_ptr<ModuleLoader>>& modules() const { return mods; }
-  const mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2S>& files() const { return fs; }
+  std::vector<Application*> const& dependencies() const { return deps; }
+  std::vector<Application*> const& revendencies() const { return rdeps; }
+  std::vector<Application*> const& moduleDependencies() const { return modDeps; }
+  std::vector<std::shared_ptr<ModuleLoader>> const& modules() const { return mods; }
+  mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2S> const& files() const { return fs; }
   std::vector<std::string> const& libraries() const { return libs; }
-  const std::vector<std::pair<Source, bool>>& sources() const { return srcs; }
-  const std::vector<std::pair<std::string, bool>>& includes() const { return incs; }
+  std::vector<std::pair<Source, bool>> const& sources() const { return srcs; }
+  std::vector<std::pair<std::string, bool>> const& includes() const { return incs; }
   std::vector<std::string> const& libraryPaths() const { return paths; }
-  const mkn::kul::hash::map::S2S& properties() const { return ps; }
-  const mkn::kul::hash::map::S2T<mkn::kul::hash::set::String>& arguments() const { return args; }
+  mkn::kul::hash::map::S2S const& properties() const { return ps; }
+  mkn::kul::hash::map::S2T<mkn::kul::hash::set::String> const& arguments() const { return args; }
 
   auto& mode() const { return m; }
   void mode(compiler::Mode mode) { m = mode; }
 
   std::vector<mkn::kul::cli::EnvVar>& envVars() { return evs; }
-  const std::vector<mkn::kul::cli::EnvVar>& envVars() const { return evs; }
+  std::vector<mkn::kul::cli::EnvVar> const& envVars() const { return evs; }
 
   void add_def(std::string const& def) { defs.emplace_back(def); }
   std::vector<std::string> const& defines() const { return defs; }
@@ -254,7 +254,7 @@ class KUL_PUBLISH Application : public Constants {
   void addInclude(std::string const& s, bool p = 1) {
     auto it = std::find_if(
         incs.begin(), incs.end(),
-        [&](const std::pair<std::string, bool>& element) { return element.first == s; });
+        [&](std::pair<std::string, bool> const& element) { return element.first == s; });
     if (it == incs.end()) incs.emplace_back(s, p);
   }
   void addLibpath(std::string const& s) { paths.push_back(s); }
@@ -296,7 +296,7 @@ class KUL_PUBLISH Application : public Constants {
   std::optional<Source> main_;
   std::string const p;
   mkn::kul::Dir bd, inst;
-  std::unordered_map<const This*, YAML::Node> modIArgs, modCArgs, modLArgs, modTArgs, modPArgs;
+  std::unordered_map<This const*, YAML::Node> modIArgs, modCArgs, modLArgs, modTArgs, modPArgs;
   maiken::Project const& proj;
   mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2S> fs;
   mkn::kul::hash::map::S2S cArg, cLnk, includeStamps, itss, ps, tests;
@@ -308,7 +308,7 @@ class KUL_PUBLISH Application : public Constants {
   std::vector<std::string> defs, libs, paths;
   std::vector<std::pair<maiken::Source, bool>> srcs;
   std::vector<std::pair<std::string, bool>> incs;
-  const mkn::kul::SCM* scm = 0;
+  mkn::kul::SCM const* scm = 0;
 };
 
 class Applications : public Constants {

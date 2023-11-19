@@ -96,7 +96,7 @@ void maiken::Application::scmUpdate(bool const& f) KTHROW(mkn::kul::scm::Excepti
   }
 }
 
-void maiken::Application::scmUpdate(bool const& f, const mkn::kul::SCM* scm, std::string const& url)
+void maiken::Application::scmUpdate(bool const& f, mkn::kul::SCM const* scm, std::string const& url)
     KTHROW(mkn::kul::scm::Exception) {
   std::string const& ver(!this->scv.empty() ? this->scv
                          : this->project().root()[STR_VERSION]

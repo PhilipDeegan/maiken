@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/bon.hpp"
 
 void maiken::Application::modArgs(std::string const mod_str, std::vector<YAML::Node>& mod_nodes,
-                                  std::function<void(YAML::Node const&, const bool)> getIfMissing) {
+                                  std::function<void(YAML::Node const&, bool const)> getIfMissing) {
   if (mod_str.size()) {
     mkn::kul::hash::set::String mods;
     std::stringstream ss;
@@ -55,7 +55,7 @@ void maiken::Application::modArgs(std::string const mod_str, std::vector<YAML::N
 }
 
 void maiken::Application::mod(mkn::kul::hash::set::String& mods, std::vector<YAML::Node>& mod_nodes,
-                              std::function<void(YAML::Node const&, const bool)> getIfMissing) {
+                              std::function<void(YAML::Node const&, bool const)> getIfMissing) {
   for (auto mod : mods) {
     mkn::kul::String::REPLACE_ALL(mod, mkn::kul::os::EOL(), "");
     mkn::kul::String::TRIM(mod);

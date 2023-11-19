@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/dist.hpp"
 
-void maiken::dist::SetupRequest::do_response_for(const mkn::kul::http::A1_1Request& req,
+void maiken::dist::SetupRequest::do_response_for(mkn::kul::http::A1_1Request const& req,
                                                  Sessions& sessions,
                                                  mkn::kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD 41");  // resp.withBody("FAILUIRE");
@@ -56,7 +56,7 @@ void maiken::dist::SetupRequest::do_response_for(const mkn::kul::http::A1_1Reque
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::CompileRequest::do_response_for(const mkn::kul::http::A1_1Request& req,
+void maiken::dist::CompileRequest::do_response_for(mkn::kul::http::A1_1Request const& req,
                                                    Sessions& sessions,
                                                    mkn::kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD CompileRequest");
@@ -83,7 +83,7 @@ void maiken::dist::CompileRequest::do_response_for(const mkn::kul::http::A1_1Req
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::LinkRequest::do_response_for(const mkn::kul::http::A1_1Request& req,
+void maiken::dist::LinkRequest::do_response_for(mkn::kul::http::A1_1Request const& req,
                                                 Sessions& sessions,
                                                 mkn::kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD LinkRequest");
@@ -119,7 +119,7 @@ void maiken::dist::LinkRequest::do_response_for(const mkn::kul::http::A1_1Reques
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::DownloadRequest::do_response_for(const mkn::kul::http::A1_1Request& req,
+void maiken::dist::DownloadRequest::do_response_for(mkn::kul::http::A1_1Request const& req,
                                                     Sessions& sessions,
                                                     mkn::kul::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD DownloadRequest");

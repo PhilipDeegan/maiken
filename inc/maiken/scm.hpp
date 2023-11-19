@@ -42,13 +42,13 @@ class SCMGetter {
     static SCMGetter s;
     return s;
   }
-  static bool HAS(const mkn::kul::Dir& d);
-  static std::string REPO(const mkn::kul::Dir& d, std::string const& r, bool module);
-  static const mkn::kul::SCM* GET(const mkn::kul::Dir& d, std::string const& r, bool module);
+  static bool HAS(mkn::kul::Dir const& d);
+  static std::string REPO(mkn::kul::Dir const& d, std::string const& r, bool module);
+  static mkn::kul::SCM const* GET(mkn::kul::Dir const& d, std::string const& r, bool module);
 
  private:
   static bool IS_SOLID(std::string const& r);
-  static const mkn::kul::SCM* GET_SCM(const mkn::kul::Dir& d, std::string const& r, bool module);
+  static mkn::kul::SCM const* GET_SCM(mkn::kul::Dir const& d, std::string const& r, bool module);
 
   mkn::kul::hash::map::S2S valids;
 };

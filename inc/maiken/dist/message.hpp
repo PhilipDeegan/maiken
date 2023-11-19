@@ -74,7 +74,7 @@ class ARequest : public AMessage {
     ar(::cereal::make_nvp("AMessage", ::cereal::base_class<AMessage>(this)));
   }
 
-  virtual void do_response_for(const mkn::kul::http::A1_1Request& req, Sessions& sessions,
+  virtual void do_response_for(mkn::kul::http::A1_1Request const& req, Sessions& sessions,
                                mkn::kul::http::_1_1Response& resp) = 0;
 };
 
@@ -89,14 +89,14 @@ class SetupRequest : public ARequest {
                mkn::kul::cli::Args const& args)
       : m_project_yaml(project), m_settings_yaml(settings), m_args(args) {}
 
-  void do_response_for(const mkn::kul::http::A1_1Request& req, Sessions& sessions,
+  void do_response_for(mkn::kul::http::A1_1Request const& req, Sessions& sessions,
                        mkn::kul::http::_1_1Response& resp) override;
 
  private:
-  SetupRequest(const SetupRequest&) = delete;
-  SetupRequest(const SetupRequest&&) = delete;
-  SetupRequest& operator=(const SetupRequest&) = delete;
-  SetupRequest& operator=(const SetupRequest&&) = delete;
+  SetupRequest(SetupRequest const&) = delete;
+  SetupRequest(SetupRequest const&&) = delete;
+  SetupRequest& operator=(SetupRequest const&) = delete;
+  SetupRequest& operator=(SetupRequest const&&) = delete;
   template <class Archive>
   void serialize(Archive& ar) {
     ar(::cereal::make_nvp("ARequest", ::cereal::base_class<ARequest>(this)));
@@ -118,17 +118,17 @@ class CompileRequest : public ARequest {
  public:
   CompileRequest() {}
   CompileRequest(std::string const& directory,
-                 const std::vector<std::pair<std::string, std::string>>& src_obj)
+                 std::vector<std::pair<std::string, std::string>> const& src_obj)
       : m_directory(directory), m_src_obj(src_obj) {}
 
-  void do_response_for(const mkn::kul::http::A1_1Request& req, Sessions& sessions,
+  void do_response_for(mkn::kul::http::A1_1Request const& req, Sessions& sessions,
                        mkn::kul::http::_1_1Response& resp) override;
 
  private:
-  CompileRequest(const CompileRequest&) = delete;
-  CompileRequest(const CompileRequest&&) = delete;
-  CompileRequest& operator=(const CompileRequest&) = delete;
-  CompileRequest& operator=(const CompileRequest&&) = delete;
+  CompileRequest(CompileRequest const&) = delete;
+  CompileRequest(CompileRequest const&&) = delete;
+  CompileRequest& operator=(CompileRequest const&) = delete;
+  CompileRequest& operator=(CompileRequest const&&) = delete;
 
   template <class Archive>
   void serialize(Archive& ar) {
@@ -149,14 +149,14 @@ class DownloadRequest : public ARequest {
 
  public:
   DownloadRequest() {}
-  void do_response_for(const mkn::kul::http::A1_1Request& req, Sessions& sessions,
+  void do_response_for(mkn::kul::http::A1_1Request const& req, Sessions& sessions,
                        mkn::kul::http::_1_1Response& resp) override;
 
  private:
-  DownloadRequest(const DownloadRequest&) = delete;
-  DownloadRequest(const DownloadRequest&&) = delete;
-  DownloadRequest& operator=(const DownloadRequest&) = delete;
-  DownloadRequest& operator=(const DownloadRequest&&) = delete;
+  DownloadRequest(DownloadRequest const&) = delete;
+  DownloadRequest(DownloadRequest const&&) = delete;
+  DownloadRequest& operator=(DownloadRequest const&) = delete;
+  DownloadRequest& operator=(DownloadRequest const&&) = delete;
 
   template <class Archive>
   void serialize(Archive& ar) {
@@ -172,14 +172,14 @@ class LinkRequest : public ARequest {
  public:
   LinkRequest() {}
   LinkRequest(std::string const& b) { str = b; }
-  void do_response_for(const mkn::kul::http::A1_1Request& req, Sessions& sessions,
+  void do_response_for(mkn::kul::http::A1_1Request const& req, Sessions& sessions,
                        mkn::kul::http::_1_1Response& resp) override;
 
  private:
-  LinkRequest(const LinkRequest&) = delete;
-  LinkRequest(const LinkRequest&&) = delete;
-  LinkRequest& operator=(const LinkRequest&) = delete;
-  LinkRequest& operator=(const LinkRequest&&) = delete;
+  LinkRequest(LinkRequest const&) = delete;
+  LinkRequest(LinkRequest const&&) = delete;
+  LinkRequest& operator=(LinkRequest const&) = delete;
+  LinkRequest& operator=(LinkRequest const&&) = delete;
 
   template <class Archive>
   void serialize(Archive& ar) {
@@ -205,10 +205,10 @@ class Blob {
   }
 
  private:
-  Blob(const Blob&) = delete;
-  Blob(const Blob&&) = delete;
-  Blob& operator=(const Blob&) = delete;
-  Blob& operator=(const Blob&&) = delete;
+  Blob(Blob const&) = delete;
+  Blob(Blob const&&) = delete;
+  Blob& operator=(Blob const&) = delete;
+  Blob& operator=(Blob const&&) = delete;
 };
 }  // end namespace dist
 }  // end namespace maiken

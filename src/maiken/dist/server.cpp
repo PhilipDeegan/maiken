@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iomanip>
 #include "maiken/dist.hpp"
 
-mkn::kul::http::_1_1Response maiken::dist::Server::respond(const mkn::kul::http::A1_1Request& req) {
+mkn::kul::http::_1_1Response maiken::dist::Server::respond(mkn::kul::http::A1_1Request const& req) {
   mkn::kul::http::_1_1Response r;
   // check session exists - if not error
   if (!sessions.count(req.ip())) {
@@ -54,7 +54,7 @@ void maiken::dist::Server::operator()() {
   try {
     start();
     join();
-  } catch (const std::runtime_error& e) {
+  } catch (std::runtime_error const& e) {
     KLOG(ERR) << e.what();
   } catch (...) {
     KLOG(ERR) << "UNKNOWN ERROR";

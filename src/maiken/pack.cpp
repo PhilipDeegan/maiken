@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class LibFinder {
  public:
-  static bool findAdd(std::string const& l, const mkn::kul::Dir& i, const mkn::kul::Dir& o) {
+  static bool findAdd(std::string const& l, mkn::kul::Dir const& i, mkn::kul::Dir const& o) {
     bool found = 0;
     for (auto const& f : i.files(0)) {
       auto const& fn(f.name());

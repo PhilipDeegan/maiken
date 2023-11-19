@@ -116,7 +116,7 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildExecutable(LinkDAO
   CompilerProcessCapture pc;
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const mkn::kul::proc::Exception& e) {
+  } catch (mkn::kul::proc::Exception const& e) {
     pc.exception(std::current_exception());
   }
   pc.file(exe);
@@ -174,7 +174,7 @@ maiken::CompilerProcessCapture maiken::cpp::WINCompiler::buildLibrary(LinkDAO& d
   CompilerProcessCapture pc;
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const mkn::kul::proc::Exception& e) {
+  } catch (mkn::kul::proc::Exception const& e) {
     pc.exception(std::current_exception());
   }
   pc.file(lib);

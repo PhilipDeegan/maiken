@@ -29,6 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
+#include <unordered_set>
 
 maiken::cpp::GccCompiler::GccCompiler(int const& v) : CCompiler(v) {
   m_optimise_c.insert({{0, ""},
@@ -147,7 +148,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(LinkDAO
   CompilerProcessCapture pc;
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const mkn::kul::proc::Exception& e) {
+  } catch (mkn::kul::proc::Exception const& e) {
     pc.exception(std::current_exception());
   }
   pc.file(out);
@@ -173,7 +174,6 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(LinkDAO& d
   }
 
   std::string lib = out.dir().join(sharedLib(app, out.name()));
-
 
   if (mode == compiler::Mode::STAT) lib = out.dir().join(staticLib(out.name()));
 
@@ -222,7 +222,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(LinkDAO& d
   CompilerProcessCapture pc;
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const mkn::kul::proc::Exception& e) {
+  } catch (mkn::kul::proc::Exception const& e) {
     pc.exception(std::current_exception());
   }
   pc.file(lib);
@@ -266,7 +266,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::compileSource(CompileDA
   if (!mkn::kul::LogMan::INSTANCE().inf()) pc.setProcess(p);
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const mkn::kul::proc::Exception& e) {
+  } catch (mkn::kul::proc::Exception const& e) {
     pc.exception(std::current_exception());
   }
   pc.file(out);
