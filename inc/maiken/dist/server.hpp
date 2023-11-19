@@ -49,7 +49,7 @@ class ServerSession {
   ServerSession() : start_time(mkn::kul::Now::MILLIS()) {}
   void reset_setup(SetupRequest* request) { setup.reset(request); }
   SetupRequest* setup_ptr() { return setup.get(); }
-  void set_apps(const std::vector<Application*>& _apps) { this->apps = std::move(_apps); }
+  void set_apps(std::vector<Application*> const& _apps) { this->apps = std::move(_apps); }
   std::vector<Application*> apps_vector() { return apps; };
 
  public:
@@ -69,15 +69,15 @@ class Server : public mkn::kul::http::MultiServer, public Constants {
   friend class mkn::kul::Thread;
 
  public:
-  Server(uint16_t const port, const mkn::kul::Dir& _home, uint16_t threads)
+  Server(uint16_t const port, mkn::kul::Dir const& _home, uint16_t threads)
       : mkn::kul::http::MultiServer(port, 1, threads), busy(false), m_home(_home) {}
   virtual ~Server() {}
-  mkn::kul::http::_1_1Response respond(const mkn::kul::http::A1_1Request& req) override;
+  mkn::kul::http::_1_1Response respond(mkn::kul::http::A1_1Request const& req) override;
 
-  Server(const Server&) = delete;
-  Server(const Server&&) = delete;
-  Server& operator=(const Server&) = delete;
-  Server& operator=(const Server&&) = delete;
+  Server(Server const&) = delete;
+  Server(Server const&&) = delete;
+  Server& operator=(Server const&) = delete;
+  Server& operator=(Server const&&) = delete;
 
  protected:
   void onConnect(char const* cip, uint16_t const& port) override {

@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/scm.hpp"
 #include "maiken/settings.hpp"
 
-const mkn::kul::SCM* maiken::SCMGetter::GET_SCM(mkn::kul::Dir const& d, std::string const& r,
+mkn::kul::SCM const* maiken::SCMGetter::GET_SCM(mkn::kul::Dir const& d, std::string const& r,
                                                 bool module) {
   std::vector<std::string> repos;
   if (IS_SOLID(r))
@@ -65,7 +65,7 @@ const mkn::kul::SCM* maiken::SCMGetter::GET_SCM(mkn::kul::Dir const& d, std::str
       }
       KLOG(DBG) << gp.outs();
       KLOG(DBG) << gp.errs();
-    } catch (const mkn::kul::proc::ExitException& e) {
+    } catch (mkn::kul::proc::ExitException const& e) {
       KLOG(ERR) << e.stack();
     }
 #endif  //_MKN_DISABLE_GIT_
@@ -97,7 +97,7 @@ bool maiken::SCMGetter::IS_SOLID(std::string const& r) {
   return r.find("://") != std::string::npos || r.find("@") != std::string::npos;
 }
 
-std::string maiken::SCMGetter::REPO(const mkn::kul::Dir& d, std::string const& r, bool module) {
+std::string maiken::SCMGetter::REPO(mkn::kul::Dir const& d, std::string const& r, bool module) {
   if (INSTANCE().valids.count(d.path())) return INSTANCE().valids.at(d.path());
   if (IS_SOLID(r))
     INSTANCE().valids.insert(d.path(), r);
@@ -106,10 +106,10 @@ std::string maiken::SCMGetter::REPO(const mkn::kul::Dir& d, std::string const& r
   if (INSTANCE().valids.count(d.path())) return INSTANCE().valids.at(d.path());
   KEXCEPT(Exception, "SCM not discovered for project: " + d.path());
 }
-bool maiken::SCMGetter::HAS(const mkn::kul::Dir& d) {
+bool maiken::SCMGetter::HAS(mkn::kul::Dir const& d) {
   return (mkn::kul::Dir(d.join(".git")) || mkn::kul::Dir(d.join(".svn")));
 }
-const mkn::kul::SCM* maiken::SCMGetter::GET(const mkn::kul::Dir& d, std::string const& r,
+mkn::kul::SCM const* maiken::SCMGetter::GET(mkn::kul::Dir const& d, std::string const& r,
                                             bool module) {
   if (IS_SOLID(r)) INSTANCE().valids.insert(d.path(), r);
   if (mkn::kul::Dir(d.join(".git"))) return &mkn::kul::scm::Manager::INSTANCE().get("git");

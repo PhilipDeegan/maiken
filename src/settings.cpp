@@ -314,7 +314,7 @@ void maiken::Settings::POST_CONSTRUCT() {
         mkn::kul::env::SET(ev.name(), ev.toString().c_str());
       }
     } else {
-      for (const auto& c : root[STR_ENV]) {
+      for (auto const& c : root[STR_ENV]) {
         auto ev = maiken::Settings::PARSE_ENV_NODE(c, settings);
         appVars.envVar(ev.name(), ev.toString());
         mkn::kul::env::SET(ev.name(), ev.toString().c_str());

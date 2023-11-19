@@ -74,7 +74,7 @@ maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const
     CompileDAO dao{app, compiler, in, out, args, incs, mode, dryRun};
 
     return comp->compileSource(dao);
-  } catch (const std::exception& e) {
-    std::rethrow_exception(std::current_exception());
+  } catch (std::exception const& e) {
+    throw;
   }
 }

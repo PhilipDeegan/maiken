@@ -91,7 +91,7 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
     KTHROW(mkn::kul::Exception) {
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   std::vector<std::shared_ptr<maiken::dist::Post>> posts;
-  auto compile_lambda = [](std::shared_ptr<maiken::dist::Post> post, const dist::Host& host) {
+  auto compile_lambda = [](std::shared_ptr<maiken::dist::Post> post, dist::Host const& host) {
     post->send(host);
     dist::FileWriter fw;
     dist::Blob b;
@@ -197,7 +197,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   mkn::kul::Dir outLogDir(".mkn/log/" + buildDir().name() + "/obj/out", 1);
   mkn::kul::Dir errLogDir(".mkn/log/" + buildDir().name() + "/obj/err", 1);
 
-  auto lambda = [&, o, e](const maiken::CompilationUnit& c_unit) {
+  auto lambda = [&, o, e](maiken::CompilationUnit const& c_unit) {
     CompilerProcessCapture const cpc = c_unit.compile();
     if (!AppVars::INSTANCE().dryRun()) {
       if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());

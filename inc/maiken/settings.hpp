@@ -58,12 +58,12 @@ class Settings : public mkn::kul::yaml::File, public Constants {
  public:
   Settings(std::string const& s);
 
-  const Settings* super() const { return sup.get(); }
+  Settings const* super() const { return sup.get(); }
 
   const mkn::kul::yaml::Validator validator() const;
   std::vector<std::string> const& remoteModules() const { return rms; }
   std::vector<std::string> const& remoteRepos() const { return rrs; }
-  const mkn::kul::hash::map::S2S& properties() const { return ps; }
+  mkn::kul::hash::map::S2S const& properties() const { return ps; }
 
   static Settings& INSTANCE() KTHROW(mkn::kul::Exit);
   static bool SET(std::string const& s);

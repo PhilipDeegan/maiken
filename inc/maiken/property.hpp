@@ -34,14 +34,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 class Properties : public Constants {
  private:
-  static std::shared_ptr<std::tuple<std::string, int, int>> KEY(const mkn::kul::hash::map::S2S& ps,
+  static std::shared_ptr<std::tuple<std::string, int, int>> KEY(mkn::kul::hash::map::S2S const& ps,
                                                                 std::string const& s)
       KTHROW(mkn::kul::Exception);
 
  public:
   static std::string RESOLVE(Application const& app, std::string const& s)
       KTHROW(mkn::kul::Exception);
-  static std::string RESOLVE(const Settings& app, std::string const& s) KTHROW(mkn::kul::Exception);
+  static std::string RESOLVE(Settings const& app, std::string const& s) KTHROW(mkn::kul::Exception);
 };
 }  // namespace maiken
 #endif  //_MAIKEN_PROPERTY_HPP_

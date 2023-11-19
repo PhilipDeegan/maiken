@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
     Args args({}, {Arg('d', maiken::Constants::STR_DIR, ArgType::STRING)});
     try {
       args.process(argc, argv);
-    } catch (const mkn::kul::cli::Exception& e) {
+    } catch (mkn::kul::cli::Exception const& e) {
       KEXIT(1, e.what());
     }
     if (args.has(maiken::Constants::STR_DIR)) {
@@ -62,12 +62,12 @@ int main(int argc, char* argv[]) {
   } catch (mkn::kul::Exit const& e) {
     if (e.code() != 0) KERR << mkn::kul::os::EOL() << "ERROR: " << e;
     exit_code = e.code();
-  } catch (const mkn::kul::proc::ExitException& e) {
+  } catch (mkn::kul::proc::ExitException const& e) {
     exit_code = e.code();
   } catch (mkn::kul::Exception const& e) {
     KERR << e.stack();
     exit_code = 2;
-  } catch (const std::exception& e) {
+  } catch (std::exception const& e) {
     KERR << e.what();
     exit_code = 3;
   }

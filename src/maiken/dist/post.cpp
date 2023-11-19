@@ -46,7 +46,7 @@ void maiken::dist::Post::send(std::string const& host, std::string const& res, u
       .withBody(s1)
       .withHeaders(headers)
       .withResponse(
-          [&](const mkn::kul::http::_1_1Response& r) { this->_body = std::move(r.body()); })
+          [&](mkn::kul::http::_1_1Response const& r) { this->_body = std::move(r.body()); })
       .send();
 }
 

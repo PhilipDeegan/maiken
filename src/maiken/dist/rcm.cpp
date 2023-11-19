@@ -65,7 +65,7 @@ std::unique_ptr<maiken::dist::SetupRequest> maiken::dist::RemoteCommandManager::
 std::unique_ptr<maiken::dist::CompileRequest>
 maiken::dist::RemoteCommandManager::build_compile_request(
     std::string const& directory,
-    const std::vector<std::pair<std::string, std::string>>& src_objs) {
+    std::vector<std::pair<std::string, std::string>> const& src_objs) {
   return std::make_unique<maiken::dist::CompileRequest>(directory, src_objs);
 }
 

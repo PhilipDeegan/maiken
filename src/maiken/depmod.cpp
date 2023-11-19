@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/github.hpp"
 #include "maiken/scm.hpp"
 
-void maiken::Application::loadDepOrMod(YAML::Node const& node, const mkn::kul::Dir& depOrMod,
+void maiken::Application::loadDepOrMod(YAML::Node const& node, mkn::kul::Dir const& depOrMod,
                                        bool module) KTHROW(mkn::kul::Exception) {
   KOUT(NON) << MKN_PROJECT_NOT_FOUND << depOrMod;
 #ifdef _MKN_DISABLE_SCM_
@@ -50,7 +50,7 @@ void maiken::Application::loadDepOrMod(YAML::Node const& node, const mkn::kul::D
   try {
     KOUT(NON) << SCMGetter::GET(depOrMod, tscr, module)
                      ->co(depOrMod.path(), SCMGetter::REPO(depOrMod, tscr, module), v);
-  } catch (const mkn::kul::scm::Exception& e) {
+  } catch (mkn::kul::scm::Exception const& e) {
     if (node[STR_NAME]) {
       mkn::kul::File version(".mkn/dep/ver/" + node[STR_NAME].Scalar());
       if (version) version.rm();

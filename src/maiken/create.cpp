@@ -245,7 +245,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
       AppVars::INSTANCE().nodes((std::numeric_limits<int16_t>::max)());
       if (args.get(STR_NODES).size())
         AppVars::INSTANCE().nodes(mkn::kul::String::UINT16(args.get(STR_NODES)));
-    } catch (const mkn::kul::StringException& e) {
+    } catch (mkn::kul::StringException const& e) {
       KEXIT(1, "-n argument is invalid");
     } catch (mkn::kul::Exception const& e) {
       KEXIT(1, e.stack());
@@ -282,7 +282,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
   }
   {
     auto splitArgs = [](std::string const& s, std::string const& t,
-                        const std::function<void(std::string const&, std::string const&)>& f) {
+                        std::function<void(std::string const&, std::string const&)> const& f) {
       for (auto const& p : mkn::kul::String::ESC_SPLIT(s, ',')) {
         if (p.find("=") == std::string::npos) KEXIT(1, t + " override invalid, = missing");
         std::vector<std::string> ps = mkn::kul::String::ESC_SPLIT(p, '=');
@@ -356,6 +356,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
 
   if (args.has(STR_ARG)) AppVars::INSTANCE().args(args.get(STR_ARG));
   if (args.has(STR_RUN_ARG)) AppVars::INSTANCE().runArgs(args.get(STR_RUN_ARG));
+  AppVars::INSTANCE().runArgs(AppVars::INSTANCE().runArgs() + " " + args.rest());
   if (args.has(STR_LINKER)) AppVars::INSTANCE().linker(args.get(STR_LINKER));
   if (args.has(STR_ALINKER)) AppVars::INSTANCE().allinker(args.get(STR_ALINKER));
   if (args.has(STR_THREADS)) {
@@ -363,7 +364,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
       AppVars::INSTANCE().threads(mkn::kul::cpu::threads());
       if (args.get(STR_THREADS).size())
         AppVars::INSTANCE().threads(mkn::kul::String::UINT16(args.get(STR_THREADS)));
-    } catch (const mkn::kul::StringException& e) {
+    } catch (mkn::kul::StringException const& e) {
       KEXIT(1, "-t argument is invalid");
     } catch (mkn::kul::Exception const& e) {
       KEXIT(1, e.stack());
@@ -373,7 +374,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     try {
       AppVars::INSTANCE().threads(
           mkn::kul::String::UINT16(mkn::kul::env::GET("MKN_COMPILE_THREADS")));
-    } catch (const mkn::kul::StringException& e) {
+    } catch (mkn::kul::StringException const& e) {
       KEXIT(1, "MKN_COMPILE_THREADS is invalid");
     } catch (mkn::kul::Exception const& e) {
       KEXIT(1, e.stack());
@@ -385,12 +386,12 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
       for (YAML::const_iterator it = node.begin(); it != node.end(); ++it)
         for (auto const& s : mkn::kul::String::SPLIT(it->first.Scalar(), ':'))
           AppVars::INSTANCE().jargs(s, it->second.Scalar());
-    } catch (const std::exception& e) {
+    } catch (std::exception const& e) {
       KEXIT(1, "JSON args failed to parse");
     }
   }
 
-  auto printDeps = [&](const std::vector<Application*>& vec) {
+  auto printDeps = [&](std::vector<Application*> const& vec) {
     std::vector<Application const*> v;
     for (auto app = vec.rbegin(); app != vec.rend(); ++app) {
       std::string const& s((*app)->project().dir().real());
@@ -446,7 +447,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     size_t threads =
         (hosts.size() < AppVars::INSTANCE().nodes()) ? hosts.size() : AppVars::INSTANCE().nodes();
     // ping nodes and set active
-    auto ping = [&](const maiken::dist::Host& host) {
+    auto ping = [&](maiken::dist::Host const& host) {
       auto post = std::make_unique<maiken::dist::Post>(
           maiken::dist::RemoteCommandManager::INST().build_setup_query(*apps[0], args));
       post->send(host);

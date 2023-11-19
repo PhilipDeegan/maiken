@@ -109,13 +109,13 @@ void maiken::Application::populateMaps(YAML::Node const& n) KTHROW(mkn::kul::Exc
   try {
     if (n[STR_INC])
       for (auto const& o : mkn::kul::String::LINES(n[STR_INC].Scalar())) addIncludeLine(o);
-  } catch (const mkn::kul::StringException&) {
+  } catch (mkn::kul::StringException const&) {
     KEXIT(1, "include contains invalid bool value\n" + project().dir().path());
   }
   try {
     if (n[STR_SRC])
       for (auto const& o : mkn::kul::String::LINES(n[STR_SRC].Scalar())) addSourceLine(o);
-  } catch (const mkn::kul::StringException&) {
+  } catch (mkn::kul::StringException const&) {
     KEXIT(1, "source contains invalid bool value\n" + project().dir().path());
   }
   if (n[STR_PATH])
@@ -139,7 +139,7 @@ void maiken::Application::populateMaps(YAML::Node const& n) KTHROW(mkn::kul::Exc
       KEXIT(1, s + " is not a valid directory\n" + project().dir().path());
 }
 
-void maiken::Application::cyclicCheck(const std::vector<std::pair<std::string, std::string>>& apps)
+void maiken::Application::cyclicCheck(std::vector<std::pair<std::string, std::string>> const& apps)
     const KTHROW(mkn::kul::Exception) {
   if (par) par->cyclicCheck(apps);
   for (auto const& pa : apps) {
@@ -200,7 +200,7 @@ void maiken::Application::setSuper() {
     try {
       sup = Applications::INSTANCE().getOrCreate(*maiken::Projects::INSTANCE().getOrCreate(d), "");
       sup->resolveProperties();
-    } catch (const std::exception& e) {
+    } catch (std::exception const& e) {
       KLOG(ERR) << e.what();
       KEXIT(1, "Possible super cycle detected: " + project().dir().real());
     }

@@ -89,7 +89,7 @@ void maiken::Application::buildDepVec(std::string const& depVal) {
   if (!depVal.empty()) {
     try {
       AppVars::INSTANCE().dependencyLevel(mkn::kul::String::UINT16(depVal));
-    } catch (const mkn::kul::StringException& e) {
+    } catch (mkn::kul::StringException const& e) {
       AppVars::INSTANCE().dependencyLevel(0);
       parseDependencyString(depVal, include);
     }

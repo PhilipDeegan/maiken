@@ -91,7 +91,7 @@ class Compilers {
 
  private:
   Compilers();
-  std::string key(std::string comp, const mkn::kul::hash::map::S2T<Compiler*>& map);
+  std::string key(std::string comp, mkn::kul::hash::map::S2T<Compiler*> const& map);
 };
 }  // namespace maiken
 #endif /* _MAIKEN_CODE_COMPILERS_HPP_ */

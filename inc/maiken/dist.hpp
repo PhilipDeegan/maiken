@@ -74,7 +74,7 @@ class DistLinker {
   static void send([[maybe_unused]] mkn::kul::File const& bin) {
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
     std::vector<std::shared_ptr<maiken::dist::Post>> posts;
-    auto post_lambda = [](const dist::Host& host, mkn::kul::File const& bin) {
+    auto post_lambda = [](dist::Host const& host, mkn::kul::File const& bin) {
       mkn::kul::io::BinaryReader br(bin);
       dist::Blob b;
       b.files_left = 1;
@@ -148,7 +148,7 @@ class Post {
   explicit Post(ARequest* _msg) : msg(std::unique_ptr<ARequest>(_msg)) {}
 
   explicit Post(std::unique_ptr<ARequest> _msg) : msg(std::move(_msg)) {}
-  void send(const Host& host) KTHROW(Exception) {
+  void send(Host const& host) KTHROW(Exception) {
     send(host.host(), "res", host.port(), {{"session", host.session_id()}});
   }
   void send(std::string const& host, std::string const& res, uint16_t const& port,
@@ -162,10 +162,10 @@ class Post {
 
  private:
   Post() {}
-  Post(const Post&) = delete;
-  Post(const Post&&) = delete;
-  Post& operator=(const Post&) = delete;
-  Post& operator=(const Post&&) = delete;
+  Post(Post const&) = delete;
+  Post(Post const&&) = delete;
+  Post& operator=(Post const&) = delete;
+  Post& operator=(Post const&&) = delete;
   template <class Archive>
   void serialize(Archive& ar) {
     ar(::cereal::make_nvp("msg", msg));
@@ -188,13 +188,13 @@ class RemoteCommandManager {
 
   std::unique_ptr<CompileRequest> build_compile_request(
       std::string const& directory,
-      const std::vector<std::pair<std::string, std::string>>& src_obj);
+      std::vector<std::pair<std::string, std::string>> const& src_obj);
 
   std::unique_ptr<DownloadRequest> build_download_request();
 
   std::unique_ptr<LinkRequest> build_link_request(std::string const& b);
 
-  void build_hosts(const Settings& settings) KTHROW(mkn::kul::Exception) {
+  void build_hosts(Settings const& settings) KTHROW(mkn::kul::Exception) {
     if (settings.root()["dist"]) {
       if (settings.root()["dist"]["nodes"]) {
         for (auto const& node : settings.root()["dist"]["nodes"]) {
@@ -204,7 +204,7 @@ class RemoteCommandManager {
       }
     }
   }
-  const std::vector<Host>& hosts() const { return m_hosts; }
+  std::vector<Host> const& hosts() const { return m_hosts; }
 
  private:
   std::vector<Host> m_hosts;

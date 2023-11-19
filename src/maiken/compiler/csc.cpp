@@ -69,7 +69,7 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildExecutable(Link
 
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const mkn::kul::proc::Exception& e) {
+  } catch (mkn::kul::proc::Exception const& e) {
     pc.exception(std::current_exception());
   }
   pc.file(exe);
@@ -101,7 +101,7 @@ maiken::CompilerProcessCapture maiken::csharp::WINCompiler::buildLibrary(LinkDAO
   for (std::string const& s : mkn::kul::String::SPLIT(linkerEnd, ' ')) p.arg(s);
   try {
     if (!dryRun) p.set(app.envVars()).start();
-  } catch (const mkn::kul::proc::Exception& e) {
+  } catch (mkn::kul::proc::Exception const& e) {
     pc.exception(std::current_exception());
   }
   pc.file(dll);

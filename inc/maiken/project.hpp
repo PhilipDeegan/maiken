@@ -51,8 +51,8 @@ class Projects;
 class KUL_PUBLISH Project : public mkn::kul::yaml::File, public Constants {
  public:
   Project(mkn::kul::File const& f) : mkn::kul::yaml::File(f), m_dir(f.dir().real()) {}
-  Project(const Project& p) : mkn::kul::yaml::File(p), m_dir(p.m_dir.real()) {}
-  const mkn::kul::Dir& dir() const { return m_dir; }
+  Project(Project const& p) : mkn::kul::yaml::File(p), m_dir(p.m_dir.real()) {}
+  mkn::kul::Dir const& dir() const { return m_dir; }
   const mkn::kul::yaml::Validator validator() const;
 
   static mkn::kul::hash::map::S2S populate_tests(YAML::Node const& node);
@@ -71,19 +71,19 @@ class Projects {
     static Projects p;
     return p;
   }
-  const Project* getOrCreate(const mkn::kul::Dir& d) {
+  Project const* getOrCreate(mkn::kul::Dir const& d) {
     if (!d) KEXCEPT(ProjectException, "Directory does not exist:\n" + d.path());
     mkn::kul::File f("mkn.yaml", d);
     if (!f && mkn::kul::File("mkn.yml", d).is()) f = mkn::kul::File("mkn.yml", d);
     return getOrCreate(f);
   }
-  const Project* getOrCreate(mkn::kul::File const& f) {
+  Project const* getOrCreate(mkn::kul::File const& f) {
     if (!f.is()) KEXCEPT(ProjectException, "project file does not exist:\n" + f.full());
     if (!m_projects.count(f.real())) {
       auto project = std::make_unique<Project>(f);
       try {
         mkn::kul::yaml::Item::VALIDATE(project->root(), project->validator().children());
-      } catch (const mkn::kul::yaml::Exception& e) {
+      } catch (mkn::kul::yaml::Exception const& e) {
         KEXCEPT(ProjectException, "YAML error encountered in file: " + f.real());
       }
       auto pp = project.get();
@@ -92,7 +92,7 @@ class Projects {
     }
     return m_projects[f.real()];
   }
-  void reload(const Project& proj) {
+  void reload(Project const& proj) {
     if (!m_reloaded.count(proj.file())) {
       m_projects[proj.file()]->reload();
       m_reloaded.insert(proj.file());
