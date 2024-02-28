@@ -4,7 +4,7 @@ name: mkn
 # scm: https://github.com/mkn/mkn
 version: master
 property:
-  DATE: 19-NOV-2023
+  DATE: 28-FEB-2024
 
 parent: bin
 mode: none
@@ -65,7 +65,7 @@ profile:
 - name: server
   parent: lib
   with: io.cereal mkn.ram[https]
-  main: src/server.cpp
+  main: server.cpp
   mode: none
 
 - name: format

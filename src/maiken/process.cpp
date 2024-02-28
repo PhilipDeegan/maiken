@@ -31,6 +31,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 void maiken::Application::process() KTHROW(mkn::kul::Exception) {
+  mkn::kul::hash::map::S2S oldEvs;
+  for (auto const& ev : evs) {
+    std::string const& v = mkn::kul::env::GET(ev.name());
+    if (v.size()) oldEvs.insert(ev.name(), v);
+    mkn::kul::env::SET(ev.name(), ev.value());
+  }
+
   auto const& cmds = CommandStateMachine::INSTANCE().commands();
 
   mkn::kul::os::PushDir pushd(this->project().dir());
@@ -134,4 +141,6 @@ void maiken::Application::process() KTHROW(mkn::kul::Exception) {
     run(cmds.count(STR_DBG));
   CommandStateMachine::INSTANCE().reset();
   AppVars::INSTANCE().show(0);
+
+  for (auto const& oldEv : oldEvs) mkn::kul::env::SET(oldEv.first.c_str(), oldEv.second.c_str());
 }

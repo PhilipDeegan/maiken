@@ -31,13 +31,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_PROJECT_HPP_
 #define _MAIKEN_PROJECT_HPP_
 
-#include "mkn/kul/log.hpp"
 #include "mkn/kul/os.hpp"
+#include "mkn/kul/log.hpp"
 #include "mkn/kul/yaml.hpp"
 
 #include "maiken/defs.hpp"
 
 namespace maiken {
+
+struct ProjectInfo {
+  std::string local /*&*/, profiles, name, version /*#*/, scm;
+
+  ProjectInfo static PARSE_LINE(std::string const& line);
+};
 
 class Application;
 
@@ -53,13 +59,13 @@ class KUL_PUBLISH Project : public mkn::kul::yaml::File, public Constants {
   Project(mkn::kul::File const& f) : mkn::kul::yaml::File(f), m_dir(f.dir().real()) {}
   Project(Project const& p) : mkn::kul::yaml::File(p), m_dir(p.m_dir.real()) {}
   mkn::kul::Dir const& dir() const { return m_dir; }
-  const mkn::kul::yaml::Validator validator() const;
+  mkn::kul::yaml::Validator validator() const;
 
   static mkn::kul::hash::map::S2S populate_tests(YAML::Node const& node);
   std::vector<Application const*> getBinaryTargets() const;
 
  private:
-  const mkn::kul::Dir m_dir;
+  mkn::kul::Dir const m_dir;
   friend class Projects;
   friend class Application;
   friend class mkn::kul::yaml::File;

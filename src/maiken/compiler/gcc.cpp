@@ -31,6 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 #include <unordered_set>
 
+#include <cstdint>
+
 maiken::cpp::GccCompiler::GccCompiler(int const& v) : CCompiler(v) {
   m_optimise_c.insert({{0, ""},
                        {1, "-O1"},
@@ -196,9 +198,9 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildLibrary(LinkDAO& d
   for (std::string const& o : objects) p << mkn::kul::File(o).escm();
 
   {
-    auto ll(mkn::kul::env::GET("MKN_LIB_LINK_LIB"));
+    auto ll(mkn::kul::env::GET("MKN_LIB_LINK_LIB", "0"));
     if (ll.size() && mode == compiler::Mode::SHAR) {
-      uint16_t llv = mkn::kul::String::UINT16(ll);
+      std::uint16_t llv = mkn::kul::String::UINT16(ll);
       for (std::string const& path : libPaths) p.arg("-L" + path);
       if (llv == 1) {
         for (std::string const& lib : libs) p.arg("-l" + lib);

@@ -43,8 +43,9 @@ class SCMGetter {
     return s;
   }
   static bool HAS(mkn::kul::Dir const& d);
-  static std::string REPO(mkn::kul::Dir const& d, std::string const& r, bool module);
-  static mkn::kul::SCM const* GET(mkn::kul::Dir const& d, std::string const& r, bool module);
+  static std::string REPO(mkn::kul::Dir const& d, std::string const& r, bool module = false);
+  static mkn::kul::SCM const* GET(mkn::kul::Dir const& d, std::string const& r,
+                                  bool module = false);
 
  private:
   static bool IS_SOLID(std::string const& r);
