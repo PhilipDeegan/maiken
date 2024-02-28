@@ -95,10 +95,6 @@ class Executioner : public Constants {
     if (dryRun)
       KOUT(NON) << cpc.cmd();
     else {
-      app.checkErrors(cpc);
-      KOUT(INF) << cpc.cmd();
-      KOUT(NON) << "Creating bin: " << mkn::kul::File(cpc.file()).real();
-
       if (AppVars::INSTANCE().dump()) {
         std::string base = mkn::kul::File(cpc.file()).name();
         mkn::kul::io::Writer(mkn::kul::File(base + ".txt", cmdLogDir)) << cpc.cmd();
@@ -140,6 +136,10 @@ void maiken::Application::buildExecutable(mkn::kul::hash::set::String const& obj
 
   auto cpc = Executioner::build_exe(objects, starDirs, file, name, install, *this);
   Executioner::print(cpc, *this);
+
+  checkErrors(cpc);
+  KOUT(INF) << cpc.cmd();
+  KOUT(NON) << "Creating bin: " << mkn::kul::File(cpc.file()).real();
 }
 
 void maiken::Application::buildTest(mkn::kul::hash::set::String const& objects)
@@ -207,6 +207,7 @@ maiken::CompilerProcessCapture maiken::Application::buildLibrary(
     if (dryRun)
       KOUT(NON) << cpc.cmd();
     else {
+      Executioner::print(cpc, *this);
       checkErrors(cpc);
       KOUT(INF) << cpc.cmd();
       KOUT(NON) << "Creating lib: " << mkn::kul::File(cpc.file()).real();

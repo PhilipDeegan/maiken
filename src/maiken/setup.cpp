@@ -30,6 +30,49 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/github.hpp"
 #include "maiken/regex.hpp"
+#include "maiken/scm.hpp"
+
+namespace maiken {
+void sub_initializer(Application& app) {
+  KLOG(INF);
+
+  auto const& STR_NAME = Constants::STR_NAME;
+  auto const& STR_PROFILE = Constants::STR_PROFILE;
+  auto const& STR_SUB = Constants::STR_SUB;
+  std::string profile(app.profile());
+  std::vector<YAML::Node> nodes;
+  if (profile.empty()) {
+    nodes.push_back(app.project().root());
+    profile = app.project().root()[STR_NAME].Scalar();
+  }
+  if (app.project().root()[STR_PROFILE])
+    for (std::size_t i = 0; i < app.project().root()[STR_PROFILE].size(); i++)
+      nodes.push_back(app.project().root()[STR_PROFILE][i]);
+
+  for (auto const& n : nodes) {
+    KLOG(INF) << profile;
+    if (n[STR_NAME].Scalar() != profile) continue;
+    KLOG(INF);
+    if (n[STR_SUB] && n[STR_SUB].IsScalar()) {
+      KLOG(INF) << n[STR_SUB].Scalar();
+      for (auto const& line : mkn::kul::String::LINES(n[STR_SUB].Scalar())) {
+        KLOG(INF) << line;
+        auto pInfo = ProjectInfo::PARSE_LINE(line);
+        mkn::kul::Dir local{pInfo.local};
+        KLOG(INF) << local;
+        KLOG(INF) << local.is();
+        if (!local) {
+          KLOG(INF) << pInfo.scm;
+          KLOG(INF) << pInfo.version;
+
+          SCMGetter::GET(local, pInfo.scm)
+              ->co(local.path(), SCMGetter::REPO(local, pInfo.scm), pInfo.version);
+        }
+      }
+    }
+  }
+}
+}  // namespace maiken
 
 void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   if (scr.empty() && project().root()[STR_SCM])
@@ -47,6 +90,9 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   if (p.empty()) buildD = mkn::kul::Dir::JOIN(STR_BIN, STR_BUILD);
   this->bd = mkn::kul::Dir(project().dir().join(buildD));
   std::string profile(p);
+
+  sub_initializer(*this);
+
   std::vector<YAML::Node> nodes;
   if (profile.empty()) {
     nodes.push_back(project().root());
@@ -140,8 +186,8 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
         else
           KEXCEPTION(STR_DEP) << " is invalid type";
       }
-      populateMaps(n);
       popDepOrMod(n, deps, STR_DEP, 0);
+      populateMaps(n);
 
       if (n[STR_IF_DEP] && n[STR_IF_DEP][KTOSTRING(__MKN_KUL_OS__)]) {
         auto node = n[STR_IF_DEP][KTOSTRING(__MKN_KUL_OS__)];

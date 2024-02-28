@@ -102,7 +102,7 @@ mkn::kul::Dir maiken::Application::resolveDepOrModDirectory(YAML::Node const& n,
         if (Github::GET_LATEST(depName, version)) return version;
 #endif  //_MKN_WITH_MKN_RAM_
 
-        return "master";
+        return defaultSCMBranchName();
       };
       std::string version(resolveSCMBranch());
       if (version.empty()) {

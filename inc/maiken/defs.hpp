@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_DEFS_HPP_
 #define _MAIKEN_DEFS_HPP_
 
+#include "mkn/kul/env.hpp"
 #include "mkn/kul/defs.hpp"
 
 #ifndef MKN_LANG
@@ -78,6 +79,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _KUL_PROC_LOOP_NSLEEP_ */
 
 namespace maiken {
+
+auto inline defaultSCMBranchName() { return mkn::kul::env::GET("MKN_DEFAULT_BRANCH", "master"); }
+
 class Constants {
  public:
   static constexpr auto STR_MAIKEN = "maiken";
@@ -124,6 +128,7 @@ class Constants {
   static constexpr auto STR_REMOTE = "remote";
   static constexpr auto STR_SCM = "scm";
   static constexpr auto STR_SELF = "self";
+  static constexpr auto STR_SUB = "sub";
   static constexpr auto STR_PROFILE = "profile";
   static constexpr auto STR_PROFILES = "profiles";
 

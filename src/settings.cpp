@@ -142,7 +142,7 @@ bool maiken::Settings::SET(std::string const& s) {
   return 0;
 }
 
-const mkn::kul::yaml::Validator maiken::Settings::validator() const {
+mkn::kul::yaml::Validator maiken::Settings::validator() const {
   using namespace mkn::kul::yaml;
 
   std::vector<NodeValidator> masks;

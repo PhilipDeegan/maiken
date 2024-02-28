@@ -31,9 +31,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/io.hpp"
 
 #include "maiken/defs.hpp"
+#include "maiken/string.hpp"
 #include "maiken/project.hpp"
 
-const mkn::kul::yaml::Validator maiken::Project::validator() const {
+maiken::ProjectInfo maiken::ProjectInfo::PARSE_LINE(std::string const& line) {
+  std::string local /*&*/, profiles, proj = line, version /*#*/, scm;
+
+  auto get_between = [&](auto& var, auto lbrak, auto rbrak) {
+    auto between = maiken::string::between_rm_str(proj, lbrak, rbrak);
+    if (between.found) proj = between.remaining, var = *between.found;
+    return !between.error;
+  };
+
+  if (!get_between(scm, "(", ")")) KEXIT(1, "Invalid -m - missing right ) bracket");
+  if (!get_between(profiles, "[", "]")) KEXIT(1, "Invalid -m - missing right ] bracket");
+  mkn::kul::String::REPLACE_ALL(profiles, ",", " ");
+
+  auto am = proj.find("&"), ha = proj.find("#");
+  if (am != std::string::npos && ha != std::string::npos)
+    if (ha > am) KEXIT(1, "invalid input, version & must before location #");
+  auto if_set = [&](auto s, auto& v) {
+    if (s != std::string::npos) v = proj.substr(s + 1), proj = proj.substr(0, s);
+  };
+  if_set(am, local);
+  if_set(ha, version);
+
+  return {local, profiles, proj, version, scm};
+}
+
+mkn::kul::yaml::Validator maiken::Project::validator() const {
   using namespace mkn::kul::yaml;
 
   std::vector<NodeValidator> depVals{NodeValidator("name"), NodeValidator("version"),
@@ -90,6 +116,7 @@ const mkn::kul::yaml::Validator maiken::Project::validator() const {
                     NodeValidator("out"),
                     NodeValidator("ext"),
                     NodeValidator("self"),
+                    NodeValidator("sub"),
                     NodeValidator("with"),
                     env,
                     dep,
@@ -118,6 +145,7 @@ const mkn::kul::yaml::Validator maiken::Project::validator() const {
                                    NodeValidator("install"),
                                    NodeValidator("out"),
                                    NodeValidator("self"),
+                                   NodeValidator("sub"),
                                    NodeValidator("with"),
                                    env,
                                    dep,

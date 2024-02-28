@@ -309,6 +309,7 @@ class KUL_PUBLISH Application : public Constants {
   std::vector<std::pair<maiken::Source, bool>> srcs;
   std::vector<std::pair<std::string, bool>> incs;
   mkn::kul::SCM const* scm = 0;
+  std::vector<ProjectInfo> subs;
 };
 
 class Applications : public Constants {

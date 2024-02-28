@@ -30,6 +30,11 @@ Languages supported            Compilers supported
     - C# (partially)
 
 
+1.4 Distributions
+
+Binaries available @ https://github.com/mkn/mkn/releases/tag/latest
+
+
 2.1 Basic project mkn.yaml files
 
 2.1.1 Binary
@@ -141,6 +146,7 @@ profiles:
 
   - name: test
     self: ${OS} ${aaa}              # dependencies on current project profiles, cycles detected
+    sub: project                    # subprojects, follows with rules for resolution, requires URL
     main: test.cpp
     out: ${aaa}                     # override default binary/library name
     install: ${aaa}                 # install binary or library to directory specified
@@ -165,7 +171,7 @@ If no mode tag is found, the -K and -S args will be used if found.
 Linking cannot be guaranteed if no mode is used, but shared is generally default.
 Unless a project requires a mode, it's advised to avoid using one. So it can be overridden with -K or -S.
 
-If a application includes both static and shared dependencies, using the mode "none" is advised.
+If an application includes both static and shared dependencies, using the mode "none" is advised.
 
 
 2.2.1.3 Entry points
@@ -247,8 +253,6 @@ Testing:
     shared : ./mkn clean build -dtSa -EHsc
 
 Example Windows settings can be found at: https://github.com/mkn/maiken/wiki
-
-Binary available @ https://github.com/mkn/maiken/tree/binaries
 
 
 3.2 Unix
@@ -403,7 +407,7 @@ If neither are set the following rules apply
     Unix    : gdb ./bin/<profile>/<binary> <args>
 
  Launch app with gdb, autorun and print backtrace
-   MKN_DBG='gdb -batch -ex "run" -ex "bt" --args' mkn dbg -r "arg0 arg1"
+   MKN_DBG='gdb -batch -ex run -ex bt --args' mkn dbg -r "arg0 arg1"
 
 4.7 Initialising scripts
 
@@ -600,14 +604,18 @@ Description     See section 4
 Key             MKN_COMPILE_THREADS
 Type            uint
 Default         none
-Description     Global override, if set forces all compile calls to use value
-                Example, low RAM systems
+Description     Global override, if set forces all compile calls to use value. Example, low RAM systems
+
+Key             MKN_DEFAULT_BRANCH
+Type            String
+Default         "master"
+Description     Default branch for SCM if not given or set
+
 
 Key             MKN_DBG
 Type            String
 Default         ""
-Description     Sets the preceding command line string when using "dbg"
-                See seciont 4.6
+Description     Sets the preceding command line string when using "dbg". See seciont 4.6
 
 Key             MKN_OBJ
 Type            String

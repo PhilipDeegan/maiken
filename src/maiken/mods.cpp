@@ -61,21 +61,15 @@ void maiken::Application::mod(mkn::kul::hash::set::String& mods, std::vector<YAM
     mkn::kul::String::TRIM(mod);
     if (mod.empty()) continue;
 
-    mod_nodes.emplace_back();
-    auto& node = mod_nodes.back();
-    std::string local /*&*/, profiles, proj = mod, version /*#*/, scm, objs;
+    auto& node = mod_nodes.emplace_back();
 
-    auto get_between = [&](auto& var, auto lbrak, auto rbrak) {
-      auto between = maiken::string::between_rm_str(proj, lbrak, rbrak);
-      if (between.found) proj = between.remaining, var = *between.found;
-      return !between.error;
-    };
+    ProjectInfo pInfo = ProjectInfo::PARSE_LINE(mod);
 
-    if (!get_between(scm, "(", ")")) KEXIT(1, "Invalid -m - missing right ) bracket");
-    if (!node[STR_SCM]) node[STR_SCM] = scm;
+    auto& [local, profiles, proj, version, scm] = pInfo;
+    // KLOG(INF) << proj;
+    std::string objs;
 
-    if (!get_between(profiles, "[", "]")) KEXIT(1, "Invalid -m - missing right ] bracket");
-    mkn::kul::String::REPLACE_ALL(profiles, ",", " ");
+    if (!node[STR_SCM] && scm.size()) node[STR_SCM] = scm;
     if (!node[STR_PROFILE] && profiles.size()) node[STR_PROFILE] = profiles;
 
     {
@@ -94,14 +88,11 @@ void maiken::Application::mod(mkn::kul::hash::set::String& mods, std::vector<YAM
                 "location");
       }
 
-      if (am != std::string::npos && ha != std::string::npos)
-        if (ha > am) KEXIT(1, "-m invalid, version must before location");
-
-      auto if_set = [&](auto s, auto& v, auto n) {
-        if (s != std::string::npos) v = proj.substr(s + 1), proj = proj.substr(0, s), n = v;
+      auto if_set = [&](auto& v, auto n) {
+        if (v.size()) n = v;
       };
-      if_set(am, local, node[STR_LOCAL]);
-      if_set(ha, version, node[STR_VERSION]);
+      if_set(local, node[STR_LOCAL]);
+      if_set(version, node[STR_VERSION]);
     }
 
     if (proj.empty() && local.empty() && scm.empty())

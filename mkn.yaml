@@ -65,7 +65,7 @@ profile:
 - name: server
   parent: lib
   with: io.cereal mkn.ram[https]
-  main: src/server.cpp
+  main: server.cpp
   mode: none
 
 - name: format
