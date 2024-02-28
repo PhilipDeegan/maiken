@@ -34,40 +34,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken {
 void sub_initializer(Application& app) {
-  KLOG(INF);
-
   auto const& STR_NAME = Constants::STR_NAME;
   auto const& STR_PROFILE = Constants::STR_PROFILE;
   auto const& STR_SUB = Constants::STR_SUB;
-  std::string profile(app.profile());
-  std::vector<YAML::Node> nodes;
-  if (profile.empty()) {
-    nodes.push_back(app.project().root());
-    profile = app.project().root()[STR_NAME].Scalar();
-  }
-  if (app.project().root()[STR_PROFILE])
-    for (std::size_t i = 0; i < app.project().root()[STR_PROFILE].size(); i++)
-      nodes.push_back(app.project().root()[STR_PROFILE][i]);
 
-  for (auto const& n : nodes) {
-    KLOG(INF) << profile;
-    if (n[STR_NAME].Scalar() != profile) continue;
-    KLOG(INF);
+  auto const process = [&](auto n) {
     if (n[STR_SUB] && n[STR_SUB].IsScalar()) {
-      KLOG(INF) << n[STR_SUB].Scalar();
       for (auto const& line : mkn::kul::String::LINES(n[STR_SUB].Scalar())) {
-        KLOG(INF) << line;
         auto pInfo = ProjectInfo::PARSE_LINE(line);
         mkn::kul::Dir local{pInfo.local};
-        KLOG(INF) << local;
-        KLOG(INF) << local.is();
-        if (!local) {
-          KLOG(INF) << pInfo.scm;
-          KLOG(INF) << pInfo.version;
-
+        if (!local)
           SCMGetter::GET(local, pInfo.scm)
               ->co(local.path(), SCMGetter::REPO(local, pInfo.scm), pInfo.version);
-        }
+      }
+    }
+  };
+
+  std::string const& profile(app.profile());
+  if (profile.empty()) {
+    process(app.project().root());
+  } else if (app.project().root()[STR_PROFILE]) {
+    for (std::size_t i = 0; i < app.project().root()[STR_PROFILE].size(); i++) {
+      auto const& n = app.project().root()[STR_PROFILE][i];
+      if (n[STR_NAME].Scalar() == profile) {
+        process(n);
+        break;
       }
     }
   }

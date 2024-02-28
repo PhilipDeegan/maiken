@@ -146,7 +146,7 @@ profiles:
 
   - name: test
     self: ${OS} ${aaa}              # dependencies on current project profiles, cycles detected
-    sub: project                    # subprojects, follows with rules for resolution, requires URL
+    sub: project                    # subprojects, follows "with" rules (4.9) for resolution, requires URL
     main: test.cpp
     out: ${aaa}                     # override default binary/library name
     install: ${aaa}                 # install binary or library to directory specified
