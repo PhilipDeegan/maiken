@@ -33,9 +33,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/scm.hpp"
 
 namespace maiken {
-void sub_initializer(Application& app) {
+void sub_initializer(Application const& app, std::vector<YAML::Node> const& nodes) {
   auto const& STR_NAME = Constants::STR_NAME;
-  auto const& STR_PROFILE = Constants::STR_PROFILE;
+  auto const& STR_PARENT = Constants::STR_PARENT;
   auto const& STR_SUB = Constants::STR_SUB;
 
   auto const process = [&](auto n) {
@@ -50,19 +50,23 @@ void sub_initializer(Application& app) {
     }
   };
 
-  std::string const& profile(app.profile());
-  if (profile.empty()) {
-    process(app.project().root());
-  } else if (app.project().root()[STR_PROFILE]) {
-    for (std::size_t i = 0; i < app.project().root()[STR_PROFILE].size(); i++) {
-      auto const& n = app.project().root()[STR_PROFILE][i];
-      if (n[STR_NAME].Scalar() == profile) {
+  std::string profile(app.profile());
+  profile = app.profile().size() ? app.profile() : app.project().root()[STR_NAME].Scalar();
+
+  bool c = true;
+  while (c) {
+    c = 0;
+    for (auto const& n : nodes) {
+      if (n[STR_NAME].Scalar() == profile){
         process(n);
+        profile = n[STR_PARENT] ? Properties::RESOLVE(app, n[STR_PARENT].Scalar()) : "";
+        c = !profile.empty();
         break;
       }
     }
   }
 }
+
 }  // namespace maiken
 
 void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
@@ -82,8 +86,6 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   this->bd = mkn::kul::Dir(project().dir().join(buildD));
   std::string profile(p);
 
-  sub_initializer(*this);
-
   std::vector<YAML::Node> nodes;
   if (profile.empty()) {
     nodes.push_back(project().root());
@@ -92,6 +94,8 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   if (project().root()[STR_PROFILE])
     for (std::size_t i = 0; i < project().root()[STR_PROFILE].size(); i++)
       nodes.push_back(project().root()[STR_PROFILE][i]);
+
+  sub_initializer(*this, nodes);
 
   auto getIfMissing = [&](YAML::Node const& n, bool const mod) {
     std::string const& cwd(mkn::kul::env::CWD());
