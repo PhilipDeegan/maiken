@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - run: make nix
+    - run: ./res/ci/nixish_setup.sh && make nix
 
     - env:
         MKN_GCC_PREFERRED: 1

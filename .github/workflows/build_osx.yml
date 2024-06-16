@@ -17,12 +17,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - run: make bsd
+    - run: ./res/ci/nixish_setup.sh && make bsd
 
     - env:
         MKN_LIB_LINK_LIB: 1
         KUL_GIT_CO: --depth 1
       run: |
+        brew install ccache
         mkdir ~/.maiken && cp res/mkn/clang.yml ~/.maiken/settings.yaml
         KLOG=3 ./mkn build -dtKO 2 -W 9 -g 0
         KLOG=3 ./mkn build -dtOp test_mod
