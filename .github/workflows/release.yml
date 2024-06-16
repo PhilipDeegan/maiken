@@ -100,7 +100,7 @@ jobs:
 
   release:
     name: "Prelease"
-    needs: [build, build_many_linux]
+    needs: [build, build_many_linux, build_arm_macos, build_x86_macos]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v3
