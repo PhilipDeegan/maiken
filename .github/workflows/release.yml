@@ -7,10 +7,10 @@ jobs:
   build:
       strategy:
         matrix:
-          os: [ubuntu-latest, windows-latest, macos-latest]
+          os: [ubuntu-latest, windows-latest, macos-12, macos-latest]
       runs-on: ${{ matrix.os }}
       steps:
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v4
         - if: matrix.os == 'windows-latest'
           run: bash -c "rm /bin/link" # interferes with cl/link.exe
         - if: matrix.os == 'windows-latest'
@@ -34,13 +34,6 @@ jobs:
             make nix
             KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_nix
 
-        - if: matrix.os == 'macos-latest'
-          env:
-            KUL_GIT_CO: --depth 1
-          run: |
-            make bsd
-            KLOG=3 ./mkn build -dtKW 9 -O 2 -g 0 -a "-std=c++17 -fPIC" -o mkn_osx
-
         - if: matrix.os == 'ubuntu-latest'
           uses: actions/upload-artifact@v3
           with:
@@ -55,15 +48,9 @@ jobs:
             path: bin/build/mkn.exe
             retention-days: 1
 
-        - if: matrix.os == 'macos-latest'
-          uses: actions/upload-artifact@v3
-          with:
-            name: maiken-${{ matrix.os }}
-            path: bin/build/mkn_osx
-            retention-days: 1
 
   build_many_linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     container: quay.io/pypa/manylinux2014_x86_64
     steps:
     - uses: actions/checkout@v3
@@ -78,21 +65,37 @@ jobs:
         path: bin/build/mkn_manylinux
         retention-days: 1
 
-  ## not yet configured
-  # build_arm_macos:
-  #   runs-on: self-hosted
-  #   steps:
-  #   - uses: actions/checkout@v3
-  #   - run: make bsd
-  #   - env:
-  #       MKN_GCC_PREFERRED: 1
-  #       KUL_GIT_CO: --depth 1
-  #     run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_arm_osx
-  #   - uses: actions/upload-artifact@v3
-  #     with:
-  #       name: maiken-macos-arm-latest
-  #       path: bin/build/mkn_arm_osx
-  #       retention-days: 1
+
+  build_x86_macos:
+    runs-on: macos-12
+    steps:
+    - uses: actions/checkout@v4
+    - run: make bsd
+    - env:
+        MKN_GCC_PREFERRED: 1
+        KUL_GIT_CO: --depth 1
+      run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_x86_osx
+    - uses: actions/upload-artifact@v3
+      with:
+        name: maiken-macos-12
+        path: bin/build/mkn_x86_osx
+        retention-days: 1
+
+
+  build_arm_macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    - run: make bsd
+    - env:
+        MKN_GCC_PREFERRED: 1
+        KUL_GIT_CO: --depth 1
+      run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_arm_osx
+    - uses: actions/upload-artifact@v3
+      with:
+        name: maiken-macos-latest
+        path: bin/build/mkn_arm_osx
+        retention-days: 1
 
 
   release:
@@ -112,7 +115,7 @@ jobs:
           title: "Development Build"
           files: |
             maiken-windows-latest/mkn.exe
-            maiken-macos-latest/mkn_osx
             maiken-ubuntu-latest/mkn_nix
             maiken-manylinux-latest/mkn_manylinux
-#maiken-macos-arm-latest/mkn_arm_osx
+            maiken-macos-12/mkn_x86_osx
+            maiken-macos-latest/mkn_arm_osx
