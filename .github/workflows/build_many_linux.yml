@@ -10,19 +10,12 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     container: quay.io/pypa/manylinux2014_x86_64
     steps:
     - uses: actions/checkout@v3
 
-    - name: dbg
-      run: |
-        set -x
-        ld -v
-        ldd --version
-        g++ -v
-
-    - run: make nix
+    - run: ./res/ci/nixish_setup.sh && make nix
 
     - env:
         MKN_GCC_PREFERRED: 1
@@ -33,8 +26,3 @@ jobs:
         KLOG=3 ./mkn build -Op test_mod -a "-std=c++17 -fPIC" -O 2 -g 0 -W 9
         KLOG=3 ./mkn build test pack -Op test -a "-std=c++17 -fPIC" -O 2 -g 0 -W 9
         ldd bin/build/mkn
-
-    - uses: actions/upload-artifact@v3
-      with:
-        name: mkn
-        path: bin/build/mkn

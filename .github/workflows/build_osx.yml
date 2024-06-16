@@ -10,26 +10,21 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-12, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - run: make bsd
-    - run: brew install ccache
+    - run: ./res/ci/nixish_setup.sh && make bsd
 
     - env:
         MKN_LIB_LINK_LIB: 1
         KUL_GIT_CO: --depth 1
       run: |
-        mkdir ~/.maiken
-        cp res/mkn/clang.yml ~/.maiken/settings.yaml
+        brew install ccache
+        mkdir ~/.maiken && cp res/mkn/clang.yml ~/.maiken/settings.yaml
         KLOG=3 ./mkn build -dtKO 2 -W 9 -g 0
         KLOG=3 ./mkn build -dtOp test_mod
         KLOG=3 ./mkn build test pack -Op test
-
-    - uses: actions/upload-artifact@v3
-      env:
-        KUL_GIT_CO: --depth 10
-      with:
-        name: mkn
-        path: bin/build/mkn
