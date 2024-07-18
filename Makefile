@@ -11,7 +11,7 @@ CXXFLAGS=-std=c++17 -O2 -Wall -fmessage-length=0 -fPIC -Iinc \
 		-Iext/mkn/kul/inc \
 		-Iext/mkn/kul/os/$(OS)/inc \
 		-Iext/mkn/kul/os/nixish/inc
-LDFLAGS = -pthread -ldl -rdynamic
+LDFLAGS = -pthread -rdynamic -Wl,--no-as-needed -ldl
 
 entry:
 	@@echo "Options include"
