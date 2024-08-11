@@ -89,7 +89,7 @@ mkn::kul::Dir maiken::Application::resolveDepOrModDirectory(YAML::Node const& n,
     d = (*AppVars::INSTANCE().properkeys().find(module ? "MKN_MOD_REPO" : "MKN_REPO")).second;
     try {
       mkn::kul::File verFile(depName, ".mkn/dep/ver");
-      auto resolveSCMBranch = [=]() -> std::string {
+      auto resolveSCMBranch = [&]() -> std::string {
         if (n[STR_VERSION]) return Properties::RESOLVE(*this, n[STR_VERSION].Scalar());
         if (verFile) return mkn::kul::io::Reader(verFile).readLine();
         {
