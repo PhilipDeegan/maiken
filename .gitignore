@@ -3,3 +3,4 @@ bin
 mkn
 mkn.exe
 .mkn
+.clangd
