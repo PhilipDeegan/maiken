@@ -109,8 +109,7 @@ void maiken::Application::mod(mkn::kul::hash::set::String& mods, std::vector<YAM
     if (!proj.empty()) node[STR_NAME] = proj;
 
     if (objs.size())
-      for (auto const n : mkn::kul::bon::from(objs))
-        for (auto const p : n) node[p.first] = p.second;
+      for (auto const p : mkn::kul::bon::from(objs)) node[p.first] = p.second;
 
     YAML::Emitter out;
     out << node;
