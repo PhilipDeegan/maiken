@@ -57,7 +57,7 @@ void sub_initializer(Application const& app, std::vector<YAML::Node> const& node
   while (c) {
     c = 0;
     for (auto const& n : nodes) {
-      if (n[STR_NAME].Scalar() == profile){
+      if (n[STR_NAME].Scalar() == profile) {
         process(n);
         profile = n[STR_PARENT] ? Properties::RESOLVE(app, n[STR_PARENT].Scalar()) : "";
         c = !profile.empty();

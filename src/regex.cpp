@@ -34,8 +34,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(mkn::kul::Exception) {
   std::vector<std::string> v;
-  auto posL = str.find("(");
-  auto posR = str.find(")");
+
+  auto const posL = str.find("(");
+  auto const posR = str.find(")");
 
   if (posL == std::string::npos || posR == std::string::npos) return v;
   if (str.size() > 1 && str.substr(0, 2) == "./") str = str.substr(2);
@@ -45,26 +46,32 @@ std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(mkn::k
   mkn::kul::Dir d(mkn::kul::env::CWD());
   if (bits.size() > 1) d = mkn::kul::Dir(bits[0]);
 
-  str = bits[bits.size() - 1];
-
-  for (size_t i = 1; i < bits.size() - 1; i++) {
+  std::size_t i = 1;
+  for (; i < bits.size() - 1; i++) {
     if (bits[i].find("(") != std::string::npos && bits[i].find(")") != std::string::npos) break;
     d = d.join(bits[i]);
   }
 
-  auto regexer = [&](auto items) {
+  str = bits[i];
+  std::string const prefix = str.substr(0, str.find("("));
+  str = str.substr(prefix.size(), str.size() - prefix.size());
+
+  auto regexer = [&](auto const& items) {
     for (auto const& item : items) {
       try {
+        std::string const real = item.real();
+        if (prefix.size() && real.find(prefix) == std::string::npos) continue;
         std::regex re(str);
         std::smatch match;
-        std::string subject(item.real());
-        if (std::regex_search(subject, match, re) && match.size() > 1) RESOLVE_REC(item.real(), v);
+        if (std::regex_search(real, match, re) && match.size() > 1) RESOLVE_REC(real, v);
       } catch (std::regex_error& e) {
         KEXIT(1, "Regex Failure:\n") << e.what();
       }
     }
   };
+
   regexer(d.files(/*recursive=*/true));
+
   return v;
 }
 
