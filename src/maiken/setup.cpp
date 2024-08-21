@@ -40,7 +40,7 @@ void sub_initializer(Application const& app, std::vector<YAML::Node> const& node
 
   auto const process = [&](auto n) {
     if (n[STR_SUB] && n[STR_SUB].IsScalar()) {
-      for (auto const& line : mkn::kul::String::LINES(n[STR_SUB].Scalar())) {
+      for (auto const& line : mkn::kul::cli::asArgs(n[STR_SUB].Scalar())) {
         auto pInfo = ProjectInfo::PARSE_LINE(line);
         mkn::kul::Dir local{pInfo.local};
         if (!local)

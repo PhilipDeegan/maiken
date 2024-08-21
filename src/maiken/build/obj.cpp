@@ -207,12 +207,13 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
       KOUT(NON) << cpc.cmd();
 
     if (AppVars::INSTANCE().dump()) {
+      auto const eol = mkn::kul::os::EOL();
       std::string base = mkn::kul::File(cpc.file()).name();
-      mkn::kul::io::Writer(mkn::kul::File(base + ".txt", cmdLogDir)) << cpc.cmd();
+      mkn::kul::io::Writer(mkn::kul::File(base + ".txt", cmdLogDir)) << cpc.cmd() << eol;
       if (cpc.outs().size())
-        mkn::kul::io::Writer(mkn::kul::File(base + ".txt", outLogDir)) << cpc.outs();
+        mkn::kul::io::Writer(mkn::kul::File(base + ".txt", outLogDir)) << cpc.outs() << eol;
       if (cpc.errs().size())
-        mkn::kul::io::Writer(mkn::kul::File(base + ".txt", errLogDir)) << cpc.errs();
+        mkn::kul::io::Writer(mkn::kul::File(base + ".txt", errLogDir)) << cpc.errs() << eol;
     }
 
     std::lock_guard<std::mutex> lock(mute);

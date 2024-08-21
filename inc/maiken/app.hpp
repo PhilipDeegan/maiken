@@ -100,7 +100,7 @@ class KUL_PUBLISH Application : public Constants {
 
   void preSetupValidation() KTHROW(Exception);
   void postSetupValidation() KTHROW(Exception);
-  void resolveProperties() KTHROW(Exception);
+  This& resolveProperties() KTHROW(Exception);
   void resolveLang() KTHROW(Exception);
   static void parseDependencyString(std::string s, mkn::kul::hash::set::String& include);
 
@@ -330,7 +330,7 @@ class Applications : public Constants {
 
   std::vector<Application const*> applicationsFor(Project const& project) const {
     std::vector<Application const*> ret;
-    for (auto const& profile : m_apps.at(project.dir().real())) ret.emplace_back(profile.second);
+    for (auto const& profile : m_apps.at(project.file())) ret.emplace_back(profile.second);
     return ret;
   }
 

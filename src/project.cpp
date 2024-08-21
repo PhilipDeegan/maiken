@@ -61,7 +61,7 @@ maiken::ProjectInfo maiken::ProjectInfo::PARSE_LINE(std::string const& line) {
   if (version.size() == 0 && scm.size() && !Github::GET_LATEST(scm, version)) version = "";
 #endif
 
-  return {local, profiles, proj, version, scm};
+  return {local, profiles, proj, version, scm.size() ? scm : proj};
 }
 
 mkn::kul::yaml::Validator maiken::Project::validator() const {

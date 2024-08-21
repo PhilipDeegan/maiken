@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-void maiken::Application::resolveProperties() KTHROW(maiken::Exception) {
+maiken::Application& maiken::Application::resolveProperties() KTHROW(maiken::Exception) {
   ps.setDeletedKey("--DELETED--");
   for (YAML::const_iterator it = project().root()[STR_PROPERTY].begin();
        it != project().root()[STR_PROPERTY].end(); ++it)
@@ -41,6 +41,7 @@ void maiken::Application::resolveProperties() KTHROW(maiken::Exception) {
     if (ps.count(it->first.as<std::string>())) ps.erase(it->first.as<std::string>());
     ps[it->first.as<std::string>()] = s;
   }
+  return *this;
 }
 
 std::shared_ptr<std::tuple<std::string, int, int>> maiken::Properties::KEY(
