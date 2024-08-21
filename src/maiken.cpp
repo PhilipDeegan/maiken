@@ -192,23 +192,40 @@ void maiken::Application::setSuper() {
   if (sup) return;
   if (project().root()[STR_SUPER]) {
     mkn::kul::os::PushDir pushd(project().dir().real());
-    mkn::kul::Dir d(project().root()[STR_SUPER].Scalar());
-    if (!d) KEXIT(1, "Super does not exist in project: " + project().dir().real());
-    std::string super(d.real());
-    if (super == project().dir().real())
-      KEXIT(1, "Super cannot reference itself: " + project().dir().real());
-    d = mkn::kul::Dir(super);
-    try {
-      sup = Applications::INSTANCE().getOrCreate(*maiken::Projects::INSTANCE().getOrCreate(d), "");
-      sup->resolveProperties();
-    } catch (std::exception const& e) {
-      KLOG(ERR) << e.what();
-      KEXIT(1, "Possible super cycle detected: " + project().dir().real());
+
+    auto const& super_string = project().root()[STR_SUPER].Scalar();
+    if (auto file = mkn::kul::File{super_string}; file.is()) {
+      if (file.real() == project().file())
+        KEXIT(1, "Super cannot reference itself: " + project().dir().real());
+      try {
+        sup = Applications::INSTANCE().getOrCreate(*maiken::Projects::INSTANCE().getOrCreate(file),
+                                                   "");
+        sup->resolveProperties();
+      } catch (std::exception const& e) {
+        KLOG(ERR) << e.what();
+        KEXIT(1, "Possible super cycle detected: " + project().dir().real());
+      }
+    } else {
+      mkn::kul::Dir d{super_string};
+      if (!d) KEXIT(1, "Super does not exist in project: " + project().dir().real());
+      std::string super(d.real());
+      if (super == project().dir().real())
+        KEXIT(1, "Super cannot reference itself: " + project().dir().real());
+      d = mkn::kul::Dir(super);
+      try {
+        sup =
+            Applications::INSTANCE().getOrCreate(*maiken::Projects::INSTANCE().getOrCreate(d), "");
+        sup->resolveProperties();
+      } catch (std::exception const& e) {
+        KLOG(ERR) << e.what();
+        KEXIT(1, "Possible super cycle detected: " + project().dir().real());
+      }
     }
+
     auto cycle = sup;
     while (cycle) {
-      if (cycle->project().dir() == project().dir())
-        KEXIT(1, "Super cycle detected: " + project().dir().real());
+      if (cycle->project().file() == project().file())
+        KEXIT(1, "Super cycle detected: " + project().file());
       cycle = cycle->sup;
     }
     for (auto const& p : sup->properties())

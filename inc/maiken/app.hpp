@@ -330,7 +330,7 @@ class Applications : public Constants {
 
   std::vector<Application const*> applicationsFor(Project const& project) const {
     std::vector<Application const*> ret;
-    for (auto const& profile : m_apps.at(project.dir().real())) ret.emplace_back(profile.second);
+    for (auto const& profile : m_apps.at(project.file())) ret.emplace_back(profile.second);
     return ret;
   }
 
