@@ -194,32 +194,28 @@ void maiken::Application::setSuper() {
     mkn::kul::os::PushDir pushd(project().dir().real());
 
     auto const& super_string = project().root()[STR_SUPER].Scalar();
-    if (auto file = mkn::kul::File{super_string}; file.is()) {
+    auto const gOrC = [&](auto const& in) {
+      try {
+        return &Applications::INSTANCE()
+                    .getOrCreate(*maiken::Projects::INSTANCE().getOrCreate(in), "")
+                    ->resolveProperties();
+      } catch (std::exception const& e) {
+        KLOG(ERR) << e.what();
+        KEXIT(1, "Possible super cycle detected: " + project().dir().real());
+      }
+    };
+
+    if (auto const file = mkn::kul::File{super_string}; file.is()) {
       if (file.real() == project().file())
         KEXIT(1, "Super cannot reference itself: " + project().dir().real());
-      try {
-        sup = Applications::INSTANCE().getOrCreate(*maiken::Projects::INSTANCE().getOrCreate(file),
-                                                   "");
-        sup->resolveProperties();
-      } catch (std::exception const& e) {
-        KLOG(ERR) << e.what();
-        KEXIT(1, "Possible super cycle detected: " + project().dir().real());
-      }
+      sup = gOrC(file);
     } else {
-      mkn::kul::Dir d{super_string};
-      if (!d) KEXIT(1, "Super does not exist in project: " + project().dir().real());
-      std::string super(d.real());
-      if (super == project().dir().real())
+      //
+      mkn::kul::Dir const dir{super_string};
+      if (!dir) KEXIT(1, "Super does not exist in project: " + project().dir().real());
+      if (dir.real() == project().dir().real())
         KEXIT(1, "Super cannot reference itself: " + project().dir().real());
-      d = mkn::kul::Dir(super);
-      try {
-        sup =
-            Applications::INSTANCE().getOrCreate(*maiken::Projects::INSTANCE().getOrCreate(d), "");
-        sup->resolveProperties();
-      } catch (std::exception const& e) {
-        KLOG(ERR) << e.what();
-        KEXIT(1, "Possible super cycle detected: " + project().dir().real());
-      }
+      sup = gOrC(dir);
     }
 
     auto cycle = sup;

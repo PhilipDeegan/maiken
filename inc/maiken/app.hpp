@@ -100,7 +100,7 @@ class KUL_PUBLISH Application : public Constants {
 
   void preSetupValidation() KTHROW(Exception);
   void postSetupValidation() KTHROW(Exception);
-  void resolveProperties() KTHROW(Exception);
+  This& resolveProperties() KTHROW(Exception);
   void resolveLang() KTHROW(Exception);
   static void parseDependencyString(std::string s, mkn::kul::hash::set::String& include);
 
