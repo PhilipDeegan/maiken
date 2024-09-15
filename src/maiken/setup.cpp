@@ -40,7 +40,8 @@ void sub_initializer(Application const& app, std::vector<YAML::Node> const& node
 
   auto const process = [&](auto n) {
     if (n[STR_SUB] && n[STR_SUB].IsScalar()) {
-      for (auto const& line : mkn::kul::cli::asArgs(n[STR_SUB].Scalar())) {
+      for (auto const& line :
+           mkn::kul::cli::asArgs(Properties::RESOLVE(app, n[STR_SUB].Scalar()))) {
         auto pInfo = ProjectInfo::PARSE_LINE(line);
         mkn::kul::Dir local{pInfo.local};
         if (!local)
@@ -174,7 +175,8 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
           withArgs(with_str, with_nodes, getIfMissing, 0);
       if (n[STR_DEP]) {
         if (n[STR_DEP].IsScalar())
-          for (auto const& with_str : mkn::kul::cli::asArgs(n[STR_DEP].Scalar()))
+          for (auto const& with_str :
+               mkn::kul::cli::asArgs(Properties::RESOLVE(*this, n[STR_DEP].Scalar())))
             withArgs(with_str, with_nodes, getIfMissing, 1);
         else if (n[STR_DEP].IsSequence())
           for (auto const& dep : n[STR_DEP]) getIfMissing(dep, 0);
@@ -187,7 +189,8 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
       if (n[STR_IF_DEP] && n[STR_IF_DEP][KTOSTRING(__MKN_KUL_OS__)]) {
         auto node = n[STR_IF_DEP][KTOSTRING(__MKN_KUL_OS__)];
         if (node.IsScalar()) {
-          for (auto const& with_str : mkn::kul::cli::asArgs(node.Scalar()))
+          for (auto const& with_str :
+               mkn::kul::cli::asArgs(Properties::RESOLVE(*this, node.Scalar())))
             withArgs(with_str, with_nodes, getIfMissing, 1);
         } else if (n[STR_DEP].IsSequence()) {
           for (auto const& dep : n[STR_IF_DEP][KTOSTRING(__MKN_KUL_OS__)]) getIfMissing(dep, 0);
@@ -325,7 +328,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
             for (auto it = node[str].begin(); it != node[str].end(); ++it)
               if (it->first.Scalar() == KTOSTRING(__MKN_KUL_OS__))
                 for (auto const& s : mkn::kul::String::LINES(it->second.Scalar())) (this->*fn)(s);
-        } catch (const mkn::kul::StringException&) {
+        } catch (mkn::kul::StringException const&) {
           KEXIT(1, std::string(str) + " contains invalid bool value\n" + project().dir().path());
         }
       };
