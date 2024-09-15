@@ -35,14 +35,14 @@ jobs:
             KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_nix
 
         - if: matrix.os == 'ubuntu-latest'
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4.4.0
           with:
             name: maiken-${{ matrix.os }}
             path: bin/build/mkn_nix
             retention-days: 1
 
         - if: matrix.os == 'windows-latest'
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4.4.0
           with:
             name: maiken-${{ matrix.os }}
             path: bin/build/mkn.exe
@@ -59,7 +59,7 @@ jobs:
         MKN_GCC_PREFERRED: 1
         KUL_GIT_CO: --depth 1
       run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_manylinux
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-manylinux-latest
         path: bin/build/mkn_manylinux
@@ -75,7 +75,7 @@ jobs:
         MKN_GCC_PREFERRED: 1
         KUL_GIT_CO: --depth 1
       run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_x86_osx
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-macos-12
         path: bin/build/mkn_x86_osx
@@ -91,7 +91,7 @@ jobs:
         MKN_GCC_PREFERRED: 1
         KUL_GIT_CO: --depth 1
       run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_arm_osx
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-macos-latest
         path: bin/build/mkn_arm_osx
