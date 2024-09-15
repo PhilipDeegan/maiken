@@ -103,7 +103,7 @@ jobs:
     needs: [build, build_many_linux, build_arm_macos, build_x86_macos]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
       - name: Display fetched artifacts
         run: ls -R
       - name: Emit a Github Release
