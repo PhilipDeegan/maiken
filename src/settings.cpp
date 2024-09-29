@@ -149,33 +149,32 @@ mkn::kul::yaml::Validator maiken::Settings::validator() const {
   for (auto const& s : Compilers::INSTANCE().keys())
     masks.push_back(NodeValidator(s, {}, 0, NodeType::STRING));
 
-  return Validator({
-    NodeValidator("super"), NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP),
-        NodeValidator("inc"), NodeValidator("path"),
-        NodeValidator("local",
-                      {NodeValidator("repo"), NodeValidator("mod-repo"), NodeValidator("debugger")},
-                      0, NodeType::MAP),
-        NodeValidator("remote", {NodeValidator("repo"), NodeValidator("mod-repo")}, 0,
-                      NodeType::MAP),
-        NodeValidator("env",
-                      {NodeValidator("name", 1), NodeValidator("value", 1), NodeValidator("mode")},
-                      0, NodeType::NON),
-        NodeValidator("file",
-                      {NodeValidator("type", 1), NodeValidator("compiler", 1),
-                       NodeValidator("linker"), NodeValidator("archiver")},
-                      1, NodeType::LIST),
+  return Validator(
+      {NodeValidator("super"), NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP),
+       NodeValidator("inc"), NodeValidator("path"),
+       NodeValidator("local",
+                     {NodeValidator("repo"), NodeValidator("mod-repo"), NodeValidator("debugger")},
+                     0, NodeType::MAP),
+       NodeValidator("remote", {NodeValidator("repo"), NodeValidator("mod-repo")}, 0,
+                     NodeType::MAP),
+       NodeValidator("env",
+                     {NodeValidator("name", 1), NodeValidator("value", 1), NodeValidator("mode")},
+                     0, NodeType::NON),
+       NodeValidator("file",
+                     {NodeValidator("type", 1), NodeValidator("compiler", 1),
+                      NodeValidator("linker"), NodeValidator("archiver")},
+                     1, NodeType::LIST),
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
-        NodeValidator("dist",
-                      {NodeValidator("port"),
-                       NodeValidator("nodes",
-                                     {NodeValidator("host", 1), NodeValidator("port", 1),
-                                      NodeValidator("user"), NodeValidator("pass")},
-                                     0, NodeType::LIST)},
-                      0, NodeType::MAP),
+       NodeValidator("dist",
+                     {NodeValidator("port"),
+                      NodeValidator("nodes",
+                                    {NodeValidator("host", 1), NodeValidator("port", 1),
+                                     NodeValidator("user"), NodeValidator("pass")},
+                                    0, NodeType::LIST)},
+                     0, NodeType::MAP),
 #endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
-        NodeValidator("compiler", {NodeValidator("mask", masks, 0, NodeType::MAP)}, 0,
-                      NodeType::MAP)
-  });
+       NodeValidator("compiler", {NodeValidator("mask", masks, 0, NodeType::MAP)}, 0,
+                     NodeType::MAP)});
 }
 
 void maiken::Settings::write(mkn::kul::File const& file) KTHROW(mkn::kul::Exit) {
@@ -302,7 +301,6 @@ mkn::kul::cli::EnvVar maiken::Settings::PARSE_ENV_NODE(YAML::Node const& n,
 void maiken::Settings::POST_CONSTRUCT() {
   auto& settings = Settings::INSTANCE();
   auto& root = settings.root();
-  auto& appVars = AppVars::INSTANCE();
 
   if (root[STR_ENV]) {
     if (root[STR_ENV].IsScalar()) {
@@ -310,13 +308,11 @@ void maiken::Settings::POST_CONSTRUCT() {
       for (auto const& line : lines) {
         auto copy = decltype(root[STR_ENV]){line};
         auto ev = maiken::Settings::PARSE_ENV_NODE(copy, settings);
-        appVars.envVar(ev.name(), ev.toString());
         mkn::kul::env::SET(ev.name(), ev.toString().c_str());
       }
     } else {
       for (auto const& c : root[STR_ENV]) {
         auto ev = maiken::Settings::PARSE_ENV_NODE(c, settings);
-        appVars.envVar(ev.name(), ev.toString());
         mkn::kul::env::SET(ev.name(), ev.toString().c_str());
       }
     }
