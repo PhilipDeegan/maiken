@@ -28,9 +28,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken/github.hpp"
-#include "maiken/regex.hpp"
 #include "maiken/scm.hpp"
+#include "maiken/regex.hpp"
+#include "maiken/github.hpp"
 
 namespace maiken {
 void sub_initializer(Application const& app, std::vector<YAML::Node> const& nodes) {
@@ -40,13 +40,15 @@ void sub_initializer(Application const& app, std::vector<YAML::Node> const& node
 
   auto const process = [&](auto n) {
     if (n[STR_SUB] && n[STR_SUB].IsScalar()) {
-      for (auto const& line :
-           mkn::kul::cli::asArgs(Properties::RESOLVE(app, n[STR_SUB].Scalar()))) {
-        auto pInfo = ProjectInfo::PARSE_LINE(line);
-        mkn::kul::Dir local{pInfo.local};
-        if (!local)
-          SCMGetter::GET(local, pInfo.scm)
-              ->co(local.path(), SCMGetter::REPO(local, pInfo.scm), pInfo.version);
+      auto const lines = mkn::kul::String::LINES(n[STR_SUB].Scalar());
+      for (auto const& input_line : lines) {
+        for (auto const& line : mkn::kul::cli::asArgs(Properties::RESOLVE(app, input_line))) {
+          auto pInfo = ProjectInfo::PARSE_LINE(line);
+          mkn::kul::Dir local{pInfo.local};
+          if (!local)
+            SCMGetter::GET(local, pInfo.scm)
+                ->co(local.path(), SCMGetter::REPO(local, pInfo.scm), pInfo.version);
+        }
       }
     }
   };
