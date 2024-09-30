@@ -3,7 +3,7 @@
 name: mkn
 version: master
 property:
-  DATE: 29-SEP-2024
+  DATE: 30-SEP-2024
 
 parent: bin
 mode: none
@@ -67,7 +67,7 @@ profile:
   main: server.cpp
   mode: none
 
-- name: format
+- name: format_a
   mod:
   - name: clang.format
     version: ${version}
@@ -75,3 +75,6 @@ profile:
       style: file
       paths: .
 
+- name: format
+  mod: |
+    clang.format{init:{style: google, paths: .}}

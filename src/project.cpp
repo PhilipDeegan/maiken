@@ -36,7 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/project.hpp"
 
 maiken::ProjectInfo maiken::ProjectInfo::PARSE_LINE(std::string const& line) {
-  std::string local /*&*/, profiles, proj = line, version /*#*/, scm;
+  std::string local /*&*/, profiles, proj = line, version /*#*/, scm, bon;
 
   auto get_between = [&](auto& var, auto lbrak, auto rbrak) {
     auto between = maiken::string::between_rm_str(proj, lbrak, rbrak);
@@ -46,6 +46,8 @@ maiken::ProjectInfo maiken::ProjectInfo::PARSE_LINE(std::string const& line) {
 
   if (!get_between(scm, "(", ")")) KEXIT(1, "Invalid -m - missing right ) bracket");
   if (!get_between(profiles, "[", "]")) KEXIT(1, "Invalid -m - missing right ] bracket");
+  if (!get_between(bon, "{", "}")) KEXIT(1, "Invalid -m - missing right } bracket");
+
   mkn::kul::String::REPLACE_ALL(profiles, ",", " ");
 
   auto am = proj.find("&"), ha = proj.find("#");
@@ -61,7 +63,7 @@ maiken::ProjectInfo maiken::ProjectInfo::PARSE_LINE(std::string const& line) {
   if (version.size() == 0 && scm.size() && !Github::GET_LATEST(scm, version)) version = "";
 #endif
 
-  return {local, profiles, proj, version, scm.size() ? scm : proj};
+  return {local, profiles, proj, version, scm.size() ? scm : proj, bon};
 }
 
 mkn::kul::yaml::Validator maiken::Project::validator() const {
