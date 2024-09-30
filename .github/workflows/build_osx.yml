@@ -27,3 +27,4 @@ jobs:
         KLOG=3 ./mkn build -dtKO 2 -W 9 -g 0
         KLOG=3 ./mkn build -dtOp test_mod
         KLOG=3 ./mkn build test pack -Op test
+        KLOG=3 ./mkn -p lib_test

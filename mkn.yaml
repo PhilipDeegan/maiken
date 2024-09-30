@@ -4,6 +4,9 @@ name: mkn
 version: master
 property:
   DATE: 30-SEP-2024
+  maiken_location: ${MKN_HOME}/app/mkn/${version}
+  maiken_scm: https://github.com/mkn/mkn
+  self.deps: mkn.kul
 
 parent: bin
 mode: none
@@ -11,7 +14,7 @@ mode: none
 profile:
 - name: headers
   inc: inc
-  dep: mkn.kul
+  dep: ${self.deps}
 
 - name: compiled
   parent: headers
@@ -78,3 +81,7 @@ profile:
 - name: format
   mod: |
     clang.format{init:{style: google, paths: .}}
+
+
+- name: lib_test
+  dep: mkn&${maiken_location}(${maiken_scm})[mod]

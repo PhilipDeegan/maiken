@@ -29,3 +29,4 @@ jobs:
         mkn build -dtKO 2 -g 0 -a "-std:c++17 -EHsc"
         mkn build -dtOp test_mod -a "-std:c++17 -EHsc"
         mkn build test pack -Op test -a "-std:c++17 -EHsc"
+        mkn -p lib_test
