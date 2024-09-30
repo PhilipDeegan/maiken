@@ -24,4 +24,5 @@ jobs:
         KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9
         KLOG=3 ./mkn build -Op test_mod -a "-std=c++17 -fPIC" -O 2 -g 0 -W 9
         KLOG=3 ./mkn build test pack -Op test -a "-std=c++17 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build -dtOp format -a "-std=c++17 -fPIC" -O 2 -g 0 -W 9
         ldd bin/build/mkn

@@ -64,22 +64,13 @@ void maiken::Application::mod(mkn::kul::hash::set::String& mods, std::vector<YAM
     auto& node = mod_nodes.emplace_back();
 
     ProjectInfo pInfo = ProjectInfo::PARSE_LINE(mod);
-
-    auto& [local, profiles, proj, version, scm] = pInfo;
-    // KLOG(INF) << proj;
-    std::string objs;
+    auto& [local, profiles, proj, version, scm, curlies] = pInfo;
 
     if (!node[STR_SCM] && scm.size()) node[STR_SCM] = scm;
     if (!node[STR_PROFILE] && profiles.size()) node[STR_PROFILE] = profiles;
 
     {
-      auto lbrak = proj.find("{"), rbrak = proj.rfind("}");
-      if (lbrak != std::string::npos) {
-        if (rbrak == std::string::npos) KEXIT(1, "Invalid -m - missing right } bracket");
-        objs = proj.substr(lbrak), proj = proj.substr(0, lbrak);
-      }
-
-      auto am = proj.find("&"), ha = proj.find("#");
+      auto const am = proj.find("&"), ha = proj.find("#");
       if (proj == this->project().root()[STR_NAME].Scalar()) {
         node[STR_LOCAL] = ".";
         if (am != std::string::npos || ha != std::string::npos)
@@ -88,7 +79,7 @@ void maiken::Application::mod(mkn::kul::hash::set::String& mods, std::vector<YAM
                 "location");
       }
 
-      auto if_set = [&](auto& v, auto n) {
+      auto const if_set = [&](auto& v, auto n) {
         if (v.size()) n = v;
       };
       if_set(local, node[STR_LOCAL]);
@@ -108,8 +99,8 @@ void maiken::Application::mod(mkn::kul::hash::set::String& mods, std::vector<YAM
     }
     if (!proj.empty()) node[STR_NAME] = proj;
 
-    if (objs.size())
-      for (auto const p : mkn::kul::bon::from(objs)) node[p.first] = p.second;
+    if (curlies.size())
+      for (auto const p : mkn::kul::bon::from("{" + curlies + "}")) node[p.first] = p.second;
 
     YAML::Emitter out;
     out << node;

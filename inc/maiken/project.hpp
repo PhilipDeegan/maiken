@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 
 struct ProjectInfo {
-  std::string local /*&*/, profiles, name, version /*#*/, scm;
+  std::string local /*&*/, profiles, name, version /*#*/, scm, bon = "";
 
   ProjectInfo static PARSE_LINE(std::string const& line);
 };
