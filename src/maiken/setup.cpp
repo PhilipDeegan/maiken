@@ -177,8 +177,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
           withArgs(with_str, with_nodes, getIfMissing, 0);
       if (n[STR_DEP]) {
         if (n[STR_DEP].IsScalar())
-          for (auto const& with_str :
-               mkn::kul::cli::asArgs(Properties::RESOLVE(*this, n[STR_DEP].Scalar())))
+          for (auto const& with_str : mkn::kul::cli::asArgs(n[STR_DEP].Scalar()))
             withArgs(with_str, with_nodes, getIfMissing, 1);
         else if (n[STR_DEP].IsSequence())
           for (auto const& dep : n[STR_DEP]) getIfMissing(dep, 0);
@@ -191,8 +190,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
       if (n[STR_IF_DEP] && n[STR_IF_DEP][KTOSTRING(__MKN_KUL_OS__)]) {
         auto node = n[STR_IF_DEP][KTOSTRING(__MKN_KUL_OS__)];
         if (node.IsScalar()) {
-          for (auto const& with_str :
-               mkn::kul::cli::asArgs(Properties::RESOLVE(*this, node.Scalar())))
+          for (auto const& with_str : mkn::kul::cli::asArgs(node.Scalar()))
             withArgs(with_str, with_nodes, getIfMissing, 1);
         } else if (n[STR_DEP].IsSequence()) {
           for (auto const& dep : n[STR_IF_DEP][KTOSTRING(__MKN_KUL_OS__)]) getIfMissing(dep, 0);
