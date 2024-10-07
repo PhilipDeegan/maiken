@@ -84,11 +84,10 @@ mkn::kul::Dir maiken::Application::resolveDepOrModDirectory(YAML::Node const& n,
   if (n[STR_LOCAL])
     d = Properties::RESOLVE(*this, n[STR_LOCAL].Scalar());
   else {
-    std::string depName{n[STR_NAME].Scalar()};
-    std::string name(Properties::RESOLVE(*this, depName));
+    std::string const depName(Properties::RESOLVE(*this, n[STR_NAME].Scalar()));
     d = (*AppVars::INSTANCE().properkeys().find(module ? "MKN_MOD_REPO" : "MKN_REPO")).second;
     try {
-      mkn::kul::File verFile(depName, ".mkn/dep/ver");
+      mkn::kul::File const verFile(depName, ".mkn/dep/ver");
       auto resolveSCMBranch = [&]() -> std::string {
         if (n[STR_VERSION]) return Properties::RESOLVE(*this, n[STR_VERSION].Scalar());
         if (verFile) return mkn::kul::io::Reader(verFile).readLine();
@@ -114,7 +113,7 @@ mkn::kul::Dir maiken::Application::resolveDepOrModDirectory(YAML::Node const& n,
         mkn::kul::io::Writer(verFile) << version;
       }
       if (_MKN_REP_VERS_DOT_) mkn::kul::String::REPLACE_ALL(version, ".", mkn::kul::Dir::SEP());
-
+      auto name = depName;
       if (_MKN_REP_NAME_DOT_) mkn::kul::String::REPLACE_ALL(name, ".", mkn::kul::Dir::SEP());
       d = mkn::kul::Dir::JOIN(d, mkn::kul::Dir::JOIN(name, version));
     } catch (mkn::kul::Exception const& e) {
@@ -141,7 +140,7 @@ void maiken::Application::popDepOrMod(YAML::Node const& n, std::vector<Applicati
   };
   std::vector<std::pair<std::string, std::string>> apps;
   auto lam = [&](auto const& depOrMod) {
-    const mkn::kul::Dir& projectDir = resolveDepOrModDirectory(depOrMod, module);
+    mkn::kul::Dir const& projectDir = resolveDepOrModDirectory(depOrMod, module);
     bool f = false;
     for (Application const* ap : vec)
       if (projectDir == ap->project().dir() && p == ap->p) return;
