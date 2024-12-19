@@ -65,7 +65,7 @@ class Validator : public maiken::Constants {
   static void PRE_BUILD(maiken::Application const& a, YAML::Node const& n)
       KTHROW(maiken::Exception) {
     if (n[STR_MODE]) {
-      auto const& s(n[STR_MODE].Scalar());
+      auto const s(n[STR_MODE].Scalar());
       if (s != STR_NONE && s != STR_STATIC && s != STR_SHARED)
         KEXIT(1, "mode tag invalid value, expects none/static/shared\n" + a.project().dir().path());
     }
@@ -130,7 +130,7 @@ void maiken::Application::preSetupValidation() KTHROW(maiken::Exception) {
   Validator::PRE_BUILD(*this, project().root());
   std::vector<std::string> profiles;
   for (auto const& profile : project().root()[STR_PROFILE]) {
-    std::string const& p(profile[STR_NAME].Scalar());
+    auto const p(profile[STR_NAME].Scalar());
     if (p.find("[") != std::string::npos || p.find("]") != std::string::npos)
       KEXIT(1, "Profile may not contain character \"[\" or \"]\"");
     if (p == project().root()[STR_NAME].Scalar())

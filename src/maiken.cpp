@@ -193,7 +193,7 @@ void maiken::Application::setSuper() {
   if (project().root()[STR_SUPER]) {
     mkn::kul::os::PushDir pushd(project().dir().real());
 
-    auto const& super_string = project().root()[STR_SUPER].Scalar();
+    auto const super_string = project().root()[STR_SUPER].Scalar();
     auto const gOrC = [&](auto const& in) {
       try {
         return &Applications::INSTANCE()

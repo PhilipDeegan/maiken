@@ -122,7 +122,7 @@ void maiken::Application::buildExecutable(mkn::kul::hash::set::String const& obj
     KEXIT(1, "Unable to handle artifact: \"" + file + "\" - type is not in file list");
   std::string const oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
   mkn::kul::Dir objD(buildDir().join("obj")), tmpD(buildDir().join("tmp"));
-  std::string const& name(out.empty() ? project().root()[STR_NAME].Scalar() : out);
+  auto const name(out.empty() ? project().root()[STR_NAME].Scalar() : out);
   auto obFile = Source(mkn::kul::File(main_->in()).real()).object();
   mkn::kul::File tbject(obFile, tmpD);
   if (!tbject)

@@ -106,7 +106,7 @@ void maiken::Application::buildDepVec(std::string const& depVal) {
   for (Application* ap : deps) {
     Application& a(*ap);
     a.buildDepVecRec(dePs, AppVars::INSTANCE().dependencyLevel(), i, include);
-    std::string const& name(a.project().root()[STR_NAME].Scalar());
+    auto const name(a.project().root()[STR_NAME].Scalar());
     std::stringstream ss;
     ss << name << "[" << (a.p.empty() ? "@" : a.p) << "]";
     if (AppVars::INSTANCE().dependencyLevel() || include.count(ss.str())) a.ig = 0;

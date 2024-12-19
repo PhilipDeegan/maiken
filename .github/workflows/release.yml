@@ -66,22 +66,6 @@ jobs:
         retention-days: 1
 
 
-  build_x86_macos:
-    runs-on: macos-12
-    steps:
-    - uses: actions/checkout@v4
-    - run: ./res/ci/nixish_setup.sh && make bsd
-    - env:
-        MKN_GCC_PREFERRED: 1
-        KUL_GIT_CO: --depth 1
-      run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9 -o mkn_x86_osx
-    - uses: actions/upload-artifact@v4.4.0
-      with:
-        name: maiken-macos-12
-        path: bin/build/mkn_x86_osx
-        retention-days: 1
-
-
   build_arm_macos:
     runs-on: macos-latest
     steps:
@@ -117,5 +101,4 @@ jobs:
             maiken-windows-latest/mkn.exe
             maiken-ubuntu-latest/mkn_nix
             maiken-manylinux-latest/mkn_manylinux
-            maiken-macos-12/mkn_x86_osx
             maiken-macos-latest/mkn_arm_osx
