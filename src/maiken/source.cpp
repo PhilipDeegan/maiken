@@ -40,7 +40,7 @@ void maiken::Application::addMainLine(std::string const& o) KTHROW(mkn::kul::Exc
 
 void maiken::Application::addSourceLine(std::string const& s) KTHROW(mkn::kul::Exception) {
   auto check_replace = [&](std::string const& str, bool recurse_dir, std::string args) {
-    auto it = std::find_if(srcs.begin(), srcs.end(), [&](const std::pair<Source, bool>& element) {
+    auto it = std::find_if(srcs.begin(), srcs.end(), [&](std::pair<Source, bool> const& element) {
       return element.first == Source(str);
     });
     if (it != srcs.end()) {

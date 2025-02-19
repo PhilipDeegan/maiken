@@ -6,7 +6,7 @@ endif
 
 OS =
 CXX=g++
-CXXFLAGS=-std=c++17 -O2 -Wall -fmessage-length=0 -fPIC -Iinc \
+CXXFLAGS=-std=c++17 -O0 -Wall -fmessage-length=0 -fPIC -Iinc -g3 -fno-omit-frame-pointer \
 		-Iext/parse/yaml/p/include \
 		-Iext/mkn/kul/inc \
 		-Iext/mkn/kul/os/$(OS)/inc \

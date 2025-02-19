@@ -42,7 +42,8 @@ namespace maiken {
 struct ProjectInfo {
   std::string local /*&*/, profiles, name, version /*#*/, scm, bon = "";
 
-  ProjectInfo static PARSE_LINE(std::string const& line);
+  ProjectInfo static PARSE_LINE(std::string const& line,
+                                [[maybe_unused]] std::string const& cacheDirName = "dep");
 };
 
 class Application;

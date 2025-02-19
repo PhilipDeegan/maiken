@@ -133,9 +133,11 @@ void maiken::Application::test() {
 
 void maiken::Application::run(bool dbg) {
   if (!main_) return;
-  std::string bin;
+  auto const exeFile = this->binaryFile();
+  auto const exe = exeFile.name();
   for (auto const& file : buildDir().files(false)) {
-    bin = file.name();
+    auto const bin = file.name();
+    if (bin.rfind(exe) == std::string::npos) continue;
 #if defined(_WIN32)
     if (bin.rfind(".exe") == std::string::npos) continue;
 #endif

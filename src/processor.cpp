@@ -76,7 +76,7 @@ void maiken::Processor::process(std::vector<Application*> apps) {
       if (cpc.exception()) std::rethrow_exception(cpc.exception());
     } catch (mkn::kul::Exception const& e) {
       lambex(e);
-    } catch (const std::exception& e) {
+    } catch (std::exception const& e) {
       KLOG(ERR) << e.what();
     }
   };
