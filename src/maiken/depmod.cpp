@@ -93,7 +93,8 @@ mkn::kul::Dir maiken::Application::resolveDepOrModDirectory(YAML::Node const& n,
           return app->project().dir().name();
 
 #ifdef _MKN_WITH_MKN_RAM_
-        return Github<>::resolveSCMBranch(depName, "dep");
+        return Github<>::resolveSCMBranch(SCMGetter::REPO(d, depName, module),
+                                          module ? "mod" : "dep");
 #else
         return defaultSCMBranchName();
 #endif
