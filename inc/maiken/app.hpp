@@ -265,8 +265,13 @@ class KUL_PUBLISH Application : public Constants {
   auto root() const { return ro; }
 
   std::string baseLibFilename() const {
-    std::string n = project().root()[STR_NAME].Scalar();
+    std::string const n = project().root()[STR_NAME].Scalar();
     return out.empty() ? inst ? p.empty() ? n : n + "_" + p : n : out;
+  }
+  auto binaryFile() const {
+    auto const name(out.empty() ? project().root()[STR_NAME].Scalar() : out);
+    auto const install = mkn::kul::Dir(inst ? inst.real() : buildDir());
+    return mkn::kul::File(install.join(name));
   }
   SourceMap sourceMap() const;
 
