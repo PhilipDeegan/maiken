@@ -43,8 +43,8 @@ void sub_initializer(Application const& app, std::vector<YAML::Node> const& node
       auto const lines = mkn::kul::String::LINES(n[STR_SUB].Scalar());
       for (auto const& input_line : lines) {
         for (auto const& line : mkn::kul::cli::asArgs(Properties::RESOLVE(app, input_line))) {
-          auto pInfo = ProjectInfo::PARSE_LINE(line);
-          mkn::kul::Dir local{pInfo.local};
+          auto const pInfo = ProjectInfo::PARSE_LINE(line, "sub");
+          mkn::kul::Dir const local{pInfo.local};
           if (!local)
             SCMGetter::GET(local, pInfo.scm)
                 ->co(local.path(), SCMGetter::REPO(local, pInfo.scm), pInfo.version);

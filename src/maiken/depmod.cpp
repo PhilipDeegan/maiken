@@ -87,31 +87,20 @@ mkn::kul::Dir maiken::Application::resolveDepOrModDirectory(YAML::Node const& n,
     std::string const depName(Properties::RESOLVE(*this, n[STR_NAME].Scalar()));
     d = (*AppVars::INSTANCE().properkeys().find(module ? "MKN_MOD_REPO" : "MKN_REPO")).second;
     try {
-      mkn::kul::File const verFile(depName, ".mkn/dep/ver");
       auto resolveSCMBranch = [&]() -> std::string {
         if (n[STR_VERSION]) return Properties::RESOLVE(*this, n[STR_VERSION].Scalar());
-        if (verFile) return mkn::kul::io::Reader(verFile).readLine();
-        {
-          auto app = Applications::INSTANCE().getOrNullptr(depName);
-          if (app) return app->project().dir().name();
-        }
-#ifdef _MKN_WITH_MKN_RAM_
-        KOUT(NON) << "Attempting branch deduction resolution for: " << depName;
-        std::string version;
-        if (Github::GET_LATEST(depName, version)) return version;
-#endif  //_MKN_WITH_MKN_RAM_
+        if (auto app = Applications::INSTANCE().getOrNullptr(depName))
+          return app->project().dir().name();
 
+#ifdef _MKN_WITH_MKN_RAM_
+        return Github<>::resolveSCMBranch(depName, "dep");
+#else
         return defaultSCMBranchName();
+#endif
       };
+
       std::string version(resolveSCMBranch());
-      if (version.empty()) {
-        KEXIT(1, "Error in file: ") << verFile << "\n\tCannot be empty";
-      }
-      {
-        verFile.rm();
-        verFile.dir().mk();
-        mkn::kul::io::Writer(verFile) << version;
-      }
+
       if (_MKN_REP_VERS_DOT_) mkn::kul::String::REPLACE_ALL(version, ".", mkn::kul::Dir::SEP());
       auto name = depName;
       if (_MKN_REP_NAME_DOT_) mkn::kul::String::REPLACE_ALL(name, ".", mkn::kul::Dir::SEP());

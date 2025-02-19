@@ -32,7 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MAIKEN_GITHUB_HPP_
 
 #include "maiken.hpp"
+
 #ifdef _MKN_WITH_MKN_RAM_
+
 #include "mkn/kul/yaml.hpp"
 #include "mkn/ram/http.hpp"
 #include "mkn/ram/https.hpp"
@@ -47,6 +49,12 @@ namespace github {
 
 static inline std::string URL = "api.github.com";
 static inline int port = 443;
+
+class Exception : public mkn::kul::Exception {
+ public:
+  Exception(char const* f, uint16_t const& l, std::string const& s)
+      : mkn::kul::Exception(f, l, s) {}
+};
 
 }  // namespace github
 
@@ -64,7 +72,19 @@ class Github {
       return mkn::ram::http::Get(github::URL, path, github::port);
   }
 
+  auto static repo_name(std::string const& repo) {
+    auto trimmed = repo;
+    while (!trimmed.empty() && trimmed.back() == '/') trimmed.pop_back();
+    if (trimmed.find("/") != std::string::npos) {
+      auto const name = trimmed.substr(trimmed.rfind("/") + 1);
+      return name.empty() ? trimmed : name;
+    }
+    return repo;
+  }
+
  public:
+  using Request_t = std::conditional_t<https, mkn::ram::https::Get, mkn::ram::http::Get>;
+
   static bool GET_DEFAULT_BRANCH(std::string const& owner, std::string const& repo,
                                  std::string& branch);
   static bool GET_LATEST_RELEASE(std::string const& owner, std::string const& repo,
@@ -72,6 +92,25 @@ class Github {
   static bool GET_LATEST_TAG(std::string const& owner, std::string const& repo,
                              std::string& branch);
   static bool GET_LATEST(std::string const& repo, std::string& branch);
+
+  std::string static resolveSCMBranch(std::string const& repo, std::string const& cacheDirName) {
+    auto const name = repo_name(repo);
+    mkn::kul::File const verFile(name, ".mkn/" + cacheDirName + "/ver");
+    if (verFile) return mkn::kul::io::Reader(verFile).readLine();
+
+#ifdef _MKN_WITH_MKN_RAM_
+    KOUT(NON) << "Attempting branch deduction resolution for: " << name;
+    std::string version;
+    if (GET_LATEST(repo, version)) {
+      verFile.rm();
+      verFile.dir().mk();
+      mkn::kul::io::Writer(verFile) << version;
+      return version;
+    };
+#endif  //_MKN_WITH_MKN_RAM_
+
+    return defaultSCMBranchName();
+  }
 };
 
 template <bool https>
@@ -80,24 +119,32 @@ bool Github<https>::GET_DEFAULT_BRANCH(std::string const& owner, std::string con
   bool b = 0;
   int retry = 3;
   std::stringstream ss;
-  ss << "repos/" << owner << "/" << repo;
-  while (retry-- > 0) {
-    request(ss.str())
-        .withHeaders({{"User-Agent", "Mozilla not a virus"}, {"Accept", "application/json"}})
-        .withResponse([&b, &branch](auto const& r) {
-          if (r.status() == 200)  //
-            try {
-              mkn::kul::yaml::String const yaml(r.body());
-              KLOG(OTH) << "Github API default branch response: " << r.body();
-              if (yaml.root() && yaml.root()["default_branch"]) {
-                branch = yaml.root()["default_branch"].Scalar();
-                b = 1;
-              }
-            } catch (YAML::Exception const&) {
-              KLOG(ERR) << "maiken::Github::GET_DEFAULT_BRANCH invalid response received.";
+  ss << "repos/" << owner << "/" << repo_name(repo);
+
+  Request_t getRequest = request(ss.str());
+  getRequest.withHeaders({{"User-Agent", "Mozilla not a virus"}, {"Accept", "application/json"}})
+      .withResponse([&b, &branch](auto const& r) {
+        if (r.status() == 200) {
+          try {
+            mkn::kul::yaml::String const yaml(r.body());
+            if (yaml.root() && yaml.root()["default_branch"]) {
+              branch = yaml.root()["default_branch"].Scalar();
+              b = 1;
             }
-        })
-        .send();
+          } catch (YAML::Exception const&) {
+            KLOG(ERR) << "maiken::Github::GET_DEFAULT_BRANCH invalid response received.";
+            KLOG(TRC) << r.body();
+          }
+        } else {
+          KLOG(TRC) << "request not OK: " << r.status() << " " << r.body();
+          KEXCEPT(github::Exception, "Github API error");
+        }
+      });
+
+  KLOG(TRC) << getRequest.toString();
+
+  while (retry-- > 0) {
+    getRequest.send();
     if (b) return b;
     KLOG(ERR) << "maiken::Github::GET_DEFAULT_BRANCH failed - retrying";
     using namespace std::chrono_literals;
@@ -112,13 +159,13 @@ bool Github<https>::GET_LATEST_RELEASE(std::string const& owner, std::string con
   bool b = 0;
   int retry = 3;
   std::stringstream ss;
-  ss << "repos/" << owner << "/" << repo << "/releases/latest";
+  ss << "repos/" << owner << "/" << repo_name(repo) << "/releases/latest";
 
   while (retry-- > 0) {
     request(ss.str())
         .withHeaders({{"User-Agent", "Mozilla not a virus"}, {"Accept", "application/json"}})
         .withResponse([&b, &branch](auto const& r) {
-          if (r.status() == 200)  //
+          if (r.status() == 200) {
             try {
               mkn::kul::yaml::String const yaml(r.body());
               if (yaml.root()["tag_name"]) {
@@ -128,6 +175,10 @@ bool Github<https>::GET_LATEST_RELEASE(std::string const& owner, std::string con
             } catch (YAML::Exception const&) {
               KLOG(ERR) << "maiken::Github::GET_LATEST_RELEASE invalid response received.";
             }
+          } else {
+            KLOG(TRC) << "request not OK: " << r.status() << " " << r.body();
+            KEXCEPT(github::Exception, "Github API error");
+          }
         })
         .send();
     if (b) return b;
@@ -144,12 +195,12 @@ bool Github<https>::GET_LATEST_TAG(std::string const& owner, std::string const& 
   bool b = 0;
   int retry = 3;
   std::stringstream ss;
-  ss << "repos/" << owner << "/" << repo << "/git/tags";
+  ss << "repos/" << owner << "/" << repo_name(repo) << "/git/tags";
   while (retry-- > 0) {
     request(ss.str())
         .withHeaders({{"User-Agent", "Mozilla not a virus"}, {"Accept", "application/json"}})
         .withResponse([&b, &branch](auto const& r) {
-          if (r.status() == 200)  //
+          if (r.status() == 200) {
             try {
               mkn::kul::yaml::String const yaml(r.body());
               if (yaml.root().Type() == 3) {
@@ -161,6 +212,10 @@ bool Github<https>::GET_LATEST_TAG(std::string const& owner, std::string const& 
             } catch (YAML::Exception const&) {
               KLOG(ERR) << "maiken::Github::GET_LATEST_TAG invalid response received.";
             }
+          } else {
+            KLOG(TRC) << "request not OK: " << r.status() << " " << r.body();
+            KEXCEPT(github::Exception, "Github API error");
+          }
         })
         .send();
 
@@ -180,8 +235,7 @@ template <bool https>
 bool Github<https>::GET_LATEST(std::string const& repo, std::string& branch) {
 #ifndef _MKN_DISABLE_SCM_
 
-  std::vector<std::function<decltype(GET_DEFAULT_BRANCH)>> gets{
-      &GET_DEFAULT_BRANCH, &GET_LATEST_RELEASE, &GET_LATEST_TAG};
+  std::array const gets{&GET_DEFAULT_BRANCH, &GET_LATEST_RELEASE, &GET_LATEST_TAG};
   std::vector<size_t> orders{0, 1, 2};
   if (_MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION_ == 1) orders = {1, 2, 0};
 
@@ -205,8 +259,13 @@ bool Github<https>::GET_LATEST(std::string const& repo, std::string& branch) {
         continue;
       }
 
-      for (auto const& order : orders)
-        if (gets[order](owner, repo, branch)) return 1;
+      try {
+        for (auto const& order : orders)
+          if (gets[order](owner, repo, branch)) return 1;
+      } catch (github::Exception const& e) {
+        KLOG(ERR) << "Exception contacting github API - rerun with debug symbols and KLOG=5";
+        std::rethrow_exception(std::current_exception());
+      }
     }
   }
 #else

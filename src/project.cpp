@@ -35,7 +35,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/github.hpp"
 #include "maiken/project.hpp"
 
-maiken::ProjectInfo maiken::ProjectInfo::PARSE_LINE(std::string const& line) {
+maiken::ProjectInfo maiken::ProjectInfo::PARSE_LINE(
+    std::string const& line, [[maybe_unused]] std::string const& cacheDirName) {
   std::string local /*&*/, profiles, proj = line, version /*#*/, scm, bon;
 
   auto get_between = [&](auto& var, auto lbrak, auto rbrak) {
@@ -60,7 +61,7 @@ maiken::ProjectInfo maiken::ProjectInfo::PARSE_LINE(std::string const& line) {
   if_set(ha, version);
 
 #if defined(_MKN_WITH_MKN_RAM_)
-  if (version.size() == 0 && scm.size() && !Github::GET_LATEST(scm, version)) version = "";
+  if (version.size() == 0 && scm.size()) version = Github<>::resolveSCMBranch(scm, cacheDirName);
 #endif
 
   return {local, profiles, proj, version, scm.size() ? scm : proj, bon};
