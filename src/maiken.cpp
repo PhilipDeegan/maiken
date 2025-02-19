@@ -153,7 +153,7 @@ void maiken::Application::addIncludeLine(std::string const& o) KTHROW(mkn::kul::
   auto add_if_missing = [&](std::pair<std::string, bool> p) {
     auto it = std::find_if(
         incs.begin(), incs.end(),
-        [&](const std::pair<std::string, bool>& element) { return element.first == p.first; });
+        [&](std::pair<std::string, bool> const& element) { return element.first == p.first; });
     if (it == incs.end()) incs.emplace_back(p);
   };
   if (o.find(',') == std::string::npos) {

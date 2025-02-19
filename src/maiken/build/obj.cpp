@@ -225,7 +225,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
 
     } catch (mkn::kul::Exception const& e) {
       lambex(e);
-    } catch (const std::exception& e) {
+    } catch (std::exception const& e) {
       KLOG(ERR) << e.what();
     }
   };

@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/dist.hpp"
 
 void maiken::dist::Post::send(std::string const& host, std::string const& res, uint16_t const& port,
-                              const std::unordered_map<std::string, std::string> headers)
+                              std::unordered_map<std::string, std::string> const headers)
     KTHROW(maiken::Exception) {
   if (msg == nullptr) KEXCEPTION("Cannot send post without message");
   std::ostringstream ss(std::ios::out | std::ios::binary);

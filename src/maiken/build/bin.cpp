@@ -41,7 +41,7 @@ class Executioner : public Constants {
   static CompilerProcessCapture build_exe(mkn::kul::hash::set::String const& objects,
                                           std::vector<mkn::kul::Dir> const& starDirs,
                                           std::string const& main, std::string const& out,
-                                          const mkn::kul::Dir outD, Application& app) {
+                                          mkn::kul::Dir const outD, Application& app) {
     auto dryRun = AppVars::INSTANCE().dryRun();
     auto& file = main;
     std::string const& fileType = file.substr(file.rfind(".") + 1);
