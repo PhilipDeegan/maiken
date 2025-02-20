@@ -49,13 +49,15 @@ void maiken::Application::link(mkn::kul::hash::set::String const& objects)
   if (CommandStateMachine::INSTANCE().commands().count(STR_TEST) && !tests.empty())
     buildTest(objects);
 
-  auto delEmpty = [](auto dir) {
-    if (dir && dir.files().empty()) dir.rm();
-  };
+  if (AppVars::INSTANCE().dump()) {
+    auto const delEmpty = [](auto dir) {
+      if (dir && dir.files().empty()) dir.rm();
+    };
 
-  delEmpty(mkn::kul::Dir(".mkn/log/" + buildDir().name() + "/bin/cmd"));
-  delEmpty(mkn::kul::Dir(".mkn/log/" + buildDir().name() + "/bin/out"));
-  delEmpty(mkn::kul::Dir(".mkn/log/" + buildDir().name() + "/bin/err"));
+    delEmpty(mkn::kul::Dir(".mkn/log/" + buildDir().name() + "/bin/cmd"));
+    delEmpty(mkn::kul::Dir(".mkn/log/" + buildDir().name() + "/bin/out"));
+    delEmpty(mkn::kul::Dir(".mkn/log/" + buildDir().name() + "/bin/err"));
+  }
 }
 
 void maiken::Application::checkErrors(CompilerProcessCapture const& cpc)

@@ -3,7 +3,7 @@
 name: mkn
 version: master
 property:
-  DATE: 19-FEB-2025
+  DATE: 20-FEB-2025
   maiken_location: ${MKN_HOME}/app/mkn/${version}
   maiken_scm: https://github.com/mkn/mkn
   self.deps: mkn.kul

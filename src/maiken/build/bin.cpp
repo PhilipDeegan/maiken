@@ -88,14 +88,14 @@ class Executioner : public Constants {
   static void print(CompilerProcessCapture const& cpc, Application& app) {
     auto dryRun = AppVars::INSTANCE().dryRun();
 
-    mkn::kul::Dir cmdLogDir(".mkn/log/" + app.buildDir().name() + "/bin/cmd", 1);
-    mkn::kul::Dir outLogDir(".mkn/log/" + app.buildDir().name() + "/bin/out", 1);
-    mkn::kul::Dir errLogDir(".mkn/log/" + app.buildDir().name() + "/bin/err", 1);
-
     if (dryRun)
       KOUT(NON) << cpc.cmd();
     else {
       if (AppVars::INSTANCE().dump()) {
+        mkn::kul::Dir cmdLogDir(".mkn/log/" + app.buildDir().name() + "/bin/cmd", 1);
+        mkn::kul::Dir outLogDir(".mkn/log/" + app.buildDir().name() + "/bin/out", 1);
+        mkn::kul::Dir errLogDir(".mkn/log/" + app.buildDir().name() + "/bin/err", 1);
+
         auto const eol = mkn::kul::os::EOL();
         std::string base = mkn::kul::File(cpc.file()).name();
         mkn::kul::io::Writer(mkn::kul::File(base + ".txt", cmdLogDir)) << cpc.cmd() << eol;
