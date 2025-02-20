@@ -193,9 +193,15 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     ctp.interrupt();
   };
 
-  mkn::kul::Dir cmdLogDir(".mkn/log/" + buildDir().name() + "/obj/cmd", 1);
-  mkn::kul::Dir outLogDir(".mkn/log/" + buildDir().name() + "/obj/out", 1);
-  mkn::kul::Dir errLogDir(".mkn/log/" + buildDir().name() + "/obj/err", 1);
+  mkn::kul::Dir cmdLogDir(".mkn/log/" + buildDir().name() + "/obj/cmd");
+  mkn::kul::Dir outLogDir(".mkn/log/" + buildDir().name() + "/obj/out");
+  mkn::kul::Dir errLogDir(".mkn/log/" + buildDir().name() + "/obj/err");
+
+  if (AppVars::INSTANCE().dump()) {
+    cmdLogDir.mk();
+    outLogDir.mk();
+    errLogDir.mk();
+  }
 
   auto lambda = [&, o, e](maiken::CompilationUnit const& c_unit) {
     CompilerProcessCapture const cpc = c_unit.compile();
@@ -237,13 +243,15 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
 
   ctp.finish(1000000 * 1000);
 
-  auto delEmpty = [](auto& dir) {
-    if (dir.files().empty()) dir.rm();
-  };
+  if (AppVars::INSTANCE().dump()) {
+    auto delEmpty = [](auto& dir) {
+      if (dir.files().empty()) dir.rm();
+    };
 
-  delEmpty(cmdLogDir);
-  delEmpty(outLogDir);
-  delEmpty(errLogDir);
+    delEmpty(cmdLogDir);
+    delEmpty(outLogDir);
+    delEmpty(errLogDir);
+  }
 
   if (!AppVars::INSTANCE().force())
     if (ctp.exception()) KEXIT(1, "Compile error detected");
