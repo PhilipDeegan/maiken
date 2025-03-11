@@ -102,9 +102,7 @@ maiken::Settings& maiken::Settings::INSTANCE() KTHROW(mkn::kul::Exit) {
   if (!instance.get()) {
     mkn::kul::File const f("settings.yaml", mkn::kul::user::home("maiken"));
     if (!f.dir().is()) f.dir().mk();
-    if (!f.is()) {
-      write(f);
-    }
+    if (!f.is()) write(f);
     instance = std::make_unique<Settings>(mkn::kul::yaml::File::CREATE<Settings>(f.full()));
   }
   return *instance.get();

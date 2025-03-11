@@ -186,6 +186,12 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     KEXIT(0, "");
   }
 
+  if (args.has(STR_SETTINGS) && !Settings::SET(args.get(STR_SETTINGS)))
+    KEXIT(1, "Unable to set specific settings files");
+  else
+    Settings::INSTANCE();
+  Settings::POST_CONSTRUCT();
+
   if (args.has(STR_QUIET)) AppVars::INSTANCE().quiet(true);
   if (args.has(STR_INIT)) NewProject{};
 
@@ -239,12 +245,6 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     }
   }
   if (profiles.empty()) profiles.emplace_back("");
-
-  if (args.has(STR_SETTINGS) && !Settings::SET(args.get(STR_SETTINGS)))
-    KEXIT(1, "Unable to set specific settings files");
-  else
-    Settings::INSTANCE();
-  Settings::POST_CONSTRUCT();
 
   if (args.has(STR_DUMP)) AppVars::INSTANCE().dump(true);
   if (args.has(STR_FORCE)) AppVars::INSTANCE().force(true);
