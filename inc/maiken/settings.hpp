@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MAIKEN_SETTINGS_HPP_
 
 #include "mkn/kul/os.hpp"
-#include "mkn/kul/log.hpp"
+#include "mkn/kul/cli.hpp"
 #include "mkn/kul/yaml.hpp"
 
 #include "maiken/defs.hpp"
