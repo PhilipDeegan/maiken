@@ -10,7 +10,13 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+        cc: [gcc, clang]
+
     steps:
     - uses: actions/checkout@v4
 
@@ -21,6 +27,7 @@ jobs:
         KUL_GIT_CO: --depth 1
       run: |
         ldd mkn
+        [ "${{ matrix.cc }}" = "clang" ] && export CC=clang CXX=clang++
         KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9
         KLOG=3 ./mkn build -Op test_mod -a "-std=c++17 -fPIC" -O 2 -g 0 -W 9
         KLOG=3 ./mkn build test pack -Op test -a "-std=c++17 -fPIC" -O 2 -g 0 -W 9
