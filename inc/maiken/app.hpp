@@ -258,6 +258,7 @@ class KUL_PUBLISH Application : public Constants {
     if (it == incs.end()) incs.emplace_back(s, p);
   }
   void addLibpath(std::string const& s) { paths.push_back(s); }
+  void addLib(std::string const& s) { libs.push_back(s); }
 
   void prependCompileString(std::string const& s) { arg = s + " " + arg; }
   void prependLinkString(std::string const& s) { lnk = s + " " + lnk; }
