@@ -55,10 +55,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken.hpp"
 
+#ifndef _MKN_RAM_TCP_READ_BUFFER_
+#error  // bad
+#endif
+
 namespace maiken {
 namespace dist {
 
-const constexpr size_t BUFF_SIZE = (_KUL_TCP_READ_BUFFER_ - 666);
+constexpr size_t const BUFF_SIZE = (_MKN_RAM_TCP_READ_BUFFER_ - 666);
 
 class Exception : public mkn::kul::Exception {
  public:
@@ -100,7 +104,7 @@ class DistLinker {
 
     auto& hosts(maiken::dist::RemoteCommandManager::INST().hosts());
     size_t threads = hosts.size();
-    mkn::kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000, 1000);
+    mkn::kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);
     auto post_ex = [&](mkn::kul::Exception const& e) {
       ctp.stop().interrupt();
       throw e;
@@ -108,7 +112,7 @@ class DistLinker {
     for (size_t i = 0; i < threads; i++) {
       ctp.async(std::bind(post_lambda, std::ref(hosts[i]), std::ref(bin)), post_ex);
     }
-    ctp.finish(10000000);  // 10 milliseconds
+    ctp.finish(100000000);  // 100 milliseconds
     ctp.rethrow();
 #endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
   }
@@ -152,7 +156,7 @@ class Post {
     send(host.host(), "res", host.port(), {{"session", host.session_id()}});
   }
   void send(std::string const& host, std::string const& res, uint16_t const& port,
-            const std::unordered_map<std::string, std::string> headers = {{}})
+            std::unordered_map<std::string, std::string> const headers = {{}})
       KTHROW(maiken::Exception);
   ARequest* message() { return msg.get(); }
 

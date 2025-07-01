@@ -123,7 +123,7 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
     threads =
         (hosts.size() < AppVars::INSTANCE().nodes()) ? hosts.size() : AppVars::INSTANCE().nodes();
   }
-  mkn::kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);
+  mkn::kul::ChroncurrentThreadPool<> ctp(threads, 1, 10000000000, 1000);
   auto compile_ex = [&](mkn::kul::Exception const& e) {
     ctp.stop().interrupt();
     throw e;
@@ -168,7 +168,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
                                   std::vector<mkn::kul::File>& cacheFiles)
     KTHROW(mkn::kul::Exception) {
   ThreadingCompiler tc(*this);
-  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
+  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 10000000000, 1000);
   std::vector<maiken::CompilationUnit> c_units;
   std::queue<std::pair<maiken::Source, std::string>> cQueue;
 
