@@ -165,7 +165,7 @@ void maiken::Application::buildTest(mkn::kul::hash::set::String const& objects)
     cpcs.push_back(cpc);
   };
 
-  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000, 1000);
+  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
 
   for (auto const& test : SourceFinder(*this).tests())
     ctp.async(std::bind(build_test, test, testsD, tmpD, this));
