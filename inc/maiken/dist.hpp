@@ -55,10 +55,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken.hpp"
 
+#ifndef _MKN_RAM_TCP_READ_BUFFER_
+#error  // bad
+#endif
+
 namespace maiken {
 namespace dist {
 
-constexpr size_t const BUFF_SIZE = (_KUL_TCP_READ_BUFFER_ - 666);
+constexpr size_t const BUFF_SIZE = (_MKN_RAM_TCP_READ_BUFFER_ - 666);
 
 class Exception : public mkn::kul::Exception {
  public:
