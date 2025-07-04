@@ -28,10 +28,13 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
+#include "maiken.hpp"
+#include "maiken/defs.hpp"
+
 #include "mkn/kul/all.hpp"
 #include "mkn/kul/log.hpp"
 #include "mkn/kul/signal.hpp"
-#include "maiken.hpp"
 
 int main(int argc, char* argv[]) {
   maiken::PROGRAM = argv[0];

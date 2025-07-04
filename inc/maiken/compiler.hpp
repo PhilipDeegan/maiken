@@ -31,6 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_COMPILER_HPP_
 #define _MAIKEN_COMPILER_HPP_
 
+#include "maiken/defs.hpp"
+
 #include "mkn/kul/cli.hpp"
 #include "mkn/kul/except.hpp"
 #include "mkn/kul/map.hpp"
