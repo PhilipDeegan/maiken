@@ -31,6 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_SCM_HPP_
 #define _MAIKEN_SCM_HPP_
 
+#include "maiken/defs.hpp"
+
 #include "mkn/kul/os.hpp"
 #include "mkn/kul/scm/man.hpp"
 

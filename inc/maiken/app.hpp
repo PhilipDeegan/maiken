@@ -31,20 +31,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_APP_HPP_
 #define _MAIKEN_APP_HPP_
 
+#include <optional>
+
 namespace maiken {
 class Application;
 }
 
-#include <optional>
-
 #include "maiken/defs.hpp"
-
-#include "mkn/kul/cli.hpp"
-#include "mkn/kul/log.hpp"
-#include "mkn/kul/os.hpp"
-#include "mkn/kul/proc.hpp"
-#include "mkn/kul/scm/man.hpp"
-#include "mkn/kul/threads.hpp"
 
 #include "maiken/compiler.hpp"
 #include "maiken/compiler/compilers.hpp"
@@ -53,6 +46,13 @@ class Application;
 #include "maiken/project.hpp"
 #include "maiken/string.hpp"
 #include "maiken/source.hpp"
+
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/proc.hpp"
+#include "mkn/kul/scm/man.hpp"
+#include "mkn/kul/threads.hpp"
 
 int main(int argc, char* argv[]);
 
