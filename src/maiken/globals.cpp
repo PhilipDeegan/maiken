@@ -41,17 +41,17 @@ maiken::AppVars::AppVars() {
 
   pks["DATETIME"] = mkn::kul::DateTime::NOW();
   pks["TIMESTAMP"] = std::time(NULL);
-  auto root = Settings::INSTANCE().root();
 
-  if (root[STR_LOCAL]) {
-    auto const& local = root[STR_LOCAL];
-    if (local[STR_REPO]) pks["MKN_REPO"] = mkn::kul::Dir(local[STR_REPO].Scalar()).real();
-    if (local[STR_MOD_REPO])
-      pks["MKN_MOD_REPO"] = mkn::kul::Dir(local[STR_MOD_REPO].Scalar()).real();
-  }
-  if (!pks.count("MKN_REPO"))
+  auto const& settings = Settings::INSTANCE();
+
+  if (auto const& local_repo = settings.local_dep_repo())
+    pks["MKN_REPO"] = *local_repo;
+  else
     pks["MKN_REPO"] = mkn::kul::user::home(mkn::kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
-  if (!pks.count("MKN_MOD_REPO"))
+
+  if (auto const& local_repo = settings.local_mod_repo())
+    pks["MKN_MOD_REPO"] = *local_repo;
+  else
     pks["MKN_MOD_REPO"] =
         mkn::kul::user::home(mkn::kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 

@@ -28,8 +28,13 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
 #include "maiken.hpp"
 #include "maiken/env.hpp"
+
+#include <optional>
+#include <functional>
+#include <type_traits>
 
 std::unique_ptr<maiken::Settings> maiken::Settings::instance;
 
@@ -50,6 +55,20 @@ class SuperSettings {
   }
 };
 }  // namespace maiken
+
+//
+
+std::optional<std::string> maiken::Settings::local_dep_repo() const {
+  return getFirstFound(
+      [](auto const& s) { return s[STR_LOCAL] && s[STR_LOCAL][STR_REPO]; },
+      [](auto const& s) { return mkn::kul::Dir(s[STR_LOCAL][STR_REPO].Scalar()).real(); });
+}
+
+std::optional<std::string> maiken::Settings::local_mod_repo() const {
+  return getFirstFound(
+      [](auto const& s) { return s[STR_LOCAL] && s[STR_LOCAL][STR_MOD_REPO]; },
+      [](auto const& s) { return mkn::kul::Dir(s[STR_LOCAL][STR_MOD_REPO].Scalar()).real(); });
+}
 
 maiken::Settings::Settings(std::string const& file_) : mkn::kul::yaml::File(file_) {
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_REPO]) {

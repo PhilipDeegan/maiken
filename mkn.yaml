@@ -3,7 +3,7 @@
 name: mkn
 version: master
 property:
-  DATE: 04-JUL-2025
+  DATE: 14-NOV-2025
   maiken_location: ${MKN_HOME}/app/mkn/${version}
   maiken_scm: https://github.com/mkn/mkn
   self.deps: mkn.kul
@@ -47,6 +47,7 @@ profile:
 - name: test_mod
   parent: mod
   src: test/mod/mod.cpp
+  out: test_mod
   mode: shared
   if_arg:
       win_shared: -DYAML_CPP_DLL
@@ -54,6 +55,7 @@ profile:
 
 - name: test
   src: test/mod/lib.cpp
+  out: test
   mod: mkn[test_mod]
 
 - name: mod
