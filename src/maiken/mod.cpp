@@ -54,10 +54,12 @@ mkn::kul::File maiken::ModuleLoader::FIND(Application& ap)
     if (ap.buildDir())
       for (auto const& f : ap.buildDir().files(0)) files.emplace_back(f.real());
   }
+
+  auto const mod_name = ap.baseLibFilename();
+
   for (auto const& f : files) {
     auto const& name(f.name());
-    if (name.find(".") != std::string::npos &&
-        name.find(ap.project().root()["name"].Scalar()) != std::string::npos
+    if (name.find(".") != std::string::npos && name.find(mod_name) != std::string::npos
 #ifdef _WIN32
         && name.substr(name.rfind(".") + 1) == "dll") {
 #else

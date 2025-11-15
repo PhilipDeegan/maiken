@@ -34,8 +34,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/os.hpp"
 #include "mkn/kul/cli.hpp"
 #include "mkn/kul/yaml.hpp"
+#include "mkn/kul/except.hpp"
 
 #include "maiken/defs.hpp"
+
+#include <vector>
+#include <string>
+#include <optional>
 
 namespace maiken {
 
@@ -46,15 +51,6 @@ class SettingsException : public mkn::kul::Exception {
 };
 
 class Settings : public mkn::kul::yaml::File, public Constants {
- private:
-  std::vector<std::string> rrs, rms;
-  std::unique_ptr<Settings> sup;
-  mkn::kul::hash::map::S2S ps;
-
-  void resolveProperties() KTHROW(SettingsException);
-  static std::unique_ptr<Settings> instance;
-  static void write(mkn::kul::File const& f) KTHROW(mkn::kul::Exit);
-
  public:
   Settings(std::string const& s);
 
@@ -64,12 +60,45 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   std::vector<std::string> const& remoteModules() const { return rms; }
   std::vector<std::string> const& remoteRepos() const { return rrs; }
   mkn::kul::hash::map::S2S const& properties() const { return ps; }
+  std::optional<std::string> local_dep_repo() const;
+  std::optional<std::string> local_mod_repo() const;
 
   static Settings& INSTANCE() KTHROW(mkn::kul::Exit);
   static bool SET(std::string const& s);
   static std::string RESOLVE(std::string const& s) KTHROW(SettingsException);
   static void POST_CONSTRUCT();
   static mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const&, Settings const&);
+
+  template <typename If, typename Get>
+  auto getFirstFound(If const _if, Get const get) const;
+
+  auto operator[](std::string const& s) { return root()[s]; }
+  auto operator[](std::string const& s) const { return root()[s]; }
+
+ private:
+  std::vector<std::string> rrs, rms;
+  std::unique_ptr<Settings> sup;
+  mkn::kul::hash::map::S2S ps;
+
+  void resolveProperties() KTHROW(SettingsException);
+  static std::unique_ptr<Settings> instance;
+  static void write(mkn::kul::File const& f) KTHROW(mkn::kul::Exit);
 };
+
+template <typename If, typename Get>
+auto Settings::getFirstFound(If const _if, Get const get) const {
+  using GetRet = std::invoke_result_t<Get, Settings const&>;
+  using FuncType = std::function<std::optional<GetRet>(Settings const&)>;
+
+  FuncType const loop = [&](auto const& settings) -> std::optional<GetRet> {
+    if (_if(settings)) return get(settings);
+    if (settings.sup) return loop(*settings.sup);
+    return std::nullopt;
+  };
+
+  return loop(*this);
+}
+
 }  // namespace maiken
+
 #endif /* _MAIKEN_SETTINGS_HPP_ */

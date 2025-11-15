@@ -186,10 +186,10 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     KEXIT(0, "");
   }
 
+  Settings::INSTANCE();  // write default settings if missing
   if (args.has(STR_SETTINGS) && !Settings::SET(args.get(STR_SETTINGS)))
     KEXIT(1, "Unable to set specific settings files");
-  else
-    Settings::INSTANCE();
+
   Settings::POST_CONSTRUCT();
 
   if (args.has(STR_QUIET)) AppVars::INSTANCE().quiet(true);
