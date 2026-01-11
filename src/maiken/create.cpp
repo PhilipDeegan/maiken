@@ -28,10 +28,13 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include <optional>
 
-#include "maiken.hpp"
-#include "maiken/dist.hpp"
+#include "maiken.hpp"       // IWYU pragma: keep
+#include "maiken/dist.hpp"  // IWYU pragma: keep
+
+#include "mkn/kul/cpu.hpp"
+
+#include <optional>
 
 namespace maiken {
 using namespace mkn::kul::cli;

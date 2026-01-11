@@ -83,7 +83,7 @@ class Module {
 };
 
 class GlobalModules;
-class KUL_PUBLISH ModuleLoader
+class MKN_KUL_PUBLISH ModuleLoader
 #ifndef _MKN_DISABLE_MODULES_
     : public mkn::kul::sys::SharedClass<maiken::Module>
 #endif  //_MKN_DISABLE_MODULES_

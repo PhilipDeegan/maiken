@@ -28,7 +28,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
+#include "maiken.hpp"  // IWYU pragma: keep
 
 #include <mutex>
 
@@ -61,24 +61,21 @@ void maiken::Processor::process(std::vector<Application*> apps) {
   auto lambex = [&](mkn::kul::Exception const&) {
     ctp.stop();
     ctp.interrupt();
+    KEXIT(1, "Compile error detected");
   };
   auto lambda = [o, e, &mute, &lambex, &cpcs](maiken::CompilationUnit const& c_unit) {
     CompilerProcessCapture const cpc = c_unit.compile();
+
     if (!AppVars::INSTANCE().dryRun()) {
       if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
       if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
       KOUT(INF) << cpc.cmd();
     } else
       KOUT(NON) << cpc.cmd();
+
+    if (cpc.exception()) std::rethrow_exception(cpc.exception());
     std::lock_guard<std::mutex> lock(mute);
     cpcs.push_back(cpc);
-    try {
-      if (cpc.exception()) std::rethrow_exception(cpc.exception());
-    } catch (mkn::kul::Exception const& e) {
-      lambex(e);
-    } catch (std::exception const& e) {
-      KLOG(ERR) << e.what();
-    }
   };
 
   if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE))
@@ -104,8 +101,6 @@ void maiken::Processor::process(std::vector<Application*> apps) {
       auto& objects = app_info.at(apP)->objects;
       for (auto const& pair : s_finder.all_sources_from(sources, objects, cacheFiles)) {
         auto unit = app_info[apP]->tc.compilationUnit(pair);
-        mkn::kul::this_thread::nSleep(
-            5000000);  // dup appears to be overloaded with too many threads
         ctp.async(std::bind(lambda, unit), std::bind(lambex, std::placeholders::_1));
       }
     }

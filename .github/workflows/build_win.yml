@@ -23,7 +23,6 @@ jobs:
     - shell: cmd
       env:
         MKN_CL_PREFERRED: 1
-        KUL_GIT_CO: --depth 1
       run: |
         bash -c ./res/ci/win_build.sh
         mkn build -dtKO 2 -g 0 -a "-std:c++17 -EHsc"

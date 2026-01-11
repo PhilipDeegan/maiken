@@ -57,8 +57,8 @@ class MaikenModule : public maiken::Module {
 
 }  // namespace maiken::test
 
-extern "C" KUL_PUBLISH maiken::Module* maiken_module_construct() {
+extern "C" MKN_KUL_PUBLISH maiken::Module* maiken_module_construct() {
   return new maiken ::test ::MaikenModule;
 }
 
-extern "C" KUL_PUBLISH void maiken_module_destruct(maiken::Module* p) { delete p; }
+extern "C" MKN_KUL_PUBLISH void maiken_module_destruct(maiken::Module* p) { delete p; }

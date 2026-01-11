@@ -24,7 +24,6 @@ jobs:
 
     - env:
         MKN_GCC_PREFERRED: 1
-        KUL_GIT_CO: --depth 1
       run: |
         ldd mkn
         [ "${{ matrix.cc }}" = "clang" ] && export CC=clang CXX=clang++

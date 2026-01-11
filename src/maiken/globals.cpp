@@ -56,7 +56,7 @@ maiken::AppVars::AppVars() {
         mkn::kul::user::home(mkn::kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
 
   std::string ext, pre;
-#if KUL_IS_WIN
+#if MKN_KUL_IS_WIN
   evs["MKN_OBJ"] = "obj", ext = ".dll", pre = "";
 #else
   evs["MKN_OBJ"] = "o", ext = ".so", pre = "lib";

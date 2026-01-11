@@ -32,18 +32,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _MAIKEN_COMPILER_HPP_
 
 #include "maiken/defs.hpp"
-
-#include "mkn/kul/cli.hpp"
-#include "mkn/kul/except.hpp"
-#include "mkn/kul/map.hpp"
-#include "mkn/kul/os.hpp"
-#include "mkn/kul/proc.hpp"
-#include "mkn/kul/string.hpp"
-
 #include "maiken/global.hpp"
 
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/proc.hpp"
+#include "mkn/kul/except.hpp"
+
 namespace maiken {
-class KUL_PUBLISH Application;
+class MKN_KUL_PUBLISH Application;
 
 struct CompilationInfo {
   std::string lib_prefix, lib_postfix, lib_ext;

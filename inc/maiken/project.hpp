@@ -55,7 +55,7 @@ class ProjectException : public mkn::kul::Exception {
 };
 
 class Projects;
-class KUL_PUBLISH Project : public mkn::kul::yaml::File, public Constants {
+class MKN_KUL_PUBLISH Project : public mkn::kul::yaml::File, public Constants {
  public:
   Project(mkn::kul::File const& f) : mkn::kul::yaml::File(f), m_dir(f.dir().real()) {}
   Project(Project const& p) : mkn::kul::yaml::File(p), m_dir(p.m_dir.real()) {}
