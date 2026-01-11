@@ -72,7 +72,7 @@ maiken::Application* maiken::Applications::getOrNullptr(std::string const& proje
   for (auto const& p1 : m_apps)
     for (auto const& p2 : p1.second) {
       if (p2.second->project().root()[STR_NAME].Scalar() == project) {
-        if(dir != "" and dir != p2.second->project().dir().real())
+        if(dir != "" && dir != p2.second->project().dir().real())
           KEXIT(1, "Cannot deduce project version as")
             << " there are multiple versions in the dependency tree: " << project;
         dir = p2.second->project().dir().real();
