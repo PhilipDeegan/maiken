@@ -44,11 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // How to create external modules
 /**
 extern "C"
-KUL_PUBLISH
+MKN_KUL_PUBLISH
 void maiken_module_construct(maiken::Plugin* p);
 
 extern "C"
-KUL_PUBLISH
+MKN_KUL_PUBLISH
 void maiken_module_destruct(maiken::Plugin* p);
 */
 
