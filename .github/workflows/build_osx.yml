@@ -21,9 +21,10 @@ jobs:
 
     - env:
         MKN_LIB_LINK_LIB: 1
-        KUL_GIT_CO: --depth 1
       run: |
-        mkdir ~/.maiken && cp res/mkn/clang.yml ~/.maiken/settings.yaml
+        mkdir -p ~/.maiken/app/mkn
+        cp -r $PWD ~/.maiken/app/mkn/master
+        cp res/mkn/clang.yml ~/.maiken/settings.yaml
         KLOG=3 ./mkn build -dtKO 2 -W 9 -g 0
         KLOG=3 ./mkn build -dtOp test_mod
         KLOG=3 ./mkn build test pack -Op test

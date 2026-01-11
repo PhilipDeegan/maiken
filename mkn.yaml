@@ -1,9 +1,9 @@
-#! clean build test -dtKOWg 0 -qw mkn.ram[https]
+#! clean build test -dtKOWg 0 -qw mkn.ram[https] -W 9
 
 name: mkn
 version: master
 property:
-  DATE: 14-NOV-2025
+  DATE: 11-JAN-2026
   maiken_location: ${MKN_HOME}/app/mkn/${version}
   maiken_scm: https://github.com/mkn/mkn
   self.deps: mkn.kul
@@ -19,7 +19,7 @@ profile:
 - name: compiled
   parent: headers
   if_arg:
-    shared: -DKUL_SHARED -DKUL_EXPORT
+    shared: -DMKN_KUL_SHARED -DMKN_KUL_EXPORT
     win_shared: -DYAML_CPP_DLL
 
 - name: bin
@@ -51,7 +51,7 @@ profile:
   mode: shared
   if_arg:
       win_shared: -DYAML_CPP_DLL
-      shared: -DKUL_SHARED
+      shared: -DMKN_KUL_SHARED
 
 - name: test
   src: test/mod/lib.cpp

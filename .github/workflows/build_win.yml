@@ -20,12 +20,17 @@ jobs:
       with:
         arch: amd64
 
+
+    - shell: bash
+      run: |
+        mkdir -p ~/maiken/app/mkn
+        cp -r $PWD ~/maiken/app/mkn/master
+        ./res/ci/win_build.sh
+
     - shell: cmd
       env:
         MKN_CL_PREFERRED: 1
-        KUL_GIT_CO: --depth 1
       run: |
-        bash -c ./res/ci/win_build.sh
         mkn build -dtKO 2 -g 0 -a "-std:c++17 -EHsc"
         mkn build -dtOp test_mod -a "-std:c++17 -EHsc"
         mkn build test pack -Op test -a "-std:c++17 -EHsc"

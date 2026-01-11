@@ -31,6 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 
 void maiken::Application::process() KTHROW(mkn::kul::Exception) {
+  showConfig();
+
   mkn::kul::hash::map::S2S oldEvs;
   for (auto const& ev : evs) {
     std::string const& v = mkn::kul::env::GET(ev.name());

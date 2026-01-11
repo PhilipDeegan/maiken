@@ -31,24 +31,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_MODULE_HPP_
 #define _MAIKEN_MODULE_HPP_
 
-#include "mkn/kul/log.hpp"
 #include "mkn/kul/os.hpp"
+#include "mkn/kul/log.hpp"
 
 #ifndef _MKN_DISABLE_MODULES_
 #include "mkn/kul/sys.hpp"
 #endif  //_MKN_DISABLE_MODULES_
 
-#include "maiken/defs.hpp"
 #include "maiken/app.hpp"
 
 // How to create external modules
 /**
 extern "C"
-KUL_PUBLISH
+MKN_KUL_PUBLISH
 void maiken_module_construct(maiken::Plugin* p);
 
 extern "C"
-KUL_PUBLISH
+MKN_KUL_PUBLISH
 void maiken_module_destruct(maiken::Plugin* p);
 */
 
@@ -83,7 +82,7 @@ class Module {
 };
 
 class GlobalModules;
-class KUL_PUBLISH ModuleLoader
+class MKN_KUL_PUBLISH ModuleLoader
 #ifndef _MKN_DISABLE_MODULES_
     : public mkn::kul::sys::SharedClass<maiken::Module>
 #endif  //_MKN_DISABLE_MODULES_

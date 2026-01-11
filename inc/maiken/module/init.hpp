@@ -31,9 +31,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_MODULE_INIT_HPP_
 #define _MAIKEN_MODULE_INIT_HPP_
 
-#include "maiken.hpp"
+#include "maiken.hpp"  // IWYU pragma: keep
 
-#define KUL_EXPORT
+#define MKN_KUL_EXPORT
 #undef _MKN_KUL_DEFS_HPP_
 #undef _MKN_KUL_OS_DEF_HPP_
 #include "mkn/kul/defs.hpp"

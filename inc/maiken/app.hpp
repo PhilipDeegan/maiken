@@ -72,7 +72,7 @@ class Applications;
 class Source;
 class CompilerPrinter;
 class Processor;
-class KUL_PUBLISH Application : public Constants {
+class MKN_KUL_PUBLISH Application : public Constants {
   using This = Application;
   friend class Applications;
   friend class CompilerPrinter;
