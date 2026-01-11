@@ -206,9 +206,10 @@ class MKN_KUL_PUBLISH Application : public Constants {
   bool is_build_stale();
 
   void withArgs(std::string const with, std::vector<YAML::Node>& with_nodes,
-                std::function<void(YAML::Node const& n, bool const mod)> getIfMissing, bool dep);
-  void with(mkn::kul::hash::set::String& withs, std::vector<YAML::Node>& with_nodes,
-            std::function<void(YAML::Node const& n, bool const mod)> getIfMissing, bool dep);
+                std::function<void(YAML::Node const& n, bool const mod)> getIfMissing,
+                bool const dep);
+  void with(mkn::kul::hash::set::String const& withs, std::vector<YAML::Node>& with_nodes,
+            std::function<void(YAML::Node const& n, bool const mod)> getIfMissing, bool const dep);
 
   void modArgs(std::string const mod_str, std::vector<YAML::Node>& mod_nodes,
                std::function<void(YAML::Node const& n, bool const mod)> getIfMissing);
