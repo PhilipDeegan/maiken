@@ -29,10 +29,11 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/app.hpp"
+#include "maiken/property.hpp"
 
 void maiken::Application::withArgs(
     std::string const with_str, std::vector<YAML::Node>& with_nodes,
-    std::function<void(YAML::Node const& n, bool const mod)> getIfMissing, bool dep) {
+    std::function<void(YAML::Node const& n, bool const mod)> getIfMissing, bool const dep) {
   if (with_str.size()) {
     mkn::kul::hash::set::String withs;
     try {
@@ -48,13 +49,14 @@ void maiken::Application::withArgs(
 }
 
 void maiken::Application::with(
-    mkn::kul::hash::set::String& withs, std::vector<YAML::Node>& with_nodes,
-    std::function<void(YAML::Node const& n, bool const mod)> getIfMissing, bool dep) {
+    mkn::kul::hash::set::String const& withs, std::vector<YAML::Node>& with_nodes,
+    std::function<void(YAML::Node const& n, bool const mod)> getIfMissing, bool const dep) {
   for (auto const& with : withs) {
     YAML::Node node;
-    std::string local /*&*/, profiles, proj = with, version /*#*/, scm;
+    std::string proj = Properties::RESOLVE(*this, with);
+    std::string local /*&*/, profiles, version /*#*/, scm;
 
-    auto get_between = [&](auto& var, auto lbrak, auto rbrak) {
+    auto const get_between = [&](auto& var, auto lbrak, auto rbrak) {
       auto between = maiken::string::between_rm_str(proj, lbrak, rbrak);
       if (between.found) proj = between.remaining, var = *between.found;
       return !between.error;
