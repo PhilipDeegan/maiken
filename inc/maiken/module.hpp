@@ -31,14 +31,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_MODULE_HPP_
 #define _MAIKEN_MODULE_HPP_
 
-#include "mkn/kul/log.hpp"
 #include "mkn/kul/os.hpp"
+#include "mkn/kul/log.hpp"
 
 #ifndef _MKN_DISABLE_MODULES_
 #include "mkn/kul/sys.hpp"
 #endif  //_MKN_DISABLE_MODULES_
 
-#include "maiken/defs.hpp"
 #include "maiken/app.hpp"
 
 // How to create external modules

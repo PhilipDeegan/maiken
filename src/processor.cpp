@@ -63,7 +63,7 @@ void maiken::Processor::process(std::vector<Application*> apps) {
     ctp.interrupt();
     KEXIT(1, "Compile error detected");
   };
-  auto lambda = [o, e, &mute, &lambex, &cpcs](maiken::CompilationUnit const& c_unit) {
+  auto lambda = [o, e, &mute, &cpcs](maiken::CompilationUnit const& c_unit) {
     CompilerProcessCapture const cpc = c_unit.compile();
 
     if (!AppVars::INSTANCE().dryRun()) {
