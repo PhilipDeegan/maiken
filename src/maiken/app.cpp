@@ -66,19 +66,20 @@ maiken::Application* maiken::Applications::getOrCreateRoot(maiken::Project const
 }
 
 maiken::Application* maiken::Applications::getOrNullptr(std::string const& project) {
-  uint32_t count = 0;
+  std::string dir = "";
+
   Application* app = nullptr;
   for (auto const& p1 : m_apps)
     for (auto const& p2 : p1.second) {
       if (p2.second->project().root()[STR_NAME].Scalar() == project) {
-        count++;
+        if(dir != "" and dir != p2.second->project().dir().real())
+          KEXIT(1, "Cannot deduce project version as")
+            << " there are multiple versions in the dependency tree: " << project;
+        dir = p2.second->project().dir().real();
         app = p2.second;
       }
     }
-  if (count > 1) {
-    KEXIT(1, "Cannot deduce project version as")
-        << " there are multiple versions in the dependency tree";
-  }
+
   return app;
 }
 
