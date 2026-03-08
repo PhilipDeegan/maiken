@@ -34,18 +34,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 void maiken::Settings::resolveFindables() KTHROW(SettingsException) {
   static std::string const STR_FIND = "find";
 
+  auto& fs = findables_;
+
   auto add = [&](auto const& k, auto const& f, auto const& n) {
-    this->findables_[k][f] = mkn::kul::cli::asArgs(n.template as<std::string>());
+    auto& v = fs[k][f];
+    auto const lines = mkn::kul::cli::asArgs(n.template as<std::string>());
+    v.insert(v.end(), lines.begin(), lines.end());
   };
 
-  auto const find = getFirstFound([&](auto const& s) -> std::optional<YAML::Node> {
-    if (s[STR_FIND]) return s[STR_FIND];
-    return std::nullopt;
+  traverse([&](auto const& s) {
+    if (auto find = s.root()[STR_FIND])
+      for (auto const& c : find)
+        if (auto const k = c.first.template as<std::string>(); k.size())
+          for (auto it = c.second.begin(); it != c.second.end(); ++it)
+            add(k, it->first.template as<std::string>(), it->second);
   });
-
-  if (find)
-    for (auto const& c : *find)
-      if (auto const k = c.first.as<std::string>(); k.size())
-        for (auto it = c.second.begin(); it != c.second.end(); ++it)
-          add(k, it->first.as<std::string>(), it->second);
 }

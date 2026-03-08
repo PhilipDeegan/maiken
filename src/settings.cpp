@@ -167,8 +167,7 @@ mkn::kul::cli::EnvVar maiken::Settings::PARSE_ENV_NODE(YAML::Node const& n,
 }
 
 void maiken::Settings::POST_CONSTRUCT(Settings* settings_ptr) {
-  settings_ptr = settings_ptr != nullptr ? settings_ptr : &Settings::INSTANCE();
-  auto& settings = *settings_ptr;
+  auto& settings = settings_ptr != nullptr ? *settings_ptr : Settings::INSTANCE();
   auto& root = settings.root();
 
   if (root[STR_ENV]) {
@@ -188,5 +187,5 @@ void maiken::Settings::POST_CONSTRUCT(Settings* settings_ptr) {
   }
 
   settings.resolveProperties();
-  settings.resolveFindables();
+  if (!settings_ptr) settings.resolveFindables();
 }

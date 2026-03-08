@@ -78,6 +78,8 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   template <typename If, typename Get>
   auto getFirstFound(If const _if, Get const get) const;
 
+  void traverse(auto const fn) const;
+
   auto operator[](std::string const& s) { return root()[s]; }
   auto operator[](std::string const& s) const { return root()[s]; }
 
@@ -92,6 +94,17 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   static std::unique_ptr<Settings> instance;
   static void write(mkn::kul::File const& f) KTHROW(mkn::kul::Exit);
 };
+
+void Settings::traverse(auto const fn) const {
+  using FuncType = std::function<void(Settings const&)>;
+
+  FuncType const loop = [&](auto const& settings) {
+    fn(settings);
+    if (settings.sup) loop(*settings.sup);
+  };
+
+  loop(*this);
+}
 
 template <typename If>
 auto Settings::getFirstFound(If const _if) const {
