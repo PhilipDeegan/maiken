@@ -205,6 +205,7 @@ Each value under "g++:" is considered to be a filesystem binary which supports a
 
 System properties:
     OS   - system OS, can be either bsd/nix/win
+    ARCH - system architecture, eg, x86_64 or arm64
     HOME - bsd/nix/win(with msys/cygwin/etc) = ~/
            win cmd prompt = %HOMEDRIVE%/%HOMEPATH%
     DATETIME - DateTime when app launched format %Y-%m-%d-%H:%M:%S
@@ -274,12 +275,12 @@ Operations:
         make nix CXX=clang++
     IF CLANG SECONDARY TO GCC
         GCC_VER=$(gcc --version | grep ^gcc | sed 's/^.* //g')
-        CXXFLAGS="-O2 -std=c++17 -Wall -I<GCC_INSTALL>/include/c++/${GCC_VER} -I<GCC_INSTALL>/include/c++/${GCC_VER}/x86_64-unknown-linux-gnu"
+        CXXFLAGS="-O2 -std=c++20 -Wall -I<GCC_INSTALL>/include/c++/${GCC_VER} -I<GCC_INSTALL>/include/c++/${GCC_VER}/x86_64-unknown-linux-gnu"
         LDFLAGS="-L<GCC_INSTALL>/lib64"
         LD_LIBRARY_PATH=<GCC_INSTALL>/lib64 make nix CXX=clang++ CXXFLAGS="${CXXFLAGS}" LDFLAGS="${LDFLAGS}"
 
 Testing:
-    ./mkn clean build -dtKOWa "-std=c++17"
+    ./mkn clean build -dtKOWa "-std=c++20"
 
 
 3.2.1 Mac/OSX
@@ -290,7 +291,7 @@ Operations:
     - make bsd CXX=clang++
 
 Testing:
-    ./mkn clean build -dtKOWa "-std=c++17
+    ./mkn clean build -dtKOWa "-std=c++20
 
 3.2.3 NetBSD/FreeBSD/etc
 
@@ -300,17 +301,17 @@ Testing:
       - gmake bsd LDFLAGS="-pthread -ldl -lexecinfo"
 
   Operations:
-      ./mkn clean build -dtKOWa "-std=c++17" -l "-pthread -ldl -lexecinfo"
+      ./mkn clean build -dtKOWa "-std=c++20" -l "-pthread -ldl -lexecinfo"
 
   3.2.3 FreeBSD
 
   Operations:
       - git clone http://www.github.com/mkn/maiken maiken/master
       - cd maiken/master
-      - gmake bsd CXXFLAGS="-std=c++17 -Os -Wall -D_GLIBCXX_USE_C99"
+      - gmake bsd CXXFLAGS="-std=c++20 -Os -Wall -D_GLIBCXX_USE_C99"
 
   Operations:
-      ./mkn clean build -dtKOWa "-std=c++17 -D_GLIBCXX_USE_C99" -l "-pthread -ldl"
+      ./mkn clean build -dtKOWa "-std=c++20 -D_GLIBCXX_USE_C99" -l "-pthread -ldl"
 
 
 4.1 Logging -

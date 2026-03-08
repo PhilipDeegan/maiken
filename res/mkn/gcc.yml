@@ -10,6 +10,6 @@ remote:
 file:
   - type: cpp:cxx:cc
     archiver: ar -cr
-    compiler: ccache g++ -std=c++17 -fPIC
+    compiler: ccache g++ -std=c++20 -fPIC
     linker: g++
 

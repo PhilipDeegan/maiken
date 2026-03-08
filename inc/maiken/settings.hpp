@@ -51,6 +51,8 @@ class SettingsException : public mkn::kul::Exception {
 };
 
 class Settings : public mkn::kul::yaml::File, public Constants {
+  using Findables = mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2T<std::vector<std::string>>>;
+
  public:
   Settings(std::string const& s);
 
@@ -60,14 +62,18 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   std::vector<std::string> const& remoteModules() const { return rms; }
   std::vector<std::string> const& remoteRepos() const { return rrs; }
   mkn::kul::hash::map::S2S const& properties() const { return ps; }
+  Findables const& findables() const { return findables_; }
   std::optional<std::string> local_dep_repo() const;
   std::optional<std::string> local_mod_repo() const;
 
   static Settings& INSTANCE() KTHROW(mkn::kul::Exit);
   static bool SET(std::string const& s);
   static std::string RESOLVE(std::string const& s) KTHROW(SettingsException);
-  static void POST_CONSTRUCT();
+  static void POST_CONSTRUCT(Settings* settings = nullptr);
   static mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const&, Settings const&);
+
+  template <typename If>
+  auto getFirstFound(If const _if) const;
 
   template <typename If, typename Get>
   auto getFirstFound(If const _if, Get const get) const;
@@ -79,11 +85,26 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   std::vector<std::string> rrs, rms;
   std::unique_ptr<Settings> sup;
   mkn::kul::hash::map::S2S ps;
+  Findables findables_;
 
   void resolveProperties() KTHROW(SettingsException);
+  void resolveFindables() KTHROW(SettingsException);
   static std::unique_ptr<Settings> instance;
   static void write(mkn::kul::File const& f) KTHROW(mkn::kul::Exit);
 };
+
+template <typename If>
+auto Settings::getFirstFound(If const _if) const {
+  using FuncType = std::function<std::optional<YAML::Node>(Settings const&)>;
+
+  FuncType const loop = [&](auto const& settings) -> std::optional<YAML::Node> {
+    if (auto const node = _if(settings)) return node;
+    if (settings.sup) return loop(*settings.sup);
+    return std::nullopt;
+  };
+
+  return loop(*this);
+}
 
 template <typename If, typename Get>
 auto Settings::getFirstFound(If const _if, Get const get) const {

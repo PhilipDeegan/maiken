@@ -1,5 +1,5 @@
 property:
-  cxx_flags: -std=c++17
+  cxx_flags: -std=c++20
 local:
   repo: /mkn/r
   mod-repo: /mkn/m

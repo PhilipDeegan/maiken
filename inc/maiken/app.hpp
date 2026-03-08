@@ -152,6 +152,7 @@ class MKN_KUL_PUBLISH Application : public Constants {
 
   bool incSrc(mkn::kul::File const& f) const;
   void addCLIArgs(mkn::kul::cli::Args const& args);
+  void findables();
 
   void addSourceLine(std::string const& o) KTHROW(mkn::kul::Exception);
   void addMainLine(std::string const& o) KTHROW(mkn::kul::Exception);
@@ -252,11 +253,11 @@ class MKN_KUL_PUBLISH Application : public Constants {
   void add_def(std::string const& def) { defs.emplace_back(def); }
   std::vector<std::string> const& defines() const { return defs; }
 
-  void addInclude(std::string const& s, bool p = 1) {
+  void addInclude(std::string const& s, bool const is_public = 1) {
     auto it = std::find_if(
         incs.begin(), incs.end(),
         [&](std::pair<std::string, bool> const& element) { return element.first == s; });
-    if (it == incs.end()) incs.emplace_back(s, p);
+    if (it == incs.end()) incs.emplace_back(s, is_public);
   }
   void addLibpath(std::string const& s) { paths.push_back(s); }
   void addLib(std::string const& s) { libs.push_back(s); }

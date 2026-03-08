@@ -1,5 +1,5 @@
 property:
-  cxx_flags: -std=c++17 -fsanitize=address -fno-omit-frame-pointer
+  cxx_flags: -std=c++20 -fsanitize=address -fno-omit-frame-pointer
 local:
   repo: /mkn/r
   mod-repo: /mkn/m
