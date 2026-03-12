@@ -53,7 +53,7 @@ mkn::kul::yaml::Validator maiken::Settings::validator() const {
        NodeValidator("file",
                      {NodeValidator("type", 1), NodeValidator("compiler", 1),
                       NodeValidator("linker"), NodeValidator("archiver")},
-                     1, NodeType::LIST),
+                     0, NodeType::LIST),
 #if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
        NodeValidator("dist",
                      {NodeValidator("port"),

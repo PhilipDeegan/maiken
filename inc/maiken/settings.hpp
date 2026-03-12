@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <string>
 #include <optional>
+#include <functional>
 
 namespace maiken {
 
@@ -68,7 +69,8 @@ class Settings : public mkn::kul::yaml::File, public Constants {
 
   static Settings& INSTANCE() KTHROW(mkn::kul::Exit);
   static bool SET(std::string const& s);
-  static std::string RESOLVE(std::string const& s) KTHROW(SettingsException);
+  static mkn::kul::File RESOLVE(std::string const& s, Settings const* settings = nullptr)
+      KTHROW(SettingsException);
   static void POST_CONSTRUCT(Settings* settings = nullptr);
   static mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const&, Settings const&);
 

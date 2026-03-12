@@ -29,12 +29,10 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "maiken.hpp"
 #include "maiken/env.hpp"
+#include "maiken/settings.hpp"
 
 #include <optional>
-#include <functional>
-#include <type_traits>
 
 std::unique_ptr<maiken::Settings> maiken::Settings::instance;
 
@@ -76,12 +74,12 @@ maiken::Settings::Settings(std::string const& file_) : mkn::kul::yaml::File(file
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_REPO]) {
     mkn::kul::Dir d(root()[STR_LOCAL][STR_REPO].Scalar());
     if (!d.is() && !d.mk())
-      KEXCEPT(SettingsException, "settings.yaml local/repo is not a valid directory");
+      KEXCEPT(SettingsException, file_) << " error: local/repo is not a valid directory";
   }
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_MOD_REPO]) {
     mkn::kul::Dir d(root()[STR_LOCAL][STR_MOD_REPO].Scalar());
     if (!d.is() && !d.mk())
-      KEXCEPT(SettingsException, "settings.yaml local/mod-repo is not a valid directory");
+      KEXCEPT(SettingsException, file_) << " error: local/mod-repo is not a valid directory";
   }
   if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_REPO])
     for (auto const& s : mkn::kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
@@ -100,10 +98,10 @@ maiken::Settings::Settings(std::string const& file_) : mkn::kul::yaml::File(file
   }
 
   if (root()[STR_SUPER]) {
-    mkn::kul::File f(RESOLVE(root()[STR_SUPER].Scalar()));
-    if (!f) KEXCEPT(SettingsException, "super file not found\n" + file());
+    auto const f = RESOLVE(root()[STR_SUPER].Scalar(), this);
+    if (!f) KEXCEPT(SettingsException, "super file not found: " + file());
     if (f.real() == mkn::kul::File(file()).real())
-      KEXCEPT(SettingsException, "super cannot reference itself\n" + file());
+      KEXCEPT(SettingsException, "super cannot reference itself: " + file());
     SuperSettings::INSTANCE().cycleCheck(f.real());
     sup = std::make_unique<Settings>(
         mkn::kul::yaml::File::CREATE<Settings>(f.full()));  // -> getOrCreate
@@ -142,20 +140,32 @@ void maiken::Settings::resolveProperties() KTHROW(SettingsException) {
   }
 }
 
-std::string maiken::Settings::RESOLVE(std::string const& s) KTHROW(SettingsException) {
-  std::vector<mkn::kul::File> pos{mkn::kul::File(s), mkn::kul::File(s + ".yaml"),
-                                  mkn::kul::File(s, mkn::kul::user::home("maiken")),
-                                  mkn::kul::File(s + ".yaml", mkn::kul::user::home("maiken"))};
-  for (auto const& f : pos)
-    if (f.is()) return f.real();
+mkn::kul::File maiken::Settings::RESOLVE(std::string const& s, Settings const* settings)
+    KTHROW(SettingsException) {
+  using File_t = mkn::kul::File;
 
-  return "";
+  mkn::kul::Dir const cwd{mkn::kul::env::CWD()};
+  auto file = [&]() -> std::optional<File_t> {
+    auto const dirs =
+        settings ? std::vector{cwd, File_t{settings->file()}.dir(), mkn::kul::user::home("maiken")}
+                 : std::vector{cwd, mkn::kul::user::home("maiken")};
+    for (auto const& dir : dirs) {
+      if (auto f = File_t{s, dir}; f) return f;
+      for (auto const& suffix : {".yml", ".yaml"})
+        if (auto f = File_t{s + suffix, dir}; f) return f;
+    }
+    return std::nullopt;
+  }();
+
+  if (!file) KEXCEPT(SettingsException, "super file not found: " + s);
+
+  return *file;
 }
 
 bool maiken::Settings::SET(std::string const& s) {
-  std::string file(RESOLVE(s));
-  if (file.size()) {
-    instance = std::make_unique<Settings>(mkn::kul::yaml::File::CREATE<Settings>(file));
+  auto const file(RESOLVE(s));
+  if (file) {
+    instance = std::make_unique<Settings>(mkn::kul::yaml::File::CREATE<Settings>(file.real()));
     return 1;
   }
   return 0;

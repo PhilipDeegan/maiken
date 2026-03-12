@@ -230,10 +230,20 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
 
   this->populateMapsFromDependencies();
   std::vector<std::string> fileStrings{STR_ARCHIVER, STR_COMPILER, STR_LINKER};
-  for (auto const& c : Settings::INSTANCE().root()[STR_FILE])
-    for (std::string const& s : fileStrings)
-      for (auto const& t : mkn::kul::String::SPLIT(c[STR_TYPE].Scalar(), ':'))
-        if (fs[t].count(s) == 0 && c[s]) fs[t].insert(s, Properties::RESOLVE(*this, c[s].Scalar()));
+
+  for (auto const* ptr = &Settings::INSTANCE(); ptr != nullptr; ptr = ptr->super())
+    if (ptr->root()[STR_FILE])
+      for (auto const& c : ptr->root()[STR_FILE])
+        for (auto const& s : fileStrings)
+          for (auto const& t : mkn::kul::String::SPLIT(c[STR_TYPE].Scalar(), ':'))
+            if (fs[t].count(s) == 0 && c[s])
+              fs[t].insert(s, Properties::RESOLVE(*this, c[s].Scalar()));
+
+  if (fs.empty()) {
+    for (auto const* ptr = &Settings::INSTANCE(); ptr != nullptr; ptr = ptr->super())
+      KOUT(NON) << "No file tag in Settings file: " << ptr->file();
+    KEXIT(1, "No file types found, review settings.yaml files shown above");
+  }
 
   this->postSetupValidation();
   profile = p.size() ? p : project().root()[STR_NAME].Scalar();
