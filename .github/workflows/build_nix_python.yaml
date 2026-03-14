@@ -31,5 +31,5 @@ jobs:
         ./res/ci/nixish_setup.sh && make nix
         sudo cp mkn /usr/bin
         python3 -m pip install -r test/github/requirements.txt
-        mkn clean build -p github -dtOa "-fPIC -std=c++17"
+        mkn clean build -p github -dtOa "-fPIC -std=c++20"
         ./test/github/test_github_api.sh

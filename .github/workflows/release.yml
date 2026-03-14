@@ -25,14 +25,14 @@ jobs:
             MKN_CL_PREFERRED: 1
           run: |
             bash -c ./res/ci/win_build.sh
-            mkn build -dtKOga "-std:c++17 -EHsc"
+            mkn build -dtKOga "-std:c++20 -EHsc"
 
         - if: matrix.os == 'ubuntu-latest'
           env:
             MKN_GCC_PREFERRED: 1
           run: |
             ./res/ci/nixish_setup.sh && make nix
-            KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -gW 9 -o mkn_nix
+            KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -gW 9 -o mkn_nix
 
         - if: matrix.os == 'ubuntu-latest'
           uses: actions/upload-artifact@v4.4.0
@@ -57,7 +57,7 @@ jobs:
     - run: ./res/ci/nixish_setup.sh && make nix
     - env:
         MKN_GCC_PREFERRED: 1
-      run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -gW 9 -o mkn_manylinux
+      run: KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -gW 9 -o mkn_manylinux
     - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-manylinux-latest
@@ -72,7 +72,7 @@ jobs:
     - run: ./res/ci/nixish_setup.sh && make bsd
     - env:
         MKN_GCC_PREFERRED: 1
-      run: KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -gW 9 -o mkn_arm_osx
+      run: KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -gW 9 -o mkn_arm_osx
     - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-macos-latest

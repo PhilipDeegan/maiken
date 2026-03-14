@@ -29,9 +29,9 @@ jobs:
         mkdir -p ~/.maiken/app/mkn
         cp -r $PWD ~/.maiken/app/mkn/master
         [ "${{ matrix.cc }}" = "clang" ] && export CC=clang CXX=clang++
-        KLOG=3 ./mkn build -dtKa "-std=c++17 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -Op test_mod -a "-std=c++17 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build test pack -Op test -a "-std=c++17 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -dtOp format -a "-std=c++17 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build -Op test_mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build test pack -Op test -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build -dtOp format -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         KLOG=3 ./mkn -p lib_test
         ldd bin/build/mkn

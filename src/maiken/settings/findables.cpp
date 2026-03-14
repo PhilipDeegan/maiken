@@ -28,26 +28,25 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_PROPERTY_HPP_
-#define _MAIKEN_PROPERTY_HPP_
 
-#include "maiken/app.hpp"
 #include "maiken/settings.hpp"
 
-namespace maiken {
+void maiken::Settings::resolveFindables() KTHROW(SettingsException) {
+  static std::string const STR_FIND = "find";
 
-class Properties : public Constants {
- private:
-  static std::shared_ptr<std::tuple<std::string, int, int>> KEY(mkn::kul::hash::map::S2S const& ps,
-                                                                std::string const& s)
-      KTHROW(mkn::kul::Exception);
+  auto& fs = findables_;
 
- public:
-  static std::string RESOLVE(Application const& app, std::string const& s)
-      KTHROW(mkn::kul::Exception);
-  static std::string RESOLVE(Settings const& app, std::string const& s) KTHROW(mkn::kul::Exception);
-};
+  auto add = [&](auto const& k, auto const& f, auto const& n) {
+    auto& v = fs[k][f];
+    auto const lines = mkn::kul::cli::asArgs(n.template as<std::string>());
+    v.insert(v.end(), lines.begin(), lines.end());
+  };
 
-}  // namespace maiken
-
-#endif  //_MAIKEN_PROPERTY_HPP_
+  traverse([&](auto const& s) {
+    if (auto find = s.root()[STR_FIND])
+      for (auto const& c : find)
+        if (auto const k = c.first.template as<std::string>(); k.size())
+          for (auto it = c.second.begin(); it != c.second.end(); ++it)
+            add(k, it->first.template as<std::string>(), it->second);
+  });
+}

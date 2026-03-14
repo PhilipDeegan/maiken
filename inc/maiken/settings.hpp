@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <string>
 #include <optional>
+#include <functional>
 
 namespace maiken {
 
@@ -51,6 +52,8 @@ class SettingsException : public mkn::kul::Exception {
 };
 
 class Settings : public mkn::kul::yaml::File, public Constants {
+  using Findables = mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2T<std::vector<std::string>>>;
+
  public:
   Settings(std::string const& s);
 
@@ -60,17 +63,27 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   std::vector<std::string> const& remoteModules() const { return rms; }
   std::vector<std::string> const& remoteRepos() const { return rrs; }
   mkn::kul::hash::map::S2S const& properties() const { return ps; }
+  Findables const& findables() const { return findables_; }
   std::optional<std::string> local_dep_repo() const;
   std::optional<std::string> local_mod_repo() const;
 
   static Settings& INSTANCE() KTHROW(mkn::kul::Exit);
-  static bool SET(std::string const& s);
-  static std::string RESOLVE(std::string const& s) KTHROW(SettingsException);
-  static void POST_CONSTRUCT();
+  static void SET(std::string const& s);
+  static mkn::kul::File RESOLVE(std::string const& s, Settings const* settings = nullptr)
+      KTHROW(SettingsException);
+  static void POST_CONSTRUCT(Settings* settings = nullptr);
   static mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const&, Settings const&);
+  static mkn::kul::File userDefault() {
+    return mkn::kul::File("settings.yaml", mkn::kul::user::home("maiken"));
+  }
+  static void writeDefault() {
+    auto const f = userDefault();
+    if (!f.dir().is()) f.dir().mk();
+    if (!f.is()) write(f);
+  }
 
-  template <typename If, typename Get>
-  auto getFirstFound(If const _if, Get const get) const;
+  auto getFirstFound(auto const fn) const;
+  void traverse(auto const fn) const;
 
   auto operator[](std::string const& s) { return root()[s]; }
   auto operator[](std::string const& s) const { return root()[s]; }
@@ -79,19 +92,31 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   std::vector<std::string> rrs, rms;
   std::unique_ptr<Settings> sup;
   mkn::kul::hash::map::S2S ps;
+  Findables findables_;
 
   void resolveProperties() KTHROW(SettingsException);
+  void resolveFindables() KTHROW(SettingsException);
   static std::unique_ptr<Settings> instance;
   static void write(mkn::kul::File const& f) KTHROW(mkn::kul::Exit);
 };
 
-template <typename If, typename Get>
-auto Settings::getFirstFound(If const _if, Get const get) const {
-  using GetRet = std::invoke_result_t<Get, Settings const&>;
-  using FuncType = std::function<std::optional<GetRet>(Settings const&)>;
+void Settings::traverse(auto const fn) const {
+  using FuncType = std::function<void(Settings const&)>;
 
-  FuncType const loop = [&](auto const& settings) -> std::optional<GetRet> {
-    if (_if(settings)) return get(settings);
+  FuncType const loop = [&](auto const& settings) {
+    fn(settings);
+    if (settings.sup) loop(*settings.sup);
+  };
+
+  loop(*this);
+}
+
+auto Settings::getFirstFound(auto const fn) const {
+  using Ret = std::invoke_result_t<decltype(fn), Settings const&>;
+  using FuncType = std::function<Ret(Settings const&)>;
+
+  FuncType const loop = [&](auto const& settings) -> Ret {
+    if (auto const node = fn(settings)) return node;
     if (settings.sup) return loop(*settings.sup);
     return std::nullopt;
   };

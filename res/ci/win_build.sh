@@ -22,7 +22,7 @@ INCS=(inc
 )
 
 for i in ${INCS[@]}; do INC+=" -I$i"; done
-compile(){ cl -std:c++17 -nologo -EHsc $INC -c -Fo$1 "$2" || exit 1 ; }
+compile(){ cl -std:c++20 -nologo -EHsc $INC -c -Fo$1 "$2" || exit 1 ; }
 archive(){ lib -nologo -LTCG -OUT:"$1" "$2/*.o"; }
 exe(){     link -OUT:"mkn.exe" -nologo bin/*.o parse.yaml.lib  \
            -nodefaultlib:libucrt.lib ucrt.lib; rm parse.yaml.lib; }
@@ -44,7 +44,13 @@ fi
 
 rm -rf bin && mkdir -p bin
 
-for f in $(find src -type f -name '*.cpp'); do compile "bin/$(basename $f).o" "$f"; done
+for f in $(find src -type f -name '*.cpp'); do
+  SHA=""
+  cd $(dirname $f)
+  SHA="$(CertUtil -hashfile $(basename $f) MD5 | head -2 | tail -1)"
+  cd -
+  compile "bin/$(basename $f)_${SHA}.o" "$f"
+done
 compile "bin/mkn.cpp.o" "mkn.cpp"
 exe
 

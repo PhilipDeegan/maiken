@@ -206,34 +206,45 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   with_node[STR_DEP] = with_nodes;
   popDepOrMod(with_node, deps, STR_DEP, 0, 1);
 
-  if (Settings::INSTANCE().root()[STR_INC])
-    for (auto const& l : mkn::kul::String::LINES(Settings::INSTANCE().root()[STR_INC].Scalar()))
-      for (auto const& s : mkn::kul::cli::asArgs(l))
-        if (s.size()) {
-          mkn::kul::Dir d(Properties::RESOLVE(*this, s));
-          if (d)
-            incs.push_back(std::make_pair(d.real(), false));
-          else
-            KEXIT(1, "include does not exist\n") << d.path() << "\n" << Settings::INSTANCE().file();
-        }
-  if (Settings::INSTANCE().root()[STR_PATH])
-    for (auto const& l : mkn::kul::String::LINES(Settings::INSTANCE().root()[STR_PATH].Scalar()))
-      for (auto const& s : mkn::kul::cli::asArgs(l))
-        if (s.size()) {
-          mkn::kul::Dir d(Properties::RESOLVE(*this, s));
-          if (d)
-            paths.push_back(d.escr());
-          else
-            KEXIT(1, "library path does not exist\n") << d.path() << "\n"
-                                                      << Settings::INSTANCE().file();
-        }
+  for (auto const* ptr = &Settings::INSTANCE(); ptr != nullptr; ptr = ptr->super())
+    if (auto const node = ptr->root()[STR_INC])
+      for (auto const& l : mkn::kul::String::LINES(node.Scalar()))
+        for (auto const& s : mkn::kul::cli::asArgs(l))
+          if (s.size()) {
+            mkn::kul::Dir d(Properties::RESOLVE(*this, s));
+            if (d)
+              incs.push_back(std::make_pair(d.real(), false));
+            else
+              KEXIT(1, "include does not exist\n") << d.path() << "\n" << ptr->file();
+          }
+  for (auto const* ptr = &Settings::INSTANCE(); ptr != nullptr; ptr = ptr->super())
+    if (auto const node = ptr->root()[STR_PATH])
+      for (auto const& l : mkn::kul::String::LINES(node.Scalar()))
+        for (auto const& s : mkn::kul::cli::asArgs(l))
+          if (s.size()) {
+            mkn::kul::Dir d(Properties::RESOLVE(*this, s));
+            if (d)
+              paths.push_back(d.escr());
+            else
+              KEXIT(1, "library path does not exist\n") << d.path() << "\n" << ptr->file();
+          }
 
   this->populateMapsFromDependencies();
   std::vector<std::string> fileStrings{STR_ARCHIVER, STR_COMPILER, STR_LINKER};
-  for (auto const& c : Settings::INSTANCE().root()[STR_FILE])
-    for (std::string const& s : fileStrings)
-      for (auto const& t : mkn::kul::String::SPLIT(c[STR_TYPE].Scalar(), ':'))
-        if (fs[t].count(s) == 0 && c[s]) fs[t].insert(s, Properties::RESOLVE(*this, c[s].Scalar()));
+
+  for (auto const* ptr = &Settings::INSTANCE(); ptr != nullptr; ptr = ptr->super())
+    if (ptr->root()[STR_FILE])
+      for (auto const& c : ptr->root()[STR_FILE])
+        for (auto const& s : fileStrings)
+          for (auto const& t : mkn::kul::String::SPLIT(c[STR_TYPE].Scalar(), ':'))
+            if (fs[t].count(s) == 0 && c[s])
+              fs[t].insert(s, Properties::RESOLVE(*this, c[s].Scalar()));
+
+  if (fs.empty()) {
+    for (auto const* ptr = &Settings::INSTANCE(); ptr != nullptr; ptr = ptr->super())
+      KOUT(NON) << "No file tag in Settings file: " << ptr->file();
+    KEXIT(1, "No file types found, review settings.yaml files shown above");
+  }
 
   this->postSetupValidation();
   profile = p.size() ? p : project().root()[STR_NAME].Scalar();

@@ -78,6 +78,8 @@ class AppVars : public Constants {
   AppVars();
 
  public:
+  static void POST_CONSTRUCT();
+
   std::string const& args() const { return aa; }
   void args(std::string const& aa) { this->aa = aa; }
 

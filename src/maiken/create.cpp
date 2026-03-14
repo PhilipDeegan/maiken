@@ -189,13 +189,15 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     KEXIT(0, "");
   }
 
-  Settings::INSTANCE();  // write default settings if missing
-  if (args.has(STR_SETTINGS) && !Settings::SET(args.get(STR_SETTINGS)))
-    KEXIT(1, "Unable to set specific settings files");
+  Settings::writeDefault();
+  if (args.has(STR_SETTINGS)) Settings::SET(args.get(STR_SETTINGS));
+  Settings::INSTANCE();  // or initialize default
 
+  AppVars::INSTANCE().quiet(args.has(STR_QUIET));
+
+  AppVars::POST_CONSTRUCT();
   Settings::POST_CONSTRUCT();
 
-  if (args.has(STR_QUIET)) AppVars::INSTANCE().quiet(true);
   if (args.has(STR_INIT)) NewProject{};
 
   std::optional<mkn::kul::File> yml_opt = find_mkn_file(args, STR_DIR);
@@ -354,6 +356,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     apps.emplace_back(app);
     a.buildDepVec(AppVars::INSTANCE().dependencyString());
     a.addCLIArgs(args);
+    a.findables();
   }
 
   if (apps.size() == 1) {
