@@ -68,18 +68,21 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   std::optional<std::string> local_mod_repo() const;
 
   static Settings& INSTANCE() KTHROW(mkn::kul::Exit);
-  static bool SET(std::string const& s);
+  static void SET(std::string const& s);
   static mkn::kul::File RESOLVE(std::string const& s, Settings const* settings = nullptr)
       KTHROW(SettingsException);
   static void POST_CONSTRUCT(Settings* settings = nullptr);
   static mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const&, Settings const&);
+  static mkn::kul::File userDefault() {
+    return mkn::kul::File("settings.yaml", mkn::kul::user::home("maiken"));
+  }
+  static void writeDefault() {
+    auto const f = userDefault();
+    if (!f.dir().is()) f.dir().mk();
+    if (!f.is()) write(f);
+  }
 
-  template <typename If>
-  auto getFirstFound(If const _if) const;
-
-  template <typename If, typename Get>
-  auto getFirstFound(If const _if, Get const get) const;
-
+  auto getFirstFound(auto const fn) const;
   void traverse(auto const fn) const;
 
   auto operator[](std::string const& s) { return root()[s]; }
@@ -108,26 +111,12 @@ void Settings::traverse(auto const fn) const {
   loop(*this);
 }
 
-template <typename If>
-auto Settings::getFirstFound(If const _if) const {
-  using FuncType = std::function<std::optional<YAML::Node>(Settings const&)>;
+auto Settings::getFirstFound(auto const fn) const {
+  using Ret = std::invoke_result_t<decltype(fn), Settings const&>;
+  using FuncType = std::function<Ret(Settings const&)>;
 
-  FuncType const loop = [&](auto const& settings) -> std::optional<YAML::Node> {
-    if (auto const node = _if(settings)) return node;
-    if (settings.sup) return loop(*settings.sup);
-    return std::nullopt;
-  };
-
-  return loop(*this);
-}
-
-template <typename If, typename Get>
-auto Settings::getFirstFound(If const _if, Get const get) const {
-  using GetRet = std::invoke_result_t<Get, Settings const&>;
-  using FuncType = std::function<std::optional<GetRet>(Settings const&)>;
-
-  FuncType const loop = [&](auto const& settings) -> std::optional<GetRet> {
-    if (_if(settings)) return get(settings);
+  FuncType const loop = [&](auto const& settings) -> Ret {
+    if (auto const node = fn(settings)) return node;
     if (settings.sup) return loop(*settings.sup);
     return std::nullopt;
   };

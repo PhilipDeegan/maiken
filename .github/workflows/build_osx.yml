@@ -24,8 +24,7 @@ jobs:
       run: |
         mkdir -p ~/.maiken/app/mkn
         cp -r $PWD ~/.maiken/app/mkn/master
-        cp res/mkn/clang.yml ~/.maiken/settings.yaml
-        KLOG=3 ./mkn build -dtKO 2 -W 9 -g 0
-        KLOG=3 ./mkn build -dtOp test_mod
-        KLOG=3 ./mkn build test pack -Op test
-        KLOG=3 ./mkn -p lib_test
+        KLOG=3 ./mkn build -dtKO 2 -W 9 -g 0 -x res/mkn/clang
+        KLOG=3 ./mkn build -dtOp test_mod -x res/mkn/clang
+        KLOG=3 ./mkn build test pack -Op test -x res/mkn/clang
+        KLOG=3 ./mkn -p lib_test -x res/mkn/clang

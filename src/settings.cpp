@@ -34,9 +34,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <optional>
 
-std::unique_ptr<maiken::Settings> maiken::Settings::instance;
-
 namespace maiken {
+
+std::unique_ptr<Settings> Settings::instance;
+
 class SuperSettings {
   friend class maiken::Settings;
 
@@ -57,15 +58,21 @@ class SuperSettings {
 //
 
 std::optional<std::string> maiken::Settings::local_dep_repo() const {
-  return getFirstFound(
-      [](auto const& s) { return s[STR_LOCAL] && s[STR_LOCAL][STR_REPO]; },
-      [](auto const& s) { return mkn::kul::Dir(s[STR_LOCAL][STR_REPO].Scalar()).real(); });
+  auto const node = getFirstFound([](auto const& s) -> std::optional<std::string> {
+    if (s[STR_LOCAL] && s[STR_LOCAL][STR_REPO]) return s[STR_LOCAL][STR_REPO].Scalar();
+    return std::nullopt;
+  });
+  if (node) return mkn::kul::Dir{*node}.real();
+  return std::nullopt;
 }
 
 std::optional<std::string> maiken::Settings::local_mod_repo() const {
-  return getFirstFound(
-      [](auto const& s) { return s[STR_LOCAL] && s[STR_LOCAL][STR_MOD_REPO]; },
-      [](auto const& s) { return mkn::kul::Dir(s[STR_LOCAL][STR_MOD_REPO].Scalar()).real(); });
+  auto const node = getFirstFound([](auto const& s) -> std::optional<std::string> {
+    if (s[STR_LOCAL] && s[STR_LOCAL][STR_MOD_REPO]) return s[STR_LOCAL][STR_MOD_REPO].Scalar();
+    return std::nullopt;
+  });
+  if (node) return mkn::kul::Dir{*node}.real();
+  return std::nullopt;
 }
 
 maiken::Settings::Settings(std::string const& file_) : mkn::kul::yaml::File(file_) {
@@ -119,9 +126,7 @@ maiken::Settings::Settings(std::string const& file_) : mkn::kul::yaml::File(file
 
 maiken::Settings& maiken::Settings::INSTANCE() KTHROW(mkn::kul::Exit) {
   if (!instance.get()) {
-    mkn::kul::File const f("settings.yaml", mkn::kul::user::home("maiken"));
-    if (!f.dir().is()) f.dir().mk();
-    if (!f.is()) write(f);
+    auto const f = userDefault();
     instance = std::make_unique<Settings>(mkn::kul::yaml::File::CREATE<Settings>(f.full()));
   }
   return *instance.get();
@@ -162,13 +167,9 @@ mkn::kul::File maiken::Settings::RESOLVE(std::string const& s, Settings const* s
   return *file;
 }
 
-bool maiken::Settings::SET(std::string const& s) {
+void maiken::Settings::SET(std::string const& s) {
   auto const file(RESOLVE(s));
-  if (file) {
-    instance = std::make_unique<Settings>(mkn::kul::yaml::File::CREATE<Settings>(file.real()));
-    return 1;
-  }
-  return 0;
+  instance = std::make_unique<Settings>(mkn::kul::yaml::File::CREATE<Settings>(file.real()));
 }
 
 mkn::kul::cli::EnvVar maiken::Settings::PARSE_ENV_NODE(YAML::Node const& n,

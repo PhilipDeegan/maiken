@@ -50,8 +50,8 @@ profile:
   out: test_mod
   mode: shared
   if_arg:
-      win_shared: -DYAML_CPP_DLL
-      shared: -DMKN_KUL_SHARED
+    shared: -DMKN_KUL_SHARED
+    win_shared: -DYAML_CPP_DLL
 
 - name: test
   src: test/mod/lib.cpp
@@ -72,7 +72,7 @@ profile:
   main: server.cpp
   mode: none
 
-- name: format_a
+- name: format_verbose
   mod:
   - name: clang.format
     version: ${version}
@@ -82,7 +82,7 @@ profile:
 
 - name: format
   mod: |
-    clang.format{init:{style: google, paths: .}}
+    clang.format{init:{style: file, paths: .}}
 
 
 - name: lib_test
