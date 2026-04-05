@@ -28,7 +28,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
+#include "maiken/app.hpp"
+#include "maiken/compiler/cpp.hpp"
+
 #include <unordered_set>
 
 #include <cstdint>
@@ -137,7 +139,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(LinkDAO
     }
   }
   std::string exe = out;
-  if (KTOSTRING(__MKN_KUL_OS__) == std::string("win")) exe += ".exe";
+  if (MKN_KUL_STR(__MKN_KUL_OS__) == std::string("win")) exe += ".exe";
 
   mkn::kul::File(exe).dir().mk();
 

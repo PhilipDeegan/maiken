@@ -35,10 +35,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void maiken::Application::findables() {
   if (!this->ro) return;  // skip otherwise
-  if (lang.empty()) {
-    KLOG(ERR) << "Unknown language: cannot interrogate compiler for automatic file finding/etc";
-    return;
-  }
 
   auto try_find_file = [&](auto const& k, [[maybe_unused]] auto const& l,
                            std::vector<std::string> const ts,

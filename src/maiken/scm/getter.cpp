@@ -28,12 +28,16 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken/except.hpp"
+#include "mkn/kul/dbg.hpp"
+
 #include "maiken/scm.hpp"
+#include "maiken/except.hpp"
 #include "maiken/settings.hpp"
 
 mkn::kul::SCM const* maiken::SCMGetter::GET_SCM(mkn::kul::Dir const& d, std::string const& r,
                                                 bool module) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
   std::vector<std::string> repos;
   if (IS_SOLID(r))
     repos.push_back(r);
@@ -98,6 +102,8 @@ bool maiken::SCMGetter::IS_SOLID(std::string const& r) {
 }
 
 std::string maiken::SCMGetter::REPO(mkn::kul::Dir const& d, std::string const& r, bool module) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
   if (INSTANCE().valids.count(d.path())) return INSTANCE().valids.at(d.path());
   if (IS_SOLID(r))
     INSTANCE().valids.insert(d.path(), r);

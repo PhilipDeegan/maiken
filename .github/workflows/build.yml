@@ -1,0 +1,111 @@
+name: build
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  ubuntu:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+        cc: [gcc, clang]
+    steps:
+    - uses: actions/checkout@v6
+    - run: ./res/ci/nixish_setup.sh && make nix
+    - env:
+        MKN_GCC_PREFERRED: 1
+      run: |
+        ldd mkn
+        mkdir -p ~/.maiken/app/mkn
+        cp -r $PWD ~/.maiken/app/mkn/master
+        [ "${{ matrix.cc }}" = "clang" ] && export CC=clang CXX=clang++
+        KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build -Op test_mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build test pack -Op test -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build -dtOp format -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn -p lib_test
+        ldd bin/build/mkn
+
+  manylinux:
+    runs-on: ubuntu-22.04
+    container: quay.io/pypa/manylinux_2_28_x86_64:latest
+    steps:
+    - uses: actions/checkout@v6
+    - run: ./res/ci/nixish_setup.sh && make nix
+    - env:
+        MKN_GCC_PREFERRED: 1
+      run: |
+        ldd mkn
+        KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build -Op test_mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build test pack -Op test -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ldd bin/build/mkn
+
+  macos:
+    strategy:
+      matrix:
+        os: [macos-14, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v6
+    - run: ./res/ci/nixish_setup.sh && make bsd
+    - env:
+        MKN_LIB_LINK_LIB: 1
+      run: |
+        mkdir -p ~/.maiken/app/mkn
+        cp -r $PWD ~/.maiken/app/mkn/master
+        KLOG=3 ./mkn build -dtKO 2 -W 9 -g 0 -x res/mkn/clang
+        KLOG=3 ./mkn build -dtOp test_mod -x res/mkn/clang
+        KLOG=3 ./mkn build test pack -Op test -x res/mkn/clang
+        KLOG=3 ./mkn -p lib_test -x res/mkn/clang
+
+  windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v6
+    - run: bash -c "rm /bin/link" # interferes with cl/link.exe
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+    - shell: bash
+      run: |
+        mkdir -p ~/maiken/app/mkn
+        cp -r $PWD ~/maiken/app/mkn/master
+        ./res/ci/win_build.sh
+    - shell: cmd
+      env:
+        MKN_CL_PREFERRED: 1
+      run: |
+        mkn build -dtKO 2 -g 0 -a "-std:c++20 -EHsc"
+        mkn build -dtOp test_mod -a "-std:c++20 -EHsc"
+        mkn build test pack -Op test -a "-std:c++20 -EHsc"
+        mkn -p lib_test
+
+  ubuntu_python:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      max-parallel: 4
+      matrix:
+        python-version: ['3.13', '3.14']
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: x64
+    - run: |
+        ./res/ci/nixish_setup.sh && make nix
+        sudo cp mkn /usr/bin
+        python3 -m pip install -r test/github/requirements.txt
+        mkn clean build -p github -dtOa "-fPIC -std=c++20"
+        ./test/github/test_github_api.sh
+

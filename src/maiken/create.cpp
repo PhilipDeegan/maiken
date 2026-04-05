@@ -151,7 +151,7 @@ std::string get_first_line_of(mkn::kul::File const& yml) {
 
 auto version_string() {
   std::stringstream ss, mod;
-  ss << KTOSTRING(_MKN_VERSION_) << " (" << KTOSTRING(__MKN_KUL_OS__) << ") w/[";
+  ss << MKN_KUL_STR(_MKN_VERSION_) << " (" << MKN_KUL_STR(__MKN_KUL_OS__) << ") w/[";
   if (_MKN_REMOTE_EXEC_) mod << "exec,";
 #ifndef _MKN_DISABLE_MODULES_
   mod << "mod,";

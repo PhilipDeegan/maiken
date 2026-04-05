@@ -36,7 +36,7 @@ std::shared_ptr<AppVars> AppVars::instance;
 }
 
 maiken::AppVars::AppVars() {
-  pks["OS"] = KTOSTRING(__MKN_KUL_OS__);
+  pks["OS"] = MKN_KUL_STR(__MKN_KUL_OS__);
   pks["HOME"] = mkn::kul::user::home().path();
   pks["ARCH"] = mkn::kul::env::GET("MKN_ARCH", "x86_64");
   pks["MKN_HOME"] = mkn::kul::user::home(STR_MAIKEN).path();
