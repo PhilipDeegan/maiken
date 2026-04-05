@@ -28,11 +28,25 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken/github.hpp"
+
+#include "mkn/kul/dbg.hpp"
+
+#include "maiken/app.hpp"
 #include "maiken/scm.hpp"
+#include "maiken/property.hpp"
+
+#ifdef _MKN_WITH_MKN_RAM_
+#include "maiken/github.hpp"
+#endif
+
+#include <optional>
 
 void maiken::Application::loadDepOrMod(YAML::Node const& node, mkn::kul::Dir const& depOrMod,
                                        bool module) KTHROW(mkn::kul::Exception) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
+  std::string const type = module ? "mod" : "dep";
+
   KOUT(NON) << MKN_PROJECT_NOT_FOUND << depOrMod;
 #ifdef _MKN_DISABLE_SCM_
   KEXIT(1, "dep does not exist and remote retrieval is disabled - path: " + depOrMod.path());
@@ -51,10 +65,10 @@ void maiken::Application::loadDepOrMod(YAML::Node const& node, mkn::kul::Dir con
     KOUT(NON) << SCMGetter::GET(depOrMod, tscr, module)
                      ->co(depOrMod.path(), SCMGetter::REPO(depOrMod, tscr, module), v);
   } catch (mkn::kul::scm::Exception const& e) {
-    if (node[STR_NAME]) {
-      mkn::kul::File version(".mkn/dep/ver/" + node[STR_NAME].Scalar());
-      if (version) version.rm();
-    }
+    if (node[STR_NAME])
+      if (mkn::kul::File const version{".mkn/" + type + "/ver/" + node[STR_NAME].Scalar()})
+        version.rm();
+
     std::rethrow_exception(std::current_exception());
   }
   mkn::kul::env::CWD(depOrMod);
@@ -65,11 +79,11 @@ void maiken::Application::loadDepOrMod(YAML::Node const& node, mkn::kul::Dir con
         mkn::kul::proc::Call("mkn.bat", AppVars::INSTANCE().envVars()).run())
       KEXIT(1, "ERROR in " + depOrMod.path() + "/mkn.bat");
 #else
-    if (mkn::kul::File("mkn." + std::string(KTOSTRING(__MKN_KUL_OS__)) + ".sh").is() &&
-        mkn::kul::proc::Call("./mkn." + std::string(KTOSTRING(__MKN_KUL_OS__)) + ".sh",
+    if (mkn::kul::File("mkn." + std::string(MKN_KUL_STR(__MKN_KUL_OS__)) + ".sh").is() &&
+        mkn::kul::proc::Call("./mkn." + std::string(MKN_KUL_STR(__MKN_KUL_OS__)) + ".sh",
                              AppVars::INSTANCE().envVars())
             .run())
-      KEXIT(1, "ERROR in " + depOrMod.path() + "mkn." + std::string(KTOSTRING(__MKN_KUL_OS__)) +
+      KEXIT(1, "ERROR in " + depOrMod.path() + "/mkn." + std::string(MKN_KUL_STR(__MKN_KUL_OS__)) +
                    ".sh");
     else if (mkn::kul::File("mkn.sh").is() &&
              mkn::kul::proc::Call("./mkn.sh", AppVars::INSTANCE().envVars()).run())
@@ -79,7 +93,27 @@ void maiken::Application::loadDepOrMod(YAML::Node const& node, mkn::kul::Dir con
   mkn::kul::env::CWD(this->project().dir());
 }
 
+std::optional<std::string> get_cache_version(std::string const& name, std::string const& type) {
+  auto const cacheDirName = std::string{".mkn/"} + type + "/ver";
+  if (mkn::kul::File const verFile{name, cacheDirName})
+    return mkn::kul::io::Reader(verFile).readLine();
+  return std::nullopt;
+}
+
+void write_cache_version(std::string const& name, std::string const& version,
+                         std::string const& type) {
+  auto const cacheDirName = std::string{".mkn/"} + type + "/ver";
+  mkn::kul::File const verFile{name, cacheDirName};
+  if (verFile) return;
+  verFile.dir().mk();
+  mkn::kul::io::Writer(verFile) << version;
+}
+
 mkn::kul::Dir maiken::Application::resolveDepOrModDirectory(YAML::Node const& n, bool module) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
+  std::string const type = module ? "mod" : "dep";
+
   std::string d;
   if (n[STR_LOCAL])
     d = Properties::RESOLVE(*this, n[STR_LOCAL].Scalar());
@@ -92,17 +126,19 @@ mkn::kul::Dir maiken::Application::resolveDepOrModDirectory(YAML::Node const& n,
         if (auto app = Applications::INSTANCE().getOrNullptr(depName))
           return app->project().dir().name();
 
+        if (auto const version = get_cache_version(depName, type)) return *version;
+
 #ifdef _MKN_WITH_MKN_RAM_
-        return Github<>::resolveSCMBranch(SCMGetter::REPO(d, depName, module),
-                                          module ? "mod" : "dep");
+        return Github<>::resolveSCMBranch(SCMGetter::REPO(d, depName, module), type);
 #else
         return defaultSCMBranchName();
 #endif
       };
 
       std::string version(resolveSCMBranch());
-
       if (_MKN_REP_VERS_DOT_) mkn::kul::String::REPLACE_ALL(version, ".", mkn::kul::Dir::SEP());
+      write_cache_version(depName, version, type);
+
       auto name = depName;
       if (_MKN_REP_NAME_DOT_) mkn::kul::String::REPLACE_ALL(name, ".", mkn::kul::Dir::SEP());
       d = mkn::kul::Dir::JOIN(d, mkn::kul::Dir::JOIN(name, version));
@@ -116,6 +152,8 @@ mkn::kul::Dir maiken::Application::resolveDepOrModDirectory(YAML::Node const& n,
 void maiken::Application::popDepOrMod(YAML::Node const& n, std::vector<Application*>& vec,
                                       std::string const& s, bool module, bool with)
     KTHROW(mkn::kul::Exception) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
   auto setApp = [&](Application& app, YAML::Node const& node) {
     if (node[STR_SCM]) app.scr = Properties::RESOLVE(*this, node[STR_SCM].Scalar());
     if (node[STR_VERSION]) app.scv = Properties::RESOLVE(*this, node[STR_VERSION].Scalar());

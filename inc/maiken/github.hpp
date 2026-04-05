@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef _MKN_WITH_MKN_RAM_
 
+#include "mkn/kul/dbg.hpp"
 #include "mkn/kul/yaml.hpp"
 #include "mkn/ram/http.hpp"
 #include "mkn/ram/https.hpp"
@@ -94,8 +95,10 @@ class Github {
   static bool GET_LATEST(std::string const& repo, std::string& branch);
 
   std::string static resolveSCMBranch(std::string const& repo, std::string const& cacheDirName) {
+    MKN_KUL_DBG_FUNC_ENTER;
+
     auto const name = repo_name(repo);
-    mkn::kul::File const verFile(name, ".mkn/" + cacheDirName + "/ver");
+    mkn::kul::File const verFile{name, ".mkn/" + cacheDirName + "/ver"};
     if (verFile) return mkn::kul::io::Reader(verFile).readLine();
 
 #ifdef _MKN_WITH_MKN_RAM_
@@ -116,6 +119,8 @@ class Github {
 template <bool https>
 bool Github<https>::GET_DEFAULT_BRANCH(std::string const& owner, std::string const& repo,
                                        std::string& branch) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
   bool b = 0;
   int retry = 3;
   std::stringstream ss;
@@ -156,6 +161,8 @@ bool Github<https>::GET_DEFAULT_BRANCH(std::string const& owner, std::string con
 template <bool https>
 bool Github<https>::GET_LATEST_RELEASE(std::string const& owner, std::string const& repo,
                                        std::string& branch) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
   bool b = 0;
   int retry = 3;
   std::stringstream ss;
@@ -192,6 +199,8 @@ bool Github<https>::GET_LATEST_RELEASE(std::string const& owner, std::string con
 template <bool https>
 bool Github<https>::GET_LATEST_TAG(std::string const& owner, std::string const& repo,
                                    std::string& branch) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
   bool b = 0;
   int retry = 3;
   std::stringstream ss;
@@ -234,6 +243,7 @@ bool Github<https>::GET_LATEST_TAG(std::string const& owner, std::string const& 
 template <bool https>
 bool Github<https>::GET_LATEST(std::string const& repo, std::string& branch) {
 #ifndef _MKN_DISABLE_SCM_
+  MKN_KUL_DBG_FUNC_ENTER;
 
   std::array const gets{&GET_DEFAULT_BRANCH, &GET_LATEST_RELEASE, &GET_LATEST_TAG};
   std::vector<size_t> orders{0, 1, 2};
