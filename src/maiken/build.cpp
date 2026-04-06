@@ -28,10 +28,15 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "mkn/kul/dbg.hpp"
+
 #include "maiken.hpp"
 
-void maiken::Application::link(mkn::kul::hash::set::String const& objects)
-    KTHROW(mkn::kul::Exception) {
+namespace maiken {
+
+void Application::link(mkn::kul::hash::set::String const& objects) KTHROW(mkn::kul::Exception) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
   showConfig();
   if (objects.size() > 0 || main_) {
     buildDir().mk();
@@ -60,8 +65,7 @@ void maiken::Application::link(mkn::kul::hash::set::String const& objects)
   }
 }
 
-void maiken::Application::checkErrors(CompilerProcessCapture const& cpc)
-    KTHROW(mkn::kul::Exception) {
+void Application::checkErrors(CompilerProcessCapture const& cpc) KTHROW(mkn::kul::Exception) {
   auto o = [](std::string const& s) {
     if (s.size()) KOUT(NON) << s;
   };
@@ -73,14 +77,14 @@ void maiken::Application::checkErrors(CompilerProcessCapture const& cpc)
   if (cpc.exception()) std::rethrow_exception(cpc.exception());
 }
 
-bool maiken::Application::is_build_required() {
+bool Application::is_build_required() {
   mkn::kul::os::PushDir pushd(this->project().dir());
   mkn::kul::Dir bDir(".mkn/build");
   return !bDir || bDir.files().size() == 0 || buildDir().dirs().size() == 0 ||
          buildDir().files().size() == 0;
 }
 
-bool maiken::Application::is_build_stale() {
+bool Application::is_build_stale() {
   mkn::kul::os::PushDir pushd(this->project().dir());
   mkn::kul::Dir d(".mkn/build");
   mkn::kul::File f("timestamp", d);
@@ -91,3 +95,5 @@ bool maiken::Application::is_build_stale() {
   if (now - then > timestamp) return true;
   return false;
 }
+
+}  // namespace maiken

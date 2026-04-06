@@ -48,6 +48,7 @@ class Application;
 #include "maiken/source.hpp"
 
 #include "mkn/kul/os.hpp"
+#include "mkn/kul/all.hpp"
 #include "mkn/kul/cli.hpp"
 #include "mkn/kul/log.hpp"
 #include "mkn/kul/proc.hpp"
@@ -360,13 +361,8 @@ class ThreadingCompiler : public Constants {
  public:
   ThreadingCompiler(maiken::Application& app) : app(app) {
     for (auto const& s : app.includes()) {
-      std::string m;
-      mkn::kul::Dir d(s.first);
-      mkn::kul::File f(s.first);
-      if (d)
-        m = (AppVars::INSTANCE().dryRun() ? d.esc() : d.escm());
-      else if (f)
-        m = (AppVars::INSTANCE().dryRun() ? f.esc() : f.escm());
+      mkn::kul::Dir const d(s.first);
+      std::string const m = d.escm();
       if (!m.empty())
         incs.push_back(m);
       else
@@ -398,7 +394,7 @@ class ModuleMinimiser {
   }
 };
 
-class CommandStateMachine {
+class CommandStateMachine : public Constants {
   friend class maiken::Application;
   friend class maiken::Processor;
 
@@ -407,8 +403,13 @@ class CommandStateMachine {
     static CommandStateMachine a;
     return a;
   }
-  static bool has(std::string cmd) { return INSTANCE().cmds.count(cmd); }
+  static bool has(std::string const& cmd) { return INSTANCE().cmds.count(cmd); }
+  static bool has_acted() {
+    return mkn::kul::any_of(build_commands, [](auto const& key) { return has(key); });
+  }
+
   mkn::kul::hash::set::String const& commands() const { return cmds; }
+
   bool main() const { return _main; }
 
  private:
@@ -424,6 +425,8 @@ class CommandStateMachine {
 
   bool _main = 1;
   mkn::kul::hash::set::String cmds;
+
+  static inline std::array<std::string, 3> build_commands{STR_BUILD, STR_COMPILE, STR_LINK};
 };
 
 class BuildRecorder {

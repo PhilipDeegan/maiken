@@ -32,23 +32,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken.hpp"
 #include "maiken/defs.hpp"
 
-#include "mkn/kul/all.hpp"
 #include "mkn/kul/log.hpp"
 #include "mkn/kul/signal.hpp"
 
-int main(int argc, char* argv[]) {
-  maiken::PROGRAM = argv[0];
+namespace maiken {
+
+int main_entry(int argc, char* argv[]) {
+  PROGRAM = argv[0];
   mkn::kul::Signal sig;
   uint8_t ret = 0;
   auto const s = mkn::kul::Now::MILLIS();
 
   try {
-    for (auto app : maiken::Application::CREATE(argc, argv)) app->process();
+    for (auto app : Application::CREATE(argc, argv)) app->process();
 
-    bool print_build_time = mkn::kul::any_of(
-        std::vector<std::string>{"build", "compile", "link"},
-        [](auto const& key) { return maiken::CommandStateMachine::INSTANCE().has(key); });
-
+    bool const print_build_time = !AppVars::INSTANCE().dryRun() && CommandStateMachine::has_acted();
     if (print_build_time) {
       KOUT(NON) << "BUILD TIME: " << (mkn::kul::Now::MILLIS() - s) << " ms";
       KOUT(NON) << "FINISHED:   " << mkn::kul::DateTime::NOW();
@@ -68,3 +66,7 @@ int main(int argc, char* argv[]) {
   }
   return ret;
 }
+
+}  // namespace maiken
+
+int main(int argc, char* argv[]) { return maiken::main_entry(argc, argv); }

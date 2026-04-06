@@ -173,18 +173,16 @@ std::vector<std::pair<maiken::Source, std::string>> maiken::SourceFinder::all_so
   mkn::kul::os::PushDir pushd(app.project().dir());
 
   std::vector<std::pair<maiken::Source, std::string>> source_objects;
-  auto dryRun = AppVars::INSTANCE().dryRun();
 
-  auto _source = [&](auto& s, auto dir) {
+  auto const _source = [&](auto& s, auto dir) {
     mkn::kul::File const source(s.in());
     if (!app.incSrc(source)) return;
 
     mkn::kul::File object(s.object(), dir);
-    source_objects.emplace_back(Source(dryRun ? source.esc() : source.escm(), s.args()),
-                                dryRun ? object.esc() : object.escm());
+    source_objects.emplace_back(Source(source.escm(), s.args()), object.escm());
   };
 
-  auto handle_source = [&](auto& s, auto dir) {
+  auto const handle_source = [&](auto& s, auto dir) {
     mkn::kul::File const source(s.in());
     if (app.main_ && Source(source.real()) == *app.main_) return;
 

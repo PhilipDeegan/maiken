@@ -30,13 +30,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
 
-maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
-    std::pair<maiken::Source, std::string> const& p) const KTHROW(mkn::kul::Exception) {
+namespace maiken {
+
+CompilationUnit ThreadingCompiler::compilationUnit(std::pair<Source, std::string> const& p) const
+    KTHROW(mkn::kul::Exception) {
   std::string const src(p.first.in()), obj(p.second);
   std::string const& fileType = src.substr(src.rfind(".") + 1);
   if (!(app.files().count(fileType))) KEXCEPTION("NOOOOOOO ") << fileType;
   std::string const& compiler = (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
-  std::string const& base = maiken::Compilers::INSTANCE().base(compiler);
+  std::string const& base = Compilers::INSTANCE().base(compiler);
   std::vector<std::string> args;
   if (app.arguments().count(fileType) > 0)
     for (std::string const& o : (*app.arguments().find(fileType)).second)
@@ -60,14 +62,13 @@ maiken::CompilationUnit maiken::ThreadingCompiler::compilationUnit(
                          AppVars::INSTANCE().dryRun());
 }
 
-std::string maiken::CompilationUnit::compileString() const KTHROW(mkn::kul::Exception) {
+std::string CompilationUnit::compileString() const KTHROW(mkn::kul::Exception) {
   mkn::kul::os::PushDir pushd(app.project().dir());
   CompileDAO dao{app, compiler, in, out, args, incs, mode, /*dryRun=*/true};
   return comp->compileSource(dao).cmd();
 }
 
-maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const
-    KTHROW(mkn::kul::Exception) {
+CompilerProcessCapture CompilationUnit::compile() const KTHROW(mkn::kul::Exception) {
   try {
     mkn::kul::os::PushDir pushd(app.project().dir());
 
@@ -78,3 +79,5 @@ maiken::CompilerProcessCapture maiken::CompilationUnit::compile() const
     throw;
   }
 }
+
+}  // namespace maiken
