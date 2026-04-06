@@ -28,6 +28,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "mkn/kul/dbg.hpp"
+
 #include "maiken.hpp"
 #include "maiken/dist.hpp"
 #include "maiken/source.hpp"
@@ -72,6 +74,8 @@ class CompilerPrinter {
 
 void maiken::Application::compile(mkn::kul::hash::set::String& objects)
     KTHROW(mkn::kul::Exception) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
   auto sources = sourceMap();
 
   showConfig();
@@ -167,8 +171,14 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
                                   mkn::kul::hash::set::String& objects,
                                   std::vector<mkn::kul::File>& cacheFiles)
     KTHROW(mkn::kul::Exception) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
+  auto const dryRun = AppVars::INSTANCE().dryRun();
+
   ThreadingCompiler tc(*this);
-  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 10000000000, 1000);
+  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1,
+                                         dryRun ? 10000 : 1000000000, 1000);
+
   std::vector<maiken::CompilationUnit> c_units;
   std::queue<std::pair<maiken::Source, std::string>> cQueue;
 
@@ -205,7 +215,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
 
   auto lambda = [&, o, e](maiken::CompilationUnit const& c_unit) {
     CompilerProcessCapture const cpc = c_unit.compile();
-    if (!AppVars::INSTANCE().dryRun()) {
+    if (!dryRun) {
       if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
       if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
       KOUT(INF) << cpc.cmd();
@@ -237,11 +247,11 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   };
 
   for (auto const& unit : c_units) {
-    mkn::kul::this_thread::nSleep(5000000);  // dup appears to be overloaded with too many threads
+    mkn::kul::this_thread::nSleep(1000000);  // dup appears to be overloaded with too many threads
     ctp.async(std::bind(lambda, unit), std::bind(lambex, std::placeholders::_1));
   }
 
-  ctp.finish(1000000 * 1000);
+  ctp.finish(dryRun ? 10000 : 1000000 * 1000);
 
   if (AppVars::INSTANCE().dump()) {
     auto delEmpty = [](auto& dir) {

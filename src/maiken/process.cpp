@@ -28,9 +28,13 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "mkn/kul/dbg.hpp"
+
 #include "maiken.hpp"
 
 void maiken::Application::process() KTHROW(mkn::kul::Exception) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
   showConfig();
 
   mkn::kul::hash::map::S2S oldEvs;
@@ -75,6 +79,7 @@ void maiken::Application::process() KTHROW(mkn::kul::Exception) {
     if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE)) {
       for (auto& modLoader : app.mods)
         modLoader->module()->compile(app, app.modCompile(modLoader->app()));
+
       if (work) app.compile(objects);
     }
     if (cmds.count(STR_BUILD) || cmds.count(STR_LINK)) {

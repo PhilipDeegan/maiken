@@ -404,6 +404,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
       KEXIT(1, e.stack());
     }
   }
+  if (AppVars::INSTANCE().dryRun()) AppVars::INSTANCE().threads(1);  // pointless
   if (args.has(STR_JARG)) {
     try {
       YAML::Node node = YAML::Load(args.get(STR_JARG));

@@ -28,6 +28,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "mkn/kul/dbg.hpp"
+
 #include "maiken.hpp"
 #include "maiken/dist.hpp"
 
@@ -42,7 +44,9 @@ class Executioner : public Constants {
                                           std::vector<mkn::kul::Dir> const& starDirs,
                                           std::string const& main, std::string const& out,
                                           mkn::kul::Dir const outD, Application& app) {
-    auto dryRun = AppVars::INSTANCE().dryRun();
+    MKN_KUL_DBG_FUNC_ENTER;
+
+    auto const dryRun = AppVars::INSTANCE().dryRun();
     auto& file = main;
     std::string const& fileType = file.substr(file.rfind(".") + 1);
 
@@ -111,10 +115,13 @@ class Executioner : public Constants {
     }
   }
 };
-}  // namespace maiken
 
-void maiken::Application::buildExecutable(mkn::kul::hash::set::String const& objects_)
+void Application::buildExecutable(mkn::kul::hash::set::String const& objects_)
     KTHROW(mkn::kul::Exception) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
+  auto const dryRun = AppVars::INSTANCE().dryRun();
+
   mkn::kul::hash::set::String objects;
   auto& file = main_->in();
   std::string const& fileType = file.substr(file.rfind(".") + 1);
@@ -125,7 +132,7 @@ void maiken::Application::buildExecutable(mkn::kul::hash::set::String const& obj
   auto const name(out.empty() ? project().root()[STR_NAME].Scalar() : out);
   auto obFile = Source(mkn::kul::File(main_->in()).real()).object();
   mkn::kul::File tbject(obFile, tmpD);
-  if (!tbject)
+  if (!dryRun && !tbject)
     KERR << "Source expected not found (ignoring) " << tbject;
   else {
     objects.emplace(tbject.escm());
@@ -138,13 +145,19 @@ void maiken::Application::buildExecutable(mkn::kul::hash::set::String const& obj
   auto cpc = Executioner::build_exe(objects, starDirs, file, name, install, *this);
   Executioner::print(cpc, *this);
 
+  if (dryRun) return;
+
   checkErrors(cpc);
   KOUT(INF) << cpc.cmd();
   KOUT(NON) << "Creating bin: " << mkn::kul::File(cpc.file()).real();
 }
 
-void maiken::Application::buildTest(mkn::kul::hash::set::String const& objects)
+void Application::buildTest(mkn::kul::hash::set::String const& objects)
     KTHROW(mkn::kul::Exception) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
+  auto const dryRun = AppVars::INSTANCE().dryRun();
+
   mkn::kul::Dir objD(buildDir().join("obj"));
   mkn::kul::Dir tmpD(buildDir().join("tmp"), 1);
   mkn::kul::Dir testsD(buildDir().join("test"), 1);
@@ -165,7 +178,8 @@ void maiken::Application::buildTest(mkn::kul::hash::set::String const& objects)
     cpcs.push_back(cpc);
   };
 
-  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
+  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1,
+                                         dryRun ? 10000 : 1000000000, 1000);
 
   for (auto const& test : SourceFinder(*this).tests())
     ctp.async(std::bind(build_test, test, testsD, tmpD, this));
@@ -174,9 +188,11 @@ void maiken::Application::buildTest(mkn::kul::hash::set::String const& objects)
   for (auto const& cpc : cpcs) Executioner::print(cpc, *this);
 }
 
-maiken::CompilerProcessCapture maiken::Application::buildLibrary(
-    mkn::kul::hash::set::String const& objects) KTHROW(mkn::kul::Exception) {
-  auto dryRun = AppVars::INSTANCE().dryRun();
+CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String const& objects)
+    KTHROW(mkn::kul::Exception) {
+  MKN_KUL_DBG_FUNC_ENTER;
+
+  auto const dryRun = AppVars::INSTANCE().dryRun();
   if (fs.count(lang) > 0) {
     mkn::kul::Dir objD(buildDir().join("obj"));
     if (m == compiler::Mode::NONE) m = compiler::Mode::SHAR;
@@ -220,3 +236,5 @@ maiken::CompilerProcessCapture maiken::Application::buildLibrary(
   } else
     KEXCEPTION("Unable to handle artifact: \"" + lang + "\" - type is not in file list");
 }
+
+}  // namespace maiken
