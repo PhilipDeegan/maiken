@@ -176,7 +176,9 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   auto const dryRun = AppVars::INSTANCE().dryRun();
 
   ThreadingCompiler tc(*this);
-  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 10000000000, 1000);
+  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1,
+                                         dryRun ? 10000 : 1000000000, 1000);
+
   std::vector<maiken::CompilationUnit> c_units;
   std::queue<std::pair<maiken::Source, std::string>> cQueue;
 
@@ -245,11 +247,11 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   };
 
   for (auto const& unit : c_units) {
-    mkn::kul::this_thread::nSleep(5000000);  // dup appears to be overloaded with too many threads
+    mkn::kul::this_thread::nSleep(1000000);  // dup appears to be overloaded with too many threads
     ctp.async(std::bind(lambda, unit), std::bind(lambex, std::placeholders::_1));
   }
 
-  ctp.finish(dryRun ? 1000 : 1000000 * 1000);
+  ctp.finish(dryRun ? 10000 : 1000000 * 1000);
 
   if (AppVars::INSTANCE().dump()) {
     auto delEmpty = [](auto& dir) {

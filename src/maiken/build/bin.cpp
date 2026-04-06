@@ -156,6 +156,8 @@ void Application::buildTest(mkn::kul::hash::set::String const& objects)
     KTHROW(mkn::kul::Exception) {
   MKN_KUL_DBG_FUNC_ENTER;
 
+  auto const dryRun = AppVars::INSTANCE().dryRun();
+
   mkn::kul::Dir objD(buildDir().join("obj"));
   mkn::kul::Dir tmpD(buildDir().join("tmp"), 1);
   mkn::kul::Dir testsD(buildDir().join("test"), 1);
@@ -176,7 +178,8 @@ void Application::buildTest(mkn::kul::hash::set::String const& objects)
     cpcs.push_back(cpc);
   };
 
-  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
+  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1,
+                                         dryRun ? 10000 : 1000000000, 1000);
 
   for (auto const& test : SourceFinder(*this).tests())
     ctp.async(std::bind(build_test, test, testsD, tmpD, this));

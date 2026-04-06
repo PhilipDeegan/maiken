@@ -77,19 +77,16 @@ void maiken::Application::process() KTHROW(mkn::kul::Exception) {
 
     mkn::kul::hash::set::String objects;
     if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE)) {
-      MKN_KUL_LOG_SCOPE("Compile");
       for (auto& modLoader : app.mods)
         modLoader->module()->compile(app, app.modCompile(modLoader->app()));
+
       if (work) app.compile(objects);
     }
     if (cmds.count(STR_BUILD) || cmds.count(STR_LINK)) {
-      MKN_KUL_LOG_SCOPE("Link start");
       if (work)
         for (auto& modLoader : app.mods)
           modLoader->module()->link(app, app.modLink(modLoader->app()));
-      MKN_KUL_LOG_SCOPE("Link find");
       app.findObjects(objects);
-      MKN_KUL_LOG_SCOPE("Link");
       app.link(objects);
     }
   };
