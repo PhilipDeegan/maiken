@@ -55,11 +55,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif /* _MKN_REMOTE_EXEC_ */
 
 #ifndef _MKN_REMOTE_REPO_
-#define _MKN_REMOTE_REPO_ "https://github.com/mkn/ https://gitlab.com/mkn/"
+#define _MKN_REMOTE_REPO_ "https://u:p@github.com/mkn/ https://u:p@gitlab.com/mkn/"
 #endif /* _MKN_REMOTE_REPO_ */
 
 #ifndef _MKN_REMOTE_MOD_
-#define _MKN_REMOTE_MOD_ "https://github.com/mkn-mod/ https://gitlab.com/mkn-mod/"
+#define _MKN_REMOTE_MOD_ "https://u:p@github.com/mkn-mod/ https://u:p@gitlab.com/mkn-mod/"
 #endif /* _MKN_REMOTE_MOD_ */
 
 #ifndef _MKN_TIMESTAMPS_

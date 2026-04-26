@@ -60,6 +60,10 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   Settings const* super() const { return sup.get(); }
 
   mkn::kul::yaml::Validator validator() const;
+  auto remotes(bool const module) const {
+    if (module) return remoteModules();
+    return remoteRepos();
+  }
   std::vector<std::string> const& remoteModules() const { return rms; }
   std::vector<std::string> const& remoteRepos() const { return rrs; }
   mkn::kul::hash::map::S2S const& properties() const { return ps; }
