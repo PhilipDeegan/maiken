@@ -31,10 +31,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_GIT_GIT_HPP_
 #define _MAIKEN_GIT_GIT_HPP_
 
+#include "mkn/kul/io.hpp"
 #include "mkn/kul/dbg.hpp"
 #include "mkn/kul/scm.hpp"
 
-#include "maiken.hpp"
+#include "maiken/settings.hpp"
 
 #ifdef _MKN_WITH_MKN_RAM_
 #include "maiken/git/github.hpp"
@@ -43,30 +44,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace maiken {
 
 class Git {
- private:
-  static bool IS_SOLID(std::string const& r) {
-    return r.find("://") != std::string::npos || r.find("@") != std::string::npos;
-  }
-
-  static std::string repo_name(std::string const& repo) {
-    auto trimmed = repo;
-    while (!trimmed.empty() && trimmed.back() == '/') trimmed.pop_back();
-    if (trimmed.find("/") != std::string::npos) {
-      auto const name = trimmed.substr(trimmed.rfind("/") + 1);
-      return name.empty() ? trimmed : name;
-    }
-    return repo;
-  }
-
  public:
   // Resolve default branch for the given remote URL via git ls-remote.
   static bool GET_DEFAULT_BRANCH(std::string const& url, std::string& branch) {
     try {
       branch = mkn::kul::scm::Git().defaultRemoteBranch(url);
       return !branch.empty();
-    } catch (mkn::kul::Exception const&) {
-      return false;
+    } catch (mkn::kul::Exception const& e) {
+      KLOG(DBG) << e.what();
     }
+    return false;
   }
 
   // Resolve the SCM branch for a dependency.
@@ -115,6 +102,21 @@ class Git {
     }
 
     return defaultSCMBranchName();
+  }
+
+ private:
+  static bool IS_SOLID(std::string const& r) {
+    return r.find("://") != std::string::npos || r.find("@") != std::string::npos;
+  }
+
+  static std::string repo_name(std::string const& repo) {
+    auto trimmed = repo;
+    while (!trimmed.empty() && trimmed.back() == '/') trimmed.pop_back();
+    if (trimmed.find("/") != std::string::npos) {
+      auto const name = trimmed.substr(trimmed.rfind("/") + 1);
+      return name.empty() ? trimmed : name;
+    }
+    return repo;
   }
 };
 

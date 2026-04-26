@@ -61,6 +61,17 @@ class Exception : public mkn::kul::Exception {
 
 template <bool https = true>
 class Github {
+ public:
+  using Request_t = std::conditional_t<https, mkn::ram::https::Get, mkn::ram::http::Get>;
+
+  static bool GET_DEFAULT_BRANCH(std::string const& owner, std::string const& repo,
+                                 std::string& branch);
+  static bool GET_LATEST_RELEASE(std::string const& owner, std::string const& repo,
+                                 std::string& branch);
+  static bool GET_LATEST_TAG(std::string const& owner, std::string const& repo,
+                             std::string& branch);
+  static bool GET_LATEST(std::string const& repo, std::string& branch, bool const module = false);
+
  private:
   static bool IS_SOLID(std::string const& r) {
     return r.find("://") != std::string::npos || r.find("@") != std::string::npos;
@@ -83,16 +94,7 @@ class Github {
       return mkn::ram::http::Get(github::URL, path, github::port);
   }
 
- public:
-  using Request_t = std::conditional_t<https, mkn::ram::https::Get, mkn::ram::http::Get>;
-
-  static bool GET_DEFAULT_BRANCH(std::string const& owner, std::string const& repo,
-                                 std::string& branch);
-  static bool GET_LATEST_RELEASE(std::string const& owner, std::string const& repo,
-                                 std::string& branch);
-  static bool GET_LATEST_TAG(std::string const& owner, std::string const& repo,
-                             std::string& branch);
-  static bool GET_LATEST(std::string const& repo, std::string& branch, bool const module = false);
+  bool static inline _403_rate_limited = false;
 };
 
 template <bool https>
@@ -121,13 +123,16 @@ bool Github<https>::GET_DEFAULT_BRANCH(std::string const& owner, std::string con
           }
         } else {
           KLOG(TRC) << "request not OK: " << r.status() << " " << r.body();
-          KEXCEPT(github::Exception, "Github API error");
+          if (r.status() == 403) {
+            _403_rate_limited = true;
+            KEXCEPT(github::Exception, "Github API error");
+          }
         }
       });
 
   KLOG(TRC) << getRequest.toString();
 
-  while (retry-- > 0) {
+  while (!_403_rate_limited and retry-- > 0) {
     getRequest.send();
     if (b) return b;
     KLOG(ERR) << "maiken::Github::GET_DEFAULT_BRANCH failed - retrying";
@@ -147,7 +152,7 @@ bool Github<https>::GET_LATEST_RELEASE(std::string const& owner, std::string con
   std::stringstream ss;
   ss << "repos/" << owner << "/" << repo_name(repo) << "/releases/latest";
 
-  while (retry-- > 0) {
+  while (!_403_rate_limited and retry-- > 0) {
     request(ss.str())
         .withHeaders({{"User-Agent", "Mozilla not a virus"}, {"Accept", "application/json"}})
         .withResponse([&b, &branch](auto const& r) {
@@ -184,14 +189,14 @@ bool Github<https>::GET_LATEST_TAG(std::string const& owner, std::string const& 
   int retry = 3;
   std::stringstream ss;
   ss << "repos/" << owner << "/" << repo_name(repo) << "/git/tags";
-  while (retry-- > 0) {
+  while (!_403_rate_limited and retry-- > 0) {
     request(ss.str())
         .withHeaders({{"User-Agent", "Mozilla not a virus"}, {"Accept", "application/json"}})
         .withResponse([&b, &branch](auto const& r) {
           if (r.status() == 200) {
             try {
               mkn::kul::yaml::String const yaml(r.body());
-              if (yaml.root().Type() == 3) {
+              if (yaml.root().IsSequence()) {
                 if (yaml.root()["ref"]) {
                   branch = yaml.root()["ref"].Scalar();
                   b = 1;
@@ -236,7 +241,7 @@ bool Github<https>::GET_LATEST(std::string const& repo, std::string& branch, boo
   for (std::string const& s : repos) {
     if (s.find("github.com") != std::string::npos) {
       std::string owner = s.substr(s.find("github.com") + 10);
-      if (owner[0] != '/' && owner[0] != ':') {
+      if (owner.empty() || (owner[0] != '/' && owner[0] != ':')) {
         KERR << "Repo \"" << s << "\" is invalid - skipping";
         continue;
       }

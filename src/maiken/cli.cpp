@@ -28,7 +28,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken/git.hpp"
+
+#include "maiken/app.hpp"
+#include "mkn/kul/cli.hpp"
 
 void maiken::Application::addCLIArgs(mkn::kul::cli::Args const& args) {
   auto addIncsOrPaths = [&args](Application& a) {
