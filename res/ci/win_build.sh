@@ -32,7 +32,7 @@ exe(){     link -OUT:"mkn.exe" -nologo bin/*.o parse.yaml.lib  \
 
 [ ! -d "ext/parse/yaml/$YAML_GIT" ] && \
   git clone --depth 1 https://github.com/mkn/parse.yaml -b $YAML_GIT ext/parse/yaml/$YAML_GIT && \
-  cd ./ext/parse/yaml/$YAML_GIT && ./mkn.sh && cd $ROOT
+  git clone --depth 1 https://github.com/jbeder/yaml-cpp $YAML_GIT ext/parse/yaml/$YAML_GIT/p
 
 if [ ! -d "ext/parse/yaml/$YAML_GIT/p/bin" ]; then
   mkdir -p ext/parse/yaml/$YAML_GIT/p/bin;
