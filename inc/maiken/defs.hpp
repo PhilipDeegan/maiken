@@ -37,10 +37,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef MKN_LANG
 #include "maiken/lang/defs.en.hpp"
 #else
-#define __MAIKEN_INCLUDE_MACRO__(str) <maiken/lang/defs.##str.hpp>
+#define __MAIKEN_INCLUDE_MACRO__(str) <maiken/lang/defs.str.hpp>
 #include __MAIKEN_INCLUDE_MACRO__(MKN_LANG)
 #undef __MAIKEN_INCLUDE_MACRO__
 #endif /*  MKN_LANG */
+
+using namespace maiken::lang::defs;
 
 #ifndef _MKN_REP_NAME_DOT_
 #define _MKN_REP_NAME_DOT_ 1
