@@ -28,6 +28,8 @@ profile:
   src: src/maiken/create.cpp, -D_MKN_VERSION_=${version}_${DATE}
   mode: static
   test: test/cpp.cpp
+  if_arg:
+    static: -DYAML_CPP_STATIC_DEFINE
   if_link:
     nix: -rdynamic
 
