@@ -32,7 +32,7 @@ jobs:
             MKN_GCC_PREFERRED: 1
           run: |
             ./res/ci/nixish_setup.sh && make nix
-            KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -gW 9 -o mkn_nix
+            KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC -DYAML_CPP_STATIC_DEFINE" -O 2 -gW 9 -o mkn_nix
 
         - if: matrix.os == 'ubuntu-latest'
           uses: actions/upload-artifact@v4.4.0
