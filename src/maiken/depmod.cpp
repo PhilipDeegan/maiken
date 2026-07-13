@@ -32,12 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/dbg.hpp"
 
 #include "maiken/app.hpp"
+#include "maiken/git.hpp"
 #include "maiken/scm.hpp"
 #include "maiken/property.hpp"
-
-#ifdef _MKN_WITH_MKN_RAM_
-#include "maiken/github.hpp"
-#endif
 
 #include <optional>
 
@@ -128,11 +125,7 @@ mkn::kul::Dir maiken::Application::resolveDepOrModDirectory(YAML::Node const& n,
 
         if (auto const version = get_cache_version(depName, type)) return *version;
 
-#ifdef _MKN_WITH_MKN_RAM_
-        return Github<>::resolveSCMBranch(SCMGetter::REPO(d, depName, module), type);
-#else
-        return defaultSCMBranchName();
-#endif
+        return Git::resolveSCMBranch(depName, type);
       };
 
       std::string version(resolveSCMBranch());

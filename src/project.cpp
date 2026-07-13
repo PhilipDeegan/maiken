@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/defs.hpp"
 #include "maiken/string.hpp"
-#include "maiken/github.hpp"
+#include "maiken/git.hpp"
 #include "maiken/project.hpp"
 
 maiken::ProjectInfo maiken::ProjectInfo::PARSE_LINE(
@@ -60,9 +60,7 @@ maiken::ProjectInfo maiken::ProjectInfo::PARSE_LINE(
   if_set(am, local);
   if_set(ha, version);
 
-#if defined(_MKN_WITH_MKN_RAM_)
-  if (version.size() == 0 && scm.size()) version = Github<>::resolveSCMBranch(scm, cacheDirName);
-#endif
+  if (version.size() == 0 && scm.size()) version = Git::resolveSCMBranch(scm, cacheDirName);
 
   return {local, profiles, proj, version, scm.size() ? scm : proj, bon};
 }

@@ -1,9 +1,9 @@
-#! clean build test -qdtKOg 0 -w mkn.ram[https] -W 9
+#! clean build test -qdtKw mkn.ram[https] -W 9
 
 name: mkn
 version: master
 property:
-  DATE: 20_APR_2026
+  DATE: 26_APR_2026
   maiken_location: ${MKN_HOME}/app/mkn/${version}
   maiken_scm: https://github.com/mkn/mkn
   self.deps: mkn.kul

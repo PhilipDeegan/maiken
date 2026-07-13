@@ -22,7 +22,7 @@ INCS=(inc
 )
 
 for i in ${INCS[@]}; do INC+=" -I$i"; done
-compile(){ cl -std:c++20 -nologo -EHsc $INC -c -Fo$1 "$2" || exit 1 ; }
+compile(){ cl -std:c++20 -nologo -EHsc -DYAML_CPP_STATIC_DEFINE $INC -c -Fo$1 "$2" || exit 1 ; }
 archive(){ lib -nologo -LTCG -OUT:"$1" "$2/*.o"; }
 exe(){     link -OUT:"mkn.exe" -nologo bin/*.o parse.yaml.lib  \
            -nodefaultlib:libucrt.lib ucrt.lib; rm parse.yaml.lib; }
@@ -32,7 +32,7 @@ exe(){     link -OUT:"mkn.exe" -nologo bin/*.o parse.yaml.lib  \
 
 [ ! -d "ext/parse/yaml/$YAML_GIT" ] && \
   git clone --depth 1 https://github.com/mkn/parse.yaml -b $YAML_GIT ext/parse/yaml/$YAML_GIT && \
-  cd ./ext/parse/yaml/$YAML_GIT && ./mkn.sh && cd $ROOT
+  git clone --depth 1 https://github.com/jbeder/yaml-cpp ext/parse/yaml/$YAML_GIT/p
 
 if [ ! -d "ext/parse/yaml/$YAML_GIT/p/bin" ]; then
   mkdir -p ext/parse/yaml/$YAML_GIT/p/bin;

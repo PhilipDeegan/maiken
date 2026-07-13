@@ -41,10 +41,9 @@ mkn::kul::SCM const* maiken::SCMGetter::GET_SCM(mkn::kul::Dir const& d, std::str
   std::vector<std::string> repos;
   if (IS_SOLID(r))
     repos.push_back(r);
-  else if (module)
-    for (auto const& s : Settings::INSTANCE().remoteModules()) repos.push_back(s + r);
   else
-    for (auto const& s : Settings::INSTANCE().remoteRepos()) repos.push_back(s + r);
+    for (auto const& s : Settings::INSTANCE().remotes(module)) repos.push_back(s + r);
+
 #ifndef _MKN_DISABLE_SCM_
   for (auto const& repo : repos) {
 #ifndef _MKN_DISABLE_GIT_

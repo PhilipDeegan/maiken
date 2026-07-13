@@ -28,9 +28,13 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_GITHUB_HPP_
-#define _MAIKEN_GITHUB_HPP_
+#ifndef _MAIKEN_GIT_HPP_
+#define _MAIKEN_GIT_HPP_
 
-#include "maiken/git.hpp"
+#include "maiken/git/git.hpp"
 
-#endif  /* _MAIKEN_GITHUB_HPP_ */
+#ifdef _MKN_WITH_MKN_RAM_
+#include "maiken/git/github.hpp"
+#endif  // _MKN_WITH_MKN_RAM_
+
+#endif  /* _MAIKEN_GIT_HPP_ */
