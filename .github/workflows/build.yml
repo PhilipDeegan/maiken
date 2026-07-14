@@ -82,11 +82,12 @@ jobs:
     - shell: cmd
       env:
         MKN_CL_PREFERRED: 1
+        KLOG: 3
       run: |
-        mkn build -dtKO 2 -g 0 -a "-std:c++20 -EHsc"
-        mkn build -dtOp test_mod -a "-std:c++20 -EHsc"
-        mkn build test pack -Op test -a "-std:c++20 -EHsc"
-        mkn -p lib_test
+        mkn build -dtKO 2 -g 0 -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE" || exit /b 1
+        mkn build -dtOp test_mod -a "-std:c++20 -EHsc" || exit /b 1
+        mkn build test pack -Op test -a "-std:c++20 -EHsc" || exit /b 1
+        mkn -p lib_test || exit /b 1
 
   ubuntu_python:
     name: Python ${{ matrix.python-version }}

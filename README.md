@@ -4,17 +4,15 @@
 **Cross platform build tool for C/C++/Obj-C/C#/CUDA/opencl**
 
 ## Building maiken prerequisites
-  Linux/BSD: GCC 8.0 (or CLANG equivalent) / git 2.0
+  Linux/BSD: C++20 compiler / git 2.0
 
-  Windows  : Visual C++ 2019 / Windows SDK 10+ / git 2.0
+  Windows  : C++20 compiler (MSVC) / Windows SDK 10+ / git 2.0
 
 [README](https://raw.githubusercontent.com/mkn/mkn/master/README.noformat)
 
 [Binaries available](https://github.com/mkn/mkn/releases/tag/latest)
 
 Testers/comments/suggestions/feature requests welcome. Email me or make an issue. Or head on over to [/r/mkn](http://reddit.com/r/mkn)
-
-**Note: Older compilers may be used by maiken**
 
 ## Dependencies
 

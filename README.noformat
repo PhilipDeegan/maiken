@@ -57,7 +57,7 @@ name: name
 version: version                    # considered git branch for pulling
 scm: string                         # Appended to remote URLs for lookup if non concrete URL, used if concrete
 super: $directory                   # Inherit properties of project at directory, super (..) or sub directory advisable
-parent: $directory                  # See profile inheritence @ 2.2.4
+parent: $directory                  # See profile inheritance @ 2.2.4
 property:
   - aaa: AAA
     bbb: ${aaa}.BBB
@@ -186,9 +186,9 @@ profiles:
 
 2.2.1.4 Compiler deduction
 
-Compiler binares are expected to have their default names e.g. gcc/gcc.exe/cl.exe. This only applies to compilers and not archivers or linkers. Compiler masking is provided to use alternate compiler binaries with the same functionality as the underlying compiler.
+Compiler binaries are expected to have their default names e.g. gcc/gcc.exe/cl.exe. This only applies to compilers and not archivers or linkers. Compiler masking is provided to use alternate compiler binaries with the same functionality as the underlying compiler.
 
-Masking settings.yml exmaple
+Masking settings.yml example
 
 ```
 compiler:
@@ -224,7 +224,7 @@ Adding a profile as a dependency can do a number of things:
         This can happen when a dependency has the "lib" tag
     Import addition library search directories with the "path" tag
 
-2.2.4  Profile Inheritence
+2.2.4  Profile Inheritance
 
 Using the "parent" tag, one profile may derive a number of values from the selected profile.
 Generally all values are inherited, however even if this is the case, some values such as
@@ -241,7 +241,7 @@ Git supported, SVN planned.
 
 Prerequisites:
     - git 2.0
-    - Microsoft Visual Studio 2015 (Express)
+    - C++20 compiler (MSVC)
     - Windows Dev Kit 10+ (http://msdn.microsoft.com/en-us/windows/desktop/ff851942.aspx)
 
 Operations:
@@ -260,7 +260,7 @@ Example Windows settings can be found at: https://github.com/mkn/maiken/wiki
 
 Prerequisites:
     - git 2.0
-    - gcc 5.0 (+) or equivalent
+    - C++20 compiler (GCC/Clang)
 
 3.2.1 Debian
 
@@ -393,7 +393,7 @@ To activate another language run:
 
 4.5 Timestamp logging
 
-Upon succesful compilation of a project, source file modification timestamps are recoreded under ./bin/<profile>/.mkn/src_stamp, which are checked on the next build to see if recompilation is required.
+Upon successful compilation of a project, source file modification timestamps are recorded under ./bin/<profile>/.mkn/src_stamp, which are checked on the next build to see if recompilation is required.
 Similarly, the aggregate of all non-hidden file modification timestamps are recorded under ./bin/<profile>/.mkn/inc_stamp, which are also checked on the next build to see if recompilation is required.
 This can be enabled by compiling with the argument -D_MKN_TIMESTAMPS_=1
 This is disabled for languages like C# when the source is not compiled.
@@ -457,7 +457,7 @@ example with g++ and "-w mkn.ram" will result in a compilation command like:
     g++ -D_MKN_WITH_MKN_RAM_ -c file.obj -o file.cpp
 
 A concrete git URL can be specified with a string between () brackets - if these are missing the project string is
- attemted to be used as the URL.
+ attempted to be used as the URL.
 
 Further options can be used to specify the version and the location
 
@@ -554,14 +554,14 @@ Available commands
 Available arguments:
     -a --args $arg        - Adds $arg to the compile command if compile/build, passes arguments to application if run
     -A --add  $arg        - CSV list of additional sources to compile/link, disable recursive finding with "<dir>\, 0"
-    -b --binc $s          - Add include directories to back of compile command, seperated by standard system PATH environment win=; others=:
-    -B --bpath $s         - Add library search directory to back of link command, seperated by standard system PATH environment win=; others=:
+    -b --binc $s          - Add include directories to back of compile command, separated by standard system PATH environment win=; others=:
+    -B --bpath $s         - Add library search directory to back of link command, separated by standard system PATH environment win=; others=:
     -C --directory $d     - Execute on directory $d rather than current directory
     -d --dependencies     - See 4.8
     -D --dump             - Write command logs to ./.mkn/logs/$PROFILE
     -E --env $e           - CSV key=value environment variables override format -P "k1=v1,k2=v2" , can be used with run/dbg, backslash escaps , and =
-    -f --finc $s          - Add include directories to front of compile command, seperated by standard system PATH environment win=; others=:
-    -F --fpath $s         - Add library search directory to front of link command, seperated by standard system PATH environment win=; others=:
+    -f --finc $s          - Add include directories to front of compile command, separated by standard system PATH environment win=; others=:
+    -F --fpath $s         - Add library search directory to front of link command, separated by standard system PATH environment win=; others=:
     -g --debug [0-9]      - Add compiler/linker debug flags for chosen compiler - 0 = off / 9 = full - number missing = 9 / no default
     -G --get $k           - Returns string value for property K in either local yaml or settings.yaml, failure is no string 0 exit code
     -h --help             - Print help
@@ -576,7 +576,8 @@ Available arguments:
     -O --optimize [0-9]   - Add compiler/linker optimisation flags for chosen compiler - 0 = off / 9 = full - number missing = 9 / no default
     -p --profile $p       - Activate profile p
     -P --property $p      - CSV key=value properties override format -P "k1=v1,k2=v2" , backslash escaps , and =
-    -r --run-args $a      - Passes $a to running binary as arguments, suppercedes -a
+    -q --quiet            - Suppress "stale build" notice when compiling without build/compile
+    -r --run-args $a      - Passes $a to running binary as arguments, supersedes -a
     -R --dry-run          - Print commands without executing them.
     -s --scm-status       - Display SCM status of project, allows -d
     -S --shared           - Links projects without mode as shared
