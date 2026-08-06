@@ -151,6 +151,14 @@ mkn::kul::File maiken::Settings::RESOLVE(std::string const& s, Settings const* s
 
   mkn::kul::Dir const cwd{mkn::kul::env::CWD()};
   auto file = [&]() -> std::optional<File_t> {
+    bool const is_abs =
+        !s.empty() && (s.front() == '/' || s.front() == '\\' || (s.size() > 1 && s[1] == ':'));
+    if (is_abs) {
+      if (auto f = File_t{s}; f) return f;
+      for (auto const& suffix : {".yml", ".yaml"})
+        if (auto f = File_t{s + suffix}; f) return f;
+      return std::nullopt;
+    }
     auto const dirs =
         settings ? std::vector{cwd, File_t{settings->file()}.dir(), mkn::kul::user::home("maiken")}
                  : std::vector{cwd, mkn::kul::user::home("maiken")};
