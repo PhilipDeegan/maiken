@@ -139,7 +139,7 @@ maiken::CompilerProcessCapture maiken::cpp::GccCompiler::buildExecutable(LinkDAO
     }
   }
   std::string exe = out;
-  if (MKN_KUL_STR(__MKN_KUL_OS__) == std::string("win")) exe += ".exe";
+  if (MKN_KUL_STR(MKN_KUL_OS) == std::string("win")) exe += ".exe";
 
   mkn::kul::File(exe).dir().mk();
 

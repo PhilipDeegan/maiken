@@ -76,12 +76,12 @@ void maiken::Application::loadDepOrMod(YAML::Node const& node, mkn::kul::Dir con
         mkn::kul::proc::Call("mkn.bat", AppVars::INSTANCE().envVars()).run())
       KEXIT(1, "ERROR in " + depOrMod.path() + "/mkn.bat");
 #else
-    if (mkn::kul::File("mkn." + std::string(MKN_KUL_STR(__MKN_KUL_OS__)) + ".sh").is() &&
-        mkn::kul::proc::Call("./mkn." + std::string(MKN_KUL_STR(__MKN_KUL_OS__)) + ".sh",
+    if (mkn::kul::File("mkn." + std::string(MKN_KUL_STR(MKN_KUL_OS)) + ".sh").is() &&
+        mkn::kul::proc::Call("./mkn." + std::string(MKN_KUL_STR(MKN_KUL_OS)) + ".sh",
                              AppVars::INSTANCE().envVars())
             .run())
-      KEXIT(1, "ERROR in " + depOrMod.path() + "/mkn." + std::string(MKN_KUL_STR(__MKN_KUL_OS__)) +
-                   ".sh");
+      KEXIT(1,
+            "ERROR in " + depOrMod.path() + "/mkn." + std::string(MKN_KUL_STR(MKN_KUL_OS)) + ".sh");
     else if (mkn::kul::File("mkn.sh").is() &&
              mkn::kul::proc::Call("./mkn.sh", AppVars::INSTANCE().envVars()).run())
       KEXIT(1, "ERROR in " + depOrMod.path() + "/mkn.sh");
