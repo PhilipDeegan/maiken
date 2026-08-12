@@ -31,15 +31,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _MAIKEN_ENV_HPP_
 #define _MAIKEN_ENV_HPP_
 
-#include "maiken/app.hpp"
+#include "mkn/kul/env.hpp"
+
 #include "maiken/property.hpp"
 
 namespace maiken {
 
 template <typename HasProperties>
-mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const& n, HasProperties const& hasProperties,
-                                     std::string /*hasProperties_id*/) {
-  using namespace mkn::kul::cli;
+mkn::kul::env::Var PARSE_ENV_NODE(YAML::Node const& n, HasProperties const& hasProperties,
+                                  std::string /*hasProperties_id*/) {
+  using namespace mkn::kul;
   if (n.IsScalar()) {
     auto bits = mkn::kul::String::ESC_SPLIT(n.Scalar(), '=');
 
@@ -54,21 +55,22 @@ mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const& n, HasProperties const& h
     replace(bits[0], bits[1], "$" + bits[0]);
     replace(bits[0], bits[1], "${" + bits[0] + "}");
 
-    return EnvVar(bits[0], Properties::RESOLVE(hasProperties, bits[1]), EnvVarMode::REPL);
+    return env::Var(bits[0], Properties::RESOLVE(hasProperties, bits[1]), env::Var::Mode::REPL);
   }
 
-  EnvVarMode mode = EnvVarMode::PREP;
+  env::Var::Mode mode = env::Var::Mode::PREP;
   if (n[Constants::STR_MODE]) {
     if (n[Constants::STR_MODE].Scalar().compare(Constants::STR_APPEND) == 0)
-      mode = EnvVarMode::APPE;
+      mode = env::Var::Mode::APPE;
     else if (n[Constants::STR_MODE].Scalar().compare(Constants::STR_PREPEND) == 0)
-      mode = EnvVarMode::PREP;
+      mode = env::Var::Mode::PREP;
     else if (n[Constants::STR_MODE].Scalar().compare(Constants::STR_REPLACE) == 0)
-      mode = EnvVarMode::REPL;
+      mode = env::Var::Mode::REPL;
   }
-  return EnvVar(n[Constants::STR_NAME].Scalar(),
-                Properties::RESOLVE(hasProperties, n[Constants::STR_VALUE].Scalar()), mode);
+  return env::Var(n[Constants::STR_NAME].Scalar(),
+                  Properties::RESOLVE(hasProperties, n[Constants::STR_VALUE].Scalar()), mode);
 }
 
 }  // namespace maiken
+
 #endif /* _MAIKEN_ENV_HPP_ */

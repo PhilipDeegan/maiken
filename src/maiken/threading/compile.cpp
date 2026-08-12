@@ -36,7 +36,7 @@ CompilationUnit ThreadingCompiler::compilationUnit(std::pair<Source, std::string
     KTHROW(mkn::kul::Exception) {
   std::string const src(p.first.in()), obj(p.second);
   std::string const& fileType = src.substr(src.rfind(".") + 1);
-  if (!(app.files().count(fileType))) KEXCEPTION("NOOOOOOO ") << fileType;
+  if (!(app.files().count(fileType))) KEXCEPTION("NOOOOOOO ", fileType);
   std::string const& compiler = (*(*app.files().find(fileType)).second.find(STR_COMPILER)).second;
   std::string const& base = Compilers::INSTANCE().base(compiler);
   std::vector<std::string> args;

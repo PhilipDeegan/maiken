@@ -42,7 +42,7 @@ void maiken::Application::showConfig(bool force) {
 
     std::string path = mkn::kul::env::GET("PATH");
     {
-      auto it(std::find_if(evs.begin(), evs.end(), [](mkn::kul::cli::EnvVar const& ev) {
+      auto it(std::find_if(evs.begin(), evs.end(), [](mkn::kul::env::Var const& ev) {
         return strcmp(ev.name(), "PATH") == 0;
       }));
       if (it != evs.end()) path = (*it).toString();

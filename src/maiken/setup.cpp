@@ -190,7 +190,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
         else if (n[STR_DEP].IsSequence())
           for (auto const& dep : n[STR_DEP]) getIfMissing(dep, 0);
         else
-          KEXCEPTION(STR_DEP) << " is invalid type";
+          KEXCEPTION(STR_DEP, " is invalid type");
       }
 
       popDepOrMod(n, deps, STR_DEP, 0);
@@ -205,7 +205,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
           for (auto const& dep : node) getIfMissing(dep, 0);
           popDepOrMod(n[STR_IF_DEP], deps, MKN_KUL_STR(__MKN_KUL_OS__), 0);
         } else
-          KEXCEPTION(STR_DEP) << " is invalid type";
+          KEXCEPTION(STR_DEP, " is invalid type");
       }
       profile = n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
       c = !profile.empty();
@@ -225,7 +225,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
             if (d)
               incs.push_back(std::make_pair(d.real(), false));
             else
-              KEXIT(1, "include does not exist\n") << d.path() << "\n" << ptr->file();
+              KEXIT(1, "include does not exist\n", d.path(), "\n", ptr->file());
           }
   for (auto const* ptr = &Settings::INSTANCE(); ptr != nullptr; ptr = ptr->super())
     if (auto const node = ptr->root()[STR_PATH])
@@ -236,7 +236,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
             if (d)
               paths.push_back(d.escr());
             else
-              KEXIT(1, "library path does not exist\n") << d.path() << "\n" << ptr->file();
+              KEXIT(1, "library path does not exist\n", d.path(), "\n", ptr->file());
           }
 
   this->populateMapsFromDependencies();

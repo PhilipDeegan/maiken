@@ -93,11 +93,10 @@ void maiken::Settings::write(mkn::kul::File const& file) KTHROW(mkn::kul::Exit) 
     if (cl.empty() || inc.empty() || lib.empty()) {
       w.flush().close();
       file.rm();
-      KEXIT(1, "gcc or clang not found, vcvars not detected")
-          << mkn::kul::os::EOL()
-          << "\tRun vcvarsall.bat or view mkn wiki to see how to configure "
-             "maiken settings.yaml"
-          << mkn::kul::os::EOL() << "\t@ https://github.com/mkn/mkn/wiki";
+      KEXIT(1, "gcc or clang not found, vcvars not detected", mkn::kul::os::EOL(),
+            "\tRun vcvarsall.bat or view mkn wiki to see how to configure "
+            "maiken settings.yaml",
+            mkn::kul::os::EOL(), "\t@ https://github.com/mkn/mkn/wiki");
     }
 
     w.write("inc: ", true);

@@ -245,7 +245,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
         if (f && !wildcard) break;
       }
 
-      if (!f) KEXIT(1, "profile does not exist: ") << profile;
+      if (!f) KEXIT(1, "profile does not exist: ", profile);
       if (!wildcard) profiles.emplace_back(profile);
     }
   }
@@ -282,12 +282,12 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
       if (args.has(a)) try {
           if (args.get(a).size()) {
             auto val(mkn::kul::String::UINT16(args.get(a)));
-            if (val > 9) KEXIT(1, e) << " argument is invalid";
+            if (val > 9) KEXIT(1, e, " argument is invalid");
             func(val);
           } else
             func(default_value);
         } catch (mkn::kul::StringException const& e) {
-          KEXIT(1, "") << e << " argument is invalid";
+          KEXIT(1, "", e, " argument is invalid");
         } catch (mkn::kul::Exception const& e) {
           KEXIT(1, e.stack());
         }

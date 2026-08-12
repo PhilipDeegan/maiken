@@ -28,8 +28,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
+#include "maiken/app.hpp"
 #include "maiken/regex.hpp"
+#include "maiken/property.hpp"
 
 void maiken::Application::addMainLine(std::string const& o) KTHROW(mkn::kul::Exception) {
   std::vector<std::string> v(mkn::kul::String::SPLIT(o, ","));
@@ -45,8 +46,7 @@ void maiken::Application::addSourceLine(std::string const& s) KTHROW(mkn::kul::E
     });
     if (it != srcs.end()) {
       if (!(*it).first.args().empty())
-        KEXCEPT(maiken::Exception, "Source file being added twice: ")
-            << str << " " << (*it).first.args();
+        KEXCEPT(maiken::Exception, "Source file being added twice: ", str, " ", (*it).first.args());
       if ((*it).first.args().empty() && !args.empty()) srcs.erase(it);
     }
     srcs.emplace_back(Source(str, args), recurse_dir);

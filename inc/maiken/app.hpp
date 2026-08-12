@@ -248,8 +248,8 @@ class MKN_KUL_PUBLISH Application : public Constants {
   auto& mode() const { return m; }
   void mode(compiler::Mode mode) { m = mode; }
 
-  std::vector<mkn::kul::cli::EnvVar>& envVars() { return evs; }
-  std::vector<mkn::kul::cli::EnvVar> const& envVars() const { return evs; }
+  std::vector<mkn::kul::env::Var>& envVars() { return evs; }
+  std::vector<mkn::kul::env::Var> const& envVars() const { return evs; }
 
   void add_def(std::string const& def) { defs.emplace_back(def); }
   std::vector<std::string> const& defines() const { return defs; }
@@ -283,8 +283,8 @@ class MKN_KUL_PUBLISH Application : public Constants {
       KTHROW(mkn::kul::Exception);
   static std::vector<Application*> CREATE(int16_t argc, char* argv[]) KTHROW(mkn::kul::Exception);
 
-  static mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const&, Application const&);
-  static mkn::kul::cli::EnvVar PARSE_PROFILE_NAME(YAML::Node const&, Application* = nullptr);
+  static mkn::kul::env::Var PARSE_ENV_NODE(YAML::Node const&, Application const&);
+  static mkn::kul::env::Var PARSE_PROFILE_NAME(YAML::Node const&, Application* = nullptr);
 
   static std::string hash(std::string in) {
     std::stringstream ss;
@@ -313,7 +313,7 @@ class MKN_KUL_PUBLISH Application : public Constants {
   mkn::kul::hash::map::S2T<uint64_t> stss;
   std::vector<Application*> deps, modDeps, rdeps;
   std::vector<std::shared_ptr<ModuleLoader>> mods;
-  std::vector<mkn::kul::cli::EnvVar> evs;
+  std::vector<mkn::kul::env::Var> evs;
   std::vector<std::string> defs, libs, paths;
   std::vector<std::pair<maiken::Source, bool>> srcs;
   std::vector<std::pair<std::string, bool>> incs;

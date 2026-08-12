@@ -75,7 +75,7 @@ class Compilers {
     if (cs.count(k)) return cs[k];
     k = key(comp, masks);
     if (masks.count(k)) return masks[k];
-    KEXCEPT(CompilerNotFoundException, "Key not found ") << comp;
+    KEXCEPT(CompilerNotFoundException, "Key not found ", comp);
   }
   std::string base(std::string const& comp) {
     try {

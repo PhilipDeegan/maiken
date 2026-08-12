@@ -38,7 +38,7 @@ void maiken::Application::addCLIArgs(mkn::kul::cli::Args const& args) {
       auto const v(mkn::kul::String::SPLIT(path, mkn::kul::env::SEP()));
       for (auto const& s : v) {
         mkn::kul::Dir d(s);
-        if (!d) KEXIT(1, type + " directory does not exist: ") << s;
+        if (!d) KEXIT(1, type + " directory does not exist: ", s);
       }
       return v;
     };

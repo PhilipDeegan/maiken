@@ -76,7 +76,7 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   static mkn::kul::File RESOLVE(std::string const& s, Settings const* settings = nullptr)
       KTHROW(SettingsException);
   static void POST_CONSTRUCT(Settings* settings = nullptr);
-  static mkn::kul::cli::EnvVar PARSE_ENV_NODE(YAML::Node const&, Settings const&);
+  static mkn::kul::env::Var PARSE_ENV_NODE(YAML::Node const&, Settings const&);
   static mkn::kul::File userDefault() {
     return mkn::kul::File("settings.yaml", mkn::kul::user::home("maiken"));
   }

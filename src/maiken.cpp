@@ -28,7 +28,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
+#include "mkn/kul/except.hpp"
+
+#include "maiken.hpp"  // IWYU pragma: keep
 
 maiken::Application::Application(maiken::Project const& proj, std::string const& profile)
     : p(profile), proj(proj) {
@@ -58,9 +60,8 @@ void maiken::Application::resolveLang() KTHROW(maiken::Exception) {
     for (auto const& s_i : mapS)
       if (s_i.second == maxI) maxO++;
     if (maxO > 1)
-      KEXCEPSTREAM << "file type conflict: linker filetype cannot be deduced, "
-                   << "specify lang tag to override\n"
-                   << project().dir().path();
+      KEXCEPTION("file type conflict: linker filetype cannot be deduced, ",
+                 "specify lang tag to override\n", project().dir().path());
     lang = maxS;
   }
 }

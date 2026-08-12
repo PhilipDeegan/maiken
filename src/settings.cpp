@@ -81,12 +81,12 @@ maiken::Settings::Settings(std::string const& file_) : mkn::kul::yaml::File(file
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_REPO]) {
     mkn::kul::Dir d(root()[STR_LOCAL][STR_REPO].Scalar());
     if (!d.is() && !d.mk())
-      KEXCEPT(SettingsException, file_) << " error: local/repo is not a valid directory";
+      KEXCEPT(SettingsException, file_, " error: local/repo is not a valid directory");
   }
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_MOD_REPO]) {
     mkn::kul::Dir d(root()[STR_LOCAL][STR_MOD_REPO].Scalar());
     if (!d.is() && !d.mk())
-      KEXCEPT(SettingsException, file_) << " error: local/mod-repo is not a valid directory";
+      KEXCEPT(SettingsException, file_, " error: local/mod-repo is not a valid directory");
   }
   if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_REPO])
     for (auto const& s : mkn::kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
@@ -151,9 +151,9 @@ mkn::kul::File maiken::Settings::RESOLVE(std::string const& s, Settings const* s
 
   mkn::kul::Dir const cwd{mkn::kul::env::CWD()};
   auto file = [&]() -> std::optional<File_t> {
-    bool const is_abs = !s.empty() && (s.compare(0, mkn::kul::Dir::SEP().size(),
-                                                  mkn::kul::Dir::SEP()) == 0 ||
-                                        (s.size() > 1 && s[1] == ':'));
+    bool const is_abs =
+        !s.empty() && (s.compare(0, mkn::kul::Dir::SEP().size(), mkn::kul::Dir::SEP()) == 0 ||
+                       (s.size() > 1 && s[1] == ':'));
     if (is_abs) {
       if (auto f = File_t{s}; f) return f;
       for (auto const& suffix : {".yml", ".yaml"})
@@ -181,8 +181,7 @@ void maiken::Settings::SET(std::string const& s) {
   instance = std::make_unique<Settings>(mkn::kul::yaml::File::CREATE<Settings>(file.real()));
 }
 
-mkn::kul::cli::EnvVar maiken::Settings::PARSE_ENV_NODE(YAML::Node const& n,
-                                                       Settings const& settings) {
+mkn::kul::env::Var maiken::Settings::PARSE_ENV_NODE(YAML::Node const& n, Settings const& settings) {
   return maiken::PARSE_ENV_NODE(n, settings, "settings file");
 }
 

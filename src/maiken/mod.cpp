@@ -36,7 +36,7 @@ mkn::kul::File maiken::ModuleLoader::FIND(Application& ap)
 #endif  //_MKN_DISABLE_MODULES_
 {
 #ifdef _MKN_DISABLE_MODULES_
-  KEXCEPT(mkn::kul::Exception, "Modules are disabled: ") << ap.project().dir();
+  KEXCEPT(mkn::kul::Exception, "Modules are disabled: ", ap.project().dir());
 #endif  //_MKN_DISABLE_MODULES_
 
   std::string file;
@@ -72,8 +72,8 @@ mkn::kul::File maiken::ModuleLoader::FIND(Application& ap)
   mkn::kul::File lib(file);
 #ifndef _MKN_DISABLE_MODULES_
   if (!lib)
-    KEXCEPT(mkn::kul::sys::Exception, "No loadable library found for project: ")
-        << ap.project().dir();
+    KEXCEPT(mkn::kul::sys::Exception, "No loadable library found for project: ",
+            ap.project().dir());
 #endif  //_MKN_DISABLE_MODULES_
   return lib;
 }
