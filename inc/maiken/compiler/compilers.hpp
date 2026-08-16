@@ -28,70 +28,24 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_CODE_COMPILERS_HPP_
-#define _MAIKEN_CODE_COMPILERS_HPP_
+#ifndef MAIKEN_CODE_COMPILERS_HPP
+#define MAIKEN_CODE_COMPILERS_HPP
 
 #include "maiken/app.hpp"
-#include "maiken/compiler/cpp.hpp"
-#include "maiken/compiler/csharp.hpp"
+
+#include "mkn/kul/lang/cpp/compilers.hpp"
 
 namespace maiken {
-namespace compiler {
-class Exception : public mkn::kul::Exception {
- public:
-  Exception(char const* f, int const l, std::string s) : mkn::kul::Exception(f, l, s) {}
-};
-}  // namespace compiler
 
-class CompilerNotFoundException : public mkn::kul::Exception {
- public:
-  CompilerNotFoundException(char const* f, int const l, std::string s)
-      : mkn::kul::Exception(f, l, s) {}
-};
+using Compilers = mkn::kul::lang::cpp::Compilers;
+using CompilerNotFoundException = mkn::kul::lang::cpp::CompilerNotFoundException;
 
-template <typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+namespace cpp {
+using namespace mkn::kul::lang::cpp;
+}
+namespace csharp {
+using namespace mkn::kul::lang::cs;
 }
 
-class Compilers {
- public:
-  static Compilers& INSTANCE() {
-    static Compilers instance;
-    return instance;
-  }
-  std::vector<std::string> keys() {
-    std::vector<std::string> ks;
-    for (auto const& p : cs) ks.push_back(p.first);
-    return ks;
-  }
-  void addMask(std::string const& m, std::string const& c) KTHROW(CompilerNotFoundException) {
-    std::string const k(key(c, cs));
-    if (cs.count(m)) KEXCEPT(compiler::Exception, "Mask cannot replace compiler");
-    masks[m] = cs[k];
-  }
-  Compiler const* get(std::string const& comp) KTHROW(CompilerNotFoundException) {
-    auto k = key(comp, cs);
-    if (cs.count(k)) return cs[k];
-    k = key(comp, masks);
-    if (masks.count(k)) return masks[k];
-    KEXCEPT(CompilerNotFoundException, "Key not found ") << comp;
-  }
-  std::string base(std::string const& comp) {
-    try {
-      return key(comp, cs);
-    } catch (CompilerNotFoundException const& e) {
-    }
-    return key(comp, masks);
-  }
-
- private:
-  std::unique_ptr<Compiler> hcc, gcc, clang, intel, winc, wincs;
-  mkn::kul::hash::map::S2T<Compiler*> cs, masks;
-
- private:
-  Compilers();
-  std::string key(std::string comp, mkn::kul::hash::map::S2T<Compiler*> const& map);
-};
 }  // namespace maiken
-#endif /* _MAIKEN_CODE_COMPILERS_HPP_ */
+#endif /* MAIKEN_CODE_COMPILERS_HPP */

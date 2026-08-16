@@ -28,40 +28,31 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_CODE_CSHARP_HPP_
-#define _MAIKEN_CODE_CSHARP_HPP_
+#ifndef MAIKEN_CONTEXT_HPP
+#define MAIKEN_CONTEXT_HPP
 
 #include "maiken/compiler.hpp"
 
 namespace maiken {
-namespace csharp {
+class Application;
 
-class Exception : public mkn::kul::Exception {
+// Context/CompilerState adapter over an Application. Kept separate so
+// Application itself doesn't have to inherit (and grow to satisfy) these
+// interfaces - it just owns one of these and hands out context().
+class ApplicationContext : public Context, public CompilerState {
  public:
-  Exception(char const* f, int const l, std::string s) : mkn::kul::Exception(f, l, s) {}
+  explicit ApplicationContext(Application& app) : app(app) {}
+
+  ContextState state() const override;
+  CompilerState& compilerState() override { return *this; }
+  void per_compiler_command(CompileHook hook) override;
+  std::string compileCommandFor(std::string const& in) const override;
+
+  void add(AbstractCompilerInput const& input) override;
+
+ private:
+  Application& app;
 };
 
-class WINCompiler : public Compiler {
- public:
-  WINCompiler(int const& v = 0) : Compiler(v) {}
-  virtual ~WINCompiler() {}
-
-  bool sourceIsBin() const override { return true; }
-
-  CompilerProcessCapture compileSource(CompileDAO&) const override {
-    KEXCEPTION("Method compileSource is not implemented in C Sharp");
-  }
-
-  CompilerProcessCapture buildExecutable(LinkDAO& dao) const KTHROW(mkn::kul::Exception) override;
-
-  CompilerProcessCapture buildLibrary(LinkDAO& dao) const KTHROW(mkn::kul::Exception) override;
-
-  void preCompileHeader(std::vector<std::string> const&, std::vector<std::string> const&,
-                        std::string const&, std::string const&, bool = false) const
-      KTHROW(mkn::kul::Exception) override {
-    KEXCEPTION("Method preCompileHeader is not implemented in C Sharp");
-  }
-};
-}  // namespace csharp
 }  // namespace maiken
-#endif /* _MAIKEN_CODE_CSHARP_HPP_ */
+#endif  // MAIKEN_CONTEXT_HPP

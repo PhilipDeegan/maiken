@@ -67,7 +67,7 @@ std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(mkn::k
         std::smatch match;
         if (std::regex_search(real, match, re) && match.size() > 1) RESOLVE_REC(real, v);
       } catch (std::regex_error& e) {
-        KEXIT(1, "Regex Failure:\n") << e.what();
+        KEXIT(1, "Regex Failure:\n", e.what());
       }
     }
   };

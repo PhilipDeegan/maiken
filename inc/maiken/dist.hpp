@@ -28,9 +28,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_DIST_HPP_
-#define _MAIKEN_DIST_HPP_
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#ifndef MAIKEN_DIST_HPP
+#define MAIKEN_DIST_HPP
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 
 #include <memory>
 #include <unordered_map>
@@ -55,14 +55,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken.hpp"
 
-#ifndef _MKN_RAM_TCP_READ_BUFFER_
+#ifndef MKN_RAM_TCP_READ_BUFFER
 #error  // bad
 #endif
 
 namespace maiken {
 namespace dist {
 
-constexpr size_t const BUFF_SIZE = (_MKN_RAM_TCP_READ_BUFFER_ - 666);
+constexpr size_t const BUFF_SIZE = (MKN_RAM_TCP_READ_BUFFER - 666);
 
 class Exception : public mkn::kul::Exception {
  public:
@@ -76,7 +76,7 @@ class Server;
 class DistLinker {
  public:
   static void send([[maybe_unused]] mkn::kul::File const& bin) {
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
     std::vector<std::shared_ptr<maiken::dist::Post>> posts;
     auto post_lambda = [](dist::Host const& host, mkn::kul::File const& bin) {
       mkn::kul::io::BinaryReader br(bin);
@@ -114,7 +114,7 @@ class DistLinker {
     }
     ctp.finish(100000000);  // 100 milliseconds
     ctp.rethrow();
-#endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#endif  //  MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
   }
 };
 
@@ -237,5 +237,5 @@ CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::dist::LinkRequest,
                                    cereal::specialization::member_serialize)
 CEREAL_REGISTER_TYPE(maiken::dist::LinkRequest)
 
-#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
-#endif  // _MAIKEN_DIST_HPP_
+#endif  // MKN_WITH_MKN_RAM && MKN_WITH_IO_CEREAL
+#endif  // MAIKEN_DIST_HPP

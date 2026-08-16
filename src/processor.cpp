@@ -29,6 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"  // IWYU pragma: keep
+#include "mkn/kul/threads.hpp"
 
 #include <mutex>
 
@@ -83,8 +84,10 @@ void maiken::Processor::process(std::vector<Application*> apps) {
       auto& app = *apP;
       mkn::kul::os::PushDir pushd(app.project().dir());
 
+#if MKN_WITH_MKN_MOD
       for (auto& modLoader : app.mods)
-        modLoader->module()->compile(app, app.modCompile(modLoader->app()));
+        modLoader->module()->compile(app.context(), app.modCompile(modLoader->app()));
+#endif  //MKN_WITH_MKN_MOD
 
       app_info.emplace(apP, std::make_shared<ProcInfo>(app));
 
@@ -94,12 +97,11 @@ void maiken::Processor::process(std::vector<Application*> apps) {
       }
       app.loadTimeStamps();
 
-      SourceFinder s_finder(app);
       auto sources = app.sourceMap();
       CompilerValidation::check_compiler_for(app, sources);
       std::vector<mkn::kul::File> cacheFiles;
       auto& objects = app_info.at(apP)->objects;
-      for (auto const& pair : s_finder.all_sources_from(sources, objects, cacheFiles)) {
+      for (auto const& pair : all_sources_from(app, sources, objects, cacheFiles)) {
         auto unit = app_info[apP]->tc.compilationUnit(pair);
         ctp.async(std::bind(lambda, unit), std::bind(lambex, std::placeholders::_1));
       }
@@ -112,8 +114,10 @@ void maiken::Processor::process(std::vector<Application*> apps) {
     for (auto* apP : apps) {
       auto& objects = app_info.at(apP)->objects;
       auto& app = *apP;
+#if MKN_WITH_MKN_MOD
       for (auto& modLoader : app.mods)
-        modLoader->module()->link(app, app.modLink(modLoader->app()));
+        modLoader->module()->link(app.context(), app.modLink(modLoader->app()));
+#endif  //MKN_WITH_MKN_MOD
       app.findObjects(objects);
       app.link(objects);
     }

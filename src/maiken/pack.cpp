@@ -80,13 +80,13 @@ void maiken::Application::pack() KTHROW(mkn::kul::Exception) {
       mkn::kul::Dir outD(a.inst ? a.inst.real() : a.buildDir());
       std::string n = a.project().root()[STR_NAME].Scalar();
       if (!LibFinder::findAdd(a.baseLibFilename(), outD, lib))
-        KEXIT(1, "Depedency Project lib not found, try building: ") << a.buildDir().real();
+        KEXIT(1, "Depedency Project lib not found, try building: ", a.buildDir().real());
     }
   for (auto const& l : libs) {
     bool found = 0;
     for (auto const& p : paths) {
       mkn::kul::Dir path(p);
-      if (!path) KEXIT(1, "Path does not exist: ") << pk.path();
+      if (!path) KEXIT(1, "Path does not exist: ", p);
       found = LibFinder::findAdd(l, path, lib);
       if (found) break;
     }

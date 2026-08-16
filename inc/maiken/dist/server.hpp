@@ -28,8 +28,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_DIST_SERVER_HPP_
-#define _MAIKEN_DIST_SERVER_HPP_
+#ifndef MAIKEN_DIST_SERVER_HPP
+#define MAIKEN_DIST_SERVER_HPP
 
 namespace maiken {
 namespace dist {
@@ -103,4 +103,4 @@ class Server : public mkn::kul::http::MultiServer, public Constants {
 }  // end namespace dist
 }  // end namespace maiken
 
-#endif  // _MAIKEN_DIST_SERVER_HPP_
+#endif  // MAIKEN_DIST_SERVER_HPP

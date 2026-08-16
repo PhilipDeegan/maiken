@@ -3,9 +3,7 @@
 name: mkn
 version: master
 property:
-  DATE: 06_AUG_2026
-  maiken_location: ${MKN_HOME}/app/mkn/${version}
-  maiken_scm: https://github.com/mkn/mkn
+  DATE: 14_AUG_2026
   self.deps: mkn.kul
 
 parent: bin
@@ -25,9 +23,12 @@ profile:
 - name: bin
   parent: lib
   main: mkn.cpp
-  src: src/maiken/create.cpp, -D_MKN_VERSION_=${version}_${DATE}
+  src: src/maiken/create.cpp, -DMKN_VERSION=${version}_${DATE}
   mode: static
-  test: test/cpp.cpp
+  test: |
+    test/cpp.cpp
+    test/compiler/test_compiler_detection.cpp
+    test/compiler/test_command_generator.cpp
   if_arg:
     static: -DYAML_CPP_STATIC_DEFINE
   if_link:
@@ -47,7 +48,8 @@ profile:
   mode: static
 
 - name: test_mod
-  parent: mod
+  parent: headers
+  with: mkn.mod
   src: test/mod/mod.cpp
   out: test_mod
   mode: shared
@@ -59,14 +61,6 @@ profile:
   src: test/mod/lib.cpp
   out: test
   mod: mkn[test_mod]
-
-- name: mod
-  parent: headers
-  mode: shared
-  if_dep:
-    bsd: parse.yaml[shared]  mkn[lib]
-    nix: parse.yaml[headers]
-    win: parse.yaml[shared]  mkn[lib]
 
 - name: server
   parent: lib
@@ -85,10 +79,6 @@ profile:
 - name: format
   mod: |
     clang.format{init:{style: file, paths: .}}
-
-
-- name: lib_test
-  dep: mkn&${maiken_location}(${maiken_scm})[mod]
 
 
 - name: github

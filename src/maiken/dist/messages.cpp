@@ -28,7 +28,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 
 #include "maiken/dist.hpp"
 
@@ -62,11 +62,12 @@ void maiken::dist::CompileRequest::do_response_for(mkn::kul::http::A1_1Request c
   if (!req.header("session")) KEXCEPTION("BAD CompileRequest");
   auto session_id = (*req.headers().find("session")).second;
 
-  mkn::kul::env::CWD(this->m_directory);
-
   std::vector<mkn::kul::File> cacheFiles;
-  sessions[session_id].apps_vector()[0]->compile(this->m_src_obj, sessions[session_id].objects,
-                                                 cacheFiles);
+  {
+    mkn::kul::os::PushDir pushd(this->m_directory);
+    sessions[session_id].apps_vector()[0]->compile(this->m_src_obj, sessions[session_id].objects,
+                                                   cacheFiles);
+  }
 
   YAML::Node root;
   bool success = 1;
@@ -155,4 +156,4 @@ void maiken::dist::DownloadRequest::do_response_for(mkn::kul::http::A1_1Request 
   resp.withBody(ss.str());
 }
 
-#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+#endif  // MKN_WITH_MKN_RAM && MKN_WITH_IO_CEREAL

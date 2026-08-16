@@ -28,6 +28,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "maiken/compiler/compilers.hpp"
 #include "maiken.hpp"
 
 void maiken::Application::showConfig(bool force) {
@@ -42,7 +43,7 @@ void maiken::Application::showConfig(bool force) {
 
     std::string path = mkn::kul::env::GET("PATH");
     {
-      auto it(std::find_if(evs.begin(), evs.end(), [](mkn::kul::cli::EnvVar const& ev) {
+      auto it(std::find_if(evs.begin(), evs.end(), [](mkn::kul::env::Var const& ev) {
         return strcmp(ev.name(), "PATH") == 0;
       }));
       if (it != evs.end()) path = (*it).toString();

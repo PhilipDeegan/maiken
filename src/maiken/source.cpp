@@ -28,8 +28,11 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
+#include "maiken/app.hpp"
+#include "maiken/defs.hpp"
 #include "maiken/regex.hpp"
+#include "maiken/property.hpp"
+#include "maiken/compiler/compilers.hpp"
 
 void maiken::Application::addMainLine(std::string const& o) KTHROW(mkn::kul::Exception) {
   std::vector<std::string> v(mkn::kul::String::SPLIT(o, ","));
@@ -44,10 +47,9 @@ void maiken::Application::addSourceLine(std::string const& s) KTHROW(mkn::kul::E
       return element.first == Source(str);
     });
     if (it != srcs.end()) {
-      if (!(*it).first.args().empty())
-        KEXCEPT(maiken::Exception, "Source file being added twice: ")
-            << str << " " << (*it).first.args();
-      if ((*it).first.args().empty() && !args.empty()) srcs.erase(it);
+      if (!(*it).first.args.empty())
+        KEXCEPT(maiken::Exception, "Source file being added twice: ", str, " ", (*it).first.args);
+      if ((*it).first.args.empty() && !args.empty()) srcs.erase(it);
     }
     srcs.emplace_back(Source(str, args), recurse_dir);
   };
@@ -91,20 +93,18 @@ maiken::Application::sourceMap() const {
 
   auto check_replace = [&](std::string const& src, std::string args,
                            std::vector<maiken::Source>& v) {
-    auto it = std::find_if(v.begin(), v.end(),
-                           [&](Source const& element) { return element.in() == src; });
+    auto it =
+        std::find_if(v.begin(), v.end(), [&](Source const& element) { return element.in == src; });
     if (it != v.end()) {
-      args += " " + (*it).args();
+      args += " " + (*it).args;
       v.erase(it);
     }
     v.emplace_back(src, args);
-    it = std::find_if(v.begin(), v.end(),
-                      [&](Source const& element) { return element.in() == src; });
   };
 
   for (auto const& sourceDir : sources()) {
     std::vector<mkn::kul::File> files;
-    std::string in(sourceDir.first.in());
+    std::string in(sourceDir.first.in);
     mkn::kul::Dir d(in);
     if (d)
       for (auto const& f : d.files(sourceDir.second)) files.push_back(f);
@@ -121,7 +121,7 @@ maiken::Application::sourceMap() const {
           a = rl.compare(s) == 0;
           if (a) break;
         }
-        if (!a) check_replace(rl, sourceDir.first.args(), sm[ft][file.dir().real()]);
+        if (!a) check_replace(rl, sourceDir.first.args, sm[ft][file.dir().real()]);
       }
     }
   }
@@ -130,7 +130,7 @@ maiken::Application::sourceMap() const {
 
 bool maiken::Application::incSrc(mkn::kul::File const& file) const {
   bool c = 1;
-  if (_MKN_TIMESTAMPS_) {
+  if (MKN_TIMESTAMPS) {
     std::string const& rl(file.mini());
     c = !stss.count(rl);
     if (!c) {
@@ -151,50 +151,46 @@ bool maiken::Application::incSrc(mkn::kul::File const& file) const {
   return c;
 }
 
-std::vector<maiken::Source> maiken::SourceFinder::tests() {
+std::vector<maiken::Source> maiken::tests_for(Application const& app) {
   std::vector<maiken::Source> testV;
-  for (auto const& p : app.tests) {
+  for (auto const& p : app.testFiles()) {
     auto& file = p.first;
-    if (app.fs.count(file.substr(file.rfind(".") + 1)) == 0) continue;
+    if (app.files().count(file.substr(file.rfind(".") + 1)) == 0) continue;
     testV.emplace_back(mkn::kul::File(file).real());
   }
   return testV;
 }
 
-maiken::SourceFinder::SourceFinder(maiken::Application const& _app)
-    : app(_app),
-      oType("." + AppVars::INSTANCE().envVars().at("MKN_OBJ")),
-      objD(_app.buildDir().join("obj"), 1),
-      tmpD(_app.buildDir().join("tmp"), 1) {}
-
-std::vector<std::pair<maiken::Source, std::string>> maiken::SourceFinder::all_sources_from(
-    SourceMap const& sources, mkn::kul::hash::set::String& objects,
-    std::vector<mkn::kul::File>& cacheFiles) {
+std::vector<std::pair<maiken::Source, std::string>> maiken::all_sources_from(
+    Application const& app, Application::SourceMap const& sources,
+    mkn::kul::hash::set::String& objects, std::vector<mkn::kul::File>& cacheFiles) {
   mkn::kul::os::PushDir pushd(app.project().dir());
 
+  mkn::kul::Dir const objD(app.buildDir().join("obj"), 1), tmpD(app.buildDir().join("tmp"), 1);
   std::vector<std::pair<maiken::Source, std::string>> source_objects;
 
   auto const _source = [&](auto& s, auto dir) {
-    mkn::kul::File const source(s.in());
+    mkn::kul::File const source(s.in);
     if (!app.incSrc(source)) return;
 
-    mkn::kul::File object(s.object(), dir);
-    source_objects.emplace_back(Source(source.escm(), s.args()), object.escm());
+    mkn::kul::File object(source_object(s.in), dir);
+    source_objects.emplace_back(Source(source.escm(), s.args), object.escm());
   };
 
   auto const handle_source = [&](auto& s, auto dir) {
-    mkn::kul::File const source(s.in());
-    if (app.main_ && Source(source.real()) == *app.main_) return;
+    mkn::kul::File const source(s.in);
+    if (app.main() && Source(source.real()) == *app.main()) return;
 
     _source(s, dir);
   };
 
   for (auto const& ft : sources) {
-    auto compiler = maiken::Compilers::INSTANCE().get(app.files().at(ft.first).at(STR_COMPILER));
+    auto compiler =
+        maiken::Compilers::INSTANCE().get(app.files().at(ft.first).at(Constants::STR_COMPILER));
     if (compiler->sourceIsBin()) {
       for (auto const& kv : ft.second)
         for (auto const& s : kv.second) {
-          mkn::kul::File source(s.in());
+          mkn::kul::File source(s.in);
           objects.insert(source.escm());
           cacheFiles.push_back(source);
         }
@@ -204,8 +200,8 @@ std::vector<std::pair<maiken::Source, std::string>> maiken::SourceFinder::all_so
     }
   }
 
-  if (app.main_) _source(*app.main_, tmpD);
-  for (auto const& test : tests()) handle_source(test, tmpD);
+  if (app.main()) _source(*app.main(), tmpD);
+  for (auto const& test : tests_for(app)) handle_source(test, tmpD);
   return source_objects;
 }
 
@@ -220,13 +216,4 @@ void maiken::CompilerValidation::check_compiler_for(
       KEXIT(1, e.what());
     }
   }
-}
-
-std::string maiken::Source::object() const {
-  mkn::kul::File const source(m_in);
-  std::string const oType = "." + AppVars::INSTANCE().envVars().at("MKN_OBJ");
-  std::stringstream ss, os;
-  ss << std::hex << std::hash<std::string>()(source.real());
-  os << ss.str() << "-" << source.name() << oType;
-  return os.str();
 }

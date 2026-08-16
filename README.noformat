@@ -347,6 +347,12 @@ super: $directory                   # Inherit properties of project at directory
 property:
   - aaa: AAA
     bbb: ${aaa}.BBB
+  - mkn.link.rpathing: true           # Optional, default true. When building a SHAR
+                                       # library or executable, add "-Wl,-rpath=..."
+                                       # entries for its dependency libraries' paths.
+                                       # Dependency libraries are always linked
+                                       # ("-l"/"-L") regardless of this setting - it
+                                       # only controls whether they're also rpathed.
 
 local:
     repo: <directory>                   # Optional, missing assumed ${4.3.2}/repo
@@ -354,7 +360,7 @@ local:
     lib:  <directory>                   # Optional, successfully linked libraries are moved to <directory>, overrides install
     debugger: <debug command>           # Optional debug command, overrides defaut, overriden by env var MKN_DBG string
 remote:
-    repo: URL_ROOTA URL_ROOTB           # Optional, overrides switch _MKN_REMOTE_REPO_ for incomplete SCM URL lookups
+    repo: URL_ROOTA URL_ROOTB           # Optional, overrides switch MKN_REMOTE_REPO for incomplete SCM URL lookups
 
 inc: <directory> <directory>            # Optional, add include directories compiling
 path: <directory> <directory>           # Optional, add library path directories linking
@@ -395,7 +401,7 @@ To activate another language run:
 
 Upon successful compilation of a project, source file modification timestamps are recorded under ./bin/<profile>/.mkn/src_stamp, which are checked on the next build to see if recompilation is required.
 Similarly, the aggregate of all non-hidden file modification timestamps are recorded under ./bin/<profile>/.mkn/inc_stamp, which are also checked on the next build to see if recompilation is required.
-This can be enabled by compiling with the argument -D_MKN_TIMESTAMPS_=1
+This can be enabled by compiling with the argument -DMKN_TIMESTAMPS=1
 This is disabled for languages like C# when the source is not compiled.
 The clean command deletes the timestamp files, and recompiles everything.
 
@@ -450,11 +456,11 @@ CSV with the value equating to either the current profile yaml root node "name" 
 Project profiles may be specified with square brackets, e.g. "-w project1[profile1,profile2],project2[profile1]"
 
 If an included dependency is not from the current project, in most cases (refine) a define is added to the compilation of the current project
-in the form of "-D_MKN_WITH_${PROJ.ECT}_" where a project name is turned uppercase and the dot is changed to an underscore
+in the form of "-DMKN_WITH_${PROJ.ECT}" where a project name is turned uppercase and the dot is changed to an underscore
 
 example with g++ and "-w mkn.ram" will result in a compilation command like:
 
-    g++ -D_MKN_WITH_MKN_RAM_ -c file.obj -o file.cpp
+    g++ -DMKN_WITH_MKN_RAM -c file.obj -o file.cpp
 
 A concrete git URL can be specified with a string between () brackets - if these are missing the project string is
  attempted to be used as the URL.
@@ -629,11 +635,6 @@ Type            String
 Default         Linux/BSD="o", Windows="obj"
 Description     Sets the file type to compile object files to
 
-Key             MKN_LIB_LINK_LIB
-Type            bool
-Default         false
-Description     Links libraries with dependency libraries (gcc and  derivatives only)
-
 Key             MKN_GCC_PREFERRED
 Type            bool
 Default         false
@@ -665,7 +666,7 @@ Description     Forwards MKN_LD_PRELOAD as LD_PRELOAD for run/dbg
 
 7. Switches
 
-Key             _MKN_REP_NAME_DOT_
+Key             MKN_REP_NAME_DOT
 Type            bool
 Default         1
 Description     split project name by period
@@ -677,7 +678,7 @@ Description     split project name by period
                     otherwise
                         ${LOCAL_REPO}/pro.ject/version
 
-Key             _MKN_REP_VERS_DOT_
+Key             MKN_REP_VERS_DOT
 Type            bool
 Default         0
 Description     split project version by period.
@@ -689,17 +690,17 @@ Description     split project version by period.
                     otherwise
                         ${LOCAL_REPO}/project/ver.si.on
 
-Key             _MKN_TIMESTAMPS_
+Key             MKN_TIMESTAMPS
 Type            bool
 Default         0
 Description     Logs timestamps of source/includes to skip files with no changes.
 
-Key             _MKN_REMOTE_EXEC_
+Key             MKN_REMOTE_EXEC
 Type            bool
 Default         1
 Description     Execute mkn.(bat/sh etc) in directory of missing dependencies when retrieved from SCM
 
-Key             _MKN_REMOTE_REPO_
+Key             MKN_REMOTE_REPO
 Type            string
 Default         "http://github.com/mkn/"
 Description     Space separated list of URLs to use as roots for non-complete SCM repositories.
@@ -707,31 +708,31 @@ Description     Space separated list of URLs to use as roots for non-complete SC
                     scm: http://github.com/mkn/mkn.kul.git  # ignored
                     scm: git@github.com:mkn/mkn.kul.git     # ignored
                     scm: mkn.kul.git                        # becomes
-                                                                for(const std::string& s: split(_MKN_REMOTE_REPO_, " ")
+                                                                for(const std::string& s: split(MKN_REMOTE_REPO, " ")
                                                                     attempt(s + "mkn.kul.git")
                                                                 if all attempts fail, throw
 
-Key             _MKN_DISABLE_SCM_
+Key             MKN_DISABLE_SCM
 Type            flag
 Default         0
 Description     disables all SCM
 
-Key             _MKN_DISABLE_SVN_
+Key             MKN_DISABLE_SVN
 Type            flag
 Default         0
 Description     disables SVN if it was supported
 
-Key             _MKN_DISABLE_GIT_
+Key             MKN_DISABLE_GIT
 Type            flag
 Default         0
 Description     disables git
 
-Key             _MKN_DISABLE_MODULES_
+Key             MKN_DISABLE_MODULES
 Type            flag
 Default         0
 Description     disables modules from executing at any point
 
-Key             _MKN_DISABLE_RUN_LIB_PATH_HANDLING_
+Key             MKN_DISABLE_RUN_LIB_PATH_HANDLING
 Type            flag
 Default         0
 Description     nix: disables LD_LIBRARY_PATH modifications during "run/dbg" commands
@@ -740,7 +741,7 @@ Description     nix: disables LD_LIBRARY_PATH modifications during "run/dbg" com
                   else  : disables LD_LIBRARY_PATH modifications during "run/dbg" commands
                 win: disables PATH modifications during "run/dbg" commands
 
-Key             _MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION_
+Key             MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION
 Type            uint
 Default         0
 Description     default action deduction for retrieving dependences if built with mkn.ram

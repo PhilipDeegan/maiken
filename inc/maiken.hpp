@@ -28,11 +28,11 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_HPP_
-#define _MAIKEN_HPP_
+#ifndef MAIKEN_HPP
+#define MAIKEN_HPP
 
 #include "maiken/app.hpp"
 #include "maiken/module.hpp"
 #include "maiken/property.hpp"
 
-#endif /* _MAIKEN_HPP_ */
+#endif /* MAIKEN_HPP */

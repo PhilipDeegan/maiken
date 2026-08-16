@@ -28,7 +28,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 
 #include <iomanip>
 #include "maiken/dist.hpp"
@@ -61,4 +61,4 @@ void maiken::dist::Server::operator()() {
   }
 }
 
-#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+#endif  // MKN_WITH_MKN_RAM && MKN_WITH_IO_CEREAL

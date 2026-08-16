@@ -28,17 +28,17 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken/module/init.hpp"
+#include "mkn/mod/init.hpp"
 
 namespace maiken::test {
 
-class MaikenModule : public maiken::Module {
+class MaikenModule : public mkn::mod::Module {
  public:
-  void init(Application&, YAML::Node const&) KTHROW(std::exception) override { init_ = 1; }
-  void compile(Application&, YAML::Node const&) KTHROW(std::exception) override { compile_ = 1; }
-  void link(Application&, YAML::Node const&) KTHROW(std::exception) override { link_ = 1; }
-  void test(Application&, YAML::Node const&) KTHROW(std::exception) override { test_ = 1; }
-  void pack(Application&, YAML::Node const&) KTHROW(std::exception) override { pack_ = 1; }
+  void init(mkn::mod::Context&, YAML::Node const&) override { init_ = 1; }
+  void compile(mkn::mod::Context&, YAML::Node const&) override { compile_ = 1; }
+  void link(mkn::mod::Context&, YAML::Node const&) override { link_ = 1; }
+  void test(mkn::mod::Context&, YAML::Node const&) override { test_ = 1; }
+  void pack(mkn::mod::Context&, YAML::Node const&) override { pack_ = 1; }
 
   ~MaikenModule() {
     auto const vec = {
@@ -57,8 +57,8 @@ class MaikenModule : public maiken::Module {
 
 }  // namespace maiken::test
 
-extern "C" MKN_KUL_PUBLISH maiken::Module* maiken_module_construct() {
-  return new maiken ::test ::MaikenModule;
+extern "C" MKN_KUL_PUBLISH mkn::mod::Module* maiken_module_construct() {
+  return new maiken::test::MaikenModule;
 }
 
-extern "C" MKN_KUL_PUBLISH void maiken_module_destruct(maiken::Module* p) { delete p; }
+extern "C" MKN_KUL_PUBLISH void maiken_module_destruct(mkn::mod::Module* p) { delete p; }

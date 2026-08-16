@@ -28,8 +28,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_GIT_GIT_HPP_
-#define _MAIKEN_GIT_GIT_HPP_
+#ifndef MAIKEN_GIT_GIT_HPP
+#define MAIKEN_GIT_GIT_HPP
 
 #include "mkn/kul/io.hpp"
 #include "mkn/kul/dbg.hpp"
@@ -37,9 +37,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/settings.hpp"
 
-#ifdef _MKN_WITH_MKN_RAM_
+#ifdef MKN_WITH_MKN_RAM
 #include "maiken/git/github.hpp"
-#endif  // _MKN_WITH_MKN_RAM_
+#endif  // MKN_WITH_MKN_RAM
 
 namespace maiken {
 
@@ -57,8 +57,8 @@ class Git {
   }
 
   // Resolve the SCM branch for a dependency.
-  // With _MKN_WITH_MKN_RAM_: tries the GitHub API first; falls back to git on API rejection.
-  // Without _MKN_WITH_MKN_RAM_: uses git ls-remote directly.
+  // With MKN_WITH_MKN_RAM: tries the GitHub API first; falls back to git on API rejection.
+  // Without MKN_WITH_MKN_RAM: uses git ls-remote directly.
   static std::string resolveSCMBranch(std::string const& repo, std::string const& cacheDirName) {
     MKN_KUL_DBG_FUNC_ENTER;
 
@@ -71,13 +71,13 @@ class Git {
     std::string version;
     bool resolved = false;
 
-#ifdef _MKN_WITH_MKN_RAM_
+#ifdef MKN_WITH_MKN_RAM
     try {
       resolved = Github<>::GET_LATEST(repo, version, module);
     } catch (...) {
       KLOG(ERR) << "Github API rejected - falling back to git for: " << name;
     }
-#endif  // _MKN_WITH_MKN_RAM_
+#endif  // MKN_WITH_MKN_RAM
 
     if (!resolved) {
       std::vector<std::string> repos;
@@ -122,4 +122,4 @@ class Git {
 
 }  // namespace maiken
 
-#endif /* _MAIKEN_GIT_GIT_HPP_ */
+#endif /* MAIKEN_GIT_GIT_HPP */

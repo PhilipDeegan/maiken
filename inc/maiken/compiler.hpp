@@ -28,129 +28,45 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_COMPILER_HPP_
-#define _MAIKEN_COMPILER_HPP_
+#ifndef MAIKEN_COMPILER_HPP
+#define MAIKEN_COMPILER_HPP
 
-#include "maiken/defs.hpp"
-#include "maiken/global.hpp"
-
-#include "mkn/kul/os.hpp"
-#include "mkn/kul/proc.hpp"
-#include "mkn/kul/except.hpp"
+#include "mkn/kul/lang/compiler.hpp"
 
 namespace maiken {
 class MKN_KUL_PUBLISH Application;
 
-struct CompilationInfo {
-  std::string lib_prefix, lib_postfix, lib_ext;
-
-  CompilationInfo()
-      : lib_prefix(AppVars::INSTANCE().envVar("MKN_LIB_PRE")),
-        lib_ext(AppVars::INSTANCE().envVar("MKN_LIB_EXT")) {}
-};
+using Context = mkn::kul::lang::Context;
+using ContextState = mkn::kul::lang::ContextState;
+using CompilerState = mkn::kul::lang::CompilerState;
+using AbstractCompilerInput = mkn::kul::lang::AbstractCompilerInput;
+using IncludeInput = mkn::kul::lang::IncludeInput;
+using LibPathInput = mkn::kul::lang::LibPathInput;
+using LibInput = mkn::kul::lang::LibInput;
+using LinkPrefixInput = mkn::kul::lang::LinkPrefixInput;
+using BuildModeInput = mkn::kul::lang::BuildModeInput;
+using CompilationInfoInput = mkn::kul::lang::CompilationInfoInput;
+using CompilationInfo = mkn::kul::lang::CompilationInfo;
+using CompileCommand = mkn::kul::lang::CompileCommand;
+using CompileEnv = mkn::kul::lang::CompileEnv;
+using Compiler = mkn::kul::lang::Compiler;
+using CompilerProcessCapture = mkn::kul::lang::ProcessCapture;
+using CompileDAO = mkn::kul::lang::CompileDAO;
+using LinkDAO = mkn::kul::lang::LinkDAO;
 
 namespace compiler {
-enum Mode { NONE = 0, STAT, SHAR };
-
-inline auto mode_from(std::string const& mode) {
-  if (mode == Constants::STR_SHARED) return Mode::SHAR;
-  if (mode == Constants::STR_STATIC) return Mode::STAT;
-  return Mode::NONE;
-}
+using Mode = mkn::kul::lang::Mode;
+using mkn::kul::lang::mode_from;
 }  // namespace compiler
-
-struct CompileDAO {
-  maiken::Application const& app;
-  std::string const &compiler, &in, &out;
-  std::vector<std::string> const &args, &incs;
-  compiler::Mode const& mode;
-  bool dryRun = false;
-};
-struct LinkDAO {
-  maiken::Application const& app;
-  std::string const &linker, &linkerEnd, &out;
-  std::vector<mkn::kul::Dir> stars;
-  std::vector<std::string> const &objects, &libs, &libPaths;
-  compiler::Mode const& mode;
-  bool dryRun = false;
-};
-
-class CompilerProcessCapture : public mkn::kul::ProcessCapture {
- public:
-  CompilerProcessCapture() {}
-  CompilerProcessCapture(mkn::kul::AProcess& p) : mkn::kul::ProcessCapture(p) {}
-
-  void exception(std::exception_ptr const& e) { ep = e; }
-  std::exception_ptr const& exception() const { return ep; }
-
-  void cmd(std::string const& cm) { this->c = cm; }
-  std::string const& cmd() const { return c; }
-
-  void file(std::string const& f) { this->f = f; }
-  std::string const& file() const { return f; }
-
- private:
-  std::exception_ptr ep;
-  std::string c, f;
-};
-
-class Compiler {
- protected:
-  Compiler(int const& v) : version(v) {}
-  int const version;
-  std::unordered_map<uint8_t, std::string> m_optimise_c, m_optimise_l_bin, m_optimise_l_lib,
-      m_debug_c, m_debug_l_bin, m_debug_l_lib, m_warn_c;
-
- public:
-  virtual ~Compiler() {}
-  virtual bool sourceIsBin() const = 0;
-
-  virtual CompilerProcessCapture compileSource(CompileDAO& dao) const
-      KTHROW(mkn::kul::Exception) = 0;
-
-  virtual CompilerProcessCapture buildExecutable(LinkDAO& dao) const
-      KTHROW(mkn::kul::Exception) = 0;
-
-  virtual CompilerProcessCapture buildLibrary(LinkDAO& dao) const KTHROW(mkn::kul::Exception) = 0;
-
-  virtual void preCompileHeader(std::vector<std::string> const& incs,
-                                std::vector<std::string> const& args, std::string const& in,
-                                std::string const& out, bool dryRun = false) const
-      KTHROW(mkn::kul::Exception) = 0;
-
-  std::string compilerDebug(uint8_t const& key) const {
-    return m_debug_c.count(key) ? m_debug_c.at(key) : "";
-  }
-  std::string compilerOptimization(uint8_t const& key) const {
-    return m_optimise_c.count(key) ? m_optimise_c.at(key) : "";
-  }
-  std::string compilerWarning(uint8_t const& key) const {
-    return m_warn_c.count(key) ? m_warn_c.at(key) : "";
-  }
-  std::string linkerDebugBin(uint8_t const& key) const {
-    return m_debug_l_bin.count(key) ? m_debug_l_bin.at(key) : "";
-  }
-  std::string linkerDebugLib(uint8_t const& key) const {
-    return m_debug_l_lib.count(key) ? m_debug_l_lib.at(key) : "";
-  }
-  std::string linkerOptimizationBin(uint8_t const& key) const {
-    return m_optimise_l_bin.count(key) ? m_optimise_l_bin.at(key) : "";
-  }
-  std::string linkerOptimizationLib(uint8_t const& key) const {
-    return m_optimise_l_lib.count(key) ? m_optimise_l_lib.at(key) : "";
-  }
-};
 
 struct CompilationUnit {
   CompilationUnit(maiken::Application const& app, Compiler const* comp, std::string const& compiler,
-                  std::vector<std::string> const& args, std::vector<std::string> const& incs,
-                  std::string const& in, std::string const& out, compiler::Mode const& mode,
-                  bool dryRun)
+                  std::vector<std::string> const& args, std::string const& in,
+                  std::string const& out, compiler::Mode const& mode, bool dryRun)
       : app(app),
         comp(comp),
         compiler(compiler),
         args(args),
-        incs(incs),
         in(in),
         out(out),
         mode(mode),
@@ -160,15 +76,17 @@ struct CompilationUnit {
 
   std::string compileString() const KTHROW(mkn::kul::Exception);
 
+  // Defined once Application is complete (needs app.context()).
+  CompileDAO dao() const;
+
   maiken::Application const& app;
   Compiler const* comp;
   std::string const compiler;
   std::vector<std::string> const args;
-  std::vector<std::string> const incs;
   std::string const in;
   std::string const out;
   compiler::Mode const mode;
   bool const dryRun;
 };
 }  // namespace maiken
-#endif /* _MAIKEN_COMPILER_HPP_ */
+#endif /* MAIKEN_COMPILER_HPP */

@@ -28,15 +28,15 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_GLOBALS_HPP_
-#define _MAIKEN_GLOBALS_HPP_
+#ifndef MAIKEN_GLOBALS_HPP
+#define MAIKEN_GLOBALS_HPP
 
 #include "mkn/kul/map.hpp"
 #include <unordered_set>
 
 #include "maiken/settings.hpp"
 
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 #include <cereal/cereal.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/types/string.hpp>
@@ -45,23 +45,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cereal/types/vector.hpp>
 
 #include <cereal/archives/portable_binary.hpp>
-#endif  // _MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  // MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
 
 namespace maiken {
 
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 namespace dist {
 class Post;
 class RemoteCommandManager;
 }  // namespace dist
-#endif  // _MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  // MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
 
 class AppVars : public Constants {
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
   friend class dist::RemoteCommandManager;
   friend class dist::Post;
   friend class ::cereal::access;
-#endif  // _MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  // MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
  private:
   bool dr = 0, du = 0, fo = 0, fu = 0, q = 0, s = 0, sh = 0, st = 0, u = 0;
   uint16_t de = -1, dl = 0, op = -1, ts = 1, wa = -1;
@@ -71,9 +71,9 @@ class AppVars : public Constants {
 
   static std::shared_ptr<AppVars> instance;
 
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
   uint16_t no = 0;
-#endif  // _MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  // MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
 
   AppVars();
 
@@ -162,7 +162,7 @@ class AppVars : public Constants {
   mkn::kul::hash::set::String const& withoutParsed() const { return wop; }
   void withoutParsed(mkn::kul::hash::set::String const& wop) { this->wop = wop; }
 
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
   uint16_t const& nodes() const { return no; }
   void nodes(uint16_t const& no) { this->no = no; }
 
@@ -230,7 +230,7 @@ class AppVars : public Constants {
     pks = convert_to_kul_map(_pks);
   }
 
-#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  //MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
 
   static AppVars& INSTANCE() {
     if (instance == nullptr) instance.reset(new AppVars);
@@ -239,10 +239,10 @@ class AppVars : public Constants {
 };
 }  // namespace maiken
 
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 
 CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::AppVars, cereal::specialization::member_load_save)
 
-#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  //MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
 
-#endif /* _MAIKEN_GLOBALS_HPP_ */
+#endif /* MAIKEN_GLOBALS_HPP */

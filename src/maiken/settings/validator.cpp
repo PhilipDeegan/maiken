@@ -54,7 +54,7 @@ mkn::kul::yaml::Validator maiken::Settings::validator() const {
                      {NodeValidator("type", 1), NodeValidator("compiler", 1),
                       NodeValidator("linker"), NodeValidator("archiver")},
                      0, NodeType::LIST),
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
        NodeValidator("dist",
                      {NodeValidator("port"),
                       NodeValidator("nodes",
@@ -62,7 +62,7 @@ mkn::kul::yaml::Validator maiken::Settings::validator() const {
                                      NodeValidator("user"), NodeValidator("pass")},
                                     0, NodeType::LIST)},
                      0, NodeType::MAP),
-#endif  // _MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+#endif  // MKN_WITH_MKN_RAM && MKN_WITH_IO_CEREAL
        NodeValidator("compiler", {NodeValidator("mask", masks, 0, NodeType::MAP)}, 0,
                      NodeType::MAP),
        NodeValidator("find", {NodeValidator("*")}, 0, NodeType::MAP)});

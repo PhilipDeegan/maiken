@@ -61,9 +61,9 @@ class CLIHandler : public Constants {
                                        Arg('L', STR_ALINKER, ArgType::STRING),
                                        Arg('m', STR_MOD, ArgType::STRING),
                                        Arg('M', STR_MAIN, ArgType::STRING),
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
                                        Arg('n', STR_NODES, ArgType::MAYBE),
-#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  //MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
                                        Arg('o', STR_OUT, ArgType::STRING),
                                        Arg('O', STR_OPT, ArgType::MAYBE),
                                        Arg('q', STR_QUIET),
@@ -81,9 +81,9 @@ class CLIHandler : public Constants {
                                        Arg('W', STR_WARN, ArgType::MAYBE),
                                        Arg('x', STR_SETTINGS, ArgType::STRING)};
   std::vector<mkn::kul::cli::Cmd> cmdV{Cmd(STR_INIT),     Cmd(STR_INC),     Cmd(STR_SRC),
-#ifndef _MKN_DISABLE_MODULES_
+#if MKN_WITH_MKN_MOD
                                        Cmd(STR_MODS),
-#endif  //_MKN_DISABLE_MODULES_
+#endif  //MKN_WITH_MKN_MOD
                                        Cmd(STR_CLEAN),    Cmd(STR_DEPS),    Cmd(STR_BUILD),
                                        Cmd(STR_RUN),      Cmd(STR_COMPILE), Cmd(STR_LINK),
                                        Cmd(STR_PROFILES), Cmd(STR_DBG),     Cmd(STR_PACK),
@@ -151,22 +151,22 @@ std::string get_first_line_of(mkn::kul::File const& yml) {
 
 auto version_string() {
   std::stringstream ss, mod;
-  ss << MKN_KUL_STR(_MKN_VERSION_) << " (" << MKN_KUL_STR(__MKN_KUL_OS__) << ") w/[";
-  if (_MKN_REMOTE_EXEC_) mod << "exec,";
-#ifndef _MKN_DISABLE_MODULES_
+  ss << MKN_KUL_STR(MKN_VERSION) << " (" << MKN_KUL_STR(MKN_KUL_OS) << ") w/[";
+  if (MKN_REMOTE_EXEC) mod << "exec,";
+#if MKN_WITH_MKN_MOD
   mod << "mod,";
-#endif  //_MKN_DISABLE_MODULES_
-#ifdef _MKN_WITH_MKN_RAM_
-#if defined(_MKN_WITH_IO_CEREAL_)
+#endif  //MKN_WITH_MKN_MOD
+#ifdef MKN_WITH_MKN_RAM
+#if defined(MKN_WITH_IO_CEREAL)
   mod << "dist,";
-#endif  //_MKN_WITH_MKN_RAM_ && _MKN_WITH_IO_CEREAL_
+#endif  //MKN_WITH_MKN_RAM && MKN_WITH_IO_CEREAL
   mod << "ram,";
-#endif  //_MKN_WITH_MKN_RAM_
-#ifdef _MKN_WITH_GOOGLE_SPARSEHASH_
+#endif  //MKN_WITH_MKN_RAM
+#ifdef MKN_WITH_GOOGLE_SPARSEHASH
   mod << "sparsehash,";
-#endif  //_MKN_WITH_GOOGLE_SPARSEHASH_
+#endif  //MKN_WITH_GOOGLE_SPARSEHASH
 
-  if (_MKN_TIMESTAMPS_) mod << "ts,";
+  if (MKN_TIMESTAMPS) mod << "ts,";
   if (mod.str().size()) mod.seekp(-1, mod.cur);
   mod << "]";
   ss << mod.str();
@@ -245,7 +245,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
         if (f && !wildcard) break;
       }
 
-      if (!f) KEXIT(1, "profile does not exist: ") << profile;
+      if (!f) KEXIT(1, "profile does not exist: ", profile);
       if (!wildcard) profiles.emplace_back(profile);
     }
   }
@@ -262,7 +262,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
   if (args.has(STR_SCM_UPDATE)) AppVars::INSTANCE().update(true);
   if (args.has(STR_DEP)) AppVars::INSTANCE().dependencyLevel((std::numeric_limits<int16_t>::max)());
 
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
   if (args.has(STR_NODES)) {
     try {
       AppVars::INSTANCE().nodes((std::numeric_limits<int16_t>::max)());
@@ -274,7 +274,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
       KEXIT(1, e.stack());
     }
   }
-#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  //MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
 
   {
     auto getSet = [args](std::string const& a, std::string const& e, uint16_t const& default_value,
@@ -282,12 +282,12 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
       if (args.has(a)) try {
           if (args.get(a).size()) {
             auto val(mkn::kul::String::UINT16(args.get(a)));
-            if (val > 9) KEXIT(1, e) << " argument is invalid";
+            if (val > 9) KEXIT(1, e, " argument is invalid");
             func(val);
           } else
             func(default_value);
         } catch (mkn::kul::StringException const& e) {
-          KEXIT(1, "") << e << " argument is invalid";
+          KEXIT(1, "", e, " argument is invalid");
         } catch (mkn::kul::Exception const& e) {
           KEXIT(1, e.stack());
         }
@@ -442,7 +442,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     auto print_srcs = [](auto const* a) {
       for (auto const& p1 : a->sourceMap())
         for (auto const& p2 : p1.second)
-          for (auto const& p3 : p2.second) KOUT(NON) << mkn::kul::File(p3.in()).full();
+          for (auto const& p3 : p2.second) KOUT(NON) << mkn::kul::File(p3.in).full();
     };
     for (auto a : apps) {
       print_srcs(a);
@@ -464,7 +464,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     if (args.has(STR_OUT)) apps[0]->out = args.get(STR_OUT);
   }
 
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
   if (AppVars::INSTANCE().nodes()) {
     maiken::dist::RemoteCommandManager::INST().build_hosts(Settings::INSTANCE());
     auto& hosts(maiken::dist::RemoteCommandManager::INST().hosts());
@@ -487,6 +487,6 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     ctp.finish(10000000);  // 10 milliseconds
     ctp.rethrow();
   }
-#endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#endif  //  MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
   return apps;
 }

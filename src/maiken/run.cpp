@@ -75,29 +75,28 @@ class Runner : public Constants {
       std::string arg;
       for (auto const& s : a.libraryPaths()) arg += s + mkn::kul::env::SEP();
       if (!arg.empty()) arg.pop_back();
-#if _MKN_DISABLE_RUN_LIB_PATH_HANDLING_ == 0
+#if MKN_DISABLE_RUN_LIB_PATH_HANDLING == 0
 #if defined(__APPLE__)
-      mkn::kul::cli::EnvVar dy("DYLD_LIBRARY_PATH", arg, mkn::kul::cli::EnvVarMode::PREP);
+      mkn::kul::env::Var dy("DYLD_LIBRARY_PATH", arg, mkn::kul::env::Var::Mode::PREP);
       KOUT(DBG) << dy.name() << " : " << dy.toString();
       envies.push_back(std::make_pair(dy.name(), dy.toString()));
 #endif
 #ifdef _WIN32
-      mkn::kul::cli::EnvVar pa("PATH", arg, mkn::kul::cli::EnvVarMode::PREP);
+      mkn::kul::env::Var pa("PATH", arg, mkn::kul::env::Var::Mode::PREP);
 #else
-      mkn::kul::cli::EnvVar pa("LD_LIBRARY_PATH", arg, mkn::kul::cli::EnvVarMode::PREP);
+      mkn::kul::env::Var pa("LD_LIBRARY_PATH", arg, mkn::kul::env::Var::Mode::PREP);
 #endif
       KOUT(DBG) << pa.name() << " : " << pa.toString();
       envies.push_back(std::make_pair(pa.name(), pa.toString()));
-#endif  // _MKN_DISABLE_RUN_LIB_PATH_HANDLING_
+#endif  // MKN_DISABLE_RUN_LIB_PATH_HANDLING
     }
 
     if (mkn::kul::env::EXISTS("MKN_LD_PRELOAD"))
       envies.emplace_back("LD_PRELOAD", mkn::kul::env::GET("MKN_LD_PRELOAD"));
 
     for (auto const& ev : envies) {
-      p->var(
-          ev.first,
-          mkn::kul::cli::EnvVar(ev.first, ev.second, mkn::kul::cli::EnvVarMode::PREP).toString());
+      p->var(ev.first,
+             mkn::kul::env::Var(ev.first, ev.second, mkn::kul::env::Var::Mode::PREP).toString());
     }
     for (auto const& ev : AppVars::INSTANCE().envVars()) {
       auto it = std::find_if(envies.begin(), envies.end(),
@@ -105,9 +104,8 @@ class Runner : public Constants {
                                return element.first == ev.first;
                              });
       if (it == envies.end())
-        p->var(
-            ev.first,
-            mkn::kul::cli::EnvVar(ev.first, ev.second, mkn::kul::cli::EnvVarMode::PREP).toString());
+        p->var(ev.first,
+               mkn::kul::env::Var(ev.first, ev.second, mkn::kul::env::Var::Mode::PREP).toString());
     }
     KOUT(DBG) << (*p);
     if (!AppVars::INSTANCE().dryRun()) p->set(a.envVars()).start();

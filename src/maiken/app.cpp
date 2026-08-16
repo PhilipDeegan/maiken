@@ -73,8 +73,9 @@ maiken::Application* maiken::Applications::getOrNullptr(std::string const& proje
     for (auto const& p2 : p1.second) {
       if (p2.second->project().root()[STR_NAME].Scalar() == project) {
         if (dir != "" && dir != p2.second->project().dir().real())
-          KEXIT(1, "Cannot deduce project version as")
-              << " there are multiple versions in the dependency tree: " << project;
+          KEXIT(1, "Cannot deduce project version as",
+                " there are multiple versions in the dependency tree: ", project);
+
         dir = p2.second->project().dir().real();
         app = p2.second;
       }
@@ -83,7 +84,7 @@ maiken::Application* maiken::Applications::getOrNullptr(std::string const& proje
   return app;
 }
 
-mkn::kul::cli::EnvVar maiken::Application::PARSE_ENV_NODE(YAML::Node const& n,
-                                                          Application const& app) {
+mkn::kul::env::Var maiken::Application::PARSE_ENV_NODE(YAML::Node const& n,
+                                                       Application const& app) {
   return maiken::PARSE_ENV_NODE(n, app, app.project().file());
 }

@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/dbg.hpp"
 
+#include "maiken/compiler/compilers.hpp"
 #include "maiken/app.hpp"
 #include "maiken/scm.hpp"
 #include "maiken/regex.hpp"
@@ -107,14 +108,13 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   sub_initializer(*this, nodes);
 
   auto getIfMissing = [&](YAML::Node const& n, bool const mod) {
-    std::string const& cwd(mkn::kul::env::CWD());
+    mkn::kul::os::PushDir pushd(mkn::kul::env::CWD());
     mkn::kul::Dir projectDir(resolveDepOrModDirectory(n, mod));
     if (!projectDir.is()) loadDepOrMod(n, projectDir, mod);
-    mkn::kul::env::CWD(cwd);
   };
 
   bool c = 1;
-#ifndef _MKN_DISABLE_MODULES_
+#if MKN_WITH_MKN_MOD
   std::vector<YAML::Node> mod_nodes;
   if (this->ro) modArgs(AppVars::INSTANCE().mods(), mod_nodes, getIfMissing);
 
@@ -144,9 +144,9 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
           KEXIT(1, "NO");
         }
       }
-      if (n[STR_IF_MOD] && n[STR_IF_MOD][MKN_KUL_STR(__MKN_KUL_OS__)]) {
-        for (auto const& mod : n[STR_IF_MOD][MKN_KUL_STR(__MKN_KUL_OS__)]) getIfMissing(mod, 1);
-        popDepOrMod(n[STR_IF_MOD], modDeps, MKN_KUL_STR(__MKN_KUL_OS__), 1);
+      if (n[STR_IF_MOD] && n[STR_IF_MOD][MKN_KUL_STR(MKN_KUL_OS)]) {
+        for (auto const& mod : n[STR_IF_MOD][MKN_KUL_STR(MKN_KUL_OS)]) getIfMissing(mod, 1);
+        popDepOrMod(n[STR_IF_MOD], modDeps, MKN_KUL_STR(MKN_KUL_OS), 1);
       }
       profile = n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
       c = !profile.empty();
@@ -190,22 +190,22 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
         else if (n[STR_DEP].IsSequence())
           for (auto const& dep : n[STR_DEP]) getIfMissing(dep, 0);
         else
-          KEXCEPTION(STR_DEP) << " is invalid type";
+          KEXCEPTION(STR_DEP, " is invalid type");
       }
 
       popDepOrMod(n, deps, STR_DEP, 0);
       populateMaps(n);
 
-      if (n[STR_IF_DEP] && n[STR_IF_DEP][MKN_KUL_STR(__MKN_KUL_OS__)]) {
-        auto node = n[STR_IF_DEP][MKN_KUL_STR(__MKN_KUL_OS__)];
+      if (n[STR_IF_DEP] && n[STR_IF_DEP][MKN_KUL_STR(MKN_KUL_OS)]) {
+        auto node = n[STR_IF_DEP][MKN_KUL_STR(MKN_KUL_OS)];
         if (node.IsScalar()) {
           for (auto const& with_str : mkn::kul::cli::asArgs(node.Scalar()))
             withArgs(with_str, with_nodes, getIfMissing, 1);
         } else if (node[STR_DEP].IsSequence()) {
           for (auto const& dep : node) getIfMissing(dep, 0);
-          popDepOrMod(n[STR_IF_DEP], deps, MKN_KUL_STR(__MKN_KUL_OS__), 0);
+          popDepOrMod(n[STR_IF_DEP], deps, MKN_KUL_STR(MKN_KUL_OS), 0);
         } else
-          KEXCEPTION(STR_DEP) << " is invalid type";
+          KEXCEPTION(STR_DEP, " is invalid type");
       }
       profile = n[STR_PARENT] ? Properties::RESOLVE(*this, n[STR_PARENT].Scalar()) : "";
       c = !profile.empty();
@@ -225,7 +225,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
             if (d)
               incs.push_back(std::make_pair(d.real(), false));
             else
-              KEXIT(1, "include does not exist\n") << d.path() << "\n" << ptr->file();
+              KEXIT(1, "include does not exist\n", d.path(), "\n", ptr->file());
           }
   for (auto const* ptr = &Settings::INSTANCE(); ptr != nullptr; ptr = ptr->super())
     if (auto const node = ptr->root()[STR_PATH])
@@ -236,7 +236,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
             if (d)
               paths.push_back(d.escr());
             else
-              KEXIT(1, "library path does not exist\n") << d.path() << "\n" << ptr->file();
+              KEXIT(1, "library path does not exist\n", d.path(), "\n", ptr->file());
           }
 
   this->populateMapsFromDependencies();
@@ -281,7 +281,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
 
   if (!main_ && lang.empty()) resolveLang();
   if (par) {
-    if (main_ && lang.empty()) lang = main_->in().substr(main_->in().rfind(".") + 1);
+    if (main_ && lang.empty()) lang = main_->in.substr(main_->in.rfind(".") + 1);
     main_ = {};
   }
 
@@ -311,7 +311,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
           for (YAML::const_iterator it = n[nName].begin(); it != n[nName].end(); ++it) {
             std::string left(it->first.Scalar());
             if (left.find("_") != std::string::npos) {
-              if (left.substr(0, left.find("_")) == MKN_KUL_STR(__MKN_KUL_OS__))
+              if (left.substr(0, left.find("_")) == MKN_KUL_STR(MKN_KUL_OS))
                 left = left.substr(left.find("_") + 1);
               else
                 continue;
@@ -334,7 +334,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
             auto trues = {lang.empty() && left == STR_BIN, !main_ && left == STR_LIB,
                           m == compiler::Mode::SHAR && left == STR_SHARED,
                           m == compiler::Mode::STAT && left == STR_STATIC,
-                          left == MKN_KUL_STR(__MKN_KUL_OS__)};
+                          left == MKN_KUL_STR(MKN_KUL_OS)};
 
             if (std::any_of(trues.begin(), trues.end(), [](bool b) { return b; })) var += ifArg;
           }
@@ -347,7 +347,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
         try {
           if (node[str])
             for (auto it = node[str].begin(); it != node[str].end(); ++it)
-              if (it->first.Scalar() == MKN_KUL_STR(__MKN_KUL_OS__))
+              if (it->first.Scalar() == MKN_KUL_STR(MKN_KUL_OS))
                 for (auto const& s : mkn::kul::String::LINES(it->second.Scalar())) (this->*fn)(s);
         } catch (mkn::kul::StringException const&) {
           KEXIT(1, std::string(str) + " contains invalid bool value\n" + project().dir().path());
@@ -359,7 +359,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
 
       if (n[STR_IF_LIB])
         for (YAML::const_iterator it = n[STR_IF_LIB].begin(); it != n[STR_IF_LIB].end(); ++it)
-          if (it->first.Scalar() == MKN_KUL_STR(__MKN_KUL_OS__))
+          if (it->first.Scalar() == MKN_KUL_STR(MKN_KUL_OS))
             for (auto const& s : mkn::kul::String::SPLIT(it->second.Scalar(), ' '))
               if (s.size()) libs.push_back(Properties::RESOLVE(*this, s));
 
