@@ -29,6 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "maiken/compiler/compilers.hpp"
 #include "maiken/env.hpp"
 #include "maiken/settings.hpp"
 
@@ -92,7 +93,7 @@ maiken::Settings::Settings(std::string const& file_) : mkn::kul::yaml::File(file
     for (auto const& s : mkn::kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
       rrs.push_back(s);
   {
-    std::string const& rr = _MKN_REMOTE_REPO_;
+    std::string const& rr = MKN_REMOTE_REPO;
     for (auto const& s : mkn::kul::String::SPLIT(rr, ' ')) rrs.push_back(s);
   }
 
@@ -100,7 +101,7 @@ maiken::Settings::Settings(std::string const& file_) : mkn::kul::yaml::File(file
     for (auto const& s : mkn::kul::String::SPLIT(root()[STR_REMOTE][STR_MOD_REPO].Scalar(), ' '))
       rms.push_back(s);
   {
-    std::string const& rr = _MKN_REMOTE_MOD_;
+    std::string const& rr = MKN_REMOTE_MOD;
     for (auto const& s : mkn::kul::String::SPLIT(rr, ' ')) rms.push_back(s);
   }
 

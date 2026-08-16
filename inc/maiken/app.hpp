@@ -28,41 +28,47 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_APP_HPP_
-#define _MAIKEN_APP_HPP_
-
-#include <optional>
-
-namespace maiken {
-class Application;
-}
+#ifndef MAIKEN_APP_HPP
+#define MAIKEN_APP_HPP
 
 #include "maiken/defs.hpp"
 
 #include "maiken/compiler.hpp"
-#include "maiken/compiler/compilers.hpp"
-#include "maiken/except.hpp"
+// #include "maiken/compiler/compilers.hpp"
+#include "maiken/context.hpp"
+// #include "maiken/except.hpp"
 #include "maiken/global.hpp"
 #include "maiken/project.hpp"
-#include "maiken/string.hpp"
 #include "maiken/source.hpp"
 
 #include "mkn/kul/os.hpp"
 #include "mkn/kul/all.hpp"
 #include "mkn/kul/cli.hpp"
-#include "mkn/kul/log.hpp"
-#include "mkn/kul/proc.hpp"
-#include "mkn/kul/scm/man.hpp"
-#include "mkn/kul/threads.hpp"
+#include "mkn/kul/scm.hpp"
+// #include "mkn/kul/log.hpp"
+// #include "mkn/kul/proc.hpp"
+// #include "mkn/kul/threads.hpp"
 
-int main(int argc, char* argv[]);
+#ifndef MKN_WITH_MKN_MOD
+#define MKN_WITH_MKN_MOD 0
+#endif
+
+#if MKN_WITH_MKN_MOD
+#include "mkn/mod/def.hpp"
+#endif  // MKN_WITH_MKN_MOD
+
+#include <queue>
+#include <optional>
 
 namespace maiken {
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+
+class Application;
+
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 namespace dist {
 class CompileRequest;
 }  //  end namespace dist
-#endif  //  _MKN_WITH_MKN_RAM_  &&         _MKN_WITH_IO_CEREAL_
+#endif  //  MKN_WITH_MKN_RAM  &&         MKN_WITH_IO_CEREAL
 
 static std::string PROGRAM = "";
 
@@ -70,7 +76,6 @@ class Module;
 class ModuleLoader;
 class ThreadingCompiler;
 class Applications;
-class Source;
 class CompilerPrinter;
 class Processor;
 class MKN_KUL_PUBLISH Application : public Constants {
@@ -78,7 +83,6 @@ class MKN_KUL_PUBLISH Application : public Constants {
   friend class Applications;
   friend class CompilerPrinter;
   friend class Executioner;
-  friend class SourceFinder;
   friend class ThreadingCompiler;
   friend class Project;
   friend class Processor;
@@ -86,9 +90,9 @@ class MKN_KUL_PUBLISH Application : public Constants {
  public:
   using SourceMap = mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2T<std::vector<maiken::Source>>>;
 
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
   friend class dist::CompileRequest;
-#endif  //  _MKN_WITH_MKN_RAM_  &&         _MKN_WITH_IO_CEREAL_
+#endif  //  MKN_WITH_MKN_RAM  &&         MKN_WITH_IO_CEREAL
 
  protected:
   void buildExecutable(mkn::kul::hash::set::String const& objects) KTHROW(mkn::kul::Exception);
@@ -151,7 +155,6 @@ class MKN_KUL_PUBLISH Application : public Constants {
 
   mkn::kul::hash::set::String inactiveMains() const;
 
-  bool incSrc(mkn::kul::File const& f) const;
   void addCLIArgs(mkn::kul::cli::Args const& args);
   void findables();
 
@@ -238,6 +241,8 @@ class MKN_KUL_PUBLISH Application : public Constants {
   std::vector<Application*> const& moduleDependencies() const { return modDeps; }
   std::vector<std::shared_ptr<ModuleLoader>> const& modules() const { return mods; }
   mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2S> const& files() const { return fs; }
+  mkn::kul::hash::map::S2S const& testFiles() const { return tests; }
+  bool incSrc(mkn::kul::File const& f) const;
   std::vector<std::string> const& libraries() const { return libs; }
   std::vector<std::pair<Source, bool>> const& sources() const { return srcs; }
   std::vector<std::pair<std::string, bool>> const& includes() const { return incs; }
@@ -254,6 +259,9 @@ class MKN_KUL_PUBLISH Application : public Constants {
   void add_def(std::string const& def) { defs.emplace_back(def); }
   std::vector<std::string> const& defines() const { return defs; }
 
+  std::string const& compileArg() const { return arg; }
+  mkn::kul::hash::map::S2S const& compilerArgs() const { return cArg; }
+
   void addInclude(std::string const& s, bool const is_public = 1) {
     auto it = std::find_if(
         incs.begin(), incs.end(),
@@ -265,6 +273,15 @@ class MKN_KUL_PUBLISH Application : public Constants {
 
   void prependCompileString(std::string const& s) { arg = s + " " + arg; }
   void prependLinkString(std::string const& s) { lnk = s + " " + lnk; }
+
+  CompilationInfo const& compilationInfo() const { return m_cInfo; }
+  void compilationInfo(CompilationInfo const& info) { m_cInfo = info; }
+
+  // ApplicationContext adapts all of the above (plus sourceMap/mode/envVars)
+  // to the mkn::kul::lang::Context/CompilerState surface a Module or Compiler
+  // backend consumes, so Application itself doesn't have to implement them.
+  Context& context() { return ctx_; }
+  Context const& context() const { return ctx_; }
 
   auto root() const { return ro; }
 
@@ -294,9 +311,10 @@ class MKN_KUL_PUBLISH Application : public Constants {
 
   std::string hash() { return hash(project().dir().real()) + "_" + hash(p.empty() ? "@" : p); }
 
-  CompilationInfo m_cInfo;
-
  protected:
+  CompilationInfo m_cInfo;
+  ApplicationContext ctx_{*this};
+
   bool ig = 1, isMod = 0, ro = 0;
   Application const* par = nullptr;
   Application* sup = nullptr;
@@ -322,8 +340,6 @@ class MKN_KUL_PUBLISH Application : public Constants {
 };
 
 class Applications : public Constants {
-  friend int ::main(int argc, char* argv[]);
-
  public:
   static Applications& INSTANCE() {
     static Applications a;
@@ -353,25 +369,31 @@ class Applications : public Constants {
   }
 };
 
+// Shared by ThreadingCompiler (real builds) and ApplicationContext::per_compiler_command
+// (command generation/introspection, e.g. clang-tidy) so both produce a
+// CompilationUnit/CompileDAO via the exact same resolution logic.
+std::vector<std::string> resolve_includes(Application const& app);
+CompilationUnit build_compilation_unit(Application const& app, std::vector<std::string> const& incs,
+                                       std::pair<maiken::Source, std::string> const& pair)
+    KTHROW(mkn::kul::Exception);
+
+std::vector<Source> tests_for(Application const& app);
+std::vector<std::pair<Source, std::string>> all_sources_from(
+    Application const& app, Application::SourceMap const& sources,
+    mkn::kul::hash::set::String& objects, std::vector<mkn::kul::File>& cacheFiles);
+
 class ThreadingCompiler : public Constants {
  private:
   maiken::Application& app;
   std::vector<std::string> incs;
 
  public:
-  ThreadingCompiler(maiken::Application& app) : app(app) {
-    for (auto const& s : app.includes()) {
-      mkn::kul::Dir const d(s.first);
-      std::string const m = d.escm();
-      if (!m.empty())
-        incs.push_back(m);
-      else
-        incs.push_back(".");
-    }
-  }
+  ThreadingCompiler(maiken::Application& app) : app(app), incs(resolve_includes(app)) {}
 
   CompilationUnit compilationUnit(std::pair<maiken::Source, std::string> const& pair) const
-      KTHROW(mkn::kul::Exception);
+      KTHROW(mkn::kul::Exception) {
+    return build_compilation_unit(app, incs, pair);
+  }
 };
 
 class ModuleMinimiser {
@@ -450,4 +472,4 @@ class CompilerValidation : public Constants {
 }  // namespace maiken
 
 #include "maiken/processor.hpp"
-#endif /* _MAIKEN_APP_HPP_ */
+#endif /* MAIKEN_APP_HPP */

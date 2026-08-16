@@ -45,7 +45,7 @@ void maiken::Application::loadDepOrMod(YAML::Node const& node, mkn::kul::Dir con
   std::string const type = module ? "mod" : "dep";
 
   KOUT(NON) << MKN_PROJECT_NOT_FOUND << depOrMod;
-#ifdef _MKN_DISABLE_SCM_
+#ifdef MKN_DISABLE_SCM
   KEXIT(1, "dep does not exist and remote retrieval is disabled - path: " + depOrMod.path());
 #endif
   if (!node[STR_SCM] && !node[STR_NAME])
@@ -70,7 +70,7 @@ void maiken::Application::loadDepOrMod(YAML::Node const& node, mkn::kul::Dir con
   }
   mkn::kul::env::CWD(depOrMod);
 
-  if (_MKN_REMOTE_EXEC_) {
+  if (MKN_REMOTE_EXEC) {
 #ifdef _WIN32
     if (mkn::kul::File("mkn.bat").is() &&
         mkn::kul::proc::Call("mkn.bat", AppVars::INSTANCE().envVars()).run())
@@ -129,11 +129,11 @@ mkn::kul::Dir maiken::Application::resolveDepOrModDirectory(YAML::Node const& n,
       };
 
       std::string version(resolveSCMBranch());
-      if (_MKN_REP_VERS_DOT_) mkn::kul::String::REPLACE_ALL(version, ".", mkn::kul::Dir::SEP());
+      if (MKN_REP_VERS_DOT) mkn::kul::String::REPLACE_ALL(version, ".", mkn::kul::Dir::SEP());
       write_cache_version(depName, version, type);
 
       auto name = depName;
-      if (_MKN_REP_NAME_DOT_) mkn::kul::String::REPLACE_ALL(name, ".", mkn::kul::Dir::SEP());
+      if (MKN_REP_NAME_DOT) mkn::kul::String::REPLACE_ALL(name, ".", mkn::kul::Dir::SEP());
       d = mkn::kul::Dir::JOIN(d, mkn::kul::Dir::JOIN(name, version));
     } catch (mkn::kul::Exception const& e) {
       KERR << e.debug();

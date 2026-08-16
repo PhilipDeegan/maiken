@@ -35,10 +35,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 maiken::Application::Application(maiken::Project const& proj, std::string const& profile)
     : p(profile), proj(proj) {
   ps["MKN_ROOT"] = proj.dir().real();
+  m_cInfo.lib_prefix = AppVars::INSTANCE().envVar("MKN_LIB_PRE");
+  m_cInfo.lib_ext = AppVars::INSTANCE().envVar("MKN_LIB_EXT");
+  m_cInfo.obj_ext = AppVars::INSTANCE().envVar("MKN_OBJ");
 }
 
 maiken::Application::~Application() {
+#if MKN_WITH_MKN_MOD
   for (auto mod : mods) mod->unload();
+#endif  // MKN_WITH_MKN_MOD
 }
 
 void maiken::Application::resolveLang() KTHROW(maiken::Exception) {
@@ -70,7 +75,7 @@ mkn::kul::hash::set::String maiken::Application::inactiveMains() const {
   mkn::kul::hash::set::String iMs;
   std::string p;
   try {
-    if (main_) p = mkn::kul::Dir::REAL(main_->in());
+    if (main_) p = mkn::kul::Dir::REAL(main_->in);
   } catch (mkn::kul::Exception const& e) {
   }
   std::string f;

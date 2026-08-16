@@ -75,7 +75,7 @@ class Runner : public Constants {
       std::string arg;
       for (auto const& s : a.libraryPaths()) arg += s + mkn::kul::env::SEP();
       if (!arg.empty()) arg.pop_back();
-#if _MKN_DISABLE_RUN_LIB_PATH_HANDLING_ == 0
+#if MKN_DISABLE_RUN_LIB_PATH_HANDLING == 0
 #if defined(__APPLE__)
       mkn::kul::env::Var dy("DYLD_LIBRARY_PATH", arg, mkn::kul::env::Var::Mode::PREP);
       KOUT(DBG) << dy.name() << " : " << dy.toString();
@@ -88,7 +88,7 @@ class Runner : public Constants {
 #endif
       KOUT(DBG) << pa.name() << " : " << pa.toString();
       envies.push_back(std::make_pair(pa.name(), pa.toString()));
-#endif  // _MKN_DISABLE_RUN_LIB_PATH_HANDLING_
+#endif  // MKN_DISABLE_RUN_LIB_PATH_HANDLING
     }
 
     if (mkn::kul::env::EXISTS("MKN_LD_PRELOAD"))

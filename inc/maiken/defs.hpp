@@ -28,61 +28,69 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_DEFS_HPP_
-#define _MAIKEN_DEFS_HPP_
+#ifndef MAIKEN_DEFS_HPP
+#define MAIKEN_DEFS_HPP
 
 #include "mkn/kul/env.hpp"
 #include "mkn/kul/defs.hpp"
 
+#include "mkn/kul/except.hpp"
+
 #ifndef MKN_LANG
 #include "maiken/lang/defs.en.hpp"
 #else
-#define __MAIKEN_INCLUDE_MACRO__(str) <maiken/lang/defs.str.hpp>
-#include __MAIKEN_INCLUDE_MACRO__(MKN_LANG)
-#undef __MAIKEN_INCLUDE_MACRO__
+#define MAIKEN_INCLUDE_MACRO(str) <maiken/lang/defs.str.hpp>
+#include MAIKEN_INCLUDE_MACRO(MKN_LANG)
+#undef MAIKEN_INCLUDE_MACRO
 #endif /*  MKN_LANG */
 
 using namespace maiken::lang::defs;
 
-#ifndef _MKN_REP_NAME_DOT_
-#define _MKN_REP_NAME_DOT_ 1
-#endif /* _MKN_REP_NAME_DOT_ */
+#ifndef MKN_REP_NAME_DOT
+#define MKN_REP_NAME_DOT 1
+#endif /* MKN_REP_NAME_DOT */
 
-#ifndef _MKN_REP_VERS_DOT_
-#define _MKN_REP_VERS_DOT_ 0
-#endif /* _MKN_REP_VERS_DOT_ */
+#ifndef MKN_REP_VERS_DOT
+#define MKN_REP_VERS_DOT 0
+#endif /* MKN_REP_VERS_DOT */
 
-#ifndef _MKN_REMOTE_EXEC_
-#define _MKN_REMOTE_EXEC_ 1
-#endif /* _MKN_REMOTE_EXEC_ */
+#ifndef MKN_REMOTE_EXEC
+#define MKN_REMOTE_EXEC 1
+#endif /* MKN_REMOTE_EXEC */
 
-#ifndef _MKN_REMOTE_REPO_
-#define _MKN_REMOTE_REPO_ "https://u:p@github.com/mkn/ https://u:p@gitlab.com/mkn/"
-#endif /* _MKN_REMOTE_REPO_ */
+#ifndef MKN_REMOTE_REPO
+#define MKN_REMOTE_REPO "https://u:p@github.com/mkn/ https://u:p@gitlab.com/mkn/"
+#endif /* MKN_REMOTE_REPO */
 
-#ifndef _MKN_REMOTE_MOD_
-#define _MKN_REMOTE_MOD_ "https://u:p@github.com/mkn-mod/ https://u:p@gitlab.com/mkn-mod/"
-#endif /* _MKN_REMOTE_MOD_ */
+#ifndef MKN_REMOTE_MOD
+#define MKN_REMOTE_MOD "https://u:p@github.com/mkn-mod/ https://u:p@gitlab.com/mkn-mod/"
+#endif /* MKN_REMOTE_MOD */
 
-#ifndef _MKN_TIMESTAMPS_
-#define _MKN_TIMESTAMPS_ 0
-#endif /* _MKN_TIMESTAMPS_ */
+#ifndef MKN_TIMESTAMPS
+#define MKN_TIMESTAMPS 0
+#endif /* MKN_TIMESTAMPS */
 
-#ifndef _MKN_VERSION_
-#define _MKN_VERSION_ truth
-#endif /* _MKN_VERSION_ */
+#ifndef MKN_VERSION
+#define MKN_VERSION master
+#endif /* MKN_VERSION */
 
-#ifndef _MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION_
-#define _MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION_ 0
-#endif /* _MKN_VERSION_ */
+#ifndef MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION
+#define MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION 0
+#endif /* MKN_VERSION */
 
-#ifndef _MKN_KUL_PROC_LOOP_NSLEEP_
-#define _MKN_KUL_PROC_LOOP_NSLEEP_ 1000000
-#endif /* _MKN_KUL_PROC_LOOP_NSLEEP_ */
+#ifndef MKN_KUL_PROC_LOOP_NSLEEP
+#define MKN_KUL_PROC_LOOP_NSLEEP 1000000
+#endif /* MKN_KUL_PROC_LOOP_NSLEEP */
 
 namespace maiken {
 
 auto inline defaultSCMBranchName() { return mkn::kul::env::GET("MKN_DEFAULT_BRANCH", "master"); }
+
+class Exception : public mkn::kul::Exception {
+ public:
+  Exception(char const* f, uint16_t const& l, std::string const& s)
+      : mkn::kul::Exception(f, l, s) {}
+};
 
 class Constants {
  public:
@@ -195,9 +203,9 @@ class Constants {
   static constexpr auto STR_IF_LIB = "if_lib";
   static constexpr auto STR_IF_LNK = "if_link";
 
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
   static constexpr auto STR_NODES = "nodes";
-#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  // MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
 };
 }  // namespace maiken
-#endif /* _MAIKEN_DEFS_HPP_ */
+#endif /* MAIKEN_DEFS_HPP */

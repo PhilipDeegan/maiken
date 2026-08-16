@@ -28,8 +28,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_ENV_HPP_
-#define _MAIKEN_ENV_HPP_
+#ifndef MAIKEN_ENV_HPP
+#define MAIKEN_ENV_HPP
 
 #include "mkn/kul/env.hpp"
 
@@ -73,4 +73,4 @@ mkn::kul::env::Var PARSE_ENV_NODE(YAML::Node const& n, HasProperties const& hasP
 
 }  // namespace maiken
 
-#endif /* _MAIKEN_ENV_HPP_ */
+#endif /* MAIKEN_ENV_HPP */

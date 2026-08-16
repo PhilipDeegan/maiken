@@ -28,12 +28,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_GIT_GITHUB_HPP_
-#define _MAIKEN_GIT_GITHUB_HPP_
+#ifndef MAIKEN_GIT_GITHUB_HPP
+#define MAIKEN_GIT_GITHUB_HPP
 
 #include "maiken.hpp"
 
-#ifdef _MKN_WITH_MKN_RAM_
+#ifdef MKN_WITH_MKN_RAM
 
 #include "mkn/kul/dbg.hpp"
 #include "mkn/kul/yaml.hpp"
@@ -226,12 +226,12 @@ bool Github<https>::GET_LATEST_TAG(std::string const& owner, std::string const& 
 
 template <bool https>
 bool Github<https>::GET_LATEST(std::string const& repo, std::string& branch, bool const module) {
-#ifndef _MKN_DISABLE_SCM_
+#ifndef MKN_DISABLE_SCM
   MKN_KUL_DBG_FUNC_ENTER;
 
   std::array const gets{&GET_DEFAULT_BRANCH, &GET_LATEST_RELEASE, &GET_LATEST_TAG};
   std::vector<size_t> orders{0, 1, 2};
-  if (_MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION_ == 1) orders = {1, 2, 0};
+  if (MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION == 1) orders = {1, 2, 0};
 
   std::vector<std::string> repos;
   if (IS_SOLID(repo))
@@ -267,5 +267,5 @@ bool Github<https>::GET_LATEST(std::string const& repo, std::string& branch, boo
 
 }  // namespace maiken
 
-#endif  // _MKN_WITH_MKN_RAM_
-#endif  /* _MAIKEN_GIT_GITHUB_HPP_ */
+#endif  // MKN_WITH_MKN_RAM
+#endif  /* MAIKEN_GIT_GITHUB_HPP */

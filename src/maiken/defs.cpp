@@ -97,6 +97,6 @@ constexpr char const* maiken::Constants::STR_IF_LIB;
 constexpr char const* maiken::Constants::STR_IF_LNK;
 constexpr char const* maiken::Constants::STR_IF_SRC;
 
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 constexpr char const* maiken::Constants::STR_NODES;
-#endif  //_MKN_WITH_MKN_RAM_) && _MKN_WITH_IO_CEREAL_
+#endif  //MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL

@@ -28,8 +28,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_SETTINGS_HPP_
-#define _MAIKEN_SETTINGS_HPP_
+#ifndef MAIKEN_SETTINGS_HPP
+#define MAIKEN_SETTINGS_HPP
 
 #include "mkn/kul/os.hpp"
 #include "mkn/kul/cli.hpp"
@@ -67,6 +67,11 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   std::vector<std::string> const& remoteModules() const { return rms; }
   std::vector<std::string> const& remoteRepos() const { return rrs; }
   mkn::kul::hash::map::S2S const& properties() const { return ps; }
+  bool propertyBool(std::string const& key, bool const default_val = true) const {
+    auto const it = ps.find(key);
+    if (it == ps.end()) return default_val;
+    return it->second == "true" || it->second == "1";
+  }
   Findables const& findables() const { return findables_; }
   std::optional<std::string> local_dep_repo() const;
   std::optional<std::string> local_mod_repo() const;
@@ -130,4 +135,4 @@ auto Settings::getFirstFound(auto const fn) const {
 
 }  // namespace maiken
 
-#endif /* _MAIKEN_SETTINGS_HPP_ */
+#endif /* MAIKEN_SETTINGS_HPP */

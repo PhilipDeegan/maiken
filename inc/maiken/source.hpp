@@ -28,43 +28,30 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _MAIKEN_SOURCE_HPP_
-#define _MAIKEN_SOURCE_HPP_
+#ifndef MAIKEN_SOURCE_HPP
+#define MAIKEN_SOURCE_HPP
 
-#include "maiken/app.hpp"
+#include "maiken/compiler.hpp"
+#include "maiken/global.hpp"
+
+#include <functional>
+#include <sstream>
 
 namespace maiken {
 
-class Source {
- public:
-  explicit Source(std::string in) : m_in(in) {}
-  explicit Source(std::string in, std::string args) : m_in(in), m_args(args) {}
-  auto& args() const { return m_args; }
-  auto& in() const { return m_in; }
+using Source = mkn::kul::lang::Source;
 
-  std::string object() const;
+// Object filename for a source file: a hash of its resolved path (so files of
+// the same name in different directories don't collide) plus its own name,
+// under MKN_OBJ.
+inline std::string source_object(std::string const& in) {
+  mkn::kul::File const source(in);
+  std::stringstream ss, os;
+  ss << std::hex << std::hash<std::string>()(source.real());
+  os << ss.str() << "-" << source.name() << "." << AppVars::INSTANCE().envVar("MKN_OBJ");
+  return os.str();
+}
 
-  bool operator==(Source const& that) const { return this->in() == that.in(); }
-
- private:
-  std::string m_in, m_args;
-};
-
-class SourceFinder : public Constants {
- public:
-  using SourceMap = mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2T<std::vector<maiken::Source>>>;
-  SourceFinder(maiken::Application const& _app);
-  std::vector<std::pair<maiken::Source, std::string>> all_sources_from(
-      SourceMap const& sources, mkn::kul::hash::set::String& objects,
-      std::vector<mkn::kul::File>& cacheFiles);
-
-  std::vector<maiken::Source> tests();
-
- private:
-  maiken::Application const& app;
-  std::string const oType;
-  mkn::kul::Dir objD, tmpD;
-};
 }  // end namespace maiken
 
-#endif  // _MAIKEN_SOURCE_HPP_
+#endif  // MAIKEN_SOURCE_HPP

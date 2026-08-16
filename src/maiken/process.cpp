@@ -47,12 +47,12 @@ void maiken::Application::process() KTHROW(mkn::kul::Exception) {
   auto const& cmds = CommandStateMachine::INSTANCE().commands();
 
   mkn::kul::os::PushDir pushd(this->project().dir());
-  auto loadModules = [&](Application& app) {
-#ifndef _MKN_DISABLE_MODULES_
+  auto loadModules = [&]([[maybe_unused]] Application& app) {
+#if MKN_WITH_MKN_MOD
     for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod)
       app.mods.push_back(ModuleLoader::LOAD(**mod));
-    for (auto& modLoader : app.mods) modLoader->module()->init(app, app.modInit(modLoader->app()));
-#endif  //_MKN_DISABLE_MODULES_
+    for (auto& modLoader : app.mods) modLoader->module()->init(app.context(), app.modInit(modLoader->app()));
+#endif  // MKN_WITH_MKN_MOD
   };
 
   std::vector<Application*> apps;
@@ -77,15 +77,19 @@ void maiken::Application::process() KTHROW(mkn::kul::Exception) {
 
     mkn::kul::hash::set::String objects;
     if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE)) {
+#if MKN_WITH_MKN_MOD
       for (auto& modLoader : app.mods)
-        modLoader->module()->compile(app, app.modCompile(modLoader->app()));
+        modLoader->module()->compile(app.context(), app.modCompile(modLoader->app()));
+#endif  // MKN_WITH_MKN_MOD
 
       if (work) app.compile(objects);
     }
     if (cmds.count(STR_BUILD) || cmds.count(STR_LINK)) {
+#if MKN_WITH_MKN_MOD
       if (work)
         for (auto& modLoader : app.mods)
-          modLoader->module()->link(app, app.modLink(modLoader->app()));
+          modLoader->module()->link(app.context(), app.modLink(modLoader->app()));
+#endif  // MKN_WITH_MKN_MOD
       app.findObjects(objects);
       app.link(objects);
     }
@@ -132,17 +136,21 @@ void maiken::Application::process() KTHROW(mkn::kul::Exception) {
     proc_a(**app, !(*app)->srcs.empty());
   }
   if (!this->ig)
-    proc_a(*this, !this->srcs.empty() || !SourceFinder(*this).tests().empty() || this->main_);
+    proc_a(*this, !this->srcs.empty() || !tests_for(*this).empty() || this->main_);
 
   proc_b();
 
   if (cmds.count(STR_TEST)) {
-    for (auto& modLoader : mods) modLoader->module()->test(*this, this->modTest(modLoader->app()));
+#if MKN_WITH_MKN_MOD
+    for (auto& modLoader : mods) modLoader->module()->test(this->context(), this->modTest(modLoader->app()));
+#endif  // MKN_WITH_MKN_MOD
     test();
   }
   if (cmds.count(STR_PACK)) {
     pack();
-    for (auto& modLoader : mods) modLoader->module()->pack(*this, this->modPack(modLoader->app()));
+#if MKN_WITH_MKN_MOD
+    for (auto& modLoader : mods) modLoader->module()->pack(this->context(), this->modPack(modLoader->app()));
+#endif  // MKN_WITH_MKN_MOD
   }
   if (CommandStateMachine::INSTANCE().main() && (cmds.count(STR_RUN) || cmds.count(STR_DBG)))
     run(cmds.count(STR_DBG));

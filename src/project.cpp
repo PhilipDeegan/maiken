@@ -29,9 +29,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/io.hpp"
+#include "mkn/kul/string.hpp"
 
 #include "maiken/defs.hpp"
-#include "maiken/string.hpp"
 #include "maiken/git.hpp"
 #include "maiken/project.hpp"
 
@@ -40,7 +40,7 @@ maiken::ProjectInfo maiken::ProjectInfo::PARSE_LINE(
   std::string local /*&*/, profiles, proj = line, version /*#*/, scm, bon;
 
   auto get_between = [&](auto& var, auto lbrak, auto rbrak) {
-    auto between = maiken::string::between_rm_str(proj, lbrak, rbrak);
+    auto between = mkn::kul::String::BETWEEN(proj, lbrak, rbrak);
     if (between.found) proj = between.remaining, var = *between.found;
     return !between.error;
   };

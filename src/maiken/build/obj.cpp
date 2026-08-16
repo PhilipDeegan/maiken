@@ -31,8 +31,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/dbg.hpp"
 
 #include "maiken.hpp"
+#include "maiken/compiler/compilers.hpp"
 #include "maiken/dist.hpp"
 #include "maiken/source.hpp"
+#include "mkn/kul/threads.hpp"
 
 #include <mutex>
 
@@ -81,10 +83,9 @@ void maiken::Application::compile(mkn::kul::hash::set::String& objects)
   showConfig();
   CompilerPrinter::print_for(*this);
 
-  SourceFinder s_finder(*this);
   CompilerValidation::check_compiler_for(*this, sources);
   std::vector<mkn::kul::File> cacheFiles;
-  auto src_objs = s_finder.all_sources_from(sources, objects, cacheFiles);
+  auto src_objs = all_sources_from(*this, sources, objects, cacheFiles);
 
   compile(src_objs, objects, cacheFiles);
 }
@@ -93,7 +94,7 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
                                   mkn::kul::hash::set::String& objects,
                                   std::vector<mkn::kul::File>& cacheFiles)
     KTHROW(mkn::kul::Exception) {
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
   std::vector<std::shared_ptr<maiken::dist::Post>> posts;
   auto compile_lambda = [](std::shared_ptr<maiken::dist::Post> post, dist::Host const& host) {
     post->send(host);
@@ -151,7 +152,7 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
     }
   }
 
-#endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#endif  //  MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
   std::queue<std::pair<maiken::Source, std::string>> sourceQueue;
   for (auto& so : src_objs) {
     sourceQueue.emplace(so.first, so.second);
@@ -159,12 +160,12 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
     if (!object_file.dir()) object_file.dir().mk();
   }
   if (!src_objs.empty()) compile(sourceQueue, objects, cacheFiles);
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
   ctp.finish(50000000);  // 50 milliseconds
   ctp.rethrow();
-#endif  //  _MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#endif  //  MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 
-  if (_MKN_TIMESTAMPS_) writeTimeStamps(objects, cacheFiles);
+  if (MKN_TIMESTAMPS) writeTimeStamps(objects, cacheFiles);
 }
 
 void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::string>>& sourceQueue,
@@ -275,7 +276,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     mkn::kul::Dir dir(mkn::kul::File(cQueue.front().second).dir());
     if (dir.real() != tmpD.real()) {
       objects.insert(cQueue.front().second);
-      cacheFiles.emplace_back(mkn::kul::File(cQueue.front().first.in()));
+      cacheFiles.emplace_back(mkn::kul::File(cQueue.front().first.in));
     }
     cQueue.pop();
   }

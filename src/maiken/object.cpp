@@ -28,7 +28,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
+
+#include "maiken/compiler/compilers.hpp"
 
 void maiken::Application::findObjects(mkn::kul::hash::set::String& objects) const {
   for (auto const& ft : sourceMap()) {
@@ -49,7 +50,7 @@ void maiken::Application::findObjects(mkn::kul::hash::set::String& objects) cons
         }
       } else {
         for (auto const& kv : ft.second)
-          for (auto const& f : kv.second) objects.insert(mkn::kul::File(f.in()).mini());
+          for (auto const& f : kv.second) objects.insert(mkn::kul::File(f.in).mini());
       }
     } catch (CompilerNotFoundException const& e) {
       KEXIT(1, "No compiler found for filetype " + ft.first);

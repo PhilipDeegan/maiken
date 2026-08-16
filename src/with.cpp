@@ -28,6 +28,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "mkn/kul/string.hpp"
+
 #include "maiken/app.hpp"
 #include "maiken/property.hpp"
 
@@ -57,7 +59,7 @@ void maiken::Application::with(
     std::string local /*&*/, profiles, version /*#*/, scm;
 
     auto const get_between = [&](auto& var, auto lbrak, auto rbrak) {
-      auto between = maiken::string::between_rm_str(proj, lbrak, rbrak);
+      auto between = mkn::kul::String::BETWEEN(proj, lbrak, rbrak);
       if (between.found) proj = between.remaining, var = *between.found;
       return !between.error;
     };
@@ -105,7 +107,7 @@ void maiken::Application::with(
       std::stringstream with_define;
       mkn::kul::String::REPLACE_ALL(proj, ".", "_");
       std::transform(proj.begin(), proj.end(), proj.begin(), ::toupper);
-      with_define << " -D_MKN_WITH_" << proj << "_ ";
+      with_define << " -DMKN_WITH_" << proj << " ";
       arg += with_define.str();
     }
     getIfMissing(node, 0);

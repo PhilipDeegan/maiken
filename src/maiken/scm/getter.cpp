@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/dbg.hpp"
 
 #include "maiken/scm.hpp"
-#include "maiken/except.hpp"
+#include "maiken/defs.hpp"
 #include "maiken/settings.hpp"
 
 mkn::kul::SCM const* maiken::SCMGetter::GET_SCM(mkn::kul::Dir const& d, std::string const& r,
@@ -44,9 +44,9 @@ mkn::kul::SCM const* maiken::SCMGetter::GET_SCM(mkn::kul::Dir const& d, std::str
   else
     for (auto const& s : Settings::INSTANCE().remotes(module)) repos.push_back(s + r);
 
-#ifndef _MKN_DISABLE_SCM_
+#ifndef MKN_DISABLE_SCM
   for (auto const& repo : repos) {
-#ifndef _MKN_DISABLE_GIT_
+#ifndef MKN_DISABLE_GIT
     try {
       mkn::kul::Process g("git");
       mkn::kul::ProcessCapture gp(g);
@@ -71,25 +71,25 @@ mkn::kul::SCM const* maiken::SCMGetter::GET_SCM(mkn::kul::Dir const& d, std::str
     } catch (mkn::kul::proc::ExitException const& e) {
       KLOG(ERR) << e.stack();
     }
-#endif  //_MKN_DISABLE_GIT_
-        // SVN NOT YET SUPPORTED
-        // #ifndef _MKN_DISABLE_SVN_
-        //                 try{
-        //                    mkn::kul::Process s("svn");
-        //                    mkn::kul::ProcessCapture sp(s);
-        //                    s.arg("ls").arg(repo).start();
-        //                    if(!sp.errs().size()) {
-        //                        INSTANCE().valids.insert(d.path(), repo);
+#endif  // MKN_DISABLE_GIT
+        //  SVN NOT YET SUPPORTED
+        //  #ifndef MKN_DISABLE_SVN
+        //                  try{
+        //                     mkn::kul::Process s("svn");
+        //                     mkn::kul::ProcessCapture sp(s);
+        //                     s.arg("ls").arg(repo).start();
+        //                     if(!sp.errs().size()) {
+        //                         INSTANCE().valids.insert(d.path(), repo);
     //                        return &mkn::kul::scm::Manager::INSTANCE().get("svn");
     //                    }
     //                 }catch(const mkn::kul::proc::ExitException& e){}
-    // #endif//_MKN_DISABLE_SVN_
+    // #endif//MKN_DISABLE_SVN
   }
 #else
   KEXIT(1,
         "SCM disabled, cannot resolve dependency, check local paths and "
         "configurations");
-#endif  //_MKN_DISABLE_SCM_
+#endif  // MKN_DISABLE_SCM
   std::stringstream ss;
   for (auto const& s : repos) ss << s << "\n";
   KEXIT(1, "SCM not found or not supported type(git/svn) for repo(s)\n\t" + ss.str() +

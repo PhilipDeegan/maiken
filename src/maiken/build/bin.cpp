@@ -30,8 +30,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/dbg.hpp"
 
+#include "maiken/compiler/compilers.hpp"
 #include "maiken.hpp"
 #include "maiken/dist.hpp"
+#include "mkn/kul/threads.hpp"
 
 #include <mutex>
 
@@ -80,8 +82,8 @@ class Executioner : public Constants {
       auto linkDbg(comp->linkerDebugBin(AppVars::INSTANCE().debug()));
       if (!linkDbg.empty()) linker += " " + linkDbg;
 
-      LinkDAO dao{app,   linker, linkEnd, bin, starDirs, obV, app.libraries(), app.libraryPaths(),
-                  app.m, dryRun};
+      LinkDAO dao{app.context(), linker,          linkEnd, bin, starDirs, obV,
+                  app.libraries(), app.libraryPaths(), app.m, dryRun};
 
       return comp->buildExecutable(dao);
     } catch (CompilerNotFoundException const& e) {
@@ -109,7 +111,7 @@ class Executioner : public Constants {
           mkn::kul::io::Writer(mkn::kul::File(base + ".txt", errLogDir)) << cpc.errs() << eol;
       }
 
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
       if (AppVars::INSTANCE().nodes()) DistLinker::send(cpc.file());
 #endif
     }
@@ -123,14 +125,14 @@ void Application::buildExecutable(mkn::kul::hash::set::String const& objects_)
   auto const dryRun = AppVars::INSTANCE().dryRun();
 
   mkn::kul::hash::set::String objects;
-  auto& file = main_->in();
+  auto& file = main_->in;
   std::string const& fileType = file.substr(file.rfind(".") + 1);
   if (fs.count(fileType) == 0)
     KEXIT(1, "Unable to handle artifact: \"" + file + "\" - type is not in file list");
   std::string const oType("." + (*AppVars::INSTANCE().envVars().find("MKN_OBJ")).second);
   mkn::kul::Dir objD(buildDir().join("obj")), tmpD(buildDir().join("tmp"));
   auto const name(out.empty() ? project().root()[STR_NAME].Scalar() : out);
-  auto obFile = Source(mkn::kul::File(main_->in()).real()).object();
+  auto obFile = source_object(mkn::kul::File(main_->in).real());
   mkn::kul::File tbject(obFile, tmpD);
   if (!dryRun && !tbject)
     KERR << "Source expected not found (ignoring) " << tbject;
@@ -170,10 +172,10 @@ void Application::buildTest(mkn::kul::hash::set::String const& objects)
 
   auto build_test = [&](auto& to, auto& testsD, auto& tmpD, auto* app) {
     mkn::kul::hash::set::String cobjects;
-    cobjects.insert(mkn::kul::File(to.object(), tmpD).escm());
-    mkn::kul::File inFile(to.in());
+    cobjects.insert(mkn::kul::File(source_object(to.in), tmpD).escm());
+    mkn::kul::File inFile(to.in);
     auto out = Application::hash(inFile.dir().real()) + "_" + inFile.name();
-    auto cpc = Executioner::build_exe(cobjects, starDirs, to.in(), out, testsD, *app);
+    auto cpc = Executioner::build_exe(cobjects, starDirs, to.in, out, testsD, *app);
     std::lock_guard<std::mutex> lock(mute);
     cpcs.push_back(cpc);
   };
@@ -181,7 +183,7 @@ void Application::buildTest(mkn::kul::hash::set::String const& objects)
   mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1,
                                          dryRun ? 10000 : 1000000000, 1000);
 
-  for (auto const& test : SourceFinder(*this).tests())
+  for (auto const& test : tests_for(*this))
     ctp.async(std::bind(build_test, test, testsD, tmpD, this));
   ctp.finish(10000000);  // 10 milliseconds
 
@@ -218,7 +220,8 @@ CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String con
     std::vector<mkn::kul::Dir> starDirs;
     if (objects.size()) starDirs.emplace_back(objD);
     std::vector<std::string> obV;
-    LinkDAO dao{*this, linker, linkEnd, lib, starDirs, obV, libraries(), libraryPaths(), m, dryRun};
+    LinkDAO dao{this->context(), linker,       linkEnd, lib, starDirs, obV,
+                libraries(),   libraryPaths(), m,       dryRun};
 
     CompilerProcessCapture const& cpc = comp->buildLibrary(dao);
     if (dryRun)
@@ -228,7 +231,7 @@ CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String con
       checkErrors(cpc);
       KOUT(INF) << cpc.cmd();
       KOUT(NON) << "Creating lib: " << mkn::kul::File(cpc.file()).real();
-#if defined(_MKN_WITH_MKN_RAM_) && defined(_MKN_WITH_IO_CEREAL_)
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
       if (AppVars::INSTANCE().nodes()) DistLinker::send(cpc.file());
 #endif
     }

@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/dbg.hpp"
 
+#include "maiken/compiler/compilers.hpp"
 #include "maiken/app.hpp"
 #include "maiken/scm.hpp"
 #include "maiken/regex.hpp"
@@ -114,7 +115,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   };
 
   bool c = 1;
-#ifndef _MKN_DISABLE_MODULES_
+#if MKN_WITH_MKN_MOD
   std::vector<YAML::Node> mod_nodes;
   if (this->ro) modArgs(AppVars::INSTANCE().mods(), mod_nodes, getIfMissing);
 
@@ -281,7 +282,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
 
   if (!main_ && lang.empty()) resolveLang();
   if (par) {
-    if (main_ && lang.empty()) lang = main_->in().substr(main_->in().rfind(".") + 1);
+    if (main_ && lang.empty()) lang = main_->in.substr(main_->in.rfind(".") + 1);
     main_ = {};
   }
 

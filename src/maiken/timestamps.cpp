@@ -28,6 +28,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "maiken/compiler/compilers.hpp"
 #include "maiken.hpp"
 
 void maiken::Application::writeTimeStamps(mkn::kul::hash::set::String& objects,
@@ -67,7 +68,7 @@ void maiken::Application::writeTimeStamps(mkn::kul::hash::set::String& objects,
 }
 
 void maiken::Application::loadTimeStamps() KTHROW(mkn::kul::StringException) {
-  if (_MKN_TIMESTAMPS_) {
+  if (MKN_TIMESTAMPS) {
     mkn::kul::Dir mkn(buildDir().join(".mkn"));
     mkn::kul::File src("src_stamp", mkn);
     if (mkn && src) {
