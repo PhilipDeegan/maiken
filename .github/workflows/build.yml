@@ -28,8 +28,8 @@ jobs:
         [ "${{ matrix.cc }}" = "clang" ] && export CC=clang CXX=clang++
         KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         KLOG=3 ./mkn build -Op test_mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -dtKO -p static -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./bin/static/mkn build test pack -Op test -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build -dtKO -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build test pack -Op test -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         KLOG=3 ./mkn build -dtOp format -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ldd bin/build/mkn
 
@@ -45,8 +45,8 @@ jobs:
         ldd mkn
         KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         KLOG=3 ./mkn build -Op test_mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -dtKO -p static -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./bin/static/mkn build test pack -Op test -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build -dtKO -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build test pack -Op test -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ldd bin/build/mkn
 
   macos:
@@ -62,8 +62,8 @@ jobs:
         cp -r $PWD ~/.maiken/app/mkn/master
         KLOG=3 ./mkn build -dtKO 2 -W 9 -g 0 -x res/mkn/clang
         KLOG=3 ./mkn build -dtOp test_mod -x res/mkn/clang
-        KLOG=3 ./mkn build -dtKO -p static -w mkn.mod -x res/mkn/clang
-        KLOG=3 ./bin/static/mkn build test pack -Op test -x res/mkn/clang
+        KLOG=3 ./mkn build -dtKO -w mkn.mod -x res/mkn/clang
+        KLOG=3 ./mkn build test pack -Op test -x res/mkn/clang
 
   windows:
     runs-on: windows-latest
@@ -85,8 +85,8 @@ jobs:
       run: |
         mkn build -dtKO 2 -g 0 -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE" || exit /b 1
         mkn build -dtOp test_mod -a "-std:c++20 -EHsc" || exit /b 1
-        mkn build -dtKO -p static -w mkn.mod -a "-std:c++20 -EHsc" || exit /b 1
-        bin\static\mkn build test pack -Op test -a "-std:c++20 -EHsc" || exit /b 1
+        mkn build -dtKO -w mkn.mod -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE" || exit /b 1
+        mkn build test pack -Op test -a "-std:c++20 -EHsc" || exit /b 1
 
   ubuntu_python:
     name: Python ${{ matrix.python-version }}

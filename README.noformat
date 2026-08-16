@@ -401,7 +401,7 @@ To activate another language run:
 
 Upon successful compilation of a project, source file modification timestamps are recorded under ./bin/<profile>/.mkn/src_stamp, which are checked on the next build to see if recompilation is required.
 Similarly, the aggregate of all non-hidden file modification timestamps are recorded under ./bin/<profile>/.mkn/inc_stamp, which are also checked on the next build to see if recompilation is required.
-This can be enabled by compiling with the argument -D_MKN_TIMESTAMPS_=1
+This can be enabled by compiling with the argument -DMKN_TIMESTAMPS=1
 This is disabled for languages like C# when the source is not compiled.
 The clean command deletes the timestamp files, and recompiles everything.
 

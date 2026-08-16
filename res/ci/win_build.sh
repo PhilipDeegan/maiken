@@ -18,7 +18,6 @@ INCS=(inc
   $YAML_INC
   ext/mkn/kul/$KUL_GIT/inc
   ext/mkn/kul/$KUL_GIT/os/win/inc
-  ext/mkn/kul/$KUL_GIT/os/nixish/inc
 )
 
 for i in ${INCS[@]}; do INC+=" -I$i"; done

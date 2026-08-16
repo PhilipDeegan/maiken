@@ -60,7 +60,7 @@ void maiken::Application::process() KTHROW(mkn::kul::Exception) {
   std::function<void()> proc_b = []() {};
 
   proc_a = [&](Application& app, bool work) {
-    mkn::kul::env::CWD(app.project().dir());
+    mkn::kul::os::PushDir pushd(app.project().dir());
 
     if (work) {
       if (!app.buildDir()) app.buildDir().mk();

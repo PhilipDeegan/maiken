@@ -36,4 +36,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MKN_ERR_INVALID_WIT_CLI "Invalid -w argument provided"
 #define MKN_ERR_INVALID_WITHOUT_CLI "Invalid -t argument provided"
 
-#endif /* MAIKEN_DEFS_LANG_HPP */
+#endif /* MAIKEN_LANG_ERR_HPP */

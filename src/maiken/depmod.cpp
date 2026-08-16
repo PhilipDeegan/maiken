@@ -53,7 +53,7 @@ void maiken::Application::loadDepOrMod(YAML::Node const& node, mkn::kul::Dir con
           "dep has no name or scm tag so cannot be resolved automatically from "
           "remote repositories - path: " +
               depOrMod.path());
-  mkn::kul::env::CWD(this->project().dir());
+  mkn::kul::os::PushDir project_pushd(this->project().dir());
   std::string const& tscr(node[STR_SCM] ? Properties::RESOLVE(*this, node[STR_SCM].Scalar())
                                         : node[STR_NAME].Scalar());
   std::string const& v(node[STR_VERSION] ? Properties::RESOLVE(*this, node[STR_VERSION].Scalar())
@@ -68,26 +68,27 @@ void maiken::Application::loadDepOrMod(YAML::Node const& node, mkn::kul::Dir con
 
     std::rethrow_exception(std::current_exception());
   }
-  mkn::kul::env::CWD(depOrMod);
+  {
+    mkn::kul::os::PushDir dep_pushd(depOrMod);
 
-  if (MKN_REMOTE_EXEC) {
+    if (MKN_REMOTE_EXEC) {
 #ifdef _WIN32
-    if (mkn::kul::File("mkn.bat").is() &&
-        mkn::kul::proc::Call("mkn.bat", AppVars::INSTANCE().envVars()).run())
-      KEXIT(1, "ERROR in " + depOrMod.path() + "/mkn.bat");
+      if (mkn::kul::File("mkn.bat").is() &&
+          mkn::kul::proc::Call("mkn.bat", AppVars::INSTANCE().envVars()).run())
+        KEXIT(1, "ERROR in " + depOrMod.path() + "/mkn.bat");
 #else
-    if (mkn::kul::File("mkn." + std::string(MKN_KUL_STR(MKN_KUL_OS)) + ".sh").is() &&
-        mkn::kul::proc::Call("./mkn." + std::string(MKN_KUL_STR(MKN_KUL_OS)) + ".sh",
-                             AppVars::INSTANCE().envVars())
-            .run())
-      KEXIT(1,
-            "ERROR in " + depOrMod.path() + "/mkn." + std::string(MKN_KUL_STR(MKN_KUL_OS)) + ".sh");
-    else if (mkn::kul::File("mkn.sh").is() &&
-             mkn::kul::proc::Call("./mkn.sh", AppVars::INSTANCE().envVars()).run())
-      KEXIT(1, "ERROR in " + depOrMod.path() + "/mkn.sh");
+      if (mkn::kul::File("mkn." + std::string(MKN_KUL_STR(MKN_KUL_OS)) + ".sh").is() &&
+          mkn::kul::proc::Call("./mkn." + std::string(MKN_KUL_STR(MKN_KUL_OS)) + ".sh",
+                               AppVars::INSTANCE().envVars())
+              .run())
+        KEXIT(1, "ERROR in " + depOrMod.path() + "/mkn." + std::string(MKN_KUL_STR(MKN_KUL_OS)) +
+                     ".sh");
+      else if (mkn::kul::File("mkn.sh").is() &&
+               mkn::kul::proc::Call("./mkn.sh", AppVars::INSTANCE().envVars()).run())
+        KEXIT(1, "ERROR in " + depOrMod.path() + "/mkn.sh");
 #endif
+    }
   }
-  mkn::kul::env::CWD(this->project().dir());
 }
 
 std::optional<std::string> get_cache_version(std::string const& name, std::string const& type) {
@@ -244,7 +245,7 @@ void maiken::Application::popDepOrMod(YAML::Node const& n, std::vector<Applicati
   for (auto* ap : vec) {
     auto& app(*ap);
     if (app.buildDir().path().empty()) {
-      mkn::kul::env::CWD(app.project().dir());
+      mkn::kul::os::PushDir pushd(app.project().dir());
       if (app.project().root()[STR_SCM])
         app.scr = Properties::RESOLVE(app, app.project().root()[STR_SCM].Scalar());
       if (app.project().root()[STR_BIN])
@@ -252,7 +253,6 @@ void maiken::Application::popDepOrMod(YAML::Node const& n, std::vector<Applicati
       if (module) app.ro = false;
       app.setup();
       if (app.sources().size()) app.buildDir().mk();
-      mkn::kul::env::CWD(this->project().dir());
     }
     std::string _path(app.inst ? app.inst.escr() : app.buildDir().escr());
     if (app.sources().size() &&

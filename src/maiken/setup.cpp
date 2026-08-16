@@ -108,10 +108,9 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   sub_initializer(*this, nodes);
 
   auto getIfMissing = [&](YAML::Node const& n, bool const mod) {
-    std::string const& cwd(mkn::kul::env::CWD());
+    mkn::kul::os::PushDir pushd(mkn::kul::env::CWD());
     mkn::kul::Dir projectDir(resolveDepOrModDirectory(n, mod));
     if (!projectDir.is()) loadDepOrMod(n, projectDir, mod);
-    mkn::kul::env::CWD(cwd);
   };
 
   bool c = 1;

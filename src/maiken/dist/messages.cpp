@@ -62,11 +62,12 @@ void maiken::dist::CompileRequest::do_response_for(mkn::kul::http::A1_1Request c
   if (!req.header("session")) KEXCEPTION("BAD CompileRequest");
   auto session_id = (*req.headers().find("session")).second;
 
-  mkn::kul::env::CWD(this->m_directory);
-
   std::vector<mkn::kul::File> cacheFiles;
-  sessions[session_id].apps_vector()[0]->compile(this->m_src_obj, sessions[session_id].objects,
-                                                 cacheFiles);
+  {
+    mkn::kul::os::PushDir pushd(this->m_directory);
+    sessions[session_id].apps_vector()[0]->compile(this->m_src_obj, sessions[session_id].objects,
+                                                   cacheFiles);
+  }
 
   YAML::Node root;
   bool success = 1;

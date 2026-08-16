@@ -86,7 +86,7 @@ void maiken::Application::pack() KTHROW(mkn::kul::Exception) {
     bool found = 0;
     for (auto const& p : paths) {
       mkn::kul::Dir path(p);
-      if (!path) KEXIT(1, "Path does not exist: ", pk.path());
+      if (!path) KEXIT(1, "Path does not exist: ", p);
       found = LibFinder::findAdd(l, path, lib);
       if (found) break;
     }
