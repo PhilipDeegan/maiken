@@ -44,38 +44,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/sys.hpp"
 
 #include "mkn/mod/def.hpp"
+#include "mkn/mod/loader.hpp"
 
 #include "maiken/app.hpp"
 
 namespace maiken {
 
 class GlobalModules;
-class MKN_KUL_PUBLISH ModuleLoader : public mkn::kul::sys::SharedClass<mkn::mod::Module> {
+class MKN_KUL_PUBLISH ModuleLoader : public mkn::mod::Loader {
   friend class GlobalModules;
 
  private:
-  bool loaded = 0;
-  mkn::mod::Module* p = nullptr;
   Application const* ap_ = nullptr;
 
   static mkn::kul::File FIND(Application& a) KTHROW(mkn::kul::sys::Exception);
 
  public:
   ModuleLoader(Application const& ap, mkn::kul::File const& f) KTHROW(mkn::kul::sys::Exception)
-      : mkn::kul::sys::SharedClass<mkn::mod::Module>(f, "maiken_module_construct",
-                                                      "maiken_module_destruct"),
-        ap_(&ap) {
-    construct(p);
-    loaded = 1;
-  }
+      : mkn::mod::Loader(f), ap_(&ap) {}
   ~ModuleLoader() {
-    if (loaded) KERR << "WARNING: ModuleLoader not unloaded, possible memory leak";
+    if (loaded()) KERR << "WARNING: ModuleLoader not unloaded, possible memory leak";
   }
-  void unload() {
-    if (loaded) destruct(p);
-    loaded = 0;
-  }
-  mkn::mod::Module* module() { return p; }
   Application const* app() const { return ap_; }
 
   static std::shared_ptr<ModuleLoader> LOAD(Application& ap) KTHROW(mkn::kul::sys::Exception);
