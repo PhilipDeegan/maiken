@@ -30,9 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/dbg.hpp"
 
-#include "maiken.hpp"
-#include "maiken/compiler/compilers.hpp"
-#include "maiken/dist.hpp"
+#include "maiken/app.hpp"
 #include "maiken/source.hpp"
 #include "mkn/kul/threads.hpp"
 
