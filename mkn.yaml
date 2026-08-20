@@ -3,7 +3,7 @@
 name: mkn
 version: master
 property:
-  DATE: 18_AUG_2026
+  DATE: 19_AUG_2026
   self.deps: mkn.kul
 
 parent: bin
@@ -47,9 +47,20 @@ profile:
   parent: bin
   mode: static
 
+# Same as "bin", but links parse.yaml as a shared library instead of static +
+# exported (-rdynamic) - used to prove modules (which all take a YAML::Node)
+# still dlopen() cleanly when their yaml-cpp dependency is a separate .so
+# rather than baked into this binary. See test_mod's mkn.yaml/mod.cpp.
+- name: bin_shared
+  parent: bin
+  mode: none
+  dep: parse.yaml[shared]
+
 - name: test_mod
   parent: headers
   with: mkn.mod
+  dep:
+    - local: test/mod/dep
   src: test/mod/mod.cpp
   out: test_mod
   mode: shared

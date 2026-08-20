@@ -19,35 +19,30 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - run: ./res/ci/nixish_setup.sh && make nix
-    - env:
-        MKN_GCC_PREFERRED: 1
-      run: |
-        ldd mkn
+    - run: ldd mkn
+    - run: |
         mkdir -p ~/.maiken/app/mkn
         cp -r $PWD ~/.maiken/app/mkn/master
-        [ "${{ matrix.cc }}" = "clang" ] && export CC=clang CXX=clang++
-        KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -Op test_mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -dtKO -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build test pack -Op test -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -dtOp format -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ldd bin/build/mkn
+    - env:
+        KLOG: 3
+      run: python3 res/ci/build.py ubuntu_${{ matrix.cc }}
+    - run: ldd bin/build/mkn
+    - run: ldd bin/bin_shared/mkn
 
   manylinux:
     runs-on: ubuntu-22.04
     container: quay.io/pypa/manylinux_2_28_x86_64:latest
     steps:
     - uses: actions/checkout@v6
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
     - run: ./res/ci/nixish_setup.sh && make nix
+    - run: ldd mkn
     - env:
-        MKN_GCC_PREFERRED: 1
-      run: |
-        ldd mkn
-        KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -Op test_mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -dtKO -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build test pack -Op test -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ldd bin/build/mkn
+        KLOG: 3
+      run: python3 res/ci/build.py manylinux_gcc
+    - run: ldd bin/build/mkn
 
   macos:
     strategy:
@@ -60,10 +55,9 @@ jobs:
     - run: |
         mkdir -p ~/.maiken/app/mkn
         cp -r $PWD ~/.maiken/app/mkn/master
-        KLOG=3 ./mkn build -dtKO 2 -W 9 -g 0 -x res/mkn/clang
-        KLOG=3 ./mkn build -dtOp test_mod -x res/mkn/clang
-        KLOG=3 ./mkn build -dtKO -w mkn.mod -x res/mkn/clang
-        KLOG=3 ./mkn build test pack -Op test -x res/mkn/clang
+    - env:
+        KLOG: 3
+      run: python3 res/ci/build.py macos_clang
 
   windows:
     runs-on: windows-latest
@@ -80,13 +74,8 @@ jobs:
         ./res/ci/win_build.sh
     - shell: cmd
       env:
-        MKN_CL_PREFERRED: 1
         KLOG: 3
-      run: |
-        mkn build -dtKO 2 -g 0 -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE" || exit /b 1
-        mkn build -dtOp test_mod -a "-std:c++20 -EHsc" || exit /b 1
-        mkn build -dtKO -w mkn.mod -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE" || exit /b 1
-        mkn build test pack -Op test -a "-std:c++20 -EHsc" || exit /b 1
+      run: python res/ci/build.py win_cl
 
   ubuntu_python:
     name: Python ${{ matrix.python-version }}

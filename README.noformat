@@ -345,14 +345,23 @@ The settings file is the default global configuration for projects.
 super: $directory                   # Inherit properties of project at directory, super (..) or sub directory advisable
 
 property:
-  - aaa: AAA
+    aaa: AAA
     bbb: ${aaa}.BBB
-  - mkn.link.rpathing: true           # Optional, default true. When building a SHAR
+    mkn.link.rpathing: true           # Optional, default true. When building a SHAR
                                        # library or executable, add "-Wl,-rpath=..."
                                        # entries for its dependency libraries' paths.
                                        # Dependency libraries are always linked
                                        # ("-l"/"-L") regardless of this setting - it
                                        # only controls whether they're also rpathed.
+
+    mkn.env.automatic: true           # Optional, default true. Automatically prepend
+                                       # dependency library directories onto PATH
+                                       # (Windows) / LD_LIBRARY_PATH (nix) / also
+                                       # DYLD_LIBRARY_PATH (macOS) before running or
+                                       # testing a binary. Windows has no rpath
+                                       # equivalent, so disabling this on Windows will
+                                       # break running anything with non-default-search
+                                       # shared dependencies.
 
 local:
     repo: <directory>                   # Optional, missing assumed ${4.3.2}/repo
