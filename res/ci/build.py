@@ -60,7 +60,7 @@ def nix_test(std_args, env, full):
     """ubuntu_gcc / ubuntu_clang / manylinux_gcc."""
     a = f'-a "{std_args}"'
     run(BOOTSTRAP, f"build {a} -O 2 -g 0 -W 9", cwd=DEP_DIR, env=env)
-    run(BOOTSTRAP, f"build -Op test_mod {a} -O 2 -g 0 -W 9", env=env)
+    run(BOOTSTRAP, f"build -dOp test_mod {a} -O 2 -g 0 -W 9", env=env)
     run(built("build"), f"build test pack -Op test {a} -O 2 -g 0 -W 9", env=env)
 
     if not full:
@@ -78,7 +78,7 @@ def nix_test(std_args, env, full):
 
 def job_macos_clang():
     tc = os.path.join(ROOT, "res", "mkn", "clang")
-    run(BOOTSTRAP, f"build -d -x {tc}", cwd=DEP_DIR)
+    run(BOOTSTRAP, f"build -x {tc}", cwd=DEP_DIR)
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
     run(built("build"), f"build test pack -Op test -x {tc}")
 
@@ -86,7 +86,7 @@ def job_macos_clang():
 def job_win_cl():
     std = "-std:c++20 -EHsc"
     env = {"MKN_CL_PREFERRED": "1"}
-    run(BOOTSTRAP, f'build -a "{std}"', cwd=DEP_DIR, env=env)
+    run(BOOTSTRAP, f'build -da "{std}"', cwd=DEP_DIR, env=env)
     run(BOOTSTRAP, f'build -dtOp test_mod -a "{std}"', env=env)
     run(built("build"), f'build test pack -Op test -a "{std}"', env=env)
 
