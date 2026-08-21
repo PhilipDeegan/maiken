@@ -82,7 +82,55 @@ std::shared_ptr<maiken::ModuleLoader> maiken::ModuleLoader::LOAD(Application& ap
   };
   global_load(ap);
 
+  auto guard = prepareModuleLoad(ap);
   return std::make_shared<ModuleLoader>(ap, FIND(ap));
+}
+
+#ifndef _WIN32
+namespace {
+// dlopen()'s dynamic linker resolves a NEEDED entry by soname against
+// already-mapped objects before ever consulting search paths, so loading
+// ap's dependency .so files by absolute path first is enough to satisfy the
+// module's NEEDED entries for them, without touching LD_LIBRARY_PATH at all.
+// Kept alive process-lifetime (same rationale as GlobalModules::libs).
+mkn::kul::hash::map::S2T<std::shared_ptr<mkn::kul::sys::SharedLibrary>>& PreloadedDeps() {
+  static mkn::kul::hash::map::S2T<std::shared_ptr<mkn::kul::sys::SharedLibrary>> libs;
+  return libs;
+}
+
+void PreloadDependencies(maiken::Application const& ap) {
+  auto& preloaded = PreloadedDeps();
+  for (auto const& dir : ap.libraryPaths()) {
+    mkn::kul::Dir d(dir);
+    if (!d) continue;
+    for (auto const& f : d.files(0)) {
+      auto const& name = f.name();
+      auto const dot = name.rfind(".");
+      if (dot == std::string::npos || name.substr(dot + 1) != "so") continue;
+      auto const real = f.real();
+      if (preloaded.count(real)) continue;
+      try {
+        preloaded.insert(std::make_pair(
+            real, std::make_shared<mkn::kul::sys::SharedLibrary>(mkn::kul::File(real))));
+        KLOG(TRC) << "preloaded module dependency: " << real;
+      } catch (mkn::kul::sys::Exception const& e) {
+        KLOG(TRC) << "could not preload module dependency: " << real << " : " << e.what();
+      }
+    }
+  }
+}
+}  // namespace
+#endif  // _WIN32
+
+mkn::kul::env::PushEnv maiken::prepareModuleLoad(Application& ap) KTHROW(mkn::kul::sys::Exception) {
+#ifdef _WIN32
+  auto vars = ap.requiredEnv();
+  for (auto const& v : ap.envVars()) vars.push_back(v);
+  return mkn::kul::env::PushEnv(vars);
+#else
+  if (Settings::INSTANCE().propertyBool("mkn.env.automatic")) PreloadDependencies(ap);
+  return mkn::kul::env::PushEnv(std::vector<mkn::kul::env::Var>{});
+#endif
 }
 
 #endif  // MKN_WITH_MKN_MOD

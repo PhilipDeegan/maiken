@@ -1,0 +1,8 @@
+name: test_mod_dep
+out: test_mod_dep
+dep: mkn.kul parse.yaml[shared]
+inc: .
+src: dep.cpp, -DMKN_KUL_SHARED -DMKN_KUL_EXPORT
+mode: shared
+if_link:
+  nix: -Wl,-soname=libtest_mod_dep.so

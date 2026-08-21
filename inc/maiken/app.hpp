@@ -256,6 +256,12 @@ class MKN_KUL_PUBLISH Application : public Constants {
   std::vector<mkn::kul::env::Var>& envVars() { return evs; }
   std::vector<mkn::kul::env::Var> const& envVars() const { return evs; }
 
+  // PATH/LD_LIBRARY_PATH (+ DYLD_LIBRARY_PATH on macOS) prepends built from
+  // libraryPaths(), needed for anything that has to find this app's
+  // dependency shared libs at runtime - running/testing a binary (Runner::RUN)
+  // or loading a build-time module (ModuleLoader).
+  std::vector<mkn::kul::env::Var> requiredEnv() const;
+
   void add_def(std::string const& def) { defs.emplace_back(def); }
   std::vector<std::string> const& defines() const { return defs; }
 

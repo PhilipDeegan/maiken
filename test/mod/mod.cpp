@@ -30,12 +30,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/mod/init.hpp"
 
+#include "dep.hpp"
+
 namespace maiken::test {
 
 class MaikenModule : public mkn::mod::Module {
  public:
-  void init(mkn::mod::Context&, YAML::Node const&) override { init_ = 1; }
-  void compile(mkn::mod::Context&, YAML::Node const&) override { compile_ = 1; }
+  void init(mkn::mod::Context&, YAML::Node const&) override {
+    init_ = 1;
+    // test_mod_dep itself links parse.yaml as a shared library, so loading
+    // this module transitively needs libparse.yaml resolvable too - not just
+    // libtest_mod_dep.so.
+    if (test_mod_dep_value() != 1234 || !test_mod_dep_yaml_ok()) std::abort();
+  }
+  void compile(mkn::mod::Context&, YAML::Node const& node) override {
+    // Every real module signature carries a YAML::Node, and real modules read
+    // it with operator[]/as<T>(), which throws a YAML::Exception (vtable/RTTI
+    // defined in libparse.yaml, not this module's own object code) on a
+    // missing/mistyped key - exercising that here forces this .so to actually
+    // depend on that symbol at load time, same as a real module.
+    try {
+      node["mkn_test_mod_missing_key"].as<std::string>();
+      std::abort();
+    } catch (YAML::Exception const&) {
+    }
+    compile_ = 1;
+  }
   void link(mkn::mod::Context&, YAML::Node const&) override { link_ = 1; }
   void test(mkn::mod::Context&, YAML::Node const&) override { test_ = 1; }
   void pack(mkn::mod::Context&, YAML::Node const&) override { pack_ = 1; }

@@ -34,7 +34,7 @@ namespace maiken {
 class Runner : public Constants {
  public:
   static void RUN(Application const& a, std::string bin, std::string const buildDir,
-                  compiler::Mode m, bool dbg = 0) {
+                  bool dbg = 0) {
     mkn::kul::File f(bin, buildDir);
     if (!f) KEXIT(1, "binary does not exist \n" + f.full());
     std::unique_ptr<mkn::kul::Process> p;
@@ -71,24 +71,9 @@ class Runner : public Constants {
     }
 
     std::vector<std::pair<std::string, std::string> > envies;
-    if (m != compiler::Mode::STAT) {
-      std::string arg;
-      for (auto const& s : a.libraryPaths()) arg += s + mkn::kul::env::SEP();
-      if (!arg.empty()) arg.pop_back();
-#if MKN_DISABLE_RUN_LIB_PATH_HANDLING == 0
-#if defined(__APPLE__)
-      mkn::kul::env::Var dy("DYLD_LIBRARY_PATH", arg, mkn::kul::env::Var::Mode::PREP);
-      KOUT(DBG) << dy.name() << " : " << dy.toString();
-      envies.push_back(std::make_pair(dy.name(), dy.toString()));
-#endif
-#ifdef _WIN32
-      mkn::kul::env::Var pa("PATH", arg, mkn::kul::env::Var::Mode::PREP);
-#else
-      mkn::kul::env::Var pa("LD_LIBRARY_PATH", arg, mkn::kul::env::Var::Mode::PREP);
-#endif
-      KOUT(DBG) << pa.name() << " : " << pa.toString();
-      envies.push_back(std::make_pair(pa.name(), pa.toString()));
-#endif  // MKN_DISABLE_RUN_LIB_PATH_HANDLING
+    for (auto const& v : a.requiredEnv()) {
+      KOUT(DBG) << v.name() << " : " << v.toString();
+      envies.push_back(std::make_pair(v.name(), v.toString()));
     }
 
     if (mkn::kul::env::EXISTS("MKN_LD_PRELOAD"))
@@ -122,9 +107,9 @@ void maiken::Application::test() {
 #ifdef _WIN32
         if (file.name().rfind(".exe") == std::string::npos) continue;
 #endif
-        Runner::RUN(*this, file.name(), testsD.real(), m);
+        Runner::RUN(*this, file.name(), testsD.real());
       } else
-        Runner::RUN(*this, mkn::kul::File(file.full(), testsD).real(), buildDir().real(), m);
+        Runner::RUN(*this, mkn::kul::File(file.full(), testsD).real(), buildDir().real());
     }
   }
 }
@@ -139,6 +124,6 @@ void maiken::Application::run(bool dbg) {
 #if defined(_WIN32)
     if (bin.rfind(".exe") == std::string::npos) continue;
 #endif
-    Runner::RUN(*this, bin, buildDir().real(), m, dbg);
+    Runner::RUN(*this, bin, buildDir().real(), dbg);
   }
 }

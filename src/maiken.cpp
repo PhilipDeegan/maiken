@@ -38,6 +38,7 @@ maiken::Application::Application(maiken::Project const& proj, std::string const&
   m_cInfo.lib_prefix = AppVars::INSTANCE().envVar("MKN_LIB_PRE");
   m_cInfo.lib_ext = AppVars::INSTANCE().envVar("MKN_LIB_EXT");
   m_cInfo.obj_ext = AppVars::INSTANCE().envVar("MKN_OBJ");
+  m_cInfo.rpathing = Settings::INSTANCE().propertyBool("mkn.link.rpathing");
 }
 
 maiken::Application::~Application() {

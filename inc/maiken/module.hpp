@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if MKN_WITH_MKN_MOD
 
+#include "mkn/kul/env.hpp"
 #include "mkn/kul/os.hpp"
 #include "mkn/kul/log.hpp"
 #include "mkn/kul/sys.hpp"
@@ -49,6 +50,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/app.hpp"
 
 namespace maiken {
+
+// Prepares whatever this process needs so ap's module (and its dependency
+// libs) can be dlopen()'d/LoadLibrary()'d successfully, and returns an RAII
+// guard scoping that preparation to the caller's load call:
+//  - Windows: LoadLibrary re-reads PATH per call, so this pushes PATH (+ any
+//    of ap's own declared env vars) for the guard's lifetime.
+//  - nix: dlopen()'s dynamic linker only reads LD_LIBRARY_PATH once at
+//    process startup, so mutating it here would do nothing - instead this
+//    preloads ap's dependency .so files by absolute path (dlopen resolves a
+//    NEEDED entry against an already-mapped object by soname before ever
+//    consulting search paths), and returns a no-op guard.
+mkn::kul::env::PushEnv prepareModuleLoad(Application& ap) KTHROW(mkn::kul::sys::Exception);
 
 class GlobalModules;
 class MKN_KUL_PUBLISH ModuleLoader : public mkn::mod::Loader {
@@ -82,6 +95,7 @@ class GlobalModules {
 
   ~GlobalModules() { libs.clear(); }
   void load(Application& ap) KTHROW(mkn::kul::sys::Exception) {
+    auto guard = prepareModuleLoad(ap);
     auto lib = std::make_shared<mkn::kul::sys::SharedLibrary>(ModuleLoader::FIND(ap));
     libs.insert(std::make_pair(lib->file().dir().real(), lib));
   }
