@@ -1,31 +1,22 @@
 #!/usr/bin/env python3
 """
-CI build driver, keyed by a "build_job_id" (e.g. ubuntu_gcc, ubuntu_clang,
-manylinux_gcc, macos_clang, win_cl).
+Module-loader test driver, keyed by a "build_job_id" (ubuntu_gcc,
+ubuntu_clang, manylinux_gcc, macos_clang, win_cl).
 
-Runs the same "build mkn -> build test_mod's local dep -> build test_mod ->
-rebuild mkn -w mkn.mod -> exercise the module loader" sequence used by every
-platform job in .github/workflows/build.yml, but as explicit subprocess calls
-whose exit codes are always checked - unlike the old per-platform bash/cmd
-blocks (bash gets this for free via `set -e -o pipefail`, but the Windows cmd
-block relied on appending "|| exit /b 1" to every single line by hand, which
-is easy to miss).
+.github/workflows/build.yml already built the mkn binaries this script uses,
+via plain shell/make commands, before invoking it:
+  - ./mkn (mkn.exe on Windows): the bootstrap binary from `make nix`/
+    `make bsd`/win_build.sh, with no mkn.mod support
+  - bin/build/mkn: rebuilt with `-w mkn.mod`, so it actually has
+    module-loading support compiled in
+  - (ubuntu only) bin/bin_shared/mkn: same as bin/build/mkn but linked
+    against a *shared* libparse.yaml instead of static + -rdynamic
 
-Each platform's mkn flags are kept as literal, platform-specific command
-lines (not derived from one generic template) - the three platforms fuse
-their -K/-O/-a/-x flags differently enough that a shared abstraction risks
-silently changing what gets passed on a platform this script can't be
-run-tested on locally.
-
-./mkn (mkn.exe on Windows) is the mod-less bootstrap binary produced by
-`make nix`/`make bsd`/win_build.sh - it is NOT compiled with mkn.mod support,
-so it must never be used to exercise "mod:" module-loader clauses (it would
-silently no-op them instead of testing anything). The sequence is:
-  A) build mkn plain, without -w mkn.mod, using the bootstrap binary
-  B) rebuild mkn again with -w mkn.mod, using the bootstrap binary as the
-     compiler - this is the first binary that actually has module-loading
-     support compiled in
-  C) use THAT binary (not the bootstrap) for anything that loads a module
+This script builds test_mod (a plain compile, using the bootstrap binary -
+no module loading involved yet) and its local test/mod/dep dependency, which
+mkn doesn't auto-build, then uses the mod-enabled binary(ies) to actually
+exercise the module loader ("build test pack -Op test"), checking every
+subprocess's exit code explicitly.
 
 Run from the repository root, e.g.: python3 res/ci/build.py ubuntu_gcc
 """
@@ -38,12 +29,12 @@ IS_WIN = sys.platform.startswith("win")
 EXE = ".exe" if IS_WIN else ""
 ROOT = os.getcwd()  # expected to be the repo root when this script is invoked
 
-BOOTSTRAP = os.path.join(ROOT, f"mkn{EXE}")  # no mkn.mod support, see module docstring
+BOOTSTRAP = os.path.join(ROOT, f"mkn{EXE}")
 DEP_DIR = os.path.join(ROOT, "test", "mod", "dep")
 
 
 def built(profile_dir):
-    """Absolute path to a binary this script itself built under bin/<profile_dir>/."""
+    """Absolute path to a binary build.yml already built under bin/<profile_dir>/."""
     return os.path.join(ROOT, "bin", profile_dir, f"mkn{EXE}")
 
 
@@ -65,19 +56,12 @@ def rm_test_lib():
         os.remove(test_lib)
 
 
-def nix_job(std_args, env, full):
+def nix_test(std_args, env, full):
     """ubuntu_gcc / ubuntu_clang / manylinux_gcc."""
-    run(BOOTSTRAP, f'build -dtKa "{std_args}" -O 2 -g 0 -W 9', env=env)
-    # test_mod's dep on test/mod/dep is local, so it isn't auto-built - build
-    # it explicitly before test_mod links against it.
-    run(BOOTSTRAP, f'build -a "{std_args}" -O 2 -g 0 -W 9', cwd=DEP_DIR, env=env)
-    run(BOOTSTRAP, f'build -Op test_mod -a "{std_args}" -O 2 -g 0 -W 9', env=env)
-    run(BOOTSTRAP, f'build -dtKO -w mkn.mod -a "{std_args}" -O 2 -g 0 -W 9', env=env)
-    run(
-        built("build"),
-        f'build test pack -Op test -a "{std_args}" -O 2 -g 0 -W 9',
-        env=env,
-    )
+    a = f'-a "{std_args}"'
+    run(BOOTSTRAP, f"build {a} -O 2 -g 0 -W 9", cwd=DEP_DIR, env=env)
+    run(BOOTSTRAP, f"build -Op test_mod {a} -O 2 -g 0 -W 9", env=env)
+    run(built("build"), f"build test pack -Op test {a} -O 2 -g 0 -W 9", env=env)
 
     if not full:
         return
@@ -86,57 +70,34 @@ def nix_job(std_args, env, full):
     # is currently out of sync with mkn.mod's Context API (pending changes to
     # merge there); leave this as a no-op build until that's sorted, rather
     # than failing CI on it.
-    run(BOOTSTRAP, f'build -dtOp format -a "{std_args}" -O 2 -g 0 -W 9', env=env)
+    run(BOOTSTRAP, f"build -dtOp format {a} -O 2 -g 0 -W 9", env=env)
 
-    # Rebuild mkn itself linked against a *shared* libparse.yaml (instead of
-    # static + -rdynamic), then reuse the module loader test against it -
-    # every module takes a YAML::Node, so this proves modules still dlopen()
-    # cleanly when that dependency is a separate .so.
-    run(
-        BOOTSTRAP,
-        f'build -dtO -w mkn.mod -Op bin_shared -a "{std_args}" -O 2 -g 0 -W 9',
-        env=env,
-    )
     rm_test_lib()
-    run(
-        built("bin_shared"),
-        f'build test pack -Op test -a "{std_args}" -O 2 -g 0 -W 9',
-        env=env,
-    )
+    run(built("bin_shared"), f"build test pack -Op test {a} -O 2 -g 0 -W 9", env=env)
 
 
 def job_macos_clang():
     tc = os.path.join(ROOT, "res", "mkn", "clang")
-    run(BOOTSTRAP, f"build -dtKO 2 -W 9 -g 0 -x {tc}")
     run(BOOTSTRAP, f"build -x {tc}", cwd=DEP_DIR)
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
-    run(BOOTSTRAP, f"build -dtKO -w mkn.mod -x {tc}")
     run(built("build"), f"build test pack -Op test -x {tc}")
 
 
 def job_win_cl():
     std = "-std:c++20 -EHsc"
-    static_std = f"{std} -DYAML_CPP_STATIC_DEFINE"
     env = {"MKN_CL_PREFERRED": "1"}
-    run(BOOTSTRAP, f'build -dtKO 2 -g 0 -a "{static_std}"', env=env)
     run(BOOTSTRAP, f'build -a "{std}"', cwd=DEP_DIR, env=env)
     run(BOOTSTRAP, f'build -dtOp test_mod -a "{std}"', env=env)
-    run(BOOTSTRAP, f'build -dtKO -w mkn.mod -a "{static_std}"', env=env)
     run(built("build"), f'build test pack -Op test -a "{std}"', env=env)
 
 
 JOBS = {
-    "ubuntu_gcc": lambda: nix_job(
-        "-std=c++20 -fPIC", {"MKN_GCC_PREFERRED": "1"}, full=True
-    ),
-    "ubuntu_clang": lambda: nix_job(
-        "-std=c++20 -fPIC",
-        {"MKN_GCC_PREFERRED": "1", "CC": "clang", "CXX": "clang++"},
-        full=True,
-    ),
-    "manylinux_gcc": lambda: nix_job(
-        "-std=c++20 -fPIC", {"MKN_GCC_PREFERRED": "1"}, full=False
-    ),
+    "ubuntu_gcc": lambda: nix_test("-std=c++20 -fPIC", {"MKN_GCC_PREFERRED": "1"}, full=True),
+    "ubuntu_clang": lambda: nix_test(
+        "-std=c++20 -fPIC", {"MKN_GCC_PREFERRED": "1", "CC": "clang", "CXX": "clang++"},
+        full=True),
+    "manylinux_gcc": lambda: nix_test(
+        "-std=c++20 -fPIC", {"MKN_GCC_PREFERRED": "1"}, full=False),
     "macos_clang": job_macos_clang,
     "win_cl": job_win_cl,
 }
