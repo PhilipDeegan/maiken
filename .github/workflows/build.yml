@@ -40,9 +40,6 @@ jobs:
     container: quay.io/pypa/manylinux_2_28_x86_64:latest
     steps:
     - uses: actions/checkout@v6
-    - uses: actions/setup-python@v6
-      with:
-        python-version: '3.x'
     - run: ./res/ci/nixish_setup.sh && make nix
     - env:
         MKN_GCC_PREFERRED: 1

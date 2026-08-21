@@ -78,7 +78,7 @@ def nix_test(std_args, env, full):
 
 def job_macos_clang():
     tc = os.path.join(ROOT, "res", "mkn", "clang")
-    run(BOOTSTRAP, f"build -x {tc}", cwd=DEP_DIR)
+    run(BOOTSTRAP, f"build -d -x {tc}", cwd=DEP_DIR)
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
     run(built("build"), f"build test pack -Op test -x {tc}")
 
