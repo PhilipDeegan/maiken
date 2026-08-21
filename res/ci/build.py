@@ -59,7 +59,7 @@ def rm_test_lib():
 def nix_test(std_args, env, full):
     """ubuntu_gcc / ubuntu_clang / manylinux_gcc."""
     a = f'-a "{std_args}"'
-    run(BOOTSTRAP, f"build {a} -O 2 -g 0 -W 9", cwd=DEP_DIR, env=env)
+    run(BOOTSTRAP, f"build {a} -dO 2 -g 0 -W 9", cwd=DEP_DIR, env=env)
     run(BOOTSTRAP, f"build -dOp test_mod {a} -O 2 -g 0 -W 9", env=env)
     run(built("build"), f"build test pack -Op test {a} -O 2 -g 0 -W 9", env=env)
 
@@ -78,7 +78,7 @@ def nix_test(std_args, env, full):
 
 def job_macos_clang():
     tc = os.path.join(ROOT, "res", "mkn", "clang")
-    run(BOOTSTRAP, f"build -x {tc}", cwd=DEP_DIR)
+    run(BOOTSTRAP, f"build -dx {tc}", cwd=DEP_DIR)
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
     run(built("build"), f"build test pack -Op test -x {tc}")
 
