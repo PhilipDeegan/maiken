@@ -45,7 +45,10 @@ maiken::ContextState maiken::ApplicationContext::state() const {
     for (auto const& byDir : byType.second)
       for (auto const& src : byDir.second) s.sourceFiles.push_back(src.in);
   s.compileEnv = CompileEnv{app.envVars(), app.compilationInfo()};
-  if (!s.sourceFiles.empty() || app.main()) s.extra["buildDir"] = app.buildDir().real();
+  if (!s.sourceFiles.empty() || app.main()) {
+    app.buildDir().mk();
+    s.extra["buildDir"] = app.buildDir().real();
+  }
   return s;
 }
 
