@@ -117,8 +117,8 @@ jobs:
     - shell: cmd
       run: |
         clang++ --version
-        mkn build -dtKO 2 -g 0 -x res/mkn/clang_win || exit /b 1
-        mkn build -dtKO -w mkn.mod -x res/mkn/clang_win || exit /b 1
+        mkn build -dtKO 2 -g 0 -x res/mkn/clang_win -a "-DYAML_CPP_STATIC_DEFINE" || exit /b 1
+        mkn build -dtKO -w mkn.mod -x res/mkn/clang_win -a "-DYAML_CPP_STATIC_DEFINE" || exit /b 1
     - shell: cmd
       run: python res/ci/build.py win_clang
 
