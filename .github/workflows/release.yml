@@ -66,7 +66,7 @@ jobs:
 
 
   build_many_linux_arm:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     container: quay.io/pypa/manylinux_2_28_aarch64:latest
     steps:
     - uses: actions/checkout@v6
@@ -76,7 +76,7 @@ jobs:
       run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -gW 9 -o mkn_manylinux_arm
     - uses: actions/upload-artifact@v4.4.0
       with:
-        name: maiken-manylinux-arm
+        name: maiken-manylinux-arm-latest
         path: bin/build/mkn_manylinux_arm
         retention-days: 1
 
@@ -95,7 +95,7 @@ jobs:
         retention-days: 1
 
   build_arm_linux:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
     - uses: actions/checkout@v6
     - run: ./res/ci/nixish_setup.sh && make nix
@@ -104,7 +104,7 @@ jobs:
       run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -gW 9 -o mkn_arm_linux
     - uses: actions/upload-artifact@v4.4.0
       with:
-        name: maiken-ubuntu-24.04-arm
+        name: maiken-ubuntu-arm-latest
         path: bin/build/mkn_arm_linux
         retention-days: 1
 
@@ -125,9 +125,9 @@ jobs:
           maiken-windows-latest/mkn.exe
           maiken-ubuntu-latest/mkn_nix
           maiken-manylinux-latest/mkn_manylinux
-          maiken-manylinux-arm/mkn_manylinux_arm
+          maiken-manylinux-arm-latest/mkn_manylinux_arm
           maiken-macos-latest/mkn_arm_osx
-          maiken-ubuntu-24.04-arm/mkn_arm_linux
+          maiken-ubuntu-arm-latest/mkn_arm_linux
 
     - if: github.event_name == 'release'
       uses: softprops/action-gh-release@v2
@@ -136,6 +136,6 @@ jobs:
           maiken-windows-latest/mkn.exe
           maiken-ubuntu-latest/mkn_nix
           maiken-manylinux-latest/mkn_manylinux
-          maiken-manylinux-arm/mkn_manylinux_arm
+          maiken-manylinux-arm-latest/mkn_manylinux_arm
           maiken-macos-latest/mkn_arm_osx
-          maiken-ubuntu-24.04-arm/mkn_arm_linux
+          maiken-ubuntu-arm-latest/mkn_arm_linux
