@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Module-loader test driver, keyed by a "build_job_id" (ubuntu_gcc,
-ubuntu_clang, manylinux_gcc, manylinux_arm_gcc, macos_clang, win_cl).
+ubuntu_clang, manylinux_gcc, manylinux_arm_gcc, macos_clang, win_cl,
+win_clang).
 
 .github/workflows/build.yml already built the mkn binaries this script uses,
 via plain shell/make commands, before invoking it:
@@ -91,6 +92,13 @@ def job_win_cl():
     run(built("build"), f'build test pack -Op test -a "{std}"', env=env)
 
 
+def job_win_clang():
+    tc = os.path.join(ROOT, "res", "mkn", "clang_win")
+    run(BOOTSTRAP, f"build -dx {tc}", cwd=DEP_DIR)
+    run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
+    run(built("build"), f"build test pack -Op test -x {tc}")
+
+
 JOBS = {
     "ubuntu_gcc": lambda: nix_test("-std=c++20 -fPIC", {"MKN_GCC_PREFERRED": "1"}, full=True),
     "ubuntu_clang": lambda: nix_test(
@@ -102,6 +110,7 @@ JOBS = {
         "-std=c++20 -fPIC", {"MKN_GCC_PREFERRED": "1"}, full=False),
     "macos_clang": job_macos_clang,
     "win_cl": job_win_cl,
+    "win_clang": job_win_clang,
 }
 
 

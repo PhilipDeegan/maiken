@@ -21,10 +21,20 @@ INCS=(inc
 )
 
 for i in ${INCS[@]}; do INC+=" -I$i"; done
-compile(){ cl -std:c++20 -nologo -EHsc -DYAML_CPP_STATIC_DEFINE $INC -c -Fo$1 "$2" || exit 1 ; }
-archive(){ lib -nologo -LTCG -OUT:"$1" "$2/*.o"; }
-exe(){     link -OUT:"mkn.exe" -nologo bin/*.o parse.yaml.lib  \
-           -nodefaultlib:libucrt.lib ucrt.lib; rm parse.yaml.lib; }
+
+CC=${CC:-cl}
+if [ "$CC" = "clang" ]; then
+  YAML_LIB="libparse.yaml.a"
+  compile(){ clang++ -std=c++20 -DYAML_CPP_STATIC_DEFINE $INC -c -o "$1" "$2" || exit 1 ; }
+  archive(){ llvm-ar rcs "$1" "$2"/*.o; }
+  exe(){     clang++ -fuse-ld=lld -o "mkn.exe" bin/*.o "$YAML_LIB"; rm "$YAML_LIB"; }
+else
+  YAML_LIB="parse.yaml.lib"
+  compile(){ cl -std:c++20 -nologo -EHsc -DYAML_CPP_STATIC_DEFINE $INC -c -Fo$1 "$2" || exit 1 ; }
+  archive(){ lib -nologo -LTCG -OUT:"$1" "$2/*.o"; }
+  exe(){     link -OUT:"mkn.exe" -nologo bin/*.o "$YAML_LIB"  \
+             -nodefaultlib:libucrt.lib ucrt.lib; rm "$YAML_LIB"; }
+fi
 
 [ ! -d "ext/mkn/kul/$KUL_GIT" ] && \
   git clone --depth 1 https://github.com/mkn/mkn.kul -b $KUL_GIT ext/mkn/kul/$KUL_GIT
@@ -38,7 +48,7 @@ if [ ! -d "ext/parse/yaml/$YAML_GIT/p/bin" ]; then
   for f in $(find ext/parse/yaml/$YAML_GIT/p/src -type f -name '*.cpp'); do
     compile "ext/parse/yaml/$YAML_GIT/p/bin/$(basename $f).o" "$f"
   done
-  archive "parse.yaml.lib" "ext/parse/yaml/$YAML_GIT/p/bin"
+  archive "$YAML_LIB" "ext/parse/yaml/$YAML_GIT/p/bin"
 fi
 
 rm -rf bin && mkdir -p bin
