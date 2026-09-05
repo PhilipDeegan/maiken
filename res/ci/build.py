@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Module-loader test driver, keyed by a "build_job_id" (ubuntu_gcc,
-ubuntu_clang, manylinux_gcc, macos_clang, win_cl).
+ubuntu_clang, manylinux_gcc, manylinux_arm_gcc, macos_clang, win_cl).
 
 .github/workflows/build.yml already built the mkn binaries this script uses,
 via plain shell/make commands, before invoking it:
@@ -97,6 +97,8 @@ JOBS = {
         "-std=c++20 -fPIC", {"MKN_GCC_PREFERRED": "1", "CC": "clang", "CXX": "clang++"},
         full=True),
     "manylinux_gcc": lambda: nix_test(
+        "-std=c++20 -fPIC", {"MKN_GCC_PREFERRED": "1"}, full=False),
+    "manylinux_arm_gcc": lambda: nix_test(
         "-std=c++20 -fPIC", {"MKN_GCC_PREFERRED": "1"}, full=False),
     "macos_clang": job_macos_clang,
     "win_cl": job_win_cl,

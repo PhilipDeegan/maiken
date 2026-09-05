@@ -19,9 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - run: ./res/ci/nixish_setup.sh && make nix
-    - env:
-        MKN_GCC_PREFERRED: 1
-      run: |
+    - run: |
         ldd mkn
         mkdir -p ~/.maiken/app/mkn
         cp -r $PWD ~/.maiken/app/mkn/master
@@ -51,6 +49,23 @@ jobs:
     - env:
         KLOG: 3
       run: python3 res/ci/build.py manylinux_gcc
+
+  manylinux_arm:
+    runs-on: ubuntu-24.04-arm
+    container: quay.io/pypa/manylinux_2_28_aarch64:latest
+    steps:
+    - uses: actions/checkout@v6
+    - run: ./res/ci/nixish_setup.sh && make nix
+    - env:
+        MKN_GCC_PREFERRED: 1
+      run: |
+        ldd mkn
+        KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        KLOG=3 ./mkn build -dtKO -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ldd bin/build/mkn
+    - env:
+        KLOG: 3
+      run: python3 res/ci/build.py manylinux_arm_gcc
 
   macos:
     strategy:
