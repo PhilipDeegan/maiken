@@ -1,0 +1,8 @@
+
+super: settings
+
+file:
+  - type: cpp:cxx:cc
+    archiver: llvm-ar rcs
+    compiler: clang++ -std=c++20
+    linker: clang++ -fuse-ld=lld
