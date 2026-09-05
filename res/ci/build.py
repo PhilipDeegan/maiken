@@ -93,7 +93,9 @@ def job_win_cl():
 
 
 def job_win_clang():
-    tc = os.path.join(ROOT, "res", "mkn", "clang_win")
+    # forward slashes: run()'s shlex.split() (POSIX mode) treats "\" as an
+    # escape char and would eat the backslashes os.path.join gives us here.
+    tc = os.path.join(ROOT, "res", "mkn", "clang_win").replace("\\", "/")
     run(BOOTSTRAP, f"build -dx {tc}", cwd=DEP_DIR)
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
     run(built("build"), f"build test pack -Op test -x {tc}")
