@@ -8,6 +8,9 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  KLOG: 3
+
 jobs:
   ubuntu:
     runs-on: ${{ matrix.os }}
@@ -24,14 +27,12 @@ jobs:
         mkdir -p ~/.maiken/app/mkn
         cp -r $PWD ~/.maiken/app/mkn/master
         [ "${{ matrix.cc }}" = "clang" ] && export CC=clang CXX=clang++
-        KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -dtKO -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -dtO -w mkn.mod -Op bin_shared -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtKO -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtO -w mkn.mod -Op bin_shared -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ldd bin/build/mkn
         ldd bin/bin_shared/mkn
-    - env:
-        KLOG: 3
-      run: python3 res/ci/build.py ubuntu_${{ matrix.cc }}
+    - run: python3 res/ci/build.py ubuntu_${{ matrix.cc }}
 
   manylinux:
     runs-on: ubuntu-22.04
@@ -43,12 +44,10 @@ jobs:
         MKN_GCC_PREFERRED: 1
       run: |
         ldd mkn
-        KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -dtKO -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtKO -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ldd bin/build/mkn
-    - env:
-        KLOG: 3
-      run: python3 res/ci/build.py manylinux_gcc
+    - run: python3 res/ci/build.py manylinux_gcc
 
   manylinux_arm:
     runs-on: ubuntu-26.04-arm
@@ -60,12 +59,10 @@ jobs:
         MKN_GCC_PREFERRED: 1
       run: |
         ldd mkn
-        KLOG=3 ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        KLOG=3 ./mkn build -dtKO -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtKO -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ldd bin/build/mkn
-    - env:
-        KLOG: 3
-      run: python3 res/ci/build.py manylinux_arm_gcc
+    - run: python3 res/ci/build.py manylinux_arm_gcc
 
   macos:
     strategy:
@@ -78,11 +75,9 @@ jobs:
     - run: |
         mkdir -p ~/.maiken/app/mkn
         cp -r $PWD ~/.maiken/app/mkn/master
-        KLOG=3 ./mkn build -dtKO 2 -W 9 -g 0 -x res/mkn/clang
-        KLOG=3 ./mkn build -dtKO -w mkn.mod -x res/mkn/clang
-    - env:
-        KLOG: 3
-      run: python3 res/ci/build.py macos_clang
+        ./mkn build -dtKO 2 -W 9 -g 0 -x res/mkn/clang
+        ./mkn build -dtKO -w mkn.mod -x res/mkn/clang
+    - run: python3 res/ci/build.py macos_clang
 
   windows:
     runs-on: windows-latest
@@ -100,14 +95,31 @@ jobs:
     - shell: cmd
       env:
         MKN_CL_PREFERRED: 1
-        KLOG: 3
       run: |
         mkn build -dtKO 2 -g 0 -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE" || exit /b 1
         mkn build -dtKO -w mkn.mod -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE" || exit /b 1
     - shell: cmd
-      env:
-        KLOG: 3
       run: python res/ci/build.py win_cl
+
+  windows_clang:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+    - shell: bash
+      run: |
+        mkdir -p ~/maiken/app/mkn
+        cp -r $PWD ~/maiken/app/mkn/master
+        CC=clang ./res/ci/win_build.sh
+    - shell: cmd
+      run: |
+        clang++ --version
+        mkn build -dtKO 2 -g 0 -x res/mkn/clang_win -a "-DYAML_CPP_STATIC_DEFINE" || exit /b 1
+        mkn build -dtKO -w mkn.mod -x res/mkn/clang_win -a "-DYAML_CPP_STATIC_DEFINE" || exit /b 1
+    - shell: cmd
+      run: python res/ci/build.py win_clang
 
   ubuntu_python:
     name: Python ${{ matrix.python-version }}
