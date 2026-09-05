@@ -103,7 +103,6 @@ jobs:
 
   windows_clang:
     runs-on: windows-latest
-    continue-on-error: true
     steps:
     - uses: actions/checkout@v6
     - uses: ilammy/msvc-dev-cmd@v1
