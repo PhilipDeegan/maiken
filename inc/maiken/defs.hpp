@@ -132,6 +132,7 @@ class Constants {
   static constexpr auto STR_GET = "get";
   static constexpr auto STR_OUT = "out";
   static constexpr auto STR_QUIET = "quiet";
+  static constexpr auto STR_VERBOSE = "verbose";
 
   static constexpr auto STR_PROJECT = "project";
   static constexpr auto STR_LOCAL = "local";

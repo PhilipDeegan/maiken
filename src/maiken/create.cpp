@@ -77,6 +77,7 @@ class CLIHandler : public Constants {
                                        Arg('u', STR_SCM_UPDATE),
                                        Arg('U', STR_SCM_FUPDATE),
                                        Arg('v', STR_VERSION),
+                                       Arg('V', STR_VERBOSE, ArgType::MAYBE),
                                        Arg('w', STR_WITH, ArgType::STRING),
                                        Arg('W', STR_WARN, ArgType::MAYBE),
                                        Arg('x', STR_SETTINGS, ArgType::STRING)};
@@ -181,6 +182,17 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     showHelp();
     KEXIT(0, "");
   };
+
+  if (args.has(STR_VERBOSE)) {
+    try {
+      uint16_t level = mkn::kul::log::mode::INF;
+      if (args.get(STR_VERBOSE).size()) level = mkn::kul::String::UINT16(args.get(STR_VERBOSE));
+      if (level > mkn::kul::log::mode::TRC) KEXIT(1, "-V argument is invalid");
+      mkn::kul::LogMan::INSTANCE().setMode(static_cast<mkn::kul::log::mode>(level));
+    } catch (mkn::kul::StringException const& e) {
+      KEXIT(1, "-V argument is invalid");
+    }
+  }
 
   if (args.has(STR_HELP)) help_exit();
 
