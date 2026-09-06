@@ -106,9 +106,9 @@ void maiken::Application::showConfig(bool force) {
       if (c[STR_ARCHIVER]) row.archiver = find_on_path(ps, first_token(c[STR_ARCHIVER].Scalar()));
       row.compiler = find_on_path(ps, resolve_compiler_binary(c));
       if (c[STR_LINKER]) row.linker = find_on_path(ps, first_token(c[STR_LINKER].Scalar()));
-      typeW = std::max(typeW, row.type.size());
-      archW = std::max(archW, row.archiver.size());
-      compW = std::max(compW, row.compiler.size());
+      typeW = (std::max)(typeW, row.type.size());
+      archW = (std::max)(archW, row.archiver.size());
+      compW = (std::max)(compW, row.compiler.size());
       rows.push_back(std::move(row));
     }
 
