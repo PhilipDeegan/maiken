@@ -31,6 +31,52 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/compiler/compilers.hpp"
 #include "maiken.hpp"
 
+namespace {
+// Mirrors mkn::kul::lang::cpp::GccCompiler::compileSource's resolution of the
+// binary actually invoked for a file type: config prefix/binary, CC/CXX
+// env-overridden, wrapper prefix (e.g. ccache) taking precedence if present.
+std::string resolve_compiler_binary(YAML::Node const& c) {
+  if (!c[maiken::Constants::STR_COMPILER]) return "";
+  auto const id =
+      maiken::Compilers::INSTANCE().identify(c[maiken::Constants::STR_COMPILER].Scalar());
+  std::string const fileType =
+      mkn::kul::String::SPLIT(c[maiken::Constants::STR_TYPE].Scalar(), ':')[0];
+  std::string const overridden = mkn::kul::String::NO_CASE_CMP(fileType, "c")
+                                      ? mkn::kul::lang::cpp::CCompiler::CC(id.binary)
+                                      : mkn::kul::lang::cpp::CCompiler::CXX(id.binary);
+  return id.prefix.empty() ? overridden : id.prefix[0];
+}
+
+std::string first_token(std::string const& s) { return mkn::kul::String::SPLIT(s, " ")[0]; }
+
+// Finds bin (a plain binary name, e.g. "g++") on one of dirs, stripping a
+// trailing ".exe" before comparing. Returns its full path, or "" if bin is
+// empty or not found.
+std::string find_on_path(std::vector<std::string> const& dirs, std::string const& bin) {
+  if (bin.empty()) return "";
+  for (auto const& d : dirs) {
+    mkn::kul::Dir dir(d);
+    if (!dir) continue;
+    for (auto const& f : dir.files()) {
+      std::string const b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe")
+                                 ? f.name().substr(0, f.name().size() - 4)
+                                 : f.name();
+      if (b == bin) return f.full();
+    }
+  }
+  return "";
+}
+
+struct BinaryRow {
+  std::string type, archiver, compiler, linker;
+};
+
+std::string pad(std::string s, size_t w) {
+  mkn::kul::String::PAD(s, static_cast<uint16_t>(w));
+  return s;
+}
+}  // namespace
+
 void maiken::Application::showConfig(bool force) {
   if (AppVars::INSTANCE().show() || AppVars::INSTANCE().dryRun()) return;
   if (mkn::kul::LogMan::INSTANCE().inf() || force) {
@@ -49,50 +95,29 @@ void maiken::Application::showConfig(bool force) {
       if (it != evs.end()) path = (*it).toString();
     }
 
+    std::vector<std::string> ps;
+    mkn::kul::String::SPLIT(path, mkn::kul::env::SEP(), ps);
+
+    std::vector<BinaryRow> rows;
+    size_t typeW = 4, archW = 8, compW = 8;
     for (auto const& c : Settings::INSTANCE().root()[STR_FILE]) {
-      bool a = 0, g = 0, l = 0;
-      KOUT(NON) << "TYPE    : " << c[STR_TYPE].Scalar();
-      std::vector<std::string> ps;
-      mkn::kul::String::SPLIT(path, mkn::kul::env::SEP(), ps);
-      for (auto const& d : ps) {
-        if (a && g && l) break;
-        mkn::kul::Dir dir(d);
-        if (!dir) continue;
-        for (auto const& f : dir.files()) {
-          std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe")
-                              ? f.name().substr(0, f.name().size() - 4)
-                              : f.name();
-          if (!a && c[STR_ARCHIVER] &&
-              b == mkn::kul::String::SPLIT(c[STR_ARCHIVER].Scalar(), " ")[0]) {
-            KOUT(NON) << "ARCHIVER: " << f.full();
-            a = 1;
-            break;
-          }
-        }
-        for (auto const& f : dir.files()) {
-          std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe")
-                              ? f.name().substr(0, f.name().size() - 4)
-                              : f.name();
-          if (!g && c[STR_COMPILER])
-            for (auto const& k : Compilers::INSTANCE().keys())
-              if (b == k) {
-                KOUT(NON) << "COMPILER: " << f.full();
-                g = 1;
-                break;
-              }
-        }
-        for (auto const& f : dir.files()) {
-          std::string b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe")
-                              ? f.name().substr(0, f.name().size() - 4)
-                              : f.name();
-          if (!l && c[STR_LINKER] && b == mkn::kul::String::SPLIT(c[STR_LINKER].Scalar(), " ")[0]) {
-            KOUT(NON) << "LINKER  : " << f.full();
-            l = 1;
-            break;
-          }
-        }
-      }
+      BinaryRow row;
+      row.type = c[STR_TYPE].Scalar();
+      if (c[STR_ARCHIVER]) row.archiver = find_on_path(ps, first_token(c[STR_ARCHIVER].Scalar()));
+      row.compiler = find_on_path(ps, resolve_compiler_binary(c));
+      if (c[STR_LINKER]) row.linker = find_on_path(ps, first_token(c[STR_LINKER].Scalar()));
+      typeW = std::max(typeW, row.type.size());
+      archW = std::max(archW, row.archiver.size());
+      compW = std::max(compW, row.compiler.size());
+      rows.push_back(std::move(row));
     }
+
+    KOUT(NON) << pad("TYPE", typeW) << "  " << pad("ARCHIVER", archW) << "  "
+              << pad("COMPILER", compW) << "  "
+              << "LINKER";
+    for (auto const& row : rows)
+      KOUT(NON) << pad(row.type, typeW) << "  " << pad(row.archiver, archW) << "  "
+                << pad(row.compiler, compW) << "  " << row.linker;
     if (mkn::kul::LogMan::INSTANCE().dbg()) {
       KOUT(NON) << "ENV     :";
       for (auto const& ev : AppVars::INSTANCE().envVars())

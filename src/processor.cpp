@@ -62,9 +62,8 @@ void maiken::Processor::process(std::vector<Application*> apps) {
   auto lambex = [&](mkn::kul::Exception const&) {
     ctp.stop();
     ctp.interrupt();
-    KEXIT(1, "Compile error detected");
   };
-  auto lambda = [o, e, &mute, &cpcs](maiken::CompilationUnit const& c_unit) {
+  auto lambda = [o, e, &mute, &cpcs, &lambex](maiken::CompilationUnit const& c_unit) {
     CompilerProcessCapture const cpc = c_unit.compile();
 
     if (!AppVars::INSTANCE().dryRun()) {
@@ -74,9 +73,16 @@ void maiken::Processor::process(std::vector<Application*> apps) {
     } else
       KOUT(NON) << cpc.cmd();
 
-    if (cpc.exception()) std::rethrow_exception(cpc.exception());
     std::lock_guard<std::mutex> lock(mute);
     cpcs.push_back(cpc);
+
+    try {
+      if (cpc.exception()) std::rethrow_exception(cpc.exception());
+    } catch (mkn::kul::Exception const& e) {
+      lambex(e);
+    } catch (std::exception const& e) {
+      KLOG(ERR) << e.what();
+    }
   };
 
   if (cmds.count(STR_BUILD) || cmds.count(STR_COMPILE))
@@ -108,7 +114,10 @@ void maiken::Processor::process(std::vector<Application*> apps) {
     }
 
   ctp.finish(1000000 * 1000);
+
   if (ctp.exception()) KEXIT(1, "Compile error detected");
+  for (auto& cpc : cpcs)
+    if (cpc.exception()) std::rethrow_exception(cpc.exception());
 
   if (cmds.count(STR_BUILD) || cmds.count(STR_LINK))
     for (auto* apP : apps) {
