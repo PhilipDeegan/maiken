@@ -116,7 +116,7 @@ void maiken::Processor::process(std::vector<Application*> apps) {
     }
 
   ctp.finish(1000000 * 1000);
-  ctp.join();
+  ctp.join();  // finish() can return early if lambex's ctp.stop() races it; join() can't
 
   if (ctp.exception()) KEXIT(1, "Compile error detected");
   for (auto& cpc : cpcs)

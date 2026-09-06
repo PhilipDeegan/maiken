@@ -253,7 +253,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   }
 
   ctp.finish(dryRun ? 10000 : 1000000 * 1000);
-  ctp.join();
+  ctp.join();  // finish() can return early if lambex's ctp.stop() races it; join() can't
 
   if (AppVars::INSTANCE().dump()) {
     auto delEmpty = [](auto& dir) {
