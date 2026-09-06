@@ -73,8 +73,10 @@ void maiken::Processor::process(std::vector<Application*> apps) {
     } else
       KOUT(NON) << cpc.cmd();
 
-    std::lock_guard<std::mutex> lock(mute);
-    cpcs.push_back(cpc);
+    {
+      std::lock_guard<std::mutex> lock(mute);
+      cpcs.push_back(cpc);
+    }
 
     try {
       if (cpc.exception()) std::rethrow_exception(cpc.exception());
@@ -114,6 +116,7 @@ void maiken::Processor::process(std::vector<Application*> apps) {
     }
 
   ctp.finish(1000000 * 1000);
+  ctp.join();
 
   if (ctp.exception()) KEXIT(1, "Compile error detected");
   for (auto& cpc : cpcs)

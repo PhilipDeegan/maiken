@@ -231,8 +231,10 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
         mkn::kul::io::Writer(mkn::kul::File(base + ".txt", errLogDir)) << cpc.errs() << eol;
     }
 
-    std::lock_guard<std::mutex> lock(mute);
-    cpcs.push_back(cpc);
+    {
+      std::lock_guard<std::mutex> lock(mute);
+      cpcs.push_back(cpc);
+    }
 
     try {
       if (!AppVars::INSTANCE().force())
@@ -251,6 +253,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   }
 
   ctp.finish(dryRun ? 10000 : 1000000 * 1000);
+  ctp.join();
 
   if (AppVars::INSTANCE().dump()) {
     auto delEmpty = [](auto& dir) {
