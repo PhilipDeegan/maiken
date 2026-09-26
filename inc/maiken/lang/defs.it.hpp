@@ -60,7 +60,11 @@ static std::string const MKN_DEFS_INC =
 static std::string const MKN_DEFS_SRC =
     "   src       | Stampa i file sorgenti trovati sullo standard output "
     "[consente l'opzione -d].";
-static std::string const MKN_DEFS_TREE = "   tree      | Display dependency tree";
+static std::string const MKN_DEFS_TREE = "   tree      | Mostra l'albero delle dipendenze";
+static std::string const MKN_DEFS_TEST =
+    "   test      | Compila ed esegue ogni file corrispondente al tag test del profilo";
+static std::string const MKN_DEFS_INFO =
+    "   info      | Mostra repository, thread e binari in uso per tipo di file";
 
 static std::string const MKN_DEFS_ARG = "Argomenti:";
 static std::string const MKN_DEFS_ARGS =
@@ -156,9 +160,13 @@ static std::string const MKN_DEFS_FUPDATE =
 static std::string const MKN_DEFS_VERSON =
     "   -v/--version           | Mostra l'attuale versione di maiken, ignora "
     "eventuali altri argomenti specificati";
+static std::string const MKN_DEFS_VERBOSE =
+    "   -V/--verbose [0-5]     | Imposta il livello di log come KLOG, 1=INFO 2=ERR 3=DBG "
+    "4=OTH 5=TRACE, in assenza 1";
 static std::string const MKN_DEFS_SETTNGS =
     "   -x/--settings $f       | Imposta il file settings.yaml in uso al file "
-    "$f, se la cartella di $f e` mancante viene cercato come $(HOME)/maiken/$f";
+    "$f, se la cartella di $f e` mancante viene cercato nella cartella del settings.yaml "
+    "predefinito";
 static std::string const MKN_DEFS_STATIC =
     "   -K/--static            | Effettua il collegamento (link) statico dei "
     "progetti nel caso 'mode' non sia eplicitato";

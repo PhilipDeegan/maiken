@@ -1,6 +1,6 @@
 ext
 bin
-mkn
+/mkn
 mkn.exe
 .mkn
 .clangd

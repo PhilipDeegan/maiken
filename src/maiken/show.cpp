@@ -42,8 +42,8 @@ std::string resolve_compiler_binary(YAML::Node const& c) {
   std::string const fileType =
       mkn::kul::String::SPLIT(c[maiken::Constants::STR_TYPE].Scalar(), ':')[0];
   std::string const overridden = mkn::kul::String::NO_CASE_CMP(fileType, "c")
-                                      ? mkn::kul::lang::cpp::CCompiler::CC(id.binary)
-                                      : mkn::kul::lang::cpp::CCompiler::CXX(id.binary);
+                                     ? mkn::kul::lang::cpp::CCompiler::CC(id.binary)
+                                     : mkn::kul::lang::cpp::CCompiler::CXX(id.binary);
   return id.prefix.empty() ? overridden : id.prefix[0];
 }
 
@@ -59,8 +59,8 @@ std::string find_on_path(std::vector<std::string> const& dirs, std::string const
     if (!dir) continue;
     for (auto const& f : dir.files()) {
       std::string const b = (f.name().size() > 3 && f.name().substr(f.name().size() - 4) == ".exe")
-                                 ? f.name().substr(0, f.name().size() - 4)
-                                 : f.name();
+                                ? f.name().substr(0, f.name().size() - 4)
+                                : f.name();
       if (b == bin) return f.full();
     }
   }
@@ -132,27 +132,68 @@ void maiken::Application::showConfig(bool force) {
 }
 
 void maiken::Application::showHelp() {
-  std::vector<std::string> ss = {MKN_DEFS_CMD,     MKN_DEFS_BUILD,  //
-                                 MKN_DEFS_CLEAN,   MKN_DEFS_COMP,    MKN_DEFS_DBG,
-                                 MKN_DEFS_INIT,    MKN_DEFS_LINK,    MKN_DEFS_PACK,
-                                 MKN_DEFS_PROFS,   MKN_DEFS_RUN,     MKN_DEFS_INC,
-                                 MKN_DEFS_SRC,     MKN_DEFS_TREE,    "",  //
-                                 MKN_DEFS_ARG,     MKN_DEFS_ARGS,    MKN_DEFS_ADD,
-                                 MKN_DEFS_BINC,    MKN_DEFS_BPATH,   MKN_DEFS_DIRC,
-                                 MKN_DEFS_DEPS,    MKN_DEFS_DUMP,    MKN_DEFS_DEBUG,
-                                 MKN_DEFS_GET,     MKN_DEFS_EVSA,    MKN_DEFS_FINC,
-                                 MKN_DEFS_FPATH,   MKN_DEFS_HELP,    MKN_DEFS_JARG,
-                                 MKN_DEFS_STATIC,  MKN_DEFS_MOD,     MKN_DEFS_MAIN,
-                                 MKN_DEFS_NODES,   MKN_DEFS_LINKER,  MKN_DEFS_ALINKR,
-                                 MKN_DEFS_OUT,     MKN_DEFS_OPTIM,   MKN_DEFS_PROF,
-                                 MKN_DEFS_PROP,    MKN_DEFS_QUIET,   MKN_DEFS_RUN_ARGS,
-                                 MKN_DEFS_DRYR,    MKN_DEFS_STAT,    MKN_DEFS_SHARED,
-                                 MKN_DEFS_THREDS,  MKN_DEFS_WITHOUT, MKN_DEFS_UPDATE,
-                                 MKN_DEFS_FUPDATE, MKN_DEFS_VERSON,
-                                 MKN_DEFS_WITH,  //
-                                 MKN_DEFS_WARN,    MKN_DEFS_SETTNGS, "",
-                                 MKN_DEFS_EXMPL,   MKN_DEFS_EXMPL1,  MKN_DEFS_EXMPL2,
-                                 MKN_DEFS_EXMPL3,  MKN_DEFS_EXMPL4,  ""};
+  std::vector<std::string> const ss = {MKN_DEFS_CMD,
+                                       MKN_DEFS_BUILD,  //
+                                       MKN_DEFS_CLEAN,
+                                       MKN_DEFS_COMP,
+                                       MKN_DEFS_DBG,
+                                       MKN_DEFS_INIT,
+                                       MKN_DEFS_LINK,
+                                       MKN_DEFS_PACK,
+                                       MKN_DEFS_PROFS,
+                                       MKN_DEFS_RUN,
+                                       MKN_DEFS_INC,
+                                       MKN_DEFS_SRC,
+                                       MKN_DEFS_TREE,
+                                       MKN_DEFS_TEST,
+                                       MKN_DEFS_INFO,
+                                       "",  //
+                                       MKN_DEFS_ARG,
+                                       MKN_DEFS_ARGS,
+                                       MKN_DEFS_ADD,
+                                       MKN_DEFS_BINC,
+                                       MKN_DEFS_BPATH,
+                                       MKN_DEFS_DIRC,
+                                       MKN_DEFS_DEPS,
+                                       MKN_DEFS_DUMP,
+                                       MKN_DEFS_DEBUG,
+                                       MKN_DEFS_GET,
+                                       MKN_DEFS_EVSA,
+                                       MKN_DEFS_FINC,
+                                       MKN_DEFS_FPATH,
+                                       MKN_DEFS_HELP,
+                                       MKN_DEFS_JARG,
+                                       MKN_DEFS_STATIC,
+                                       MKN_DEFS_MOD,
+                                       MKN_DEFS_MAIN,
+                                       MKN_DEFS_NODES,
+                                       MKN_DEFS_LINKER,
+                                       MKN_DEFS_ALINKR,
+                                       MKN_DEFS_OUT,
+                                       MKN_DEFS_OPTIM,
+                                       MKN_DEFS_PROF,
+                                       MKN_DEFS_PROP,
+                                       MKN_DEFS_QUIET,
+                                       MKN_DEFS_RUN_ARGS,
+                                       MKN_DEFS_DRYR,
+                                       MKN_DEFS_STAT,
+                                       MKN_DEFS_SHARED,
+                                       MKN_DEFS_THREDS,
+                                       MKN_DEFS_WITHOUT,
+                                       MKN_DEFS_UPDATE,
+                                       MKN_DEFS_FUPDATE,
+                                       MKN_DEFS_VERSON,
+                                       MKN_DEFS_VERBOSE,
+                                       MKN_DEFS_WITH,  //
+                                       MKN_DEFS_WARN,
+                                       MKN_DEFS_SETTNGS,
+                                       "",
+                                       MKN_DEFS_EXMPL,
+                                       MKN_DEFS_EXMPL1,
+                                       MKN_DEFS_EXMPL2,
+                                       MKN_DEFS_EXMPL3,
+                                       MKN_DEFS_EXMPL4,
+                                       ""};
   for (auto const& s : ss) KOUT(NON) << s;
 }
 

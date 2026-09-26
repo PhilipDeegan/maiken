@@ -170,7 +170,6 @@ class Constants {
   static constexpr auto STR_JARG = "jarg";
   static constexpr auto STR_INC = "inc";
   static constexpr auto STR_FINC = "finc";
-  static constexpr auto STR_FORCE = "force";
   static constexpr auto STR_FPATH = "flib";
   static constexpr auto STR_LIB = "lib";
   static constexpr auto STR_DEP = "dep";

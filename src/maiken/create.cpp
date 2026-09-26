@@ -51,7 +51,6 @@ class CLIHandler : public Constants {
                                        Arg('E', STR_ENV, ArgType::STRING),
                                        Arg('f', STR_FINC, ArgType::STRING),
                                        Arg('F', STR_FPATH, ArgType::STRING),
-                                       Arg(' ', STR_FORCE),
                                        Arg('g', STR_DEBUG, ArgType::MAYBE),
                                        Arg('G', STR_GET, ArgType::STRING),
                                        Arg('h', STR_HELP),
@@ -264,7 +263,6 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
   if (profiles.empty()) profiles.emplace_back("");
 
   if (args.has(STR_DUMP)) AppVars::INSTANCE().dump(true);
-  if (args.has(STR_FORCE)) AppVars::INSTANCE().force(true);
   if (args.has(STR_DRY_RUN)) AppVars::INSTANCE().dryRun(true);
   if (args.has(STR_SHARED)) AppVars::INSTANCE().shar(true);
   if (args.has(STR_STATIC)) AppVars::INSTANCE().stat(true);

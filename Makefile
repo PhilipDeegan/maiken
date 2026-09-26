@@ -6,12 +6,17 @@ endif
 
 OS =
 CXX=g++
-CXXFLAGS=-std=c++20 -O0 -Wall -fmessage-length=0 -fPIC -Iinc -g3 -fno-omit-frame-pointer \
+CXXFLAGS=-std=c++20 -O0 -Wall -fmessage-length=0 -fPIC -g3 -fno-omit-frame-pointer
+INC=-Iinc \
 		-Iext/parse/yaml/p/include \
 		-Iext/mkn/kul/inc \
 		-Iext/mkn/kul/os/$(OS)/inc \
 		-Iext/mkn/kul/os/nixish/inc
 LDFLAGS = -pthread -rdynamic -ldl
+NIX_LDFLAGS = -pthread -rdynamic -Wl,--no-as-needed -ldl
+ifeq ($(origin LDFLAGS),command line)
+  NIX_LDFLAGS = $(LDFLAGS)
+endif
 
 entry:
 	@@echo "Options include"
@@ -19,10 +24,10 @@ entry:
 	@@echo "make bsd"
 
 nix:
-	$(MAKE) build OS=nix LDFLAGS="-pthread -rdynamic -Wl,--no-as-needed -ldl"
+	$(MAKE) build OS=nix LDFLAGS="$(NIX_LDFLAGS)"
 
 bsd:
 	$(MAKE) build OS=bsd
 
 build:
-	$(CXX) $(LDFLAGS) $(CXXFLAGS) -o mkn mkn.cpp $(shell find src ext/parse/yaml/p/src -type f -name '*.cpp')
+	$(CXX) $(LDFLAGS) $(CXXFLAGS) $(INC) -o mkn mkn.cpp $(shell find src ext/parse/yaml/p/src -type f -name '*.cpp')
