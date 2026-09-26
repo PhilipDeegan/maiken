@@ -11,10 +11,14 @@ If neither are set the following rules apply
 | Windows | `cdb -o ./bin/<profile>/<binary> <args>` |
 | Unix    | `gdb ./bin/<profile>/<binary> <args>` |
 
+Arguments are passed to the binary with `-r "arg0 arg1"` or after `--`, as with `run`.
+If both are given, `-r` arguments come first.
+
 Launch app with gdb, autorun and print backtrace
 
 ```sh
 MKN_DBG='gdb -batch -ex run -ex bt --args' mkn dbg -r "arg0 arg1"
+MKN_DBG='gdb -batch -ex run -ex bt --args' mkn dbg -- arg0 arg1
 ```
 
 For LLDB try:

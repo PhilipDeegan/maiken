@@ -48,7 +48,7 @@
 | `-p --profile $p`       | Activate profile p |
 | `-P --property $p`      | CSV key=value properties override format `-P "k1=v1,k2=v2"`, backslash escapes `,` and `=` |
 | `-q --quiet`            | Suppress "stale build" notice when compiling without build/compile |
-| `-r --run-args $a`      | Passes `$a` to running binary as arguments, supersedes `-a` |
+| `-r --run-args $a`      | Passes `$a` to running binary as arguments, supersedes `-a`. Arguments after `--` are appended |
 | `-R --dry-run`          | Print commands without executing them. |
 | `-s --scm-status`       | Display SCM status of project, allows `-d` |
 | `-S --shared`           | Links projects without mode as shared |
