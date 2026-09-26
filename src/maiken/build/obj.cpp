@@ -237,9 +237,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     }
 
     try {
-      if (!AppVars::INSTANCE().force())
-        if (cpc.exception()) std::rethrow_exception(cpc.exception());
-
+      if (cpc.exception()) std::rethrow_exception(cpc.exception());
     } catch (mkn::kul::Exception const& e) {
       lambex(e);
     } catch (std::exception const& e) {
@@ -265,12 +263,10 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     delEmpty(errLogDir);
   }
 
-  if (!AppVars::INSTANCE().force())
-    if (ctp.exception()) KEXIT(1, "Compile error detected");
+  if (ctp.exception()) KEXIT(1, "Compile error detected");
 
-  if (!AppVars::INSTANCE().force())
-    for (auto& cpc : cpcs)
-      if (cpc.exception()) std::rethrow_exception(cpc.exception());
+  for (auto& cpc : cpcs)
+    if (cpc.exception()) std::rethrow_exception(cpc.exception());
 
   mkn::kul::Dir tmpD(buildDir().join("tmp"), 1);
   while (cQueue.size()) {

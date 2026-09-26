@@ -3,7 +3,7 @@
 name: mkn
 version: master
 property:
-  DATE: 06_SEP_2026
+  DATE: 26_SEP_2026
   self.deps: mkn.kul
 
 parent: bin
@@ -29,6 +29,7 @@ profile:
     test/cpp.cpp
     test/compiler/test_compiler_detection.cpp
     test/compiler/test_command_generator.cpp
+    test/run/test_run_args.cpp
   if_arg:
     static: -DYAML_CPP_STATIC_DEFINE
   if_link:

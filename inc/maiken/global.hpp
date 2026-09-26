@@ -63,7 +63,7 @@ class AppVars : public Constants {
   friend class ::cereal::access;
 #endif  // MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
  private:
-  bool dr = 0, du = 0, fo = 0, fu = 0, q = 0, s = 0, sh = 0, st = 0, u = 0;
+  bool dr = 0, du = 0, fu = 0, q = 0, s = 0, sh = 0, st = 0, u = 0;
   uint16_t de = -1, dl = 0, op = -1, ts = 1, wa = -1;
   std::string aa, al, dep, la, mo, ra, wi, wo;
   mkn::kul::hash::set::String cmds, wop;
@@ -86,8 +86,6 @@ class AppVars : public Constants {
   bool const& dump() const { return this->du; }
   void dump(bool const& du) { this->du = du; }
 
-  bool const& force() const { return this->fo; }
-  void force(bool const& fo) { this->fo = fo; }
 
   std::string const& runArgs() const { return ra; }
   void runArgs(std::string const& ra) { this->ra = ra; }
