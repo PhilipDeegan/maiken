@@ -197,7 +197,9 @@ Each `-w` dependency adds a `-DMKN_WITH_<NAME>` define, e.g. `-DMKN_WITH_MKN_RAM
 ## Modules
 
 Modules are plugins that hook into the build phases (init / compile / link / pack),
-declared under `mod:` or added with `-m`. Official modules live at
+declared under `mod:` or added with `-m`. Module support is opt-in: maiken must itself be
+built with `-w mkn.mod` (see [Building maiken from source](#building-maiken-from-source)).
+Official modules live at
 [github.com/mkn-mod](https://github.com/mkn-mod), including:
 
 | Module             | Purpose                                     |
@@ -246,6 +248,7 @@ git clone https://github.com/mkn/mkn maiken/master && cd maiken/master
 ./res/ci/nixish_setup.sh   # fetches mkn.kul and yaml-cpp into ./ext
 make nix                   # macOS / BSD: make bsd CXX=clang++
 ./mkn build -dtKO          # rebuild maiken with itself
+./mkn build -dtKO -w mkn.mod   # or, with module support
 ```
 
 **Windows** (from a shell where `vcvarsall.bat` has been run, e.g. Git Bash):
