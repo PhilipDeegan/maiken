@@ -73,12 +73,6 @@ Type: flag, default: `0`
 
 Disables git
 
-## `MKN_DISABLE_MODULES`
-
-Type: flag, default: `0`
-
-Disables modules from executing at any point
-
 ## `MKN_DISABLE_RUN_LIB_PATH_HANDLING`
 
 Type: flag, default: `0`

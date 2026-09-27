@@ -52,6 +52,8 @@ in your system and do not wish to use the mkn configured version.
 
 ## Add modules on the command line
 
+Module support is opt-in, maiken must be built with `-w mkn.mod`, see [Building](build.md#modules).
+
 Similar to `-w`/`-T`, modules may be added with `-m`, with the same rules, but with additional properties for nested attributes
 
 ```sh

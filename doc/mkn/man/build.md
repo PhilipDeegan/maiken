@@ -8,6 +8,15 @@ Example settings files for various toolchains can be found in [res/mkn](../../..
 
 Platform specific compiler arguments are listed in [Platforms](../os.md).
 
+## Modules
+
+Module support is opt-in and is not compiled into the bootstrap binary. To use modules,
+rebuild maiken with itself adding `-w mkn.mod`, e.g.
+
+```sh
+./mkn clean build -dtKOWa "-std=c++20" -w mkn.mod
+```
+
 ## Windows
 
 Prerequisites:
