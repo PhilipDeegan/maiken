@@ -56,13 +56,10 @@ void maiken::Processor::process(std::vector<Application*> apps) {
 
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
-  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1, 1000000000, 1000);
+  mkn::kul::ThreadPool<> ctp(AppVars::INSTANCE().threads());
   std::vector<maiken::CompilationUnit> c_units;
 
-  auto lambex = [&](mkn::kul::Exception const&) {
-    ctp.stop();
-    ctp.interrupt();
-  };
+  auto lambex = [&](mkn::kul::Exception const&) { ctp.stop(); };
   auto lambda = [o, e, &mute, &cpcs, &lambex](maiken::CompilationUnit const& c_unit) {
     CompilerProcessCapture const cpc = c_unit.compile();
 
@@ -115,8 +112,7 @@ void maiken::Processor::process(std::vector<Application*> apps) {
       }
     }
 
-  ctp.finish(1000000 * 1000);
-  ctp.join();  // finish() can return early if lambex's ctp.stop() races it; join() can't
+  ctp.finish().join();
 
   if (ctp.exception()) KEXIT(1, "Compile error detected");
   for (auto& cpc : cpcs)

@@ -487,14 +487,14 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
           maiken::dist::RemoteCommandManager::INST().build_setup_query(*apps[0], args));
       post->send(host);
     };
-    mkn::kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);
+    mkn::kul::ThreadPool<> ctp(threads);
     std::exception_ptr exp;
     auto pingex = [&](mkn::kul::Exception const& e) {
-      ctp.stop().interrupt();
+      ctp.stop();
       throw e;
     };
     for (size_t i = 0; i < threads; i++) ctp.async(std::bind(ping, std::ref(hosts[i])), pingex);
-    ctp.finish(10000000);  // 10 milliseconds
+    ctp.finish().join();
     ctp.rethrow();
   }
 #endif  //  MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)

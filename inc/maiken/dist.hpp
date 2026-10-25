@@ -47,13 +47,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cereal/archives/portable_binary.hpp>
 
 #include "mkn/kul/cli.hpp"
-#include "mkn/kul/http.hpp"
+#include "mkn/ram/http.hpp"
 #include "mkn/kul/io.hpp"
 #include "mkn/kul/threads.hpp"
 #include "mkn/kul/time.hpp"
 #include "mkn/kul/yaml.hpp"
 
 #include "maiken.hpp"
+
+namespace mkn::kul::lang {
+template <class Archive>
+void serialize(Archive& ar, Source& s) {
+  ar(s.in, s.args);
+}
+}  // namespace mkn::kul::lang
 
 #ifndef MKN_RAM_TCP_READ_BUFFER
 #error  // bad
@@ -72,52 +79,6 @@ class Exception : public mkn::kul::Exception {
 class RemoteCommandManager;
 class Server;
 }  // namespace dist
-
-class DistLinker {
- public:
-  static void send([[maybe_unused]] mkn::kul::File const& bin) {
-#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
-    std::vector<std::shared_ptr<maiken::dist::Post>> posts;
-    auto post_lambda = [](dist::Host const& host, mkn::kul::File const& bin) {
-      mkn::kul::io::BinaryReader br(bin);
-      dist::Blob b;
-      b.files_left = 1;
-      b.file = bin.real();
-      size_t red = 0;
-      do {
-        bzero(b.c1, dist::BUFF_SIZE / 2);
-        red = b.len = br.read(b.c1, dist::BUFF_SIZE / 2);
-        if (red == 0) {
-          b.last_packet = 1;
-          b.files_left = 0;
-        }
-        std::ostringstream ss(std::ios::out | std::ios::binary);
-        {
-          cereal::PortableBinaryOutputArchive oarchive(ss);
-          oarchive(b);
-        }
-        auto link = std::make_shared<maiken::dist::Post>(
-            maiken::dist::RemoteCommandManager::INST().build_link_request(ss.str()));
-        link->send(host);
-      } while (red > 0);
-    };
-
-    auto& hosts(maiken::dist::RemoteCommandManager::INST().hosts());
-    size_t threads = hosts.size();
-    mkn::kul::ChroncurrentThreadPool<> ctp(threads, 1, 1000000000, 1000);
-    auto post_ex = [&](mkn::kul::Exception const& e) {
-      ctp.stop().interrupt();
-      throw e;
-    };
-    for (size_t i = 0; i < threads; i++) {
-      ctp.async(std::bind(post_lambda, std::ref(hosts[i]), std::ref(bin)), post_ex);
-    }
-    ctp.finish(100000000);  // 100 milliseconds
-    ctp.rethrow();
-#endif  //  MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
-  }
-};
-
 }  // namespace maiken
 
 #include "maiken/dist/message.hpp"
@@ -192,7 +153,7 @@ class RemoteCommandManager {
 
   std::unique_ptr<CompileRequest> build_compile_request(
       std::string const& directory,
-      std::vector<std::pair<std::string, std::string>> const& src_obj);
+      std::vector<std::pair<maiken::Source, std::string>> const& src_obj);
 
   std::unique_ptr<DownloadRequest> build_download_request();
 
@@ -215,6 +176,49 @@ class RemoteCommandManager {
 };
 using RMC = RemoteCommandManager;
 }  // end namespace dist
+
+class DistLinker {
+ public:
+  static void send(mkn::kul::File const& bin) {
+    std::vector<std::shared_ptr<maiken::dist::Post>> posts;
+    auto post_lambda = [](dist::Host const& host, mkn::kul::File const& bin) {
+      mkn::kul::io::BinaryReader br(bin);
+      dist::Blob b;
+      b.files_left = 1;
+      b.file = bin.real();
+      size_t red = 0;
+      do {
+        bzero(b.c1, dist::BUFF_SIZE / 2);
+        red = b.len = br.read(b.c1, dist::BUFF_SIZE / 2);
+        if (red == 0) {
+          b.last_packet = 1;
+          b.files_left = 0;
+        }
+        std::ostringstream ss(std::ios::out | std::ios::binary);
+        {
+          cereal::PortableBinaryOutputArchive oarchive(ss);
+          oarchive(b);
+        }
+        auto link = std::make_shared<maiken::dist::Post>(
+            maiken::dist::RemoteCommandManager::INST().build_link_request(ss.str()));
+        link->send(host);
+      } while (red > 0);
+    };
+
+    auto& hosts(maiken::dist::RemoteCommandManager::INST().hosts());
+    size_t threads = hosts.size();
+    mkn::kul::ThreadPool<> ctp(threads);
+    auto post_ex = [&](mkn::kul::Exception const& e) {
+      ctp.stop();
+      throw e;
+    };
+    for (size_t i = 0; i < threads; i++) {
+      ctp.async(std::bind(post_lambda, std::ref(hosts[i]), std::ref(bin)), post_ex);
+    }
+    ctp.finish().join();
+    ctp.rethrow();
+  }
+};
 }  // end namespace maiken
 
 CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::dist::AMessage, cereal::specialization::member_serialize)

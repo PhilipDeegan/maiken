@@ -32,6 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/app.hpp"
 #include "maiken/source.hpp"
+#if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
+#include "maiken/dist.hpp"
+#endif  //  MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 #include "mkn/kul/threads.hpp"
 
 #include <mutex>
@@ -102,7 +105,7 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
       auto dowd = std::make_shared<maiken::dist::Post>(
           maiken::dist::RemoteCommandManager::INST().build_download_request());
       dowd->send(host);
-      std::string body(std::move(dowd->body()));
+      std::string body(dowd->body());
       std::istringstream iss(body);
       {
         cereal::PortableBinaryInputArchive iarchive(iss);
@@ -126,16 +129,16 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
     threads =
         (hosts.size() < AppVars::INSTANCE().nodes()) ? hosts.size() : AppVars::INSTANCE().nodes();
   }
-  mkn::kul::ChroncurrentThreadPool<> ctp(threads, 1, 10000000000, 1000);
+  mkn::kul::ThreadPool<> ctp(threads);
   auto compile_ex = [&](mkn::kul::Exception const& e) {
-    ctp.stop().interrupt();
+    ctp.stop();
     throw e;
   };
   {
     size_t sources = src_objs.size();
     size_t divisor = std::floor(sources / (threads + 1));
     for (size_t i = 0; i < threads; i++) {
-      std::vector<std::pair<std::string, std::string>> remote_src_objs;
+      std::vector<std::pair<maiken::Source, std::string>> remote_src_objs;
       for (size_t k = 0; k < divisor; k++) {
         remote_src_objs.push_back(src_objs[0]);
         src_objs.erase(src_objs.begin());
@@ -159,7 +162,7 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
   }
   if (!src_objs.empty()) compile(sourceQueue, objects, cacheFiles);
 #if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
-  ctp.finish(50000000);  // 50 milliseconds
+  ctp.finish().join();
   ctp.rethrow();
 #endif  //  MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 
@@ -175,8 +178,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   auto const dryRun = AppVars::INSTANCE().dryRun();
 
   ThreadingCompiler tc(*this);
-  mkn::kul::ChroncurrentThreadPool<> ctp(AppVars::INSTANCE().threads(), 1,
-                                         dryRun ? 10000 : 1000000000, 1000);
+  mkn::kul::ThreadPool<> ctp(AppVars::INSTANCE().threads());
 
   std::vector<maiken::CompilationUnit> c_units;
   std::queue<std::pair<maiken::Source, std::string>> cQueue;
@@ -197,10 +199,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
 
-  auto lambex = [&](mkn::kul::Exception const&) {
-    ctp.stop();
-    ctp.interrupt();
-  };
+  auto lambex = [&](mkn::kul::Exception const&) { ctp.stop(); };
 
   mkn::kul::Dir cmdLogDir(".mkn/log/" + buildDir().name() + "/obj/cmd");
   mkn::kul::Dir outLogDir(".mkn/log/" + buildDir().name() + "/obj/out");
@@ -250,8 +249,7 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     ctp.async(std::bind(lambda, unit), std::bind(lambex, std::placeholders::_1));
   }
 
-  ctp.finish(dryRun ? 10000 : 1000000 * 1000);
-  ctp.join();  // finish() can return early if lambex's ctp.stop() races it; join() can't
+  ctp.finish().join();
 
   if (AppVars::INSTANCE().dump()) {
     auto delEmpty = [](auto& dir) {

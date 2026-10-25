@@ -55,7 +55,7 @@ class ServerSession {
  public:
   std::unique_ptr<mkn::kul::io::BinaryReader> binary_reader;
   std::unique_ptr<mkn::kul::io::BinaryWriter> binary_writer;
-  std::vector<std::pair<std::string, std::string>> m_src_obj;
+  std::vector<std::pair<maiken::Source, std::string>> m_src_obj;
   mkn::kul::hash::set::String objects;
 
  private:
@@ -65,19 +65,19 @@ class ServerSession {
   SessionState state = SessionState::NON;
 };
 
-class Server : public mkn::kul::http::MultiServer, public Constants {
-  friend class mkn::kul::Thread;
-
+class Server : public mkn::ram::http::MultiServer, public Constants {
  public:
   Server(uint16_t const port, mkn::kul::Dir const& _home, uint16_t threads)
-      : mkn::kul::http::MultiServer(port, 1, threads), busy(false), m_home(_home) {}
+      : mkn::ram::http::MultiServer(port, 1, threads), busy(false), m_home(_home) {}
   virtual ~Server() {}
-  mkn::kul::http::_1_1Response respond(mkn::kul::http::A1_1Request const& req) override;
+  mkn::ram::http::_1_1Response respond(mkn::ram::http::A1_1Request const& req) override;
 
   Server(Server const&) = delete;
   Server(Server const&&) = delete;
   Server& operator=(Server const&) = delete;
   Server& operator=(Server const&&) = delete;
+
+  void operator()();
 
  protected:
   void onConnect(char const* cip, uint16_t const& port) override {
@@ -90,9 +90,6 @@ class Server : public mkn::kul::http::MultiServer, public Constants {
       onConnect(cip, port);
     }
   }
-
- private:
-  void operator()();
 
  private:
   std::atomic<bool> busy;

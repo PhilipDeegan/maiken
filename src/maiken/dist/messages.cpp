@@ -32,9 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/dist.hpp"
 
-void maiken::dist::SetupRequest::do_response_for(mkn::kul::http::A1_1Request const& req,
+void maiken::dist::SetupRequest::do_response_for(mkn::ram::http::A1_1Request const& req,
                                                  Sessions& sessions,
-                                                 mkn::kul::http::_1_1Response& resp) {
+                                                 mkn::ram::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD 41");  // resp.withBody("FAILUIRE");
   auto session_id = (*req.headers().find("session")).second;
 
@@ -56,9 +56,9 @@ void maiken::dist::SetupRequest::do_response_for(mkn::kul::http::A1_1Request con
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::CompileRequest::do_response_for(mkn::kul::http::A1_1Request const& req,
+void maiken::dist::CompileRequest::do_response_for(mkn::ram::http::A1_1Request const& req,
                                                    Sessions& sessions,
-                                                   mkn::kul::http::_1_1Response& resp) {
+                                                   mkn::ram::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD CompileRequest");
   auto session_id = (*req.headers().find("session")).second;
 
@@ -84,9 +84,9 @@ void maiken::dist::CompileRequest::do_response_for(mkn::kul::http::A1_1Request c
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::LinkRequest::do_response_for(mkn::kul::http::A1_1Request const& req,
+void maiken::dist::LinkRequest::do_response_for(mkn::ram::http::A1_1Request const& req,
                                                 Sessions& sessions,
-                                                mkn::kul::http::_1_1Response& resp) {
+                                                mkn::ram::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD LinkRequest");
   auto session_id = (*req.headers().find("session")).second;
 
@@ -120,9 +120,9 @@ void maiken::dist::LinkRequest::do_response_for(mkn::kul::http::A1_1Request cons
   resp.withBody(std::string(out.c_str()));
 }
 
-void maiken::dist::DownloadRequest::do_response_for(mkn::kul::http::A1_1Request const& req,
+void maiken::dist::DownloadRequest::do_response_for(mkn::ram::http::A1_1Request const& req,
                                                     Sessions& sessions,
-                                                    mkn::kul::http::_1_1Response& resp) {
+                                                    mkn::ram::http::_1_1Response& resp) {
   if (!req.header("session")) KEXCEPTION("BAD DownloadRequest");
   auto session_id = (*req.headers().find("session")).second;
 

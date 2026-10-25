@@ -52,10 +52,9 @@ int main(int argc, char* argv[]) {
         KEXCEPT(mkn::kul::Exception, "diretory provided does not exist or cannot be created");
     }
     maiken::dist::Server serv(8888, d, 3);
-    mkn::kul::Thread thread(std::ref(serv));
-    sig.intr([&](int16_t) {
+    std::thread thread([&serv]() { serv(); });
+    sig.intr([](int16_t) {
       KERR << "Interrupted";
-      thread.interrupt();
       exit(2);
     });
     thread.join();

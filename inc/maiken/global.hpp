@@ -171,7 +171,7 @@ class AppVars : public Constants {
 
   template <class Archive>
   void save(Archive& ar) const {
-    ar(dr, f, q, s, sh, st, u);
+    ar(dr, du, fu, q, s, sh, st, u);
 
     ar(de, dl, op, ts, wa);
     ar(aa, al, la, ra, wi, wo);
@@ -196,7 +196,7 @@ class AppVars : public Constants {
   }
   template <class Archive>
   void load(Archive& ar) {
-    ar(dr, f, q, s, sh, st, u);
+    ar(dr, du, fu, q, s, sh, st, u);
 
     ar(de, dl, op, ts, wa);
     ar(aa, al, la, ra, wi, wo);
