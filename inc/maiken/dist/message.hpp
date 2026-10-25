@@ -74,8 +74,8 @@ class ARequest : public AMessage {
     ar(::cereal::make_nvp("AMessage", ::cereal::base_class<AMessage>(this)));
   }
 
-  virtual void do_response_for(mkn::kul::http::A1_1Request const& req, Sessions& sessions,
-                               mkn::kul::http::_1_1Response& resp) = 0;
+  virtual void do_response_for(mkn::ram::http::A1_1Request const& req, Sessions& sessions,
+                               mkn::ram::http::_1_1Response& resp) = 0;
 };
 
 class SetupRequest : public ARequest {
@@ -89,8 +89,8 @@ class SetupRequest : public ARequest {
                mkn::kul::cli::Args const& args)
       : m_project_yaml(project), m_settings_yaml(settings), m_args(args) {}
 
-  void do_response_for(mkn::kul::http::A1_1Request const& req, Sessions& sessions,
-                       mkn::kul::http::_1_1Response& resp) override;
+  void do_response_for(mkn::ram::http::A1_1Request const& req, Sessions& sessions,
+                       mkn::ram::http::_1_1Response& resp) override;
 
  private:
   SetupRequest(SetupRequest const&) = delete;
@@ -118,11 +118,11 @@ class CompileRequest : public ARequest {
  public:
   CompileRequest() {}
   CompileRequest(std::string const& directory,
-                 std::vector<std::pair<std::string, std::string>> const& src_obj)
+                 std::vector<std::pair<maiken::Source, std::string>> const& src_obj)
       : m_directory(directory), m_src_obj(src_obj) {}
 
-  void do_response_for(mkn::kul::http::A1_1Request const& req, Sessions& sessions,
-                       mkn::kul::http::_1_1Response& resp) override;
+  void do_response_for(mkn::ram::http::A1_1Request const& req, Sessions& sessions,
+                       mkn::ram::http::_1_1Response& resp) override;
 
  private:
   CompileRequest(CompileRequest const&) = delete;
@@ -139,7 +139,7 @@ class CompileRequest : public ARequest {
 
  private:
   std::string m_directory;
-  std::vector<std::pair<std::string, std::string>> m_src_obj;
+  std::vector<std::pair<maiken::Source, std::string>> m_src_obj;
 };
 
 class DownloadRequest : public ARequest {
@@ -149,8 +149,8 @@ class DownloadRequest : public ARequest {
 
  public:
   DownloadRequest() {}
-  void do_response_for(mkn::kul::http::A1_1Request const& req, Sessions& sessions,
-                       mkn::kul::http::_1_1Response& resp) override;
+  void do_response_for(mkn::ram::http::A1_1Request const& req, Sessions& sessions,
+                       mkn::ram::http::_1_1Response& resp) override;
 
  private:
   DownloadRequest(DownloadRequest const&) = delete;
@@ -172,8 +172,8 @@ class LinkRequest : public ARequest {
  public:
   LinkRequest() {}
   LinkRequest(std::string const& b) { str = b; }
-  void do_response_for(mkn::kul::http::A1_1Request const& req, Sessions& sessions,
-                       mkn::kul::http::_1_1Response& resp) override;
+  void do_response_for(mkn::ram::http::A1_1Request const& req, Sessions& sessions,
+                       mkn::ram::http::_1_1Response& resp) override;
 
  private:
   LinkRequest(LinkRequest const&) = delete;

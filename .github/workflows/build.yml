@@ -30,6 +30,7 @@ jobs:
         ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ./mkn build -dtKO -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ./mkn build -dtO -w mkn.mod -Op bin_shared -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtKOp server -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ldd bin/build/mkn
         ldd bin/bin_shared/mkn
     - run: python3 res/ci/build.py ubuntu_${{ matrix.cc }}
