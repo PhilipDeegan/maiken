@@ -25,14 +25,14 @@ jobs:
             MKN_CL_PREFERRED: 1
           run: |
             bash -c ./res/ci/win_build.sh
-            mkn build -dtKOgw mkn.mod -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE"
+            mkn build -dtKw mkn.mod -O 3 -g 0 -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE"
 
         - if: matrix.os == 'ubuntu-latest'
           env:
             MKN_GCC_PREFERRED: 1
           run: |
             ./res/ci/nixish_setup.sh && make nix
-            KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -gW 9 -o mkn_nix
+            KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_nix
 
         - if: matrix.os == 'ubuntu-latest'
           uses: actions/upload-artifact@v4.4.0
@@ -57,7 +57,7 @@ jobs:
     - run: ./res/ci/nixish_setup.sh && make nix
     - env:
         MKN_GCC_PREFERRED: 1
-      run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -gW 9 -o mkn_manylinux
+      run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_manylinux
     - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-manylinux-latest
@@ -73,7 +73,7 @@ jobs:
     - run: ./res/ci/nixish_setup.sh && make nix
     - env:
         MKN_GCC_PREFERRED: 1
-      run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -gW 9 -o mkn_manylinux_arm
+      run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_manylinux_arm
     - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-manylinux-arm-latest
@@ -87,7 +87,7 @@ jobs:
     - run: ./res/ci/nixish_setup.sh && make bsd
     - env:
         MKN_GCC_PREFERRED: 1
-      run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -gW 9 -o mkn_arm_osx
+      run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_arm_osx
     - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-macos-latest
@@ -101,7 +101,7 @@ jobs:
     - run: ./res/ci/nixish_setup.sh && make nix
     - env:
         MKN_GCC_PREFERRED: 1
-      run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -gW 9 -o mkn_arm_linux
+      run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_arm_linux
     - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-ubuntu-arm-latest
