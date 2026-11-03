@@ -1,9 +1,9 @@
-#! clean build test -qdtKw mkn.ram[https] -W 9
+#! clean build test -qdtKw mkn.mod,mkn.ram[https] -W 9
 
 name: mkn
 version: master
 property:
-  DATE: 25_OCT_2026
+  DATE: 03_NOV_2026
   self.deps: mkn.kul
 
 parent: bin
