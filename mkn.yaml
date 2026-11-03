@@ -1,4 +1,4 @@
-#! clean build test -qdtKw mkn.ram[https] -W 9
+#! clean build test -qdtKw mkn.mod,mkn.ram[https] -W 9
 
 name: mkn
 version: master
