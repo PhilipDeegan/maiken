@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 
 #include "maiken/dist.hpp"
+#include "mkn/kul/io.hpp"
 
 void maiken::dist::SetupRequest::do_response_for(mkn::ram::http::A1_1Request const& req,
                                                  Sessions& sessions,

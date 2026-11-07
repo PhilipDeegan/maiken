@@ -29,6 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/compiler/compilers.hpp"
+#include "mkn/kul/io.hpp"
 #include "maiken.hpp"
 
 void maiken::Application::writeTimeStamps(mkn::kul::hash::set::String& objects,

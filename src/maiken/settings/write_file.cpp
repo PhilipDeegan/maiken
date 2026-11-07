@@ -31,6 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/settings.hpp"
 
+#include "mkn/kul/io.hpp"
+
 void maiken::Settings::write(mkn::kul::File const& file) KTHROW(mkn::kul::Exit) {
   mkn::kul::io::Writer w(file);
   w.write("\n", true);
