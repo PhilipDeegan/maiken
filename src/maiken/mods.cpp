@@ -29,7 +29,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"
-#include "mkn/kul/bon.hpp"
+#include "mkn/kul/bon/yaml.hpp"
 
 void maiken::Application::modArgs(std::string const mod_str, std::vector<YAML::Node>& mod_nodes,
                                   std::function<void(YAML::Node const&, bool const)> getIfMissing) {
