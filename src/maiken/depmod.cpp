@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "mkn/kul/dbg.hpp"
+#include "mkn/kul/io.hpp"
 
 #include "maiken/app.hpp"
 #include "maiken/git.hpp"

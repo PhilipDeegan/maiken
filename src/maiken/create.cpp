@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "maiken.hpp"       // IWYU pragma: keep
+#include "mkn/kul/io.hpp"
 #include "maiken/dist.hpp"  // IWYU pragma: keep
 
 #include "mkn/kul/cpu.hpp"
