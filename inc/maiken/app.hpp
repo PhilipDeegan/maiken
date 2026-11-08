@@ -32,7 +32,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAIKEN_APP_HPP
 
 #include "maiken/defs.hpp"
-
 #include "maiken/compiler.hpp"
 // #include "maiken/compiler/compilers.hpp"
 #include "maiken/context.hpp"
@@ -40,11 +39,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/global.hpp"
 #include "maiken/project.hpp"
 #include "maiken/source.hpp"
-
 #include "mkn/kul/os.hpp"
 #include "mkn/kul/all.hpp"
 #include "mkn/kul/cli.hpp"
 #include "mkn/kul/scm.hpp"
+#include "mkn/kul/defs.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/map.hpp"
+
+namespace mkn {
+namespace kul {
+class SCM;
+namespace cli {
+class Args;
+}  // namespace cli
+namespace env {
+class Var;
+}  // namespace env
+}  // namespace kul
+}  // namespace mkn
 // #include "mkn/kul/log.hpp"
 // #include "mkn/kul/proc.hpp"
 // #include "mkn/kul/threads.hpp"
@@ -57,8 +71,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/mod/def.hpp"
 #endif  // MKN_WITH_MKN_MOD
 
+#include <cstdint>
 #include <queue>
 #include <optional>
+#include <algorithm>
+#include <array>
+#include <functional>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace maiken {
 
@@ -78,6 +102,7 @@ class ThreadingCompiler;
 class Applications;
 class CompilerPrinter;
 class Processor;
+
 class MKN_KUL_PUBLISH Application : public Constants {
   using This = Application;
   friend class Applications;

@@ -80,6 +80,19 @@ profile:
   main: server.cpp
   mode: none
 
+# include-what-you-use report for inc/ and src/, needs iwyu on PATH, see res/iwyu.imp
+- name: iwyu
+  parent: bin
+  mode: none
+  mod:
+  - name: cpp.iwyu
+    compile:
+      paths: inc
+      # fragments of maiken/dist.hpp, not standalone headers
+      ignore: dist/message.hpp dist/server.hpp
+      headers: -x c++-header
+      args: -Xiwyu --mapping_file=res/iwyu.imp
+
 - name: format_verbose
   mod:
   - name: clang.format

@@ -29,7 +29,24 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/compiler/compilers.hpp"
-#include "maiken.hpp"
+#include "maiken/app.hpp"
+#include "maiken/compiler.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "maiken/source.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/lang/compiler.hpp"
+#include "mkn/kul/lang/cpp/compilers.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+
+#include <exception>
+#include <string>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 namespace maiken {
 

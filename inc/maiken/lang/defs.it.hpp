@@ -28,12 +28,14 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */  // Translation gratefully received from https://github.com/eantcal
+// IWYU pragma: private, include "maiken/defs.hpp"
+
 #ifndef MAIKEN_DEFS_LANG_HPP
 #define MAIKEN_DEFS_LANG_HPP
 
 #include <string>
 
-#include "maiken/lang/err/it.hpp"
+#include "maiken/lang/err/it.hpp"  // IWYU pragma: export
 
 namespace maiken::lang::defs {
 

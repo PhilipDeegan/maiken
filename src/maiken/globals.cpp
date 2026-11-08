@@ -28,8 +28,17 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken/app.hpp"
 #include "mkn/kul/env.hpp"
+#include "maiken/global.hpp"
+#include "maiken/settings.hpp"
+#include "mkn/kul/defs.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/time.hpp"
+
+#include <ctime>
+#include <memory>
+#include <optional>
+#include <string>
 
 namespace maiken {
 std::shared_ptr<AppVars> AppVars::instance;

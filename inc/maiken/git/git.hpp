@@ -34,8 +34,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/io.hpp"
 #include "mkn/kul/dbg.hpp"
 #include "mkn/kul/scm.hpp"
-
 #include "maiken/settings.hpp"
+#include "maiken/defs.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/os.hpp"
+
+#include <string>
+#include <vector>
 
 #ifdef MKN_WITH_MKN_RAM
 #include "maiken/git/github.hpp"

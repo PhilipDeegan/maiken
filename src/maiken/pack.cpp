@@ -29,7 +29,16 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/string.hpp"
-#include "maiken.hpp"
+#include "maiken/app.hpp"
+#include "maiken/project.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/os.hpp"
+#include "yaml-cpp/yaml.h"
+
+#include <optional>
+#include <string>
+#include <vector>
 
 class LibFinder {
  public:

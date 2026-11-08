@@ -30,6 +30,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "maiken/settings.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/except.hpp"
+
+#include <string>
+#include <vector>
 
 void maiken::Settings::resolveFindables() KTHROW(SettingsException) {
   static std::string const STR_FIND = "find";

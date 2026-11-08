@@ -30,8 +30,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "maiken/scm.hpp"
+
 #include "maiken/app.hpp"
 #include "maiken/property.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/scm.hpp"
+#include "mkn/kul/string.hpp"
+#include "yaml-cpp/yaml.h"
+
+#include <cstddef>
+#include <algorithm>
+#include <sstream>
+#include <vector>
 
 class UpdateTracker {
  private:

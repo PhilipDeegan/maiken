@@ -28,13 +28,33 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
+
+#include "maiken/app.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "maiken/settings.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/proc.hpp"
+#include "yaml-cpp/yaml.h"
+
+#include <cstddef>
+#include <algorithm>
+#include <memory>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace maiken {
 class Runner : public Constants {
  public:
-  static void RUN(Application const& a, std::string bin, std::string const buildDir,
-                  bool dbg = 0) {
+  static void RUN(Application const& a, std::string bin, std::string const buildDir, bool dbg = 0) {
     mkn::kul::File f(bin, buildDir);
     if (!f) KEXIT(1, "binary does not exist \n" + f.full());
     std::unique_ptr<mkn::kul::Process> p;

@@ -33,8 +33,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/app.hpp"
 #include "maiken/settings.hpp"
+#include "maiken/defs.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/map.hpp"
+
+#include <memory>
+#include <string>
+#include <tuple>
 
 namespace maiken {
+class Application;
+class Settings;
 
 class Properties : public Constants {
  private:
@@ -50,4 +59,4 @@ class Properties : public Constants {
 
 }  // namespace maiken
 
-#endif  //MAIKEN_PROPERTY_HPP
+#endif  // MAIKEN_PROPERTY_HPP

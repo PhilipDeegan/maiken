@@ -30,15 +30,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/dbg.hpp"
 #include "mkn/kul/io.hpp"
-
 #include "maiken/app.hpp"
 #include "maiken/source.hpp"
+#include "maiken/compiler.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "mkn/kul/defs.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/lang/compiler.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
 #if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 #include "maiken/dist.hpp"
 #endif  //  MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 #include "mkn/kul/threads.hpp"
 
 #include <mutex>
+#include <exception>
+#include <functional>
+#include <queue>
+#include <sstream>
+#include <string>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 namespace maiken {
 class CompilerPrinter {

@@ -29,12 +29,40 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/dbg.hpp"
-
 #include "maiken/compiler/compilers.hpp"
 #include "maiken/app.hpp"
 #include "maiken/scm.hpp"
 #include "maiken/regex.hpp"
 #include "maiken/property.hpp"
+#include "maiken/compiler.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "maiken/settings.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/defs.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/lang/cpp/compilers.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/string.hpp"
+
+#if MKN_WITH_MKN_MOD
+#include "mkn/mod/def.hpp"
+#endif  // MKN_WITH_MKN_MOD
+
+#include <algorithm>
+#include <cstddef>
+#include <functional>
+#include <initializer_list>
+#include <optional>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace maiken {
 void sub_initializer(Application const& app, std::vector<YAML::Node> const& nodes) {

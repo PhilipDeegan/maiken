@@ -31,6 +31,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/settings.hpp"
 #include "maiken/compiler/compilers.hpp"
+#include "mkn/kul/lang/cpp/compilers.hpp"
+#include "mkn/kul/yaml.hpp"
+
+#include <string>
+#include <vector>
 
 mkn::kul::yaml::Validator maiken::Settings::validator() const {
   using namespace mkn::kul::yaml;

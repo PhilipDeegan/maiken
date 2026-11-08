@@ -29,13 +29,38 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "maiken.hpp"       // IWYU pragma: keep
+#include "maiken.hpp"  // IWYU pragma: keep
 #include "mkn/kul/io.hpp"
 #include "maiken/dist.hpp"  // IWYU pragma: keep
-
 #include "mkn/kul/cpu.hpp"
+#include "maiken/app.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "maiken/settings.hpp"
+#include "maiken/source.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/defs.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/string.hpp"
+#include "yaml-cpp/yaml.h"
 
+#include <cstddef>
+#include <cstdint>
 #include <optional>
+#include <algorithm>
+#include <exception>
+#include <functional>
+#include <limits>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace maiken {
 using namespace mkn::kul::cli;
@@ -63,7 +88,7 @@ class CLIHandler : public Constants {
                                        Arg('M', STR_MAIN, ArgType::STRING),
 #if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
                                        Arg('n', STR_NODES, ArgType::MAYBE),
-#endif  //MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
+#endif  // MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
                                        Arg('o', STR_OUT, ArgType::STRING),
                                        Arg('O', STR_OPT, ArgType::MAYBE),
                                        Arg('q', STR_QUIET),
@@ -84,7 +109,7 @@ class CLIHandler : public Constants {
   std::vector<mkn::kul::cli::Cmd> cmdV{Cmd(STR_INIT),     Cmd(STR_INC),     Cmd(STR_SRC),
 #if MKN_WITH_MKN_MOD
                                        Cmd(STR_MODS),
-#endif  //MKN_WITH_MKN_MOD
+#endif  // MKN_WITH_MKN_MOD
                                        Cmd(STR_CLEAN),    Cmd(STR_DEPS),    Cmd(STR_BUILD),
                                        Cmd(STR_RUN),      Cmd(STR_COMPILE), Cmd(STR_LINK),
                                        Cmd(STR_PROFILES), Cmd(STR_DBG),     Cmd(STR_PACK),
@@ -156,16 +181,16 @@ auto version_string() {
   if (MKN_REMOTE_EXEC) mod << "exec,";
 #if MKN_WITH_MKN_MOD
   mod << "mod,";
-#endif  //MKN_WITH_MKN_MOD
+#endif  // MKN_WITH_MKN_MOD
 #ifdef MKN_WITH_MKN_RAM
 #if defined(MKN_WITH_IO_CEREAL)
   mod << "dist,";
-#endif  //MKN_WITH_MKN_RAM && MKN_WITH_IO_CEREAL
+#endif  // MKN_WITH_MKN_RAM && MKN_WITH_IO_CEREAL
   mod << "ram,";
-#endif  //MKN_WITH_MKN_RAM
+#endif  // MKN_WITH_MKN_RAM
 #ifdef MKN_WITH_GOOGLE_SPARSEHASH
   mod << "sparsehash,";
-#endif  //MKN_WITH_GOOGLE_SPARSEHASH
+#endif  // MKN_WITH_GOOGLE_SPARSEHASH
 
   if (MKN_TIMESTAMPS) mod << "ts,";
   if (mod.str().size()) mod.seekp(-1, mod.cur);
@@ -285,7 +310,7 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
       KEXIT(1, e.stack());
     }
   }
-#endif  //MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
+#endif  // MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
 
   {
     auto getSet = [args](std::string const& a, std::string const& e, uint16_t const& default_value,
@@ -305,13 +330,13 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     };
 
     getSet(STR_DEBUG, "-g", 9,
-           std::bind((void(AppVars::*)(uint16_t const&)) & AppVars::debug,
+           std::bind((void (AppVars::*)(uint16_t const&))&AppVars::debug,
                      std::ref(AppVars::INSTANCE()), std::placeholders::_1));
     getSet(STR_OPT, "-O", 9,
-           std::bind((void(AppVars::*)(uint16_t const&)) & AppVars::optimise,
+           std::bind((void (AppVars::*)(uint16_t const&))&AppVars::optimise,
                      std::ref(AppVars::INSTANCE()), std::placeholders::_1));
     getSet(STR_WARN, "-W", 8,
-           std::bind((void(AppVars::*)(uint16_t const&)) & AppVars::warn,
+           std::bind((void (AppVars::*)(uint16_t const&))&AppVars::warn,
                      std::ref(AppVars::INSTANCE()), std::placeholders::_1));
   }
   {
@@ -328,13 +353,12 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     if (args.has(STR_PROPERTY))
       splitArgs(
           args.get(STR_PROPERTY), "property",
-          std::bind(
-              (void(AppVars::*)(std::string const&, std::string const&)) & AppVars::properkeys,
-              std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
+          std::bind((void (AppVars::*)(std::string const&, std::string const&))&AppVars::properkeys,
+                    std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
     if (args.has(STR_ENV))
       splitArgs(
           args.get(STR_ENV), "environment",
-          std::bind((void(AppVars::*)(std::string const&, std::string const&)) & AppVars::envVar,
+          std::bind((void (AppVars::*)(std::string const&, std::string const&))&AppVars::envVar,
                     std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
   }
 

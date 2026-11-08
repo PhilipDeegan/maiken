@@ -34,8 +34,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/os.hpp"
 #include "mkn/kul/log.hpp"
 #include "mkn/kul/yaml.hpp"
-
 #include "maiken/defs.hpp"
+#include "mkn/kul/defs.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/map.hpp"
+
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace YAML {
+class Node;
+}  // namespace YAML
 
 namespace maiken {
 
@@ -55,6 +68,7 @@ class ProjectException : public mkn::kul::Exception {
 };
 
 class Projects;
+
 class MKN_KUL_PUBLISH Project : public mkn::kul::yaml::File, public Constants {
  public:
   Project(mkn::kul::File const& f) : mkn::kul::yaml::File(f), m_dir(f.dir().real()) {}

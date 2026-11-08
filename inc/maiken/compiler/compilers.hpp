@@ -32,8 +32,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAIKEN_CODE_COMPILERS_HPP
 
 #include "maiken/app.hpp"
-
 #include "mkn/kul/lang/cpp/compilers.hpp"
+#include "mkn/kul/lang/cs/msvc.hpp"
+
+#include <string>
 
 namespace maiken {
 

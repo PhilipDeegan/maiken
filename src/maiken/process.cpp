@@ -29,8 +29,30 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/dbg.hpp"
+#include "maiken/app.hpp"
+#include "maiken/global.hpp"
+#include "maiken/module.hpp"
+#include "maiken/processor.hpp"
+#include "maiken/project.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/string.hpp"
 
-#include "maiken.hpp"
+#if MKN_WITH_MKN_MOD
+#include "mkn/mod/def.hpp"
+#endif  // MKN_WITH_MKN_MOD
+
+#include <functional>
+#include <memory>
+#include <optional>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 void maiken::Application::process() KTHROW(mkn::kul::Exception) {
   MKN_KUL_DBG_FUNC_ENTER;
@@ -51,7 +73,8 @@ void maiken::Application::process() KTHROW(mkn::kul::Exception) {
 #if MKN_WITH_MKN_MOD
     for (auto mod = app.modDeps.begin(); mod != app.modDeps.end(); ++mod)
       app.mods.push_back(ModuleLoader::LOAD(**mod));
-    for (auto& modLoader : app.mods) modLoader->module()->init(app.context(), app.modInit(modLoader->app()));
+    for (auto& modLoader : app.mods)
+      modLoader->module()->init(app.context(), app.modInit(modLoader->app()));
 #endif  // MKN_WITH_MKN_MOD
   };
 
@@ -135,21 +158,22 @@ void maiken::Application::process() KTHROW(mkn::kul::Exception) {
     (*app)->main_ = {};
     proc_a(**app, !(*app)->srcs.empty());
   }
-  if (!this->ig)
-    proc_a(*this, !this->srcs.empty() || !tests_for(*this).empty() || this->main_);
+  if (!this->ig) proc_a(*this, !this->srcs.empty() || !tests_for(*this).empty() || this->main_);
 
   proc_b();
 
   if (cmds.count(STR_TEST)) {
 #if MKN_WITH_MKN_MOD
-    for (auto& modLoader : mods) modLoader->module()->test(this->context(), this->modTest(modLoader->app()));
+    for (auto& modLoader : mods)
+      modLoader->module()->test(this->context(), this->modTest(modLoader->app()));
 #endif  // MKN_WITH_MKN_MOD
     test();
   }
   if (cmds.count(STR_PACK)) {
     pack();
 #if MKN_WITH_MKN_MOD
-    for (auto& modLoader : mods) modLoader->module()->pack(this->context(), this->modPack(modLoader->app()));
+    for (auto& modLoader : mods)
+      modLoader->module()->pack(this->context(), this->modPack(modLoader->app()));
 #endif  // MKN_WITH_MKN_MOD
   }
   if (CommandStateMachine::INSTANCE().main() && (cmds.count(STR_RUN) || cmds.count(STR_DBG)))

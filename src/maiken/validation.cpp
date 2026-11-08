@@ -30,8 +30,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 // #include "mkn/kul/log.hpp"
 
-#include "maiken.hpp"
 #include "maiken/compiler/compilers.hpp"
+#include "maiken/app.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/project.hpp"
+#include "maiken/property.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/lang/cpp/compilers.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/string.hpp"
+#include "yaml-cpp/yaml.h"
+
+#include <algorithm>
+#include <initializer_list>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 class Validator : public maiken::Constants {
  private:
