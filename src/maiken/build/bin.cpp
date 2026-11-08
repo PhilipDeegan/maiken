@@ -30,13 +30,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/dbg.hpp"
 #include "mkn/kul/io.hpp"
-
 #include "maiken/compiler/compilers.hpp"
-#include "maiken.hpp"
-#include "maiken/dist.hpp"
 #include "mkn/kul/threads.hpp"
+#include "maiken/app.hpp"
+#include "maiken/dist.hpp"  // IWYU pragma: keep
+#include "maiken/compiler.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "maiken/source.hpp"
+#include "mkn/kul/defs.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/lang/compiler.hpp"
+#include "mkn/kul/lang/cpp/compilers.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "yaml-cpp/yaml.h"
 
 #include <mutex>
+#include <functional>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace maiken {
 
@@ -83,8 +101,8 @@ class Executioner : public Constants {
       auto linkDbg(comp->linkerDebugBin(AppVars::INSTANCE().debug()));
       if (!linkDbg.empty()) linker += " " + linkDbg;
 
-      LinkDAO dao{app.context(), linker,          linkEnd, bin, starDirs, obV,
-                  app.libraries(), app.libraryPaths(), app.m, dryRun};
+      LinkDAO dao{app.context(),      linker, linkEnd, bin, starDirs, obV, app.libraries(),
+                  app.libraryPaths(), app.m,  dryRun};
 
       return comp->buildExecutable(dao);
     } catch (CompilerNotFoundException const& e) {
@@ -218,8 +236,8 @@ CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String con
     std::vector<mkn::kul::Dir> starDirs;
     if (objects.size()) starDirs.emplace_back(objD);
     std::vector<std::string> obV;
-    LinkDAO dao{this->context(), linker,       linkEnd, lib, starDirs, obV,
-                libraries(),   libraryPaths(), m,       dryRun};
+    LinkDAO dao{this->context(), linker,         linkEnd, lib,   starDirs, obV,
+                libraries(),     libraryPaths(), m,       dryRun};
 
     CompilerProcessCapture const& cpc = comp->buildLibrary(dao);
     if (dryRun)

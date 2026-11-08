@@ -32,9 +32,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAIKEN_GLOBALS_HPP
 
 #include "mkn/kul/map.hpp"
-#include <unordered_set>
-
 #include "maiken/settings.hpp"
+#include "maiken/defs.hpp"
+
+#include <cstdint>
+#include <unordered_set>
+#include <memory>
+#include <string>
+#include <utility>
 
 #if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
 #include <cereal/cereal.hpp>
@@ -43,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/unordered_set.hpp>
 #include <cereal/types/vector.hpp>
-
 #include <cereal/archives/portable_binary.hpp>
 #endif  // MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
 
@@ -85,7 +89,6 @@ class AppVars : public Constants {
 
   bool const& dump() const { return this->du; }
   void dump(bool const& du) { this->du = du; }
-
 
   std::string const& runArgs() const { return ra; }
   void runArgs(std::string const& ra) { this->ra = ra; }
@@ -228,7 +231,7 @@ class AppVars : public Constants {
     pks = convert_to_kul_map(_pks);
   }
 
-#endif  //MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
+#endif  // MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
 
   static AppVars& INSTANCE() {
     if (instance == nullptr) instance.reset(new AppVars);
@@ -241,6 +244,6 @@ class AppVars : public Constants {
 
 CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(maiken::AppVars, cereal::specialization::member_load_save)
 
-#endif  //MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
+#endif  // MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
 
 #endif /* MAIKEN_GLOBALS_HPP */

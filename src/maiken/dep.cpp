@@ -28,8 +28,25 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
 #include "maiken/graph.hpp"
+#include "maiken/app.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/string.hpp"
+#include "yaml-cpp/yaml.h"
+
+#include <cstdint>
+#include <algorithm>
+#include <functional>
+#include <limits>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 void includeDependency(std::string const& s, std::string const& p,
                        mkn::kul::hash::set::String& include) {

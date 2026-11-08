@@ -30,10 +30,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/io.hpp"
 #include "mkn/kul/string.hpp"
-
-#include "maiken/defs.hpp"
-#include "maiken/git.hpp"
 #include "maiken/project.hpp"
+#include "maiken/git/git.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/yaml.hpp"
+
+#include <optional>
+#include <string>
+#include <vector>
 
 maiken::ProjectInfo maiken::ProjectInfo::PARSE_LINE(
     std::string const& line, [[maybe_unused]] std::string const& cacheDirName) {
@@ -188,6 +192,7 @@ void maiken::NewProject::write() {
 }
 
 #include "maiken/app.hpp"
+
 std::vector<maiken::Application const*> maiken::Project::getBinaryTargets() const {
   std::vector<Application const*> ret;
   for (auto const* app : maiken::Applications::INSTANCE().applicationsFor(*this))

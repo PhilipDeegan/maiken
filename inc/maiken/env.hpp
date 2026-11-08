@@ -34,6 +34,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/env.hpp"
 
 #include "maiken/property.hpp"
+#include "maiken/defs.hpp"
+#include "yaml-cpp/yaml.h"
+
+#include <cstddef>
 
 namespace maiken {
 

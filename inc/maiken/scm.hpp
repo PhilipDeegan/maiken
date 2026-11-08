@@ -32,9 +32,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAIKEN_SCM_HPP
 
 #include "maiken/defs.hpp"
-
 #include "mkn/kul/os.hpp"
 #include "mkn/kul/scm/man.hpp"
+#include "mkn/kul/map.hpp"
+
+#include <string>
+
+namespace mkn {
+namespace kul {
+class Dir;
+class SCM;
+}  // namespace kul
+}  // namespace mkn
 
 namespace maiken {
 

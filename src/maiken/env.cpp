@@ -28,7 +28,15 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
+
+#include "maiken/app.hpp"
+#include "maiken/compiler.hpp"
+#include "maiken/settings.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/lang/def.hpp"
+
+#include <string>
+#include <vector>
 
 std::vector<mkn::kul::env::Var> maiken::Application::requiredEnv() const {
   std::vector<mkn::kul::env::Var> vars;

@@ -32,6 +32,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAIKEN_PROCESSOR_HPP
 
 #include "maiken/defs.hpp"
+#include "mkn/kul/except.hpp"
+
+#include <cstdint>
+#include <string>
+#include <vector>
 
 namespace maiken {
 

@@ -33,6 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mkn/kul/lang/compiler.hpp"
 
+#include "mkn/kul/defs.hpp"
+
 namespace maiken {
 class MKN_KUL_PUBLISH Application;
 

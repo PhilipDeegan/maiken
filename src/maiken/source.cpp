@@ -33,6 +33,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/regex.hpp"
 #include "maiken/property.hpp"
 #include "maiken/compiler/compilers.hpp"
+#include "maiken/project.hpp"
+#include "maiken/source.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/lang/compiler.hpp"
+#include "mkn/kul/lang/cpp/compilers.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/string.hpp"
+
+#include <cstddef>
+#include <algorithm>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 void maiken::Application::addMainLine(std::string const& o) KTHROW(mkn::kul::Exception) {
   std::vector<std::string> v(mkn::kul::String::SPLIT(o, ","));

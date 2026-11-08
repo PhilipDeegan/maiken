@@ -29,10 +29,25 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/dbg.hpp"
-
 #include "maiken/scm.hpp"
 #include "maiken/defs.hpp"
 #include "maiken/settings.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/proc.hpp"
+#include "mkn/kul/scm/man.hpp"
+#include "mkn/kul/string.hpp"
+
+#include <sstream>
+#include <string>
+#include <vector>
+
+namespace mkn {
+namespace kul {
+class SCM;
+}  // namespace kul
+}  // namespace mkn
 
 mkn::kul::SCM const* maiken::SCMGetter::GET_SCM(mkn::kul::Dir const& d, std::string const& r,
                                                 bool module) {

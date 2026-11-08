@@ -29,8 +29,34 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/except.hpp"
-
 #include "maiken.hpp"  // IWYU pragma: keep
+#include "maiken/app.hpp"
+#include "maiken/global.hpp"
+#include "maiken/module.hpp"
+#include "maiken/project.hpp"
+#include "maiken/property.hpp"
+#include "maiken/settings.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/string.hpp"
+
+#if MKN_WITH_MKN_MOD
+#include "mkn/mod/def.hpp"
+#endif  // MKN_WITH_MKN_MOD
+
+#include <cstddef>
+#include <algorithm>
+#include <exception>
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 maiken::Application::Application(maiken::Project const& proj, std::string const& profile)
     : p(profile), proj(proj) {

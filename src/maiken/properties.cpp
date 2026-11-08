@@ -28,7 +28,21 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
+
+#include "maiken/app.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "maiken/property.hpp"
+#include "maiken/settings.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/string.hpp"
+#include "yaml-cpp/yaml.h"
+
+#include <memory>
+#include <string>
+#include <tuple>
+#include <variant>
 
 maiken::Application& maiken::Application::resolveProperties() KTHROW(maiken::Exception) {
   ps.setDeletedKey("--DELETED--");

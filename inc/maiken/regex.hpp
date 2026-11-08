@@ -32,6 +32,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAIKEN_REGEX_HPP
 
 #include "mkn/kul/os.hpp"
+#include "mkn/kul/except.hpp"
+
+#include <string>
+#include <vector>
 
 namespace maiken {
 

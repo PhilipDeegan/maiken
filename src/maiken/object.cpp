@@ -30,6 +30,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "maiken/compiler/compilers.hpp"
+#include "maiken/app.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/lang/compiler.hpp"
+#include "mkn/kul/lang/cpp/compilers.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 void maiken::Application::findObjects(mkn::kul::hash::set::String& objects) const {
   for (auto const& ft : sourceMap()) {

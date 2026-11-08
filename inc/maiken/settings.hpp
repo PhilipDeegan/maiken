@@ -35,13 +35,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/cli.hpp"
 #include "mkn/kul/yaml.hpp"
 #include "mkn/kul/except.hpp"
-
 #include "maiken/defs.hpp"
+#include "mkn/kul/map.hpp"
+#include "yaml-cpp/yaml.h"
 
+#include <cstdint>
 #include <vector>
 #include <string>
 #include <optional>
 #include <functional>
+#include <memory>
+#include <type_traits>
+#include <unordered_map>
+#include <utility>
+
+namespace mkn {
+namespace kul {
+namespace env {
+class Var;
+}  // namespace env
+}  // namespace kul
+}  // namespace mkn
 
 namespace maiken {
 

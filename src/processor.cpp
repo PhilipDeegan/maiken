@@ -30,8 +30,29 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken.hpp"  // IWYU pragma: keep
 #include "mkn/kul/threads.hpp"
+#include "maiken/app.hpp"
+#include "maiken/compiler.hpp"
+#include "maiken/global.hpp"
+#include "maiken/module.hpp"
+#include "maiken/processor.hpp"
+#include "maiken/project.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/lang/compiler.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+
+#if MKN_WITH_MKN_MOD
+#include "mkn/mod/def.hpp"
+#endif  // MKN_WITH_MKN_MOD
 
 #include <mutex>
+#include <exception>
+#include <functional>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 struct ProcInfo {
   mkn::kul::hash::set::String objects;
@@ -92,7 +113,7 @@ void maiken::Processor::process(std::vector<Application*> apps) {
 #if MKN_WITH_MKN_MOD
       for (auto& modLoader : app.mods)
         modLoader->module()->compile(app.context(), app.modCompile(modLoader->app()));
-#endif  //MKN_WITH_MKN_MOD
+#endif  // MKN_WITH_MKN_MOD
 
       app_info.emplace(apP, std::make_shared<ProcInfo>(app));
 
@@ -125,7 +146,7 @@ void maiken::Processor::process(std::vector<Application*> apps) {
 #if MKN_WITH_MKN_MOD
       for (auto& modLoader : app.mods)
         modLoader->module()->link(app.context(), app.modLink(modLoader->app()));
-#endif  //MKN_WITH_MKN_MOD
+#endif  // MKN_WITH_MKN_MOD
       app.findObjects(objects);
       app.link(objects);
     }

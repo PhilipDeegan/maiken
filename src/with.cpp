@@ -29,9 +29,21 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/string.hpp"
-
 #include "maiken/app.hpp"
+#include "maiken/defs.hpp"
 #include "maiken/property.hpp"
+#include "maiken/project.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/map.hpp"
+#include "yaml-cpp/yaml.h"
+
+#include <algorithm>
+#include <cctype>
+#include <functional>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 void maiken::Application::withArgs(
     std::string const with_str, std::vector<YAML::Node>& with_nodes,

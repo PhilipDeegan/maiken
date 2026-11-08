@@ -35,14 +35,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef MKN_WITH_MKN_RAM
 
+#include "maiken/defs.hpp"
+#include "maiken/settings.hpp"
 #include "mkn/kul/dbg.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/string.hpp"
 #include "mkn/kul/yaml.hpp"
 #include "mkn/ram/http.hpp"
 #include "mkn/ram/https.hpp"
+#include "yaml-cpp/yaml.h"
 
+#include <array>
 #include <chrono>
+#include <cstddef>
+#include <cstdint>
+#include <sstream>
 #include <string>
 #include <thread>
+#include <type_traits>
+#include <vector>
 
 namespace maiken {
 

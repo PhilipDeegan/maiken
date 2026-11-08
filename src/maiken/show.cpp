@@ -29,7 +29,30 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/compiler/compilers.hpp"
-#include "maiken.hpp"
+#include "maiken/app.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "maiken/property.hpp"
+#include "maiken/settings.hpp"
+#include "mkn/kul/cli.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/lang/cpp/compilers.hpp"
+#include "mkn/kul/lang/cpp/gcc.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/string.hpp"
+#include "yaml-cpp/yaml.h"
+
+#include <cstdint>
+#include <algorithm>
+#include <cstring>
+#include <initializer_list>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace {
 // Mirrors mkn::kul::lang::cpp::GccCompiler::compileSource's resolution of the

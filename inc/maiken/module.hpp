@@ -31,6 +31,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef MAIKEN_MODULE_HPP
 #define MAIKEN_MODULE_HPP
 
+#include "mkn/kul/defs.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/map.hpp"
+
+#include <memory>
+#include <string>
+#include <utility>
+
+namespace maiken {
+class Application;
+}  // namespace maiken
+namespace mkn {
+namespace kul {
+namespace env {
+class PushEnv;
+}  // namespace env
+}  // namespace kul
+}  // namespace mkn
 // Module support (dlopen/dlsym-based loading) is opt-in: it only compiles in
 // when maiken itself is built "-w mkn.mod", which defines MKN_WITH_MKN_MOD.
 #if !MKN_WITH_MKN_MOD
@@ -43,10 +61,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/os.hpp"
 #include "mkn/kul/log.hpp"
 #include "mkn/kul/sys.hpp"
-
 #include "mkn/mod/def.hpp"
 #include "mkn/mod/loader.hpp"
-
 #include "maiken/app.hpp"
 
 namespace maiken {
@@ -64,6 +80,7 @@ namespace maiken {
 mkn::kul::env::PushEnv prepareModuleLoad(Application& ap) KTHROW(mkn::kul::sys::Exception);
 
 class GlobalModules;
+
 class MKN_KUL_PUBLISH ModuleLoader : public mkn::mod::Loader {
   friend class GlobalModules;
 

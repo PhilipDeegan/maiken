@@ -1,6 +1,12 @@
 
 
-#include "maiken.hpp"
+#include "maiken/project.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/string.hpp"
+#include "yaml-cpp/yaml.h"
+
+#include <string>
+#include <vector>
 
 mkn::kul::hash::map::S2S maiken::Project::populate_tests(YAML::Node const& node) {
   mkn::kul::hash::map::S2S tests;

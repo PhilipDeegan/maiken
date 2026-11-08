@@ -30,8 +30,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/dbg.hpp"
 #include "mkn/kul/io.hpp"
+#include "maiken/app.hpp"
+#include "maiken/compiler.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/string.hpp"
+#include "mkn/kul/time.hpp"
 
-#include "maiken.hpp"
+#include <cstddef>
+#include <exception>
+#include <optional>
+#include <string>
+#include <vector>
 
 namespace maiken {
 

@@ -1,0 +1,31 @@
+# iwyu mappings for maiken, used by the iwyu profile in mkn.yaml
+[
+  # libstdc++ 14 <format> forward declares std::vector, iwyu credits it when only a declaration is needed
+  { symbol: ["std::vector", "private", "<vector>", "public"] },
+
+  # yaml-cpp: only yaml-cpp/yaml.h is meant to be included
+  { include: ["@\"yaml-cpp/node/.*\"", "private", "\"yaml-cpp/yaml.h\"", "public"] },
+
+  # prefer the C++ headers, <cstring> over <string.h>. iwyu's own mappings already mark the C
+  # headers public, so they can't be remapped by include, only by symbol. Symbol mappings don't
+  # work for typedefs (uint16_t, size_t), iwyu suggests <stdint.h> but accepts <cstdint>
+  { symbol: ["strcmp", "private", "<cstring>", "public"] },
+  { symbol: ["strncmp", "private", "<cstring>", "public"] },
+  { symbol: ["strlen", "private", "<cstring>", "public"] },
+  { symbol: ["strchr", "private", "<cstring>", "public"] },
+  { symbol: ["strrchr", "private", "<cstring>", "public"] },
+  { symbol: ["strstr", "private", "<cstring>", "public"] },
+  { symbol: ["strerror", "private", "<cstring>", "public"] },
+  { symbol: ["memcpy", "private", "<cstring>", "public"] },
+  { symbol: ["memmove", "private", "<cstring>", "public"] },
+  { symbol: ["memset", "private", "<cstring>", "public"] },
+  { symbol: ["memcmp", "private", "<cstring>", "public"] },
+  { symbol: ["toupper", "private", "<cctype>", "public"] },
+  { symbol: ["tolower", "private", "<cctype>", "public"] },
+  { symbol: ["isdigit", "private", "<cctype>", "public"] },
+  { symbol: ["isalpha", "private", "<cctype>", "public"] },
+  { symbol: ["isalnum", "private", "<cctype>", "public"] },
+  { symbol: ["isspace", "private", "<cctype>", "public"] },
+  { symbol: ["isupper", "private", "<cctype>", "public"] },
+  { symbol: ["islower", "private", "<cctype>", "public"] },
+]

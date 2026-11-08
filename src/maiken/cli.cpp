@@ -31,6 +31,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/app.hpp"
 #include "mkn/kul/cli.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/string.hpp"
+
+#include <string>
+#include <utility>
+#include <vector>
 
 void maiken::Application::addCLIArgs(mkn::kul::cli::Args const& args) {
   auto addIncsOrPaths = [&args](Application& a) {

@@ -32,8 +32,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/compiler/compilers.hpp"
 #include "maiken/env.hpp"
 #include "maiken/settings.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/property.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/lang/cpp/compilers.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/string.hpp"
+#include "mkn/kul/yaml.hpp"
+#include "yaml-cpp/yaml.h"
 
 #include <optional>
+#include <initializer_list>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace maiken {
 

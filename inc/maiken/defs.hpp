@@ -33,14 +33,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mkn/kul/env.hpp"
 #include "mkn/kul/defs.hpp"
-
 #include "mkn/kul/except.hpp"
 
+#include <cstdint>
+#include <string>
+
 #ifndef MKN_LANG
-#include "maiken/lang/defs.en.hpp"
+#include "maiken/lang/defs.en.hpp"  // IWYU pragma: export
 #else
 #define MAIKEN_INCLUDE_MACRO(str) <maiken/lang/defs.str.hpp>
-#include MAIKEN_INCLUDE_MACRO(MKN_LANG)
+#include MAIKEN_INCLUDE_MACRO(MKN_LANG)  // IWYU pragma: export
 #undef MAIKEN_INCLUDE_MACRO
 #endif /*  MKN_LANG */
 

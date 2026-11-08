@@ -30,8 +30,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/app.hpp"
 #include "maiken/property.hpp"
+#include "maiken/global.hpp"
+#include "maiken/settings.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
 
 #include <optional>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 void maiken::Application::findables() {
   if (!this->ro) return;  // skip otherwise

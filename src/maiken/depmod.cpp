@@ -31,13 +31,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "mkn/kul/dbg.hpp"
 #include "mkn/kul/io.hpp"
-
 #include "maiken/app.hpp"
-#include "maiken/git.hpp"
 #include "maiken/scm.hpp"
 #include "maiken/property.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/git/git.hpp"
+#include "maiken/global.hpp"
+#include "maiken/project.hpp"
+#include "mkn/kul/defs.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/proc.hpp"
+#include "mkn/kul/scm.hpp"
+#include "mkn/kul/string.hpp"
+#include "yaml-cpp/yaml.h"
 
 #include <optional>
+#include <algorithm>
+#include <exception>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 void maiken::Application::loadDepOrMod(YAML::Node const& node, mkn::kul::Dir const& depOrMod,
                                        bool module) KTHROW(mkn::kul::Exception) {

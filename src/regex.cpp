@@ -30,9 +30,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "maiken/regex.hpp"
+
 #include "mkn/kul/except.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/string.hpp"
 
 #include <regex>
+#include <cstddef>
 
 std::vector<std::string> maiken::Regexer::RESOLVE(std::string str) KTHROW(mkn::kul::Exception) {
   std::vector<std::string> v;

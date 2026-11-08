@@ -28,9 +28,24 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "maiken.hpp"
-
 #if MKN_WITH_MKN_MOD
+
+#include "maiken/app.hpp"
+#include "maiken/module.hpp"
+#include "maiken/project.hpp"
+#include "maiken/settings.hpp"
+#include "mkn/kul/env.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/log.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/sys.hpp"
+
+#include <functional>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 mkn::kul::File maiken::ModuleLoader::FIND(Application& ap) KTHROW(mkn::kul::sys::Exception) {
   std::string file;
@@ -65,8 +80,8 @@ mkn::kul::File maiken::ModuleLoader::FIND(Application& ap) KTHROW(mkn::kul::sys:
   }
   mkn::kul::File lib(file);
   if (!lib)
-    KEXCEPT(mkn::kul::sys::Exception, "No loadable library found for project: ",
-            ap.project().dir());
+    KEXCEPT(mkn::kul::sys::Exception,
+            "No loadable library found for project: ", ap.project().dir());
   return lib;
 }
 

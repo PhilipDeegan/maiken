@@ -30,7 +30,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "maiken/compiler/compilers.hpp"
 #include "mkn/kul/io.hpp"
-#include "maiken.hpp"
+#include "maiken/app.hpp"
+#include "maiken/compiler.hpp"
+#include "maiken/defs.hpp"
+#include "maiken/global.hpp"
+#include "mkn/kul/defs.hpp"
+#include "mkn/kul/except.hpp"
+#include "mkn/kul/lang/compiler.hpp"
+#include "mkn/kul/lang/cpp/compilers.hpp"
+#include "mkn/kul/map.hpp"
+#include "mkn/kul/os.hpp"
+#include "mkn/kul/string.hpp"
+
+#include <cstdint>
+#include <algorithm>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 void maiken::Application::writeTimeStamps(mkn::kul::hash::set::String& objects,
                                           std::vector<mkn::kul::File>& cacheFiles) {

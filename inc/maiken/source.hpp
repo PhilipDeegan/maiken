@@ -33,9 +33,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "maiken/compiler.hpp"
 #include "maiken/global.hpp"
+#include "mkn/kul/lang/def.hpp"
+#include "mkn/kul/os.hpp"
 
 #include <functional>
 #include <sstream>
+#include <string>
 
 namespace maiken {
 
