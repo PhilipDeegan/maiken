@@ -269,6 +269,9 @@ class MKN_KUL_PUBLISH Application : public Constants {
   mkn::kul::hash::map::S2S const& testFiles() const { return tests; }
   bool incSrc(mkn::kul::File const& f) const;
   std::vector<std::string> const& libraries() const { return libs; }
+  // libraries() with those of dependencies that -l can't find by name (non-default
+  // lib_prefix/lib_ext, e.g. python extension modules) as paths, for gcc-like linkers.
+  std::vector<std::string> linkLibraries() const;
   std::vector<std::pair<Source, bool>> const& sources() const { return srcs; }
   std::vector<std::pair<std::string, bool>> const& includes() const { return incs; }
   std::vector<std::string> const& libraryPaths() const { return paths; }

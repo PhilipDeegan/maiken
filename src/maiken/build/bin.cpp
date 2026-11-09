@@ -43,11 +43,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/except.hpp"
 #include "mkn/kul/lang/compiler.hpp"
 #include "mkn/kul/lang/cpp/compilers.hpp"
+#include "mkn/kul/lang/cpp/gcc.hpp"
 #include "mkn/kul/log.hpp"
 #include "mkn/kul/map.hpp"
 #include "mkn/kul/os.hpp"
 #include "yaml-cpp/yaml.h"
 
+#include <algorithm>
 #include <mutex>
 #include <functional>
 #include <optional>
@@ -58,8 +60,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace maiken {
 
+std::vector<std::string> Application::linkLibraries() const {
+  using mkn::kul::lang::cpp::GccCompiler;
+  std::vector<std::string> v;
+  v.reserve(libs.size());
+  for (auto const& lib : libs) {
+    auto const it = std::find_if(deps.begin(), deps.end(), [&](auto const* d) {
+      return !d->srcs.empty() && d->baseLibFilename() == lib;
+    });
+    if (it == deps.end() || (*it)->m == compiler::Mode::STAT ||
+        GccCompiler::linkableByName((*it)->compilationInfo())) {
+      v.emplace_back(lib);
+      continue;
+    }
+    auto const& dep = **it;
+    auto const& outD = dep.inst ? dep.inst : dep.buildDir();
+    mkn::kul::Dir const dir(outD.is() ? outD.real() : outD.path());
+    v.emplace_back(dir.join(GccCompiler::libName(dep.compilationInfo(), lib)));
+  }
+  return v;
+}
+
 class Executioner : public Constants {
   friend class Application;
+
+  static std::vector<std::string> link_libraries(Application const& app, Compiler const* comp) {
+    if (dynamic_cast<mkn::kul::lang::cpp::GccCompiler const*>(comp)) return app.linkLibraries();
+    return app.libraries();
+  }
 
   static CompilerProcessCapture build_exe(mkn::kul::hash::set::String const& objects,
                                           std::vector<mkn::kul::Dir> const& starDirs,
@@ -101,7 +129,8 @@ class Executioner : public Constants {
       auto linkDbg(comp->linkerDebugBin(AppVars::INSTANCE().debug()));
       if (!linkDbg.empty()) linker += " " + linkDbg;
 
-      LinkDAO dao{app.context(),      linker, linkEnd, bin, starDirs, obV, app.libraries(),
+      auto const libs = link_libraries(app, comp);
+      LinkDAO dao{app.context(),      linker, linkEnd, bin, starDirs, obV, libs,
                   app.libraryPaths(), app.m,  dryRun};
 
       return comp->buildExecutable(dao);
@@ -236,8 +265,9 @@ CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String con
     std::vector<mkn::kul::Dir> starDirs;
     if (objects.size()) starDirs.emplace_back(objD);
     std::vector<std::string> obV;
+    auto const libs = Executioner::link_libraries(*this, comp);
     LinkDAO dao{this->context(), linker,         linkEnd, lib,   starDirs, obV,
-                libraries(),     libraryPaths(), m,       dryRun};
+                libs,            libraryPaths(), m,       dryRun};
 
     CompilerProcessCapture const& cpc = comp->buildLibrary(dao);
     if (dryRun)
