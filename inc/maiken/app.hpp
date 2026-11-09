@@ -288,7 +288,6 @@ class MKN_KUL_PUBLISH Application : public Constants {
   std::vector<mkn::kul::env::Var> requiredEnv() const;
 
   void add_compile_arg(std::string const& arg) { compile_args.emplace_back(arg); }
-  void add_def(std::string const& def) { add_compile_arg("-D" + def); }
   std::vector<std::string> const& compileArgs() const { return compile_args; }
 
   std::string const& compileArg() const { return arg; }
