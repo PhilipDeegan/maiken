@@ -45,6 +45,7 @@ using AbstractCompilerInput = mkn::kul::lang::AbstractCompilerInput;
 using IncludeInput = mkn::kul::lang::IncludeInput;
 using LibPathInput = mkn::kul::lang::LibPathInput;
 using LibInput = mkn::kul::lang::LibInput;
+using CompileArgInput = mkn::kul::lang::CompileArgInput;
 using LinkPrefixInput = mkn::kul::lang::LinkPrefixInput;
 using BuildModeInput = mkn::kul::lang::BuildModeInput;
 using CompilationInfoInput = mkn::kul::lang::CompilationInfoInput;

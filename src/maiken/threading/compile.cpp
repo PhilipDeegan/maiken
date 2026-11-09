@@ -73,9 +73,8 @@ CompilationUnit build_compilation_unit(Application const& app, std::vector<std::
 
   // Baked in up front so CompileDAO::args is the complete, ready-to-use flag
   // list - a module reading a real compile command via per_compiler_command
-  // doesn't need to know about defines/incs formatting separately.
-  std::vector<std::string> args;
-  for (auto const& def : app.defines()) args.push_back("-D" + def);
+  // doesn't need to know about compile args/incs formatting separately.
+  std::vector<std::string> args{app.compileArgs()};
   for (auto const& inc : incs) args.push_back(comp->includeArg(inc));
 
   if (app.arguments().count(fileType) > 0)
