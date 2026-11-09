@@ -78,6 +78,8 @@ void maiken::ApplicationContext::add(AbstractCompilerInput const& input) {
     app.addLibpath(i->path);
   else if (auto const* i = dynamic_cast<LibInput const*>(&input))
     app.addLib(i->name);
+  else if (auto const* i = dynamic_cast<CompileArgInput const*>(&input))
+    app.add_compile_arg(i->value);
   else if (auto const* i = dynamic_cast<LinkPrefixInput const*>(&input))
     app.prependLinkString(i->value);
   else if (auto const* i = dynamic_cast<BuildModeInput const*>(&input))

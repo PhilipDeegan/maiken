@@ -290,8 +290,8 @@ class MKN_KUL_PUBLISH Application : public Constants {
   // or loading a build-time module (ModuleLoader).
   std::vector<mkn::kul::env::Var> requiredEnv() const;
 
-  void add_def(std::string const& def) { defs.emplace_back(def); }
-  std::vector<std::string> const& defines() const { return defs; }
+  void add_compile_arg(std::string const& arg) { compile_args.emplace_back(arg); }
+  std::vector<std::string> const& compileArgs() const { return compile_args; }
 
   std::string const& compileArg() const { return arg; }
   mkn::kul::hash::map::S2S const& compilerArgs() const { return cArg; }
@@ -305,7 +305,6 @@ class MKN_KUL_PUBLISH Application : public Constants {
   void addLibpath(std::string const& s) { paths.push_back(s); }
   void addLib(std::string const& s) { libs.push_back(s); }
 
-  void prependCompileString(std::string const& s) { arg = s + " " + arg; }
   void prependLinkString(std::string const& s) { lnk = s + " " + lnk; }
 
   CompilationInfo const& compilationInfo() const { return m_cInfo; }
@@ -366,7 +365,7 @@ class MKN_KUL_PUBLISH Application : public Constants {
   std::vector<Application*> deps, modDeps, rdeps;
   std::vector<std::shared_ptr<ModuleLoader>> mods;
   std::vector<mkn::kul::env::Var> evs;
-  std::vector<std::string> defs, libs, paths;
+  std::vector<std::string> compile_args, libs, paths;
   std::vector<std::pair<maiken::Source, bool>> srcs;
   std::vector<std::pair<std::string, bool>> incs;
   mkn::kul::SCM const* scm = 0;
