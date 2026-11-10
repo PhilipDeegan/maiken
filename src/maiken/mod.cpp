@@ -113,24 +113,42 @@ mkn::kul::hash::map::S2T<std::shared_ptr<mkn::kul::sys::SharedLibrary>>& Preload
   return libs;
 }
 
+// The shared libraries the linker resolved for ap, in link order: a path as is, a name as
+//  lib<name>.so from the first of ap's library paths with lib<name>.so or lib<name>.a, as -l
+//  does (.a is static, nothing to load). Names not found there are system libraries the dynamic
+//  linker finds itself. Other files in the library paths are not ap's dependencies.
+std::vector<std::string> LinkedSharedLibraries(maiken::Application const& ap) {
+  std::vector<std::string> libs;
+  for (auto const& lib : ap.linkLibraries()) {
+    if (lib.find('/') != std::string::npos) {
+      if (mkn::kul::File const f{lib}; f) libs.emplace_back(f.real());
+      continue;
+    }
+    for (auto const& path : ap.libraryPaths()) {
+      mkn::kul::Dir const dir{path};
+      if (mkn::kul::File const so{"lib" + lib + ".so", dir}; so) {
+        libs.emplace_back(so.real());
+        break;
+      }
+      if (mkn::kul::File{"lib" + lib + ".a", dir}) break;
+    }
+  }
+  return libs;
+}
+
 void PreloadDependencies(maiken::Application const& ap) {
   auto& preloaded = PreloadedDeps();
-  for (auto const& dir : ap.libraryPaths()) {
-    mkn::kul::Dir d(dir);
-    if (!d) continue;
-    for (auto const& f : d.files(0)) {
-      auto const& name = f.name();
-      auto const dot = name.rfind(".");
-      if (dot == std::string::npos || name.substr(dot + 1) != "so") continue;
-      auto const real = f.real();
-      if (preloaded.count(real)) continue;
-      try {
-        preloaded.insert(std::make_pair(
-            real, std::make_shared<mkn::kul::sys::SharedLibrary>(mkn::kul::File(real))));
-        KLOG(TRC) << "preloaded module dependency: " << real;
-      } catch (mkn::kul::sys::Exception const& e) {
-        KLOG(TRC) << "could not preload module dependency: " << real << " : " << e.what();
-      }
+  auto const libs = LinkedSharedLibraries(ap);
+  // reversed: libraries are linked before what they depend on, load those first
+  for (auto it = libs.rbegin(); it != libs.rend(); ++it) {
+    auto const& real = *it;
+    if (preloaded.count(real)) continue;
+    try {
+      preloaded.insert(std::make_pair(
+          real, std::make_shared<mkn::kul::sys::SharedLibrary>(mkn::kul::File(real))));
+      KLOG(TRC) << "preloaded module dependency: " << real;
+    } catch (mkn::kul::sys::Exception const& e) {
+      KLOG(TRC) << "could not preload module dependency: " << real << " : " << e.what();
     }
   }
 }
