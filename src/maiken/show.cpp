@@ -106,6 +106,7 @@ void maiken::Application::showConfig(bool force) {
     std::string repo = (*AppVars::INSTANCE().properkeys().find("MKN_REPO")).second;
     using namespace mkn::kul::cli;
     KOUT(NON) << "+++++++++ BUILD INFO +++++++++";
+    KOUT(NON) << "VERSION : " << VERSION();
     KOUT(NON) << "REPO    : " << repo;
     KOUT(NON) << "THREADS : " << AppVars::INSTANCE().threads() << "\n";
     KOUT(NON) << "BINARIES";
