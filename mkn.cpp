@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "maiken.hpp"
+#include "maiken/app.hpp"
 #include "maiken/defs.hpp"
 
 #include "mkn/kul/log.hpp"
@@ -64,6 +65,7 @@ int main_entry(int argc, char* argv[]) {
     KERR << e.what();
     ret = 1;
   }
+  Applications::INSTANCE().clear();
   return ret;
 }
 

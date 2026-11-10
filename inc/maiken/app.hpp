@@ -392,14 +392,17 @@ class Applications : public Constants {
     return ret;
   }
 
- private:
-  mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2T<Application*>> m_apps;
-  std::vector<std::unique_ptr<Application>> m_appPs;
-  Applications() {}
+  // Destroys all applications, unloading their modules. Called before main returns so module
+  // destructors run while other singletons (e.g. LogMan) are still alive.
   void clear() {
     m_apps.clear();
     m_appPs.clear();
   }
+
+ private:
+  mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2T<Application*>> m_apps;
+  std::vector<std::unique_ptr<Application>> m_appPs;
+  Applications() {}
 };
 
 // Shared by ThreadingCompiler (real builds) and ApplicationContext::per_compiler_command
