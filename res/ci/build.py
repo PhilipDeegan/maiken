@@ -61,8 +61,8 @@ def nix_test(std_args, env, full):
     """ubuntu_gcc / ubuntu_clang / manylinux_gcc."""
     a = f'-a "{std_args}"'
     run(BOOTSTRAP, f"build {a} -dO 2 -g 0 -W 9", cwd=DEP_DIR, env=env)
-    run(BOOTSTRAP, f"build -dOp test_mod {a} -O 2 -g 0 -W 9", env=env)
-    run(built("build"), f"build test pack -Op test {a} -O 2 -g 0 -W 9", env=env)
+    run(BOOTSTRAP, f"build -dp test_mod {a} -O 2 -g 0 -W 9", env=env)
+    run(built("build"), f"build test pack -p test {a} -O 2 -g 0 -W 9", env=env)
 
     if not full:
         return
@@ -71,10 +71,10 @@ def nix_test(std_args, env, full):
     # is currently out of sync with mkn.mod's Context API (pending changes to
     # merge there); leave this as a no-op build until that's sorted, rather
     # than failing CI on it.
-    run(BOOTSTRAP, f"build -dtOp format {a} -O 2 -g 0 -W 9", env=env)
+    run(BOOTSTRAP, f"build -dtp format {a} -O 2 -g 0 -W 9", env=env)
 
     rm_test_lib()
-    run(built("bin_shared"), f"build test pack -Op test {a} -O 2 -g 0 -W 9", env=env)
+    run(built("bin_shared"), f"build test pack -p test {a} -O 2 -g 0 -W 9", env=env)
 
 
 def job_macos_clang():
