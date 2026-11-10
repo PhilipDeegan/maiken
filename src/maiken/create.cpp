@@ -101,7 +101,7 @@ class CLIHandler : public Constants {
                                        Arg('T', STR_WITHOUT, ArgType::STRING),
                                        Arg('u', STR_SCM_UPDATE),
                                        Arg('U', STR_SCM_FUPDATE),
-                                       Arg('v', STR_VERSION),
+                                       Arg('v', STR_VERSION, 2),
                                        Arg('V', STR_VERBOSE, ArgType::MAYBE),
                                        Arg('w', STR_WITH, ArgType::STRING),
                                        Arg('W', STR_WARN, ArgType::MAYBE),
