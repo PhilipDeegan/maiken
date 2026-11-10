@@ -101,13 +101,16 @@ class Git {
     }
 
     if (resolved) {
+      KOUT(NON) << "Resolved branch for: " << name << " -> " << version;
       verFile.rm();
       verFile.dir().mk();
       mkn::kul::io::Writer(verFile) << version;
       return version;
     }
 
-    return defaultSCMBranchName();
+    auto const fallback = defaultSCMBranchName();
+    KOUT(NON) << "Branch not resolved for: " << name << ", using default -> " << fallback;
+    return fallback;
   }
 
  private:
