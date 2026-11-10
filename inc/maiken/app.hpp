@@ -333,6 +333,11 @@ class MKN_KUL_PUBLISH Application : public Constants {
       KTHROW(mkn::kul::Exception);
   static std::vector<Application*> CREATE(int16_t argc, char* argv[]) KTHROW(mkn::kul::Exception);
 
+  // "-v": version, OS and optional features
+  static std::string VERSION();
+  // "-vv": compile time configuration of this binary
+  static std::string BUILD_CONFIG();
+
   static mkn::kul::env::Var PARSE_ENV_NODE(YAML::Node const&, Application const&);
   static mkn::kul::env::Var PARSE_PROFILE_NAME(YAML::Node const&, Application* = nullptr);
 

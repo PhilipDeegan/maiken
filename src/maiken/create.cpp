@@ -175,7 +175,7 @@ std::string get_first_line_of(mkn::kul::File const& yml) {
   return c ? c : "";
 }
 
-auto version_string() {
+std::string maiken::Application::VERSION() {
   std::stringstream ss, mod;
   ss << MKN_KUL_STR(MKN_VERSION) << " (" << MKN_KUL_STR(MKN_KUL_OS) << ") w/[";
   if (MKN_REMOTE_EXEC) mod << "exec,";
@@ -197,6 +197,60 @@ auto version_string() {
   mod << "]";
   ss << mod.str();
   return ss.str();
+}
+
+std::string maiken::Application::BUILD_CONFIG() {
+  std::stringstream ss;
+  auto const kv = [&](std::string k, auto const& v) {
+    mkn::kul::String::PAD(k, 34);
+    ss << "  " << k << ": " << v << mkn::kul::os::EOL();
+  };
+  ss << "BUILD CONFIG" << mkn::kul::os::EOL();
+#if defined(__clang__)
+  kv("COMPILER", "clang " __clang_version__);
+#elif defined(__GNUC__)
+  kv("COMPILER", "gcc " __VERSION__);
+#elif defined(_MSC_VER)
+  kv("COMPILER", "msvc " MKN_KUL_STR(_MSC_FULL_VER));
+#endif
+  kv("__cplusplus", __cplusplus);
+#ifdef MKN_LANG
+  kv("MKN_LANG", MKN_KUL_STR(MKN_LANG));
+#else
+  kv("MKN_LANG", "en");
+#endif  // MKN_LANG
+#ifdef MKN_KUL_SHARED
+  kv("MKN_KUL_SHARED", 1);
+#else
+  kv("MKN_KUL_SHARED", 0);
+#endif  // MKN_KUL_SHARED
+  kv("MKN_WITH_MKN_MOD", MKN_WITH_MKN_MOD);
+#ifdef MKN_WITH_MKN_RAM
+  kv("MKN_WITH_MKN_RAM", 1);
+#else
+  kv("MKN_WITH_MKN_RAM", 0);
+#endif  // MKN_WITH_MKN_RAM
+#ifdef MKN_WITH_IO_CEREAL
+  kv("MKN_WITH_IO_CEREAL", 1);
+#else
+  kv("MKN_WITH_IO_CEREAL", 0);
+#endif  // MKN_WITH_IO_CEREAL
+#ifdef MKN_WITH_GOOGLE_SPARSEHASH
+  kv("MKN_WITH_SPARSEHASH", 1);
+#else
+  kv("MKN_WITH_SPARSEHASH", 0);
+#endif  // MKN_WITH_GOOGLE_SPARSEHASH
+  kv("MKN_REMOTE_EXEC", MKN_REMOTE_EXEC);
+  kv("MKN_REMOTE_REPO", MKN_REMOTE_REPO);
+  kv("MKN_REMOTE_MOD", MKN_REMOTE_MOD);
+  kv("MKN_TIMESTAMPS", MKN_TIMESTAMPS);
+  kv("MKN_REP_NAME_DOT", MKN_REP_NAME_DOT);
+  kv("MKN_REP_VERS_DOT", MKN_REP_VERS_DOT);
+  kv("MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION", MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION);
+  kv("MKN_KUL_PROC_LOOP_NSLEEP", MKN_KUL_PROC_LOOP_NSLEEP);
+  auto str = ss.str();
+  while (!str.empty() && (str.back() == '\n' || str.back() == '\r')) str.pop_back();
+  return str;
 }
 
 std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Args const& args)
@@ -222,7 +276,8 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
   if (args.has(STR_HELP)) help_exit();
 
   if (args.has(STR_VERSION)) {
-    KOUT(NON) << version_string();
+    KOUT(NON) << VERSION();
+    if (args.count(STR_VERSION) > 1) KOUT(NON) << BUILD_CONFIG();
     KEXIT(0, "");
   }
 
