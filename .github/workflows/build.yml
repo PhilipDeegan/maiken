@@ -28,8 +28,8 @@ jobs:
         cp -r $PWD ~/.maiken/app/mkn/master
         [ "${{ matrix.cc }}" = "clang" ] && export CC=clang CXX=clang++
         ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ./mkn build -dtK -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ./mkn build -dt -w mkn.mod -p bin_shared -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtw mkn.mod -p bin_shared -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ./mkn build -dtKp server -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ldd bin/build/mkn
         ldd bin/bin_shared/mkn
@@ -46,7 +46,7 @@ jobs:
       run: |
         ldd mkn
         ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ./mkn build -dtK -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ldd bin/build/mkn
     - run: python3 res/ci/build.py manylinux_gcc
 
@@ -61,7 +61,7 @@ jobs:
       run: |
         ldd mkn
         ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ./mkn build -dtK -w mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ldd bin/build/mkn
     - run: python3 res/ci/build.py manylinux_arm_gcc
 
