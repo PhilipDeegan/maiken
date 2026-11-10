@@ -3,7 +3,7 @@
 name: mkn
 version: master
 property:
-  DATE: 09_NOV_2026
+  DATE: 10_NOV_2026
   self.deps: mkn.kul
 
 parent: bin
