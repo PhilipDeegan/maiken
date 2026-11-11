@@ -90,6 +90,31 @@ class Executioner : public Constants {
     return app.libraries();
   }
 
+  // the linker arguments of a link of app, before those of its compiler
+  static std::string link_end(Application const& app) {
+    std::string linkEnd;
+    if (app.ro) linkEnd = AppVars::INSTANCE().linker();
+    if (!AppVars::INSTANCE().allinker().empty()) linkEnd += " " + AppVars::INSTANCE().allinker();
+    if (!app.lnk.empty()) linkEnd += " " + app.lnk;
+    return linkEnd;
+  }
+
+  // what a link of app uses, at INF: once per link, or once for all of its tests, which are linked
+  //  in parallel
+  static void show_link_settings(Application const& app) {
+    if (AppVars::INSTANCE().dryRun() || !mkn::kul::LogMan::INSTANCE().inf()) return;
+    if (!app.libraries().empty()) {
+      KOUT(NON) << "LIBRARIES";
+      for (std::string const& s : app.libraries()) KOUT(NON) << "\t" << s;
+    }
+    if (!app.libraryPaths().empty()) {
+      KOUT(NON) << "LIBRARY PATHS";
+      for (std::string const& s : app.libraryPaths()) KOUT(NON) << "\t" << s;
+    }
+    if (auto const linkEnd = link_end(app); linkEnd.size())
+      KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
+  }
+
   static CompilerProcessCapture build_exe(mkn::kul::hash::set::String const& objects,
                                           std::vector<mkn::kul::Dir> const& starDirs,
                                           std::string const& main, std::string const& out,
@@ -102,22 +127,9 @@ class Executioner : public Constants {
 
     if (!app.files().at(fileType).count(STR_COMPILER))
       KEXIT(1, "No compiler found for filetype " + fileType);
-    if (!dryRun && mkn::kul::LogMan::INSTANCE().inf() && !app.libraries().empty()) {
-      KOUT(NON) << "LIBRARIES";
-      for (std::string const& s : app.libraries()) KOUT(NON) << "\t" << s;
-    }
-    if (!dryRun && mkn::kul::LogMan::INSTANCE().inf() && !app.libraryPaths().empty()) {
-      KOUT(NON) << "LIBRARY PATHS";
-      for (std::string const& s : app.libraryPaths()) KOUT(NON) << "\t" << s;
-    }
     try {
       std::string linker = app.fs[fileType][STR_LINKER];
-      std::string linkEnd;
-      if (app.ro) linkEnd = AppVars::INSTANCE().linker();
-      if (!AppVars::INSTANCE().allinker().empty()) linkEnd += " " + AppVars::INSTANCE().allinker();
-      if (!app.lnk.empty()) linkEnd += " " + app.lnk;
-      if (!dryRun && mkn::kul::LogMan::INSTANCE().inf() && linkEnd.size())
-        KOUT(NON) << "LINKER ARGUMENTS\n\t" << linkEnd;
+      std::string linkEnd = link_end(app);
       std::string bin(dryRun ? mkn::kul::File(outD.join(out)).esc()
                              : mkn::kul::File(outD.join(out)).escm());
       std::vector<std::string> obV;
@@ -193,6 +205,7 @@ void Application::buildExecutable(mkn::kul::hash::set::String const& objects_)
   std::vector<mkn::kul::Dir> starDirs;
   if (objects_.size()) starDirs.emplace_back(objD);
 
+  Executioner::show_link_settings(*this);
   auto cpc = Executioner::build_exe(objects, starDirs, file, name, install, *this);
   Executioner::print(cpc, *this);
 
@@ -228,6 +241,7 @@ void Application::buildTest(mkn::kul::hash::set::String const& objects)
 
   mkn::kul::ThreadPool<> ctp(AppVars::INSTANCE().threads());
 
+  Executioner::show_link_settings(*this);
   for (auto const& test : tests_for(*this))
     ctp.async(std::bind(build_test, test, testsD, tmpD, this));
   ctp.finish().join();
