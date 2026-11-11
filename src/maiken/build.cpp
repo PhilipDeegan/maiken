@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstddef>
 #include <exception>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <vector>
@@ -80,16 +81,15 @@ void Application::link(mkn::kul::hash::set::String const& objects) KTHROW(mkn::k
   }
 }
 
-// a process's captured output, always on failure
+// a process's command, then its captured output (always on failure), as one block: blocks from
+//  several threads do not interleave
 void Application::showOutput(CompilerProcessCapture const& cpc) {
-  auto o = [](std::string const& s) {
-    if (s.size()) KOUT(NON) << s;
-  };
-  auto e = [](std::string const& s) {
-    if (s.size()) KERR << s;
-  };
-  if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
-  if (mkn::kul::LogMan::INSTANCE().err() || cpc.exception()) e(cpc.errs());
+  auto const show = mkn::kul::LogMan::INSTANCE().inf() || cpc.exception();
+  static std::mutex mute;
+  std::lock_guard<std::mutex> lock(mute);
+  if (show && cpc.cmd().size()) KOUT(NON) << cpc.cmd();
+  if (show && cpc.outs().size()) KOUT(NON) << cpc.outs();
+  if (show && cpc.errs().size()) KERR << cpc.errs();
 }
 
 void Application::checkErrors(CompilerProcessCapture const& cpc) KTHROW(mkn::kul::Exception) {

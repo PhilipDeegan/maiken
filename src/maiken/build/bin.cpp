@@ -199,7 +199,6 @@ void Application::buildExecutable(mkn::kul::hash::set::String const& objects_)
   if (dryRun) return;
 
   checkErrors(cpc);
-  KOUT(INF) << cpc.cmd();
   KOUT(NON) << "Creating bin: " << mkn::kul::File(cpc.file()).real();
 }
 
@@ -283,7 +282,6 @@ CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String con
     else {
       Executioner::print(cpc, *this);
       checkErrors(cpc);
-      KOUT(INF) << cpc.cmd();
       KOUT(NON) << "Creating lib: " << mkn::kul::File(cpc.file()).real();
 #if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
       if (AppVars::INSTANCE().nodes()) DistLinker::send(cpc.file());

@@ -119,12 +119,14 @@ class MKN_KUL_PUBLISH Application : public Constants {
   friend class dist::CompileRequest;
 #endif  //  MKN_WITH_MKN_RAM  &&         MKN_WITH_IO_CEREAL
 
+ public:
+  static void showOutput(CompilerProcessCapture const& cpc);
+
  protected:
   void buildExecutable(mkn::kul::hash::set::String const& objects) KTHROW(mkn::kul::Exception);
   CompilerProcessCapture buildLibrary(mkn::kul::hash::set::String const& objects)
       KTHROW(mkn::kul::Exception);
   void buildTest(mkn::kul::hash::set::String const& objects) KTHROW(mkn::kul::Exception);
-  static void showOutput(CompilerProcessCapture const& cpc);
   void checkErrors(CompilerProcessCapture const& cpc) KTHROW(mkn::kul::Exception);
 
   void populateMaps(YAML::Node const& n) KTHROW(mkn::kul::Exception);

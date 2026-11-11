@@ -207,13 +207,6 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     sourceQueue.pop();
   }
 
-  auto o = [](std::string const& s) {
-    if (s.size()) KOUT(NON) << s;
-  };
-  auto e = [](std::string const& s) {
-    if (s.size()) KERR << s;
-  };
-
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
 
@@ -229,13 +222,11 @@ void maiken::Application::compile(std::queue<std::pair<maiken::Source, std::stri
     errLogDir.mk();
   }
 
-  auto lambda = [&, o, e](maiken::CompilationUnit const& c_unit) {
+  auto lambda = [&](maiken::CompilationUnit const& c_unit) {
     CompilerProcessCapture const cpc = c_unit.compile();
-    if (!dryRun) {
-      if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
-      if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
-      KOUT(INF) << cpc.cmd();
-    } else
+    if (!dryRun)
+      showOutput(cpc);
+    else
       KOUT(NON) << cpc.cmd();
 
     if (AppVars::INSTANCE().dump()) {
