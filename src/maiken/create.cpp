@@ -301,7 +301,9 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
   auto& yml = *yml_opt;
   mkn::kul::env::CWD(yml.dir());
 
-  if (args.empty() || (args.size() == 1 && args.has(STR_DIR))) {
+  // the mkn file's first line "#! <args>" runs when no args are given but -C (which project) and
+  //  -V (how much to log, already set)
+  if (args.size() == std::size_t{args.has(STR_DIR)} + std::size_t{args.has(STR_VERBOSE)}) {
     std::string const s = get_first_line_of(yml);
     if (s.size() > 3 && s.substr(0, 3) == "#! ") {
       std::string line(s.substr(3));
