@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 #include <mutex>
+#include <exception>
 #include <functional>
 #include <optional>
 #include <string>
@@ -232,8 +233,13 @@ void Application::buildTest(mkn::kul::hash::set::String const& objects)
     ctp.async(std::bind(build_test, test, testsD, tmpD, this));
   ctp.finish().join();
 
-  for (auto const& cpc : cpcs) Executioner::print(cpc, *this);
-  for (auto const& cpc : cpcs) checkErrors(cpc);
+  // every test's output, then the first failure
+  for (auto const& cpc : cpcs) {
+    Executioner::print(cpc, *this);
+    showOutput(cpc);
+  }
+  for (auto const& cpc : cpcs)
+    if (cpc.exception()) std::rethrow_exception(cpc.exception());
 }
 
 CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String const& objects)
@@ -267,8 +273,8 @@ CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String con
     if (objects.size()) starDirs.emplace_back(objD);
     std::vector<std::string> obV;
     auto const libs = Executioner::link_libraries(*this, comp);
-    LinkDAO dao{this->context(), linker,         linkEnd, lib,   starDirs, obV,
-                libs,            libraryPaths(), m,       dryRun};
+    LinkDAO dao{this->context(), linker, linkEnd, lib, starDirs, obV, libs,
+                libraryPaths(),  m,      dryRun};
 
     CompilerProcessCapture const& cpc = comp->buildLibrary(dao);
     if (dryRun)
