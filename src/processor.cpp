@@ -68,27 +68,18 @@ void maiken::Processor::process(std::vector<Application*> apps) {
 
   std::unordered_map<Application*, std::shared_ptr<ProcInfo>> app_info;
 
-  auto o = [](std::string const& s) {
-    if (s.size()) KOUT(NON) << s;
-  };
-  auto e = [](std::string const& s) {
-    if (s.size()) KERR << s;
-  };
-
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
   mkn::kul::ThreadPool<> ctp(AppVars::INSTANCE().threads());
   std::vector<maiken::CompilationUnit> c_units;
 
   auto lambex = [&](mkn::kul::Exception const&) { ctp.stop(); };
-  auto lambda = [o, e, &mute, &cpcs, &lambex](maiken::CompilationUnit const& c_unit) {
+  auto lambda = [&mute, &cpcs, &lambex](maiken::CompilationUnit const& c_unit) {
     CompilerProcessCapture const cpc = c_unit.compile();
 
-    if (!AppVars::INSTANCE().dryRun()) {
-      if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
-      if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) e(cpc.errs());
-      KOUT(INF) << cpc.cmd();
-    } else
+    if (!AppVars::INSTANCE().dryRun())
+      Application::showOutput(cpc);
+    else
       KOUT(NON) << cpc.cmd();
 
     {
