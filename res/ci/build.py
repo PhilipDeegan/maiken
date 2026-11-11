@@ -60,9 +60,9 @@ def rm_test_lib():
 def nix_test(std_args, env, full):
     """ubuntu_gcc / ubuntu_clang / manylinux_gcc."""
     a = f'-a "{std_args}"'
-    run(BOOTSTRAP, f"build {a} -dO 2 -g 0 -W 9", cwd=DEP_DIR, env=env)
-    run(BOOTSTRAP, f"build -dp test_mod {a} -O 2 -g 0 -W 9", env=env)
-    run(built("build"), f"build test pack -p test {a} -O 2 -g 0 -W 9", env=env)
+    run(BOOTSTRAP, f"build {a} -dtO 2 -g 0 -W 9", cwd=DEP_DIR, env=env)
+    run(BOOTSTRAP, f"build -dtp test_mod {a} -O 2 -g 0 -W 9", env=env)
+    run(built("build"), f"build test pack -tp test {a} -O 2 -g 0 -W 9", env=env)
 
     if not full:
         return
@@ -79,7 +79,7 @@ def nix_test(std_args, env, full):
 
 def job_macos_clang():
     tc = os.path.join(ROOT, "res", "mkn", "clang")
-    run(BOOTSTRAP, f"build -dx {tc}", cwd=DEP_DIR)
+    run(BOOTSTRAP, f"build -dtx {tc}", cwd=DEP_DIR)
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
     run(built("build"), f"build test pack -Op test -x {tc}")
 
@@ -87,7 +87,7 @@ def job_macos_clang():
 def job_win_cl():
     std = "-std:c++20 -EHsc"
     env = {"MKN_CL_PREFERRED": "1"}
-    run(BOOTSTRAP, f'build -da "{std}"', cwd=DEP_DIR, env=env)
+    run(BOOTSTRAP, f'build -dta "{std}"', cwd=DEP_DIR, env=env)
     run(BOOTSTRAP, f'build -dtOp test_mod -a "{std}"', env=env)
     run(built("build"), f'build test pack -Op test -a "{std}"', env=env)
 
@@ -96,7 +96,7 @@ def job_win_clang():
     # forward slashes: run()'s shlex.split() (POSIX mode) treats "\" as an
     # escape char and would eat the backslashes os.path.join gives us here.
     tc = os.path.join(ROOT, "res", "mkn", "clang_win").replace("\\", "/")
-    run(BOOTSTRAP, f"build -dx {tc}", cwd=DEP_DIR)
+    run(BOOTSTRAP, f"build -dtx {tc}", cwd=DEP_DIR)
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
     run(built("build"), f"build test pack -Op test -x {tc}")
 
