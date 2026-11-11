@@ -240,6 +240,7 @@ void Application::buildTest(mkn::kul::hash::set::String const& objects)
   }
   for (auto const& cpc : cpcs)
     if (cpc.exception()) std::rethrow_exception(cpc.exception());
+  ctp.rethrow();  // a test whose task threw has no capture
 }
 
 CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String const& objects)
