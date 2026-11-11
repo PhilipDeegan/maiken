@@ -80,7 +80,8 @@ void Application::link(mkn::kul::hash::set::String const& objects) KTHROW(mkn::k
   }
 }
 
-void Application::checkErrors(CompilerProcessCapture const& cpc) KTHROW(mkn::kul::Exception) {
+// a process's captured output, always on failure
+void Application::showOutput(CompilerProcessCapture const& cpc) {
   auto o = [](std::string const& s) {
     if (s.size()) KOUT(NON) << s;
   };
@@ -89,6 +90,10 @@ void Application::checkErrors(CompilerProcessCapture const& cpc) KTHROW(mkn::kul
   };
   if (mkn::kul::LogMan::INSTANCE().inf() || cpc.exception()) o(cpc.outs());
   if (mkn::kul::LogMan::INSTANCE().err() || cpc.exception()) e(cpc.errs());
+}
+
+void Application::checkErrors(CompilerProcessCapture const& cpc) KTHROW(mkn::kul::Exception) {
+  showOutput(cpc);
   if (cpc.exception()) std::rethrow_exception(cpc.exception());
 }
 
