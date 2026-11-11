@@ -233,6 +233,7 @@ void Application::buildTest(mkn::kul::hash::set::String const& objects)
   ctp.finish().join();
 
   for (auto const& cpc : cpcs) Executioner::print(cpc, *this);
+  for (auto const& cpc : cpcs) checkErrors(cpc);
 }
 
 CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String const& objects)
