@@ -66,6 +66,7 @@ class AppVars : public Constants {
   friend class dist::Post;
   friend class ::cereal::access;
 #endif  // MKN_WITH_MKN_RAM) && MKN_WITH_IO_CEREAL
+
  private:
   bool dr = 0, du = 0, fu = 0, q = 0, s = 0, sh = 0, st = 0, u = 0;
   uint16_t de = -1, dl = 0, op = -1, ts = 1, wa = -1;
