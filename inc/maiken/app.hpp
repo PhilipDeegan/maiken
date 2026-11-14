@@ -356,7 +356,7 @@ class MKN_KUL_PUBLISH Application : public Constants {
   CompilationInfo m_cInfo;
   ApplicationContext ctx_{*this};
 
-  bool ig = 1, isMod = 0, ro = 0;
+  bool ig = 1, isMod = 0, ro = 0, su = 0;  // su: setup() ran
   Application const* par = nullptr;
   Application* sup = nullptr;
   compiler::Mode m{compiler::Mode::SHAR};

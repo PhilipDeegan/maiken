@@ -450,6 +450,10 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
 
   AppVars::INSTANCE().dependencyString(args.has(STR_DEP) ? args.get(STR_DEP) : "");
   std::vector<Application*> apps;
+  // every selected profile is a root before any is set up: one that another depends on is set
+  //  up as that dependency, and must already have the root's settings (e.g. -i)
+  for (auto profile : profiles)
+    Applications::INSTANCE().getOrCreateRoot(project, profile, /*setup = */ false);
   for (auto profile : profiles) {
     auto* app = Applications::INSTANCE().getOrCreateRoot(project, profile);
     auto& a = *app;

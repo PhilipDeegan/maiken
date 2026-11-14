@@ -109,6 +109,11 @@ static std::string const MKN_DEFS_MAIN =
 static std::string const MKN_DEFS_NODES =
     "   -n/--nodes [$n]        | Aktiviert verteilte Kompilierung mit $n "
     "Knoten aus der gewaehlten settings.yaml (-x)";
+static std::string const MKN_DEFS_INSTALL =
+    "   -i/--install $d        | Setzt das Installationsverzeichnis der gewählten "
+    "Wurzelprofile auf $d, ersetzt das /install Tag";
+static std::string const MKN_DEFS_NAME =
+    "   -N/--name $n           | Baut das Wurzelprofil in ./bin/$n statt ./bin/$profile";
 static std::string const MKN_DEFS_OUT =
     "   -o/--out $o            | Sets output binary/library to name $o, "
     "supercedes /out tag";

@@ -38,15 +38,16 @@ maiken::Application* maiken::Applications::getOrCreate(maiken::Project const& pr
   std::string profile = _profile.empty() ? "@" : _profile;
   if (!m_apps.count(pFile) || !m_apps[pFile].count(profile)) {
     auto app = std::make_unique<Application>(proj, _profile);
-    auto pp = app.get();
+    m_apps[pFile][profile] = app.get();
     m_appPs.push_back(std::move(app));
-    m_apps[pFile][profile] = pp;
-    if (setup) {
-      mkn::kul::os::PushDir pushd(proj.dir());
-      pp->setup();
-    }
   }
-  return m_apps[pFile][profile];
+  auto* pp = m_apps[pFile][profile];
+  // also an existing entry not set up yet, e.g. a selected root profile another one depends on
+  if (setup && !pp->su) {
+    mkn::kul::os::PushDir pushd(proj.dir());
+    pp->setup();
+  }
+  return pp;
 }
 
 maiken::Application* maiken::Applications::getOrCreateRoot(maiken::Project const& proj,
@@ -54,15 +55,13 @@ maiken::Application* maiken::Applications::getOrCreateRoot(maiken::Project const
     KTHROW(mkn::kul::Exception) {
   std::string pFile(proj.file());
   std::string profile = _profile.empty() ? "@" : _profile;
-  if (!m_apps.count(pFile) || !m_apps[pFile].count(profile)) {
-    auto* pp = getOrCreate(proj, _profile, /*setup = */ false);
-    pp->ro = 1;
-    if (setup) {
-      mkn::kul::os::PushDir pushd(proj.dir());
-      pp->setup();
-    }
+  auto* pp = getOrCreate(proj, _profile, /*setup = */ false);
+  pp->ro = 1;
+  if (setup && !pp->su) {
+    mkn::kul::os::PushDir pushd(proj.dir());
+    pp->setup();
   }
-  return m_apps[pFile][profile];
+  return pp;
 }
 
 maiken::Application* maiken::Applications::getOrNullptr(std::string const& project) {

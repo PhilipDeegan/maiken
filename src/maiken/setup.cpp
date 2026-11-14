@@ -107,6 +107,8 @@ void sub_initializer(Application const& app, std::vector<YAML::Node> const& node
 void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   MKN_KUL_DBG_FUNC_ENTER;
   KLOG(TRC) << proj.dir();
+  if (su) return;
+  su = 1;
 
   if (scr.empty() && project().root()[STR_SCM])
     scr = Properties::RESOLVE(*this, project().root()[STR_SCM].Scalar());
