@@ -129,6 +129,11 @@ static std::string const MKN_DEFS_MAIN =
 static std::string const MKN_DEFS_NODES =
     "   -n/--nodes [$n]        | Attiva la compilazione distribuita con $n "
     "nodi dal file settings.yaml scelto (-x)";
+static std::string const MKN_DEFS_INSTALL =
+    "   -i/--install $d        | Imposta la directory di installazione dei profili radice a $d, "
+    "sostituisce il tag /install";
+static std::string const MKN_DEFS_NAME =
+    "   -N/--name $n           | Compila il profilo del progetto radice in ./bin/$n invece di ./bin/$profile";
 static std::string const MKN_DEFS_OUT =
     "   -o/--out $o            | Sets output binary/library to name $o, "
     "supercedes /out tag";

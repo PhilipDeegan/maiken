@@ -69,7 +69,7 @@ class AppVars : public Constants {
  private:
   bool dr = 0, du = 0, fu = 0, q = 0, s = 0, sh = 0, st = 0, u = 0;
   uint16_t de = -1, dl = 0, op = -1, ts = 1, wa = -1;
-  std::string aa, al, dep, la, mo, ra, wi, wo;
+  std::string aa, al, dep, io, la, mo, no_, ra, wi, wo;
   mkn::kul::hash::set::String cmds, wop;
   mkn::kul::hash::map::S2S evs, jas, pks;
 
@@ -156,6 +156,13 @@ class AppVars : public Constants {
 
   std::string const& mods() const { return mo; }
   void mods(std::string const& mo) { this->mo = mo; }
+
+  // -i / -N: the root project profile's install directory and build directory name
+  std::string const& installOverride() const { return io; }
+  void installOverride(std::string const& io) { this->io = io; }
+
+  std::string const& nameOverride() const { return no_; }
+  void nameOverride(std::string const& no_) { this->no_ = no_; }
 
   std::string const& without() const { return wo; }
   void without(std::string const& wo) { this->wo = wo; }

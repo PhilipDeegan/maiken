@@ -116,6 +116,11 @@ static std::string const MKN_DEFS_MAIN =
 static std::string const MKN_DEFS_NODES =
     "   -n/--nodes [$n]        | Activate distributed compilation with $n "
     "nodes from chosen settings.yaml (-x)";
+static std::string const MKN_DEFS_INSTALL =
+    "   -i/--install $d        | Sets the install directory of the selected root project "
+    "profiles to $d, supercedes /install tag";
+static std::string const MKN_DEFS_NAME =
+    "   -N/--name $n           | Builds the root project profile in ./bin/$n instead of ./bin/$profile";
 static std::string const MKN_DEFS_OUT =
     "   -o/--out $o            | Sets output binary/library to name $o, "
     "supercedes /out tag";

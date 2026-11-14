@@ -121,6 +121,8 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   this->preSetupValidation();
   std::string buildD = mkn::kul::Dir::JOIN(STR_BIN, p);
   if (p.empty()) buildD = mkn::kul::Dir::JOIN(STR_BIN, STR_BUILD);
+  if (ro && AppVars::INSTANCE().nameOverride().size())  // -N
+    buildD = mkn::kul::Dir::JOIN(STR_BIN, AppVars::INSTANCE().nameOverride());
   this->bd = mkn::kul::Dir(project().dir().join(buildD));
   std::string profile(p);
 
@@ -321,6 +323,11 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   }
 
   profile = p.size() ? p : project().root()[STR_NAME].Scalar();
+  if (ro && AppVars::INSTANCE().installOverride().size()) {  // -i, supercedes the install tag
+    inst = mkn::kul::Dir(AppVars::INSTANCE().installOverride());
+    if (!inst && !inst.mk()) KEXIT(1, "-i/--install is not a valid directory: " + inst.path());
+    inst = mkn::kul::Dir(inst.real());
+  }
   c = 1;
   while (c) {
     c = 0;
