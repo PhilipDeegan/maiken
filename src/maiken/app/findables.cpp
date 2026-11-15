@@ -70,14 +70,22 @@ void maiken::Application::findables() {
   // as CMake's find_package hints, for key "hdf5": the directories in HDF5_INCLUDE_DIR and
   //  HDF5_LIBDIR (or HDF5_LIBRARY_DIR), then under HDF5_ROOT (include, lib, lib64), are tried
   //  before the settings' lines; each only where it holds the file
-  auto const env_dirs = [](std::string const& k, std::vector<std::string> const& dirs_vars,
-                           std::vector<std::string> const& under_root) {
+  // a variable from mkn's three sources, the first set: -E, this project's env, then the
+  //  process' (the shell's, and the settings' env, set into it)
+  auto const env = [&](std::string const& name) -> std::string {
+    if (auto const& cli = AppVars::INSTANCE().envVars(); cli.count(name)) return cli.at(name);
+    for (auto const& ev : this->envVars())
+      if (ev.name() == name) return ev.toString();
+    return mkn::kul::env::GET(name.c_str());
+  };
+  auto const env_dirs = [&](std::string const& k, std::vector<std::string> const& dirs_vars,
+                            std::vector<std::string> const& under_root) {
     std::string K;
     for (auto const c : k) K += std::isalnum(static_cast<unsigned char>(c)) ? std::toupper(c) : '_';
     std::vector<std::string> dirs;
     for (auto const& var : dirs_vars)
-      if (auto const dir = mkn::kul::env::GET((K + var).c_str()); dir.size()) dirs.push_back(dir);
-    if (auto const root = mkn::kul::env::GET((K + "_ROOT").c_str()); root.size())
+      if (auto const dir = env(K + var); dir.size()) dirs.push_back(dir);
+    if (auto const root = env(K + "_ROOT"); root.size())
       for (auto const& sub : under_root) dirs.push_back(mkn::kul::Dir::JOIN(root, sub));
     return dirs;
   };

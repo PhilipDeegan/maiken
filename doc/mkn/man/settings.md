@@ -48,7 +48,8 @@ find:                                   # Optional, per library name prefix (e.g
     lib: <directory> <directory>        # find_package hints, environment variables of the key
                                         # upper cased (non alphanumerics as _): HDF5_INCLUDE_DIR,
                                         # HDF5_LIBDIR or HDF5_LIBRARY_DIR, then HDF5_ROOT's include
-                                        # and lib, lib64
+                                        # and lib, lib64; each from -E, else the project's env,
+                                        # else the environment (the shell's, settings' env)
 
 compiler:
     mask:                               # To use a compiler binary with a name other than the default
