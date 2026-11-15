@@ -42,6 +42,14 @@ env:                                    # Optional, useful for compiler specific
     mode: prepend/append/replace        # Optional default prepend
     value: value
 
+find:                                   # Optional, per library name prefix (e.g. hdf5 for -lhdf5*):
+  hdf5:                                 # the first directory holding the header / library is added
+    inc: <directory> <directory>        # as an include / library path. Before these, as CMake's
+    lib: <directory> <directory>        # find_package hints, environment variables of the key
+                                        # upper cased (non alphanumerics as _): HDF5_INCLUDE_DIR,
+                                        # HDF5_LIBDIR or HDF5_LIBRARY_DIR, then HDF5_ROOT's include
+                                        # and lib, lib64
+
 compiler:
     mask:                               # To use a compiler binary with a name other than the default
         cl: $var_cl                     # masking is provided to alter the command line call
