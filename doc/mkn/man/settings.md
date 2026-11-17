@@ -16,6 +16,11 @@ property:
                                        # Dependency libraries are always linked
                                        # ("-l"/"-L") regardless of this setting - it
                                        # only controls whether they're also rpathed.
+    mkn.compile.visibility_hidden: false # Optional, default false. Compile with
+                                       # "-fvisibility=hidden" (nvcc: through
+                                       # -Xcompiler): symbols exported only where
+                                       # annotated, as python modules want. Project
+                                       # args after it may override it.
 
     mkn.env.automatic: true           # Optional, default true. Automatically prepend
                                        # dependency library directories onto PATH

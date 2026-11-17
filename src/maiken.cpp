@@ -65,6 +65,8 @@ maiken::Application::Application(maiken::Project const& proj, std::string const&
   m_cInfo.lib_ext = AppVars::INSTANCE().envVar("MKN_LIB_EXT");
   m_cInfo.obj_ext = AppVars::INSTANCE().envVar("MKN_OBJ");
   m_cInfo.rpathing = Settings::INSTANCE().propertyBool("mkn.link.rpathing");
+  m_cInfo.visibility_hidden =
+      Settings::INSTANCE().propertyBool("mkn.compile.visibility_hidden", false);
 }
 
 maiken::Application::~Application() {
