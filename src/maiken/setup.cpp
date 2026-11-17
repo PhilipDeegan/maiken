@@ -195,8 +195,8 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   {
     auto depLevel(AppVars::INSTANCE().dependencyLevel());
     for (auto* mod : modDeps) {
-      mod->ig = 0;
       mod->buildDepVec(AppVars::INSTANCE().dependencyString());
+      mod->ig = 0;  // "+" ignores the root project, never a module (it must be built to load)
     }
     AppVars::INSTANCE().dependencyLevel(depLevel);
   }
