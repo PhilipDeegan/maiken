@@ -417,8 +417,10 @@ class Applications : public Constants {
 // (command generation/introspection, e.g. clang-tidy) so both produce a
 // CompilationUnit/CompileDAO via the exact same resolution logic.
 std::vector<std::string> resolve_includes(Application const& app);
+// without: compiler flag parts left out, e.g. "lto", see mkn::kul::lang::Flags
 CompilationUnit build_compilation_unit(Application const& app, std::vector<std::string> const& incs,
-                                       std::pair<maiken::Source, std::string> const& pair)
+                                       std::pair<maiken::Source, std::string> const& pair,
+                                       std::vector<std::string> const& without = {})
     KTHROW(mkn::kul::Exception);
 
 std::vector<Source> tests_for(Application const& app);

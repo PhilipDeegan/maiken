@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/compiler.hpp"
 
 #include <string>
+#include <vector>
 
 namespace maiken {
 class Application;
@@ -49,6 +50,8 @@ class ApplicationContext : public Context, public CompilerState {
   CompilerState& compilerState() override { return *this; }
   void per_compiler_command(CompileHook hook) override;
   std::string compileCommandFor(std::string const& in) const override;
+  std::string compileCommandFor(std::string const& in,
+                                std::vector<std::string> const& without) const override;
 
   void add(AbstractCompilerInput const& input) override;
 
