@@ -111,3 +111,9 @@ std::string maiken::ApplicationContext::compileCommandFor(std::string const& in)
   auto const incs = resolve_includes(app);
   return build_compilation_unit(app, incs, {Source(in), "obj"}).compileString();
 }
+
+std::string maiken::ApplicationContext::compileCommandFor(
+    std::string const& in, std::vector<std::string> const& without) const {
+  auto const incs = resolve_includes(app);
+  return build_compilation_unit(app, incs, {Source(in), "obj"}, without).compileString();
+}

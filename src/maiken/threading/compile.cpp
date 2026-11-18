@@ -62,7 +62,8 @@ std::vector<std::string> resolve_includes(Application const& app) {
 }
 
 CompilationUnit build_compilation_unit(Application const& app, std::vector<std::string> const& incs,
-                                       std::pair<Source, std::string> const& p)
+                                       std::pair<Source, std::string> const& p,
+                                       std::vector<std::string> const& without)
     KTHROW(mkn::kul::Exception) {
   std::string const src(p.first.in), obj(p.second);
   std::string const& fileType = src.substr(src.rfind(".") + 1);
@@ -92,12 +93,13 @@ CompilationUnit build_compilation_unit(Application const& app, std::vector<std::
     compilerFlags((*AppVars::INSTANCE().jargs().find(fileType)).second);
   compilerFlags(AppVars::INSTANCE().args());
   auto const& av = AppVars::INSTANCE();
-  compilerFlags(Settings::INSTANCE()
-                    .flags(Settings::JOIN({comp->compilerDebugFlags(av.debug()),
-                                           comp->compilerOptimizationFlags(av.optimise()),
-                                           comp->compilerWarningFlags(av.warn())}),
-                           "compile")
-                    .str());
+  auto flags =
+      Settings::INSTANCE().flags(Settings::JOIN({comp->compilerDebugFlags(av.debug()),
+                                                 comp->compilerOptimizationFlags(av.optimise()),
+                                                 comp->compilerWarningFlags(av.warn())}),
+                                 "compile");
+  for (auto const& part : without) flags = flags.without(part);
+  compilerFlags(flags.str());
   compilerFlags(p.first.args);
   return CompilationUnit(app, comp, compiler, args, src, obj, app.mode(),
                          AppVars::INSTANCE().dryRun());
