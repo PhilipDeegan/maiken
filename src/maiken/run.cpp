@@ -90,30 +90,26 @@ class Runner : public Constants {
       }
     }
 
-    std::vector<std::pair<std::string, std::string> > envies;
-    for (auto const& v : a.requiredEnv()) {
-      KOUT(DBG) << v.name() << " : " << v.toString();
-      envies.push_back(std::make_pair(v.name(), std::string{v.value()}));
-    }
+    using Mode = mkn::kul::env::Var::Mode;
+    std::vector<mkn::kul::env::Var> vars = a.requiredEnv();
+    for (auto const& v : vars) KOUT(DBG) << v.name() << " : " << v.toString();
 
     if (mkn::kul::env::EXISTS("MKN_LD_PRELOAD"))
-      envies.emplace_back("LD_PRELOAD", mkn::kul::env::GET("MKN_LD_PRELOAD"));
+      vars.emplace_back("LD_PRELOAD", mkn::kul::env::GET("MKN_LD_PRELOAD"), Mode::PREP);
 
-    for (auto const& ev : envies) {
-      p->var(ev.first,
-             mkn::kul::env::Var(ev.first, ev.second, mkn::kul::env::Var::Mode::PREP).toString());
-    }
-    for (auto const& ev : AppVars::INSTANCE().envVars()) {
-      auto it = std::find_if(envies.begin(), envies.end(),
-                             [&ev](std::pair<std::string, std::string> const& element) {
-                               return element.first == ev.first;
-                             });
-      if (it == envies.end())
-        p->var(ev.first,
-               mkn::kul::env::Var(ev.first, ev.second, mkn::kul::env::Var::Mode::PREP).toString());
-    }
+    for (auto const& ev : AppVars::INSTANCE().envVars())
+      if (std::none_of(vars.begin(), vars.end(),
+                       [&ev](auto const& v) { return ev.first == v.name(); }))
+        vars.emplace_back(ev.first, ev.second, Mode::PREP);
+    for (auto const& v : a.envVars()) vars.push_back(v);
+
     KOUT(DBG) << (*p);
-    if (!AppVars::INSTANCE().dryRun()) p->set(a.envVars()).start();
+    if (!AppVars::INSTANCE().dryRun()) {
+      // runs are serial: the vars are set in maiken's own environment for the run, each applied
+      //  once in order, and the child inherits them
+      mkn::kul::env::PushEnv const pushed(vars);
+      p->start();
+    }
   }
 };
 }  // namespace maiken
