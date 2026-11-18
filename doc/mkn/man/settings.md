@@ -22,13 +22,14 @@ property:
                                        # annotated, as python modules want. Project
                                        # args after it may override it.
 
-    mkn.flags.lto: ""                 # Optional. Replaces a named part of the compiler's
-    mkn.compile.flags.optimise: -O2   #  flags for the -O/-g/-W levels:
-    mkn.link.flags.lto: ""            #  mkn.flags.<part> for compile and link,
-                                       #  mkn.compile.flags.<part> / mkn.link.flags.<part>
-                                       #  for one side, over mkn.flags.<part>. An empty
-                                       #  value drops the part, a part the levels don't
-                                       #  have is added. Parts: optimise, arch, lto,
+    mkn.flags.lto: ""                 # Optional. The compiler's default flags for the
+    mkn.compile.flags.optimise: -O2   #  chosen -O/-g/-W levels come in named parts,
+    mkn.link.flags.lto: ""            #  these replace one: mkn.flags.<part> for compile
+                                       #  and link, mkn.compile.flags.<part> /
+                                       #  mkn.link.flags.<part> for one side, over
+                                       #  mkn.flags.<part>. An empty value drops the part,
+                                       #  a name not among the defaults adds a new part.
+                                       #  Default parts: optimise, arch, lto,
                                        #  debug, warn - e.g. gcc/clang -O 9 is optimise
                                        #  "-O3 -funroll-loops", arch "-march=native
                                        #  -mtune=native" and lto "-flto=auto"/"-flto=thin"

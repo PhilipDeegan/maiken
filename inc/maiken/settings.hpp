@@ -90,7 +90,7 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   }
   // flags with their named parts replaced by properties: "mkn.flags.<part>" for compile and
   //  link, then "mkn.<stage>.flags.<part>" for stage "compile" or "link" only. An empty value
-  //  drops the part, a part flags don't have is appended.
+  //  drops the part, a name flags don't have adds a new part at the end.
   mkn::kul::lang::Flags flags(mkn::kul::lang::Flags flags, std::string const& stage) const {
     for (auto const& prefix : {std::string{"mkn.flags."}, "mkn." + stage + ".flags."})
       for (auto const& [key, value] : ps)
