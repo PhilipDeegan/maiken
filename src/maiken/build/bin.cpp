@@ -285,14 +285,17 @@ CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String con
     auto const& base(Compilers::INSTANCE().base(files().at(lang).at(STR_COMPILER)));
     if (cLnk.count(base)) linkEnd += " " + cLnk[base];
     auto* comp = Compilers::INSTANCE().get(base);
-    auto const& av = AppVars::INSTANCE();
-    auto const linkFlags =
-        Settings::INSTANCE()
-            .flags(Settings::JOIN({comp->linkerOptimizationLibFlags(av.optimise()),
-                                   comp->linkerDebugLibFlags(av.debug())}),
-                   "link")
-            .str();
-    if (!linkFlags.empty()) linker += " " + linkFlags;
+    // the archiver gets no compiler flags, a settings file's archiver: is used as is
+    if (m != compiler::Mode::STAT) {
+      auto const& av = AppVars::INSTANCE();
+      auto const linkFlags =
+          Settings::INSTANCE()
+              .flags(Settings::JOIN({comp->linkerOptimizationLibFlags(av.optimise()),
+                                     comp->linkerDebugLibFlags(av.debug())}),
+                     "link")
+              .str();
+      if (!linkFlags.empty()) linker += " " + linkFlags;
+    }
 
     std::vector<mkn::kul::Dir> starDirs;
     if (objects.size()) starDirs.emplace_back(objD);

@@ -32,7 +32,9 @@ property:
                                        #  debug, warn - e.g. gcc/clang -O 9 is optimise
                                        #  "-O3 -funroll-loops", arch "-march=native
                                        #  -mtune=native" and lto "-flto=auto"/"-flto=thin"
-                                       #  (linux) on both compile and link.
+                                       #  (linux) on both compile and link. A static
+                                       #  library's archiver gets none of these, its
+                                       #  file: archiver entry is used as given.
 
     mkn.env.automatic: true           # Optional, default true. Automatically prepend
                                        # dependency library directories onto PATH
