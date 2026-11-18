@@ -101,7 +101,7 @@ void maiken::dist::LinkRequest::do_response_for(mkn::ram::http::A1_1Request cons
   if (obj) obj = mkn::kul::File(std::string(b.file + ".new"));
   if (!sessions[session_id].binary_writer) {
     obj.rm();
-    sessions[session_id].binary_writer = std::make_unique<mkn::kul::io::BinaryWriter>(obj);
+    sessions[session_id].binary_writer = std::make_unique<mkn::kul::io::BinaryWriter>(obj.full());
   }
 
   mkn::kul::io::BinaryWriter& bw(*sessions[session_id].binary_writer.get());
@@ -132,7 +132,7 @@ void maiken::dist::DownloadRequest::do_response_for(mkn::ram::http::A1_1Request 
     if (!src_obj.empty()) {
       auto& pair = src_obj[0];
       mkn::kul::File bin(pair.second);
-      sessions[session_id].binary_reader = std::make_unique<mkn::kul::io::BinaryReader>(bin);
+      sessions[session_id].binary_reader = std::make_unique<mkn::kul::io::BinaryReader>(bin.full());
     }
   }
 

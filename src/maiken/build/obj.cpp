@@ -133,7 +133,7 @@ void maiken::Application::compile(std::vector<std::pair<maiken::Source, std::str
         if (!fw.bw) {
           mkn::kul::File obj(b.file);
           if (obj) obj = mkn::kul::File(std::string(b.file + ".new"));
-          fw.bw = std::make_unique<mkn::kul::io::BinaryWriter>(obj);
+          fw.bw = std::make_unique<mkn::kul::io::BinaryWriter>(obj.full());
         }
         fw.bw->write(b.c1, b.len);
       }
