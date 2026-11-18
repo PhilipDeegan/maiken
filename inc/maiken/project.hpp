@@ -71,7 +71,7 @@ class Projects;
 
 class MKN_KUL_PUBLISH Project : public mkn::kul::yaml::File, public Constants {
  public:
-  Project(mkn::kul::File const& f) : mkn::kul::yaml::File(f), m_dir(f.dir().real()) {}
+  Project(mkn::kul::File const& f) : mkn::kul::yaml::File(f.real()), m_dir(f.dir().real()) {}
   Project(Project const& p) : mkn::kul::yaml::File(p), m_dir(p.m_dir.real()) {}
   mkn::kul::Dir const& dir() const { return m_dir; }
   mkn::kul::yaml::Validator validator() const;

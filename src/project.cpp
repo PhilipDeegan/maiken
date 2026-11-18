@@ -172,7 +172,7 @@ mkn::kul::yaml::Validator maiken::Project::validator() const {
 
 void maiken::NewProject::write() {
   {
-    mkn::kul::io::Writer w(file());
+    mkn::kul::io::Writer w(file().full());
     w.write("\n", true);
     w.write("name: hello_world", true);
     w.write("#inc: ./inc\n#src: ./src", true);

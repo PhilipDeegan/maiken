@@ -172,7 +172,7 @@ std::optional<mkn::kul::File> find_mkn_file(mkn::kul::cli::Args const& args,
 }
 
 std::string get_first_line_of(mkn::kul::File const& yml) {
-  mkn::kul::io::Reader reader(yml);
+  mkn::kul::io::Reader reader(yml.full());
   char const* c = reader.readLine();
   return c ? c : "";
 }

@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 void maiken::Settings::write(mkn::kul::File const& file) KTHROW(mkn::kul::Exit) {
-  mkn::kul::io::Writer w(file);
+  mkn::kul::io::Writer w(file.full());
   w.write("\n", true);
 
   bool c = mkn::kul::env::WHICH("clang") || mkn::kul::env::WHICH("clang.exe");

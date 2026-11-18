@@ -65,7 +65,7 @@ void Application::link(mkn::kul::hash::set::String const& objects) KTHROW(mkn::k
     build.mk();
     mkn::kul::File ts("timestamp", build);
     if (ts) ts.rm();
-    mkn::kul::io::Writer(ts) << mkn::kul::Now::MILLIS();
+    mkn::kul::io::Writer(ts.full()) << mkn::kul::Now::MILLIS();
   }
   if (CommandStateMachine::INSTANCE().commands().count(STR_TEST) && !tests.empty())
     buildTest(objects);
@@ -111,7 +111,8 @@ bool Application::is_build_stale() {
   if (!d || !f) return true;
   size_t then = size_t{43200} * size_t{60} * size_t{1000};
   size_t now = mkn::kul::Now::MILLIS();
-  size_t timestamp = mkn::kul::String::UINT64(std::string(mkn::kul::io::Reader(f).readLine()));
+  size_t timestamp =
+      mkn::kul::String::UINT64(std::string(mkn::kul::io::Reader(f.full()).readLine()));
   if (now - then > timestamp) return true;
   return false;
 }

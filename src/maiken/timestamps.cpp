@@ -78,8 +78,8 @@ void maiken::Application::writeTimeStamps(mkn::kul::hash::set::String& objects,
       if (std::find(objects.begin(), objects.end(), f.escm()) == objects.end())
         objects.insert(f.escm());
 
-  mkn::kul::io::Writer srcW(srcStamps);
-  mkn::kul::io::Writer incW(incStamps);
+  mkn::kul::io::Writer srcW(srcStamps.full());
+  mkn::kul::io::Writer incW(incStamps.full());
   for (auto const& i : includeStamps) incW << i.first << " " << i.second << mkn::kul::os::EOL();
   for (auto const& src : cacheFiles)
     if (!(*compilers.find(src.name().substr(src.name().rfind(".") + 1))).second->sourceIsBin())
@@ -91,7 +91,7 @@ void maiken::Application::loadTimeStamps() KTHROW(mkn::kul::StringException) {
     mkn::kul::Dir mkn(buildDir().join(".mkn"));
     mkn::kul::File src("src_stamp", mkn);
     if (mkn && src) {
-      mkn::kul::io::Reader r(src);
+      mkn::kul::io::Reader r(src.full());
       char const* c = 0;
       while ((c = r.readLine())) {
         std::string s(c);
@@ -108,7 +108,7 @@ void maiken::Application::loadTimeStamps() KTHROW(mkn::kul::StringException) {
     }
     mkn::kul::File inc("inc_stamp", mkn);
     if (mkn && inc) {
-      mkn::kul::io::Reader r(inc);
+      mkn::kul::io::Reader r(inc.full());
       char const* c = 0;
       while ((c = r.readLine())) {
         std::string s(c);
