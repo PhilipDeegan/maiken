@@ -112,7 +112,7 @@ void maiken::Application::loadDepOrMod(YAML::Node const& node, mkn::kul::Dir con
 std::optional<std::string> get_cache_version(std::string const& name, std::string const& type) {
   auto const cacheDirName = std::string{".mkn/"} + type + "/ver";
   if (mkn::kul::File const verFile{name, cacheDirName})
-    return mkn::kul::io::Reader(verFile).readLine();
+    return mkn::kul::io::Reader(verFile.full()).readLine();
   return std::nullopt;
 }
 
@@ -122,7 +122,7 @@ void write_cache_version(std::string const& name, std::string const& version,
   mkn::kul::File const verFile{name, cacheDirName};
   if (verFile) return;
   verFile.dir().mk();
-  mkn::kul::io::Writer(verFile) << version;
+  mkn::kul::io::Writer(verFile.full()) << version;
 }
 
 mkn::kul::Dir maiken::Application::resolveDepOrModDirectory(YAML::Node const& n, bool module) {

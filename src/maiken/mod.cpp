@@ -144,8 +144,7 @@ void PreloadDependencies(maiken::Application const& ap) {
     auto const& real = *it;
     if (preloaded.count(real)) continue;
     try {
-      preloaded.insert(std::make_pair(
-          real, std::make_shared<mkn::kul::sys::SharedLibrary>(mkn::kul::File(real))));
+      preloaded.insert(std::make_pair(real, std::make_shared<mkn::kul::sys::SharedLibrary>(real)));
       KLOG(TRC) << "preloaded module dependency: " << real;
     } catch (mkn::kul::sys::Exception const& e) {
       KLOG(TRC) << "could not preload module dependency: " << real << " : " << e.what();

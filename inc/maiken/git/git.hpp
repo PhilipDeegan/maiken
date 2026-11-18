@@ -71,7 +71,7 @@ class Git {
     bool const module = cacheDirName == "mod";
     auto const name = repo_name(repo);
     mkn::kul::File const verFile{name, ".mkn/" + cacheDirName + "/ver"};
-    if (verFile) return mkn::kul::io::Reader(verFile).readLine();
+    if (verFile) return mkn::kul::io::Reader(verFile.full()).readLine();
 
     KOUT(NON) << "Attempting branch deduction resolution for: " << name;
     std::string version;
@@ -104,7 +104,7 @@ class Git {
       KOUT(NON) << "Resolved branch for: " << name << " -> " << version;
       verFile.rm();
       verFile.dir().mk();
-      mkn::kul::io::Writer(verFile) << version;
+      mkn::kul::io::Writer(verFile.full()) << version;
       return version;
     }
 

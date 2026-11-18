@@ -182,7 +182,7 @@ class DistLinker {
   static void send(mkn::kul::File const& bin) {
     std::vector<std::shared_ptr<maiken::dist::Post>> posts;
     auto post_lambda = [](dist::Host const& host, mkn::kul::File const& bin) {
-      mkn::kul::io::BinaryReader br(bin);
+      mkn::kul::io::BinaryReader br(bin.full());
       dist::Blob b;
       b.files_left = 1;
       b.file = bin.real();

@@ -91,7 +91,7 @@ class MKN_KUL_PUBLISH ModuleLoader : public mkn::mod::Loader {
 
  public:
   ModuleLoader(Application const& ap, mkn::kul::File const& f) KTHROW(mkn::kul::sys::Exception)
-      : mkn::mod::Loader(f), ap_(&ap) {}
+      : mkn::mod::Loader(f.full()), ap_(&ap) {}
   ~ModuleLoader() {
     if (loaded()) KERR << "WARNING: ModuleLoader not unloaded, possible memory leak";
   }
@@ -113,8 +113,8 @@ class GlobalModules {
   ~GlobalModules() { libs.clear(); }
   void load(Application& ap) KTHROW(mkn::kul::sys::Exception) {
     auto guard = prepareModuleLoad(ap);
-    auto lib = std::make_shared<mkn::kul::sys::SharedLibrary>(ModuleLoader::FIND(ap));
-    libs.insert(std::make_pair(lib->file().dir().real(), lib));
+    auto lib = std::make_shared<mkn::kul::sys::SharedLibrary>(ModuleLoader::FIND(ap).real());
+    libs.insert(std::make_pair(lib->path().parent_path().string(), lib));
   }
 };
 

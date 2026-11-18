@@ -165,11 +165,13 @@ class Executioner : public Constants {
 
         auto const eol = mkn::kul::os::EOL();
         std::string base = mkn::kul::File(cpc.file()).name();
-        mkn::kul::io::Writer(mkn::kul::File(base + ".txt", cmdLogDir)) << cpc.cmd() << eol;
+        mkn::kul::io::Writer(mkn::kul::File(base + ".txt", cmdLogDir).full()) << cpc.cmd() << eol;
         if (cpc.outs().size())
-          mkn::kul::io::Writer(mkn::kul::File(base + ".txt", outLogDir)) << cpc.outs() << eol;
+          mkn::kul::io::Writer(mkn::kul::File(base + ".txt", outLogDir).full())
+              << cpc.outs() << eol;
         if (cpc.errs().size())
-          mkn::kul::io::Writer(mkn::kul::File(base + ".txt", errLogDir)) << cpc.errs() << eol;
+          mkn::kul::io::Writer(mkn::kul::File(base + ".txt", errLogDir).full())
+              << cpc.errs() << eol;
       }
 
 #if defined(MKN_WITH_MKN_RAM) && defined(MKN_WITH_IO_CEREAL)
