@@ -111,6 +111,11 @@ jobs:
   finally:
     name: "Release"
     needs: [build, build_many_linux, build_many_linux_arm, build_arm_macos, build_arm_linux]
+    # macOS runners are sometimes cancelled before the build finishes: release the others, the
+    #  previous mkn_arm_osx stays on the release until a macOS build succeeds again
+    if: >-
+      always() && needs.build.result == 'success' && needs.build_many_linux.result == 'success'
+      && needs.build_many_linux_arm.result == 'success' && needs.build_arm_linux.result == 'success'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v5
