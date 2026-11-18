@@ -22,6 +22,23 @@ property:
                                        # annotated, as python modules want. Project
                                        # args after it may override it.
 
+    mkn.flags.lto: ""                 # Optional. The compiler's default flags for the
+    mkn.compile.flags.optimise: -O2   #  chosen -O/-g/-W levels come in named parts,
+    mkn.link.flags.lto: ""            #  these replace one: mkn.flags.<part> for compile
+                                       #  and link, mkn.compile.flags.<part> /
+                                       #  mkn.link.flags.<part> for one side, over
+                                       #  mkn.flags.<part>. An empty value drops the part,
+                                       #  a name not among the defaults adds a new part.
+                                       #  Which parts there are depends on the compiler
+                                       #  and level: at least optimise, debug and warn
+                                       #  where a level sets flags, some split further,
+                                       #  e.g. gcc/clang -O 9 is optimise "-O3
+                                       #  -funroll-loops", arch "-march=native
+                                       #  -mtune=native" and lto "-flto=auto"/"-flto=thin"
+                                       #  (linux) on both compile and link. A static
+                                       #  library's archiver gets none of these, its
+                                       #  file: archiver entry is used as given.
+
     mkn.env.automatic: true           # Optional, default true. Automatically prepend
                                        # dependency library directories onto PATH
                                        # (Windows) / LD_LIBRARY_PATH (nix) / also

@@ -28,6 +28,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "maiken/settings.hpp"
 #include "maiken/compiler/compilers.hpp"
 #include "maiken/app.hpp"
 #include "maiken/compiler.hpp"
@@ -90,9 +91,13 @@ CompilationUnit build_compilation_unit(Application const& app, std::vector<std::
   if (AppVars::INSTANCE().jargs().count(fileType) > 0)
     compilerFlags((*AppVars::INSTANCE().jargs().find(fileType)).second);
   compilerFlags(AppVars::INSTANCE().args());
-  compilerFlags(comp->compilerDebug(AppVars::INSTANCE().debug()));
-  compilerFlags(comp->compilerOptimization(AppVars::INSTANCE().optimise()));
-  compilerFlags(comp->compilerWarning(AppVars::INSTANCE().warn()));
+  auto const& av = AppVars::INSTANCE();
+  compilerFlags(Settings::INSTANCE()
+                    .flags(Settings::JOIN({comp->compilerDebugFlags(av.debug()),
+                                           comp->compilerOptimizationFlags(av.optimise()),
+                                           comp->compilerWarningFlags(av.warn())}),
+                           "compile")
+                    .str());
   compilerFlags(p.first.args);
   return CompilationUnit(app, comp, compiler, args, src, obj, app.mode(),
                          AppVars::INSTANCE().dryRun());
