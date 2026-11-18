@@ -4,5 +4,6 @@ super: settings
 file:
   - type: cpp:cxx:cc
     archiver: llvm-ar rcs
-    compiler: clang++ -std=c++20
+    # the image's MSVC STL can be newer than its clang expects (STL1000), until they match again
+    compiler: clang++ -std=c++20 -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH
     linker: clang++ -fuse-ld=lld
