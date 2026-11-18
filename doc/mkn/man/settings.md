@@ -29,9 +29,11 @@ property:
                                        #  mkn.link.flags.<part> for one side, over
                                        #  mkn.flags.<part>. An empty value drops the part,
                                        #  a name not among the defaults adds a new part.
-                                       #  Default parts: optimise, arch, lto,
-                                       #  debug, warn - e.g. gcc/clang -O 9 is optimise
-                                       #  "-O3 -funroll-loops", arch "-march=native
+                                       #  Which parts there are depends on the compiler
+                                       #  and level: at least optimise, debug and warn
+                                       #  where a level sets flags, some split further,
+                                       #  e.g. gcc/clang -O 9 is optimise "-O3
+                                       #  -funroll-loops", arch "-march=native
                                        #  -mtune=native" and lto "-flto=auto"/"-flto=thin"
                                        #  (linux) on both compile and link. A static
                                        #  library's archiver gets none of these, its
