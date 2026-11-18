@@ -25,7 +25,7 @@ for i in ${INCS[@]}; do INC+=" -I$i"; done
 CC=${CC:-cl}
 if [ "$CC" = "clang" ]; then
   YAML_LIB="libparse.yaml.a"
-  compile(){ clang++ -std=c++20 -DYAML_CPP_STATIC_DEFINE $INC -c -o "$1" "$2" || exit 1 ; }
+  compile(){ clang++ -std=c++20 -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH -DYAML_CPP_STATIC_DEFINE $INC -c -o "$1" "$2" || exit 1 ; }
   archive(){ llvm-ar rcs "$1" "$2"/*.o; }
   exe(){     clang++ -fuse-ld=lld -o "mkn.exe" bin/*.o "$YAML_LIB"; rm "$YAML_LIB"; }
 else
