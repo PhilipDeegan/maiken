@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "mkn/kul/dbg.hpp"
 #include "mkn/kul/io.hpp"
+#include "maiken/settings.hpp"
 #include "maiken/compiler/compilers.hpp"
 #include "mkn/kul/threads.hpp"
 #include "maiken/app.hpp"
@@ -137,10 +138,14 @@ class Executioner : public Constants {
       auto const& base(Compilers::INSTANCE().base(app.files().at(fileType).at(STR_COMPILER)));
       if (app.cLnk.count(base)) linkEnd += " " + app.cLnk[base];
       auto* comp = Compilers::INSTANCE().get(base);
-      auto linkOpt(comp->linkerOptimizationBin(AppVars::INSTANCE().optimise()));
-      if (!linkOpt.empty()) linker += " " + linkOpt;
-      auto linkDbg(comp->linkerDebugBin(AppVars::INSTANCE().debug()));
-      if (!linkDbg.empty()) linker += " " + linkDbg;
+      auto const& av = AppVars::INSTANCE();
+      auto const linkFlags =
+          Settings::INSTANCE()
+              .flags(Settings::JOIN({comp->linkerOptimizationBinFlags(av.optimise()),
+                                     comp->linkerDebugBinFlags(av.debug())}),
+                     "link")
+              .str();
+      if (!linkFlags.empty()) linker += " " + linkFlags;
 
       auto const libs = link_libraries(app, comp);
       LinkDAO dao{app.context(),      linker, linkEnd, bin, starDirs, obV, libs,
@@ -280,10 +285,14 @@ CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String con
     auto const& base(Compilers::INSTANCE().base(files().at(lang).at(STR_COMPILER)));
     if (cLnk.count(base)) linkEnd += " " + cLnk[base];
     auto* comp = Compilers::INSTANCE().get(base);
-    auto linkOpt(comp->linkerOptimizationLib(AppVars::INSTANCE().optimise()));
-    if (!linkOpt.empty()) linker += " " + linkOpt;
-    auto linkDbg(comp->linkerDebugLib(AppVars::INSTANCE().debug()));
-    if (!linkDbg.empty()) linker += " " + linkDbg;
+    auto const& av = AppVars::INSTANCE();
+    auto const linkFlags =
+        Settings::INSTANCE()
+            .flags(Settings::JOIN({comp->linkerOptimizationLibFlags(av.optimise()),
+                                   comp->linkerDebugLibFlags(av.debug())}),
+                   "link")
+            .str();
+    if (!linkFlags.empty()) linker += " " + linkFlags;
 
     std::vector<mkn::kul::Dir> starDirs;
     if (objects.size()) starDirs.emplace_back(objD);

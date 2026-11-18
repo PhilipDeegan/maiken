@@ -37,6 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/except.hpp"
 #include "maiken/defs.hpp"
 #include "mkn/kul/map.hpp"
+#include "mkn/kul/lang/compiler.hpp"
 #include "yaml-cpp/yaml.h"
 
 #include <cstdint>
@@ -44,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <optional>
 #include <functional>
+#include <initializer_list>
 #include <memory>
 #include <type_traits>
 #include <unordered_map>
@@ -85,6 +87,23 @@ class Settings : public mkn::kul::yaml::File, public Constants {
     auto const it = ps.find(key);
     if (it == ps.end()) return default_val;
     return it->second == "true" || it->second == "1";
+  }
+  // flags with their named parts replaced by properties: "mkn.flags.<part>" for compile and
+  //  link, then "mkn.<stage>.flags.<part>" for stage "compile" or "link" only. An empty value
+  //  drops the part, a part flags don't have is appended.
+  mkn::kul::lang::Flags flags(mkn::kul::lang::Flags flags, std::string const& stage) const {
+    for (auto const& prefix : {std::string{"mkn.flags."}, "mkn." + stage + ".flags."})
+      for (auto const& [key, value] : ps)
+        if (key.size() > prefix.size() && key.starts_with(prefix))
+          flags.set(key.substr(prefix.size()), value);
+    return flags;
+  }
+  // the parts of several flags in order, as one
+  static mkn::kul::lang::Flags JOIN(std::initializer_list<mkn::kul::lang::Flags> const all) {
+    mkn::kul::lang::Flags joined;
+    for (auto const& f : all)
+      for (auto const& p : f.parts()) joined.set(p.name, p.flags);
+    return joined;
   }
   Findables const& findables() const { return findables_; }
   std::optional<std::string> local_dep_repo() const;
