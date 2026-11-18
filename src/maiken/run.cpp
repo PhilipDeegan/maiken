@@ -93,7 +93,7 @@ class Runner : public Constants {
     std::vector<std::pair<std::string, std::string> > envies;
     for (auto const& v : a.requiredEnv()) {
       KOUT(DBG) << v.name() << " : " << v.toString();
-      envies.push_back(std::make_pair(v.name(), v.toString()));
+      envies.push_back(std::make_pair(v.name(), std::string{v.value()}));
     }
 
     if (mkn::kul::env::EXISTS("MKN_LD_PRELOAD"))
