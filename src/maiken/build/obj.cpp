@@ -74,7 +74,7 @@ class CompilerPrinter {
     }
 
     if (!AppVars::INSTANCE().dryRun() && mkn::kul::LogMan::INSTANCE().inf()) {
-      if (!app.arg.empty()) KOUT(NON) << "ARGUMENTS\n\t" << app.arg;
+      if (auto const a = app.compileArg(); !a.empty()) KOUT(NON) << "ARGUMENTS\n\t" << a;
       if (app.arguments().size()) {
         KOUT(NON) << "FILE ARGUMENTS";
         for (auto const& kv : app.arguments())

@@ -296,15 +296,16 @@ class MKN_KUL_PUBLISH Application : public Constants {
   void add_compile_arg(std::string const& arg) { compile_args.emplace_back(arg); }
   std::vector<std::string> const& compileArgs() const { return compile_args; }
 
-  std::string const& compileArg() const { return arg; }
-  mkn::kul::hash::map::S2S const& compilerArgs() const { return cArg; }
-  // pub_arg: compile arguments also given to every project depending on this one, as written: a
-  //  line, or an if_arg style value, with its option operands
+  // this project's compile arguments, then its dependencies' public ones (pub_arg)
+  std::string compileArg() const;
+  mkn::kul::hash::map::S2S compilerArgs() const;
+  // this project's own pub_arg units, as written: a line, or an if_arg style value with its option
+  //  operands. Its dependents read them through dependencies(), which DepGrapher makes every
+  //  application they depend on, directly or not, once
   std::vector<std::string> const& publicArgs() const { return pubArgs; }
   mkn::kul::hash::map::S2T<std::vector<std::string>> const& publicCompilerArgs() const {
     return cPubArgs;
   }
-  // a public argument unit, for this project and its dependents, once
   void addPublicArg(std::string const& unit) {
     if (std::find(pubArgs.begin(), pubArgs.end(), unit) != pubArgs.end()) return;
     pubArgs.emplace_back(unit);

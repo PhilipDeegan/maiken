@@ -183,13 +183,33 @@ void maiken::Application::populateMapsFromDependencies() KTHROW(mkn::kul::Except
       if (s.second && std::find(includes().begin(), includes().end(), s) == includes().end())
         incs.emplace_back(s.first, true);
 
-    // public arguments, passed on again like public includes, each unit once
-    for (auto const& unit : dep.publicArgs()) addPublicArg(unit);
-    for (auto const& [compiler, units] : dep.publicCompilerArgs())
-      for (auto const& unit : units) addPublicArg(compiler, unit);
-
     for (std::string const& s : dep.libraryPaths())
       if (std::find(libraryPaths().begin(), libraryPaths().end(), s) == libraryPaths().end())
         paths.push_back(s);
   }
+}
+
+std::string maiken::Application::compileArg() const {
+  std::string out = arg;
+  std::vector<std::string> units = pubArgs;
+  for (auto const* dep : dependencies())
+    for (auto const& unit : dep->publicArgs())
+      if (std::find(units.begin(), units.end(), unit) == units.end()) {
+        units.emplace_back(unit);
+        out += unit;
+      }
+  return out;
+}
+
+mkn::kul::hash::map::S2S maiken::Application::compilerArgs() const {
+  auto out = cArg;
+  auto units = cPubArgs;
+  for (auto const* dep : dependencies())
+    for (auto const& [compiler, dep_units] : dep->publicCompilerArgs())
+      for (auto const& unit : dep_units)
+        if (auto& seen = units[compiler]; std::find(seen.begin(), seen.end(), unit) == seen.end()) {
+          seen.emplace_back(unit);
+          out[compiler] += unit;
+        }
+  return out;
 }
