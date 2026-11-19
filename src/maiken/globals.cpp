@@ -84,6 +84,5 @@ void maiken::AppVars::POST_CONSTRUCT() {
   if (auto const& local_repo = settings.local_mod_repo())
     pks["MKN_MOD_REPO"] = *local_repo;
   else
-    pks["MKN_MOD_REPO"] =
-        (mkn::kul::user::home(STR_MAIKEN) / STR_MOD_REPO).string();
+    pks["MKN_MOD_REPO"] = (mkn::kul::user::home(STR_MAIKEN) / STR_MOD_REPO).string();
 }
