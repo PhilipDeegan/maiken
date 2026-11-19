@@ -1,0 +1,5 @@
+file:
+- type: c
+  archiver: ar -cr
+  compiler: gcc
+  linker: gcc
