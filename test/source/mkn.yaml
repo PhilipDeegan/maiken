@@ -1,0 +1,19 @@
+# sources without a compiler in the settings file list, see test/run.py
+name: source
+
+profile:
+- name: dir
+  lang: c
+  src: dir
+
+- name: named
+  lang: c
+  src: dir/two.c named.S
+
+- name: headers
+  lang: c
+  src: headers
+
+- name: objc
+  lang: c
+  src: objc
