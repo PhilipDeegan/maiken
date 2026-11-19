@@ -298,6 +298,9 @@ class MKN_KUL_PUBLISH Application : public Constants {
 
   std::string const& compileArg() const { return arg; }
   mkn::kul::hash::map::S2S const& compilerArgs() const { return cArg; }
+  // pub_arg: compile arguments also given to every project depending on this one
+  std::string const& publicArg() const { return pubArg; }
+  mkn::kul::hash::map::S2S const& publicCompilerArgs() const { return cPubArg; }
 
   void addInclude(std::string const& s, bool const is_public = 1) {
     auto it = std::find_if(
@@ -360,14 +363,14 @@ class MKN_KUL_PUBLISH Application : public Constants {
   Application const* par = nullptr;
   Application* sup = nullptr;
   compiler::Mode m{compiler::Mode::SHAR};
-  std::string arg, bin, lang, lnk, out, scr, scv;
+  std::string arg, bin, lang, lnk, out, pubArg, scr, scv;
   std::optional<Source> main_;
   std::string const p;
   mkn::kul::Dir bd, inst;
   std::unordered_map<This const*, YAML::Node> modIArgs, modCArgs, modLArgs, modTArgs, modPArgs;
   maiken::Project const& proj;
   mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2S> fs;
-  mkn::kul::hash::map::S2S cArg, cLnk, includeStamps, itss, ps, tests;
+  mkn::kul::hash::map::S2S cArg, cLnk, cPubArg, includeStamps, itss, ps, tests;
   mkn::kul::hash::map::S2T<mkn::kul::hash::set::String> args;
   mkn::kul::hash::map::S2T<uint64_t> stss;
   std::vector<Application*> deps, modDeps, rdeps;

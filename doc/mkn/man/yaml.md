@@ -51,6 +51,9 @@ with:
 main: <file>
 arg: -DTHIS_PROFILE ${aaa}          # Optional additional compiler arguments
 link: ${aaa}                        # Optional additional linker arguments, applied to end
+pub_arg: -DTHIS_PROFILE             # Optional compiler arguments for this project and every project
+                                    #  depending on it, passed on as public includes are. A map is
+                                    #  keyed as if_arg, e.g. "win_static: -DYAML_CPP_STATIC_DEFINE"
 if_arg:                             # optional arguments if case is true
     shared: ${aaa}                  # Add arguments to compilation if mode is shared
     static: ${aaa}                  # Add arguments to compilation if mode is static

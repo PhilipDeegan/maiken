@@ -378,6 +378,17 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
       };
 
       ifArgOrLnk(n, STR_IF_ARG, arg, cArg);
+      if (n[STR_PUB_ARG] && n[STR_PUB_ARG].IsMap()) {  // keyed as if_arg
+        std::string pub;
+        mkn::kul::hash::map::S2S cPub;
+        ifArgOrLnk(n, STR_PUB_ARG, pub, cPub);
+        arg += pub;
+        pubArg += pub;
+        for (auto const& [k, v] : cPub) {
+          cArg[k] += v;
+          cPubArg[k] += v;
+        }
+      }
       ifArgOrLnk(n, STR_IF_LNK, lnk, cLnk);
 
       auto if_inc_src = [&](auto const& node, auto str, auto fn) {

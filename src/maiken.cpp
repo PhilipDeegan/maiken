@@ -139,6 +139,12 @@ void maiken::Application::populateMaps(YAML::Node const& n) KTHROW(mkn::kul::Exc
   if (n[STR_ARG])
     for (auto const& o : mkn::kul::String::LINES(n[STR_ARG].Scalar()))
       arg += Properties::RESOLVE(*this, o) + " ";
+  if (n[STR_PUB_ARG] && n[STR_PUB_ARG].IsScalar())  // a map is if_arg's form, see setup()
+    for (auto const& o : mkn::kul::String::LINES(n[STR_PUB_ARG].Scalar())) {
+      auto const a = Properties::RESOLVE(*this, o) + " ";
+      arg += a;
+      pubArg += a;
+    }
   if (n[STR_LINK])
     for (auto const& o : mkn::kul::String::LINES(n[STR_LINK].Scalar()))
       lnk += Properties::RESOLVE(*this, o) + " ";
