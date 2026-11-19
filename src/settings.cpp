@@ -92,18 +92,18 @@ std::optional<std::string> maiken::Settings::local_mod_repo() const {
   return std::nullopt;
 }
 
-maiken::Settings::Settings(std::string const& file_) : mkn::kul::yaml::File(file_) {
-  KLOG(TRC) << file_;
+maiken::Settings::Settings(std::filesystem::path const& file_) : mkn::kul::yaml::File(file_) {
+  KLOG(TRC) << file_.string();
 
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_REPO]) {
     mkn::kul::Dir d(root()[STR_LOCAL][STR_REPO].Scalar());
     if (!d.is() && !d.mk())
-      KEXCEPT(SettingsException, file_, " error: local/repo is not a valid directory");
+      KEXCEPT(SettingsException, file_.string(), " error: local/repo is not a valid directory");
   }
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_MOD_REPO]) {
     mkn::kul::Dir d(root()[STR_LOCAL][STR_MOD_REPO].Scalar());
     if (!d.is() && !d.mk())
-      KEXCEPT(SettingsException, file_, " error: local/mod-repo is not a valid directory");
+      KEXCEPT(SettingsException, file_.string(), " error: local/mod-repo is not a valid directory");
   }
   if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_REPO])
     for (auto const& s : mkn::kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
@@ -166,7 +166,7 @@ mkn::kul::File maiken::Settings::RESOLVE(std::string const& s, Settings const* s
     KTHROW(SettingsException) {
   using File_t = mkn::kul::File;
 
-  mkn::kul::Dir const cwd{mkn::kul::env::CWD()};
+  mkn::kul::Dir const cwd{mkn::kul::env::CWD()}, home{mkn::kul::user::home("maiken").string()};
   auto file = [&]() -> std::optional<File_t> {
     bool const is_abs =
         !s.empty() && (s.compare(0, mkn::kul::Dir::SEP().size(), mkn::kul::Dir::SEP()) == 0 ||
@@ -178,8 +178,7 @@ mkn::kul::File maiken::Settings::RESOLVE(std::string const& s, Settings const* s
       return std::nullopt;
     }
     auto const dirs =
-        settings ? std::vector{cwd, File_t{settings->file()}.dir(), mkn::kul::user::home("maiken")}
-                 : std::vector{cwd, mkn::kul::user::home("maiken")};
+        settings ? std::vector{cwd, File_t{settings->file()}.dir(), home} : std::vector{cwd, home};
     for (auto const& dir : dirs) {
       if (auto f = File_t{s, dir}; f) return f;
       for (auto const& suffix : {".yml", ".yaml"})
