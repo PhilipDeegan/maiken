@@ -153,7 +153,6 @@ maiken::Application::sourceMap() const {
       std::vector<std::string> unbuilt;
       for (auto& file : mkn::kul::fsys::files(in, {.recursive = sourceDir.second})) {
         if (file.filename().string()[0] == '.') continue;
-        if (iMs.count(mkn::kul::fsys::real(file))) continue;  // another profile's main
         auto const ft = extension(file);
         if (fs.count(ft)) {
           files.emplace_back(std::move(file));

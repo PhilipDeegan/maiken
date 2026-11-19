@@ -22,13 +22,6 @@ profile:
   lang: c
   src: csharp
 
-- name: mains
-  lang: c
-  src: mains
-
-- name: other
-  main: mains/other.S
-
 - name: fortran
   lang: c
   src: fortran

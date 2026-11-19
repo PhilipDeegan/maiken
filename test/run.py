@@ -46,8 +46,6 @@ CASES = [
     source("headers", "c.yaml", ok=True, has=["two.c"], lacks=["README"]),
     # C# is a known source type, csc builds it
     source("csharp", "c.yaml", ok=False, has=["Unable to handle sources in", "app.cs"]),
-    # another profile's main in a scanned directory is not this profile's source
-    source("mains", "c.yaml", ok=True, has=["two.c"], lacks=["other.S"]),
     # Fortran's upper case suffixes are known source types too
     source("fortran", "c.yaml", ok=False, has=["Unable to handle sources in", "kernel.F08"]),
     # Objective-C is a known source type only on Apple
