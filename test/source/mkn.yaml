@@ -17,3 +17,7 @@ profile:
 - name: objc
   lang: c
   src: objc
+
+- name: csharp
+  lang: c
+  src: csharp

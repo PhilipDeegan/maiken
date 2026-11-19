@@ -44,6 +44,8 @@ CASES = [
     source("named", "c_S.yaml", ok=True, has=["named.S", "two.c"]),
     # files of no source type are skipped
     source("headers", "c.yaml", ok=True, has=["two.c"], lacks=["README"]),
+    # C# is a known source type, csc builds it
+    source("csharp", "c.yaml", ok=False, has=["Unable to handle sources in", "app.cs"]),
     # Objective-C is a known source type only on Apple
     source("objc", "c.yaml", ok=not APPLE, has=["apple.m"] if APPLE else ["two.c"]),
 ]

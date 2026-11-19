@@ -111,10 +111,10 @@ namespace {
 // extensions a compiler builds, a src: directory's file of one without a compiler is an error.
 //  Objective-C only on Apple, elsewhere its files are another platform's, as in glfw's src
 constexpr std::string_view KNOWN_SOURCE_TYPES[]{
-    "c",   "C",  "cc",  "cp",  "cpp", "cxx", "c++", "s",   "S", "sx",  "asm", "cu",
-    "hip", "f",  "for", "f77", "f90", "f95", "f03", "f08", "F", "F90", "F95", "ispc",
+    "c", "C",   "cc",  "cp",  "cpp", "cxx", "c++", "s", "S",   "sx",  "asm",  "cu", "hip",
+    "f", "for", "f77", "f90", "f95", "f03", "f08", "F", "F90", "F95", "ispc", "cs",
 #if defined(__APPLE__)
-    "m",   "mm",
+    "m", "mm",
 #endif
 };
 
