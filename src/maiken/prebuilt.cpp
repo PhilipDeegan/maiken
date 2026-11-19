@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -142,90 +143,111 @@ std::string sha256(std::filesystem::path const& file) {
 
 }  // namespace
 
-void maiken::Application::fetchPrebuilt(std::string const& tag) {
-  std::string const mode = m == compiler::Mode::STAT   ? "static"
-                           : m == compiler::Mode::SHAR ? "shared"
-                                                       : "";
-  if (mode.empty()) throw Unusable("no prebuilt binaries without a static or shared mode");
-  auto const key = AppVars::INSTANCE().properkeys().at("mkn.bin.key") + ";mode=" + mode;
+namespace {
 
-  auto const dir = mkn::kul::fsys::escaped_real(project().dir().path());
+using Path = std::filesystem::path;
+
+std::string mode_name(maiken::compiler::Mode const m) {
+  if (m == maiken::compiler::Mode::STAT) return "static";
+  if (m == maiken::compiler::Mode::SHAR) return "shared";
+  throw Unusable("no prebuilt binaries without a static or shared mode");
+}
+
+// the clone's commit and its GitHub release URL for tag, a clone with local changes can't be used
+std::pair<std::string, std::string> clone_release(std::string const& dir, std::string const& tag) {
   if (!capture("git", {"-C", dir, "status", "--porcelain", "--untracked-files=no"}).empty())
     throw Unusable("local changes in " + dir);
   auto const commit = capture("git", {"-C", dir, "rev-parse", "HEAD"});
-  auto const url = github(capture("git", {"-C", dir, "remote", "get-url", "origin"})) +
-                   "/releases/download/" + tag + "/";
+  auto const url = github(capture("git", {"-C", dir, "remote", "get-url", "origin"}));
+  return {commit, url + "/releases/download/" + tag + "/"};
+}
 
-  std::filesystem::path const out = buildDir().path();
-  auto const marker = out / ".mkn.prebuilt";
-  auto const stamp = tag + " " + commit + " " + key;
-  auto const name = project().root()[STR_NAME].Scalar();
-  // the marker: the stamp, then each installed file, all present for it to count
-  if (std::ifstream m(marker); m) {
-    std::string s, f;
-    std::getline(m, s);
-    bool in_place = s == stamp, any = false;
-    while (in_place && std::getline(m, f)) {
-      any = true;
-      in_place = std::filesystem::exists(out / f);
-    }
-    if (in_place && any) {
-      KOUT(NON) << name << ": prebuilt " << tag << " (" << key << ")";
-      return;
-    }
+// the marker: the stamp, then each installed file, all present for it to count
+bool in_place(Path const& out, Path const& marker, std::string const& stamp) {
+  std::ifstream m(marker);
+  std::string s, f;
+  if (!m || !std::getline(m, s) || s != stamp) return false;
+  bool any = false;
+  while (std::getline(m, f)) {
+    if (!std::filesystem::exists(out / f)) return false;
+    any = true;
   }
+  return any;
+}
 
-  if (AppVars::INSTANCE().dryRun()) {
-    KOUT(NON) << name << ": prebuilt " << url << " (" << key << ")";
-    return;
-  }
-
-  std::filesystem::create_directories(out);
+// key's files in the release's manifest, which must be built from commit
+YAML::Node manifest_files(Path const& out, std::string const& url, std::string const& tag,
+                          std::string const& commit, std::string const& key) {
   auto const manifest = out / "mkn.manifest.yml";
   download(url + "mkn.manifest.yml", manifest);
   YAML::Node const mf = YAML::LoadFile(manifest.string());
-  if (mf["commit"].as<std::string>() != commit)
+  auto const built = mf["commit"].as<std::string>();
+  if (built != commit)
     throw Unusable("clone at " + commit.substr(0, 7) + ", " + tag + " built from " +
-                   mf["commit"].as<std::string>().substr(0, 7));
-  auto const entry = mf["bins"][key];
-  if (!entry) throw Unusable(tag + " has no binary for " + key);
-  auto const files = entry["files"];
+                   built.substr(0, 7));
+  auto const bins = mf["bins"];
+  if (!bins || !bins[key]) throw Unusable(tag + " has no binary for " + key);
+  auto const files = bins[key]["files"];
   if (!files || !files.IsSequence() || files.size() == 0) throw Unusable(tag + " lists no files");
+  return files;
+}
 
-  // each file downloaded and checked beside its final name, only then put in place: a failure
-  //  never touches what is there, e.g. a library built from source
-  auto const pre = AppVars::INSTANCE().envVar("MKN_LIB_PRE");
-  std::vector<std::pair<std::filesystem::path, std::filesystem::path>> checked;  // .part, final
-  auto const discard = [&]() {
+// each file downloaded and checked beside its final name, stem + its extension: a failure
+//  removes those downloads and never touches what is there, e.g. a library built from source
+std::vector<std::pair<Path, Path>> download_checked(YAML::Node const& files, std::string const& url,
+                                                    Path const& out, std::string const& stem) {
+  std::vector<std::pair<Path, Path>> checked;  // .part, final
+  try {
+    for (auto const& f : files) {
+      auto const file = f["file"].as<std::string>();
+      auto const ext = Path(file).extension().string();
+      if (ext != ".a" && ext != ".so" && ext != ".dylib" && ext != ".lib" && ext != ".dll")
+        throw Unusable(file + " is not a library mkn names");
+      auto const to = out / (stem + ext);
+      checked.emplace_back(Path(to.string() + ".part"), to);
+      download(url + file, checked.back().first);
+      if (sha256(checked.back().first) != f["sha256"].as<std::string>())
+        throw Unusable(file + " does not match its sha256");
+    }
+  } catch (...) {
     for (auto const& [part, to] : checked) std::filesystem::remove(part);
-  };
-  for (auto const& f : files) {
-    auto const file = f["file"].as<std::string>();
-    auto const ext = std::filesystem::path(file).extension().string();
-    if (ext != ".a" && ext != ".so" && ext != ".dylib" && ext != ".lib" && ext != ".dll") {
-      discard();
-      throw Unusable(file + " is not a library mkn names");
-    }
-    auto const to = out / (pre + baseLibFilename() + ext);  // where building would put it
-    auto const part = std::filesystem::path(to.string() + ".part");
-    checked.emplace_back(part, to);
-    try {
-      download(url + file, part);
-    } catch (...) {
-      discard();
-      throw;
-    }
-    if (sha256(part) != f["sha256"].as<std::string>()) {
-      discard();
-      throw Unusable(file + " does not match its sha256");
-    }
+    throw;
   }
+  return checked;
+}
+
+// the checked files in place, the marker rewritten for them
+void put_in_place(std::vector<std::pair<Path, Path>> const& checked, Path const& marker,
+                  std::string const& stamp) {
   std::filesystem::remove(marker);  // no marker while files are replaced
   std::ofstream m(marker);
   m << stamp << "\n";
   for (auto const& [part, to] : checked) {
     std::filesystem::rename(part, to);
     m << to.filename().string() << "\n";
+  }
+}
+
+}  // namespace
+
+void maiken::Application::fetchPrebuilt(std::string const& tag) {
+  auto const key = AppVars::INSTANCE().properkeys().at("mkn.bin.key") + ";mode=" + mode_name(m);
+  auto const [commit, url] =
+      clone_release(mkn::kul::fsys::escaped_real(project().dir().path()), tag);
+  Path const out = buildDir().path();
+  auto const marker = out / ".mkn.prebuilt";
+  auto const stamp = tag + " " + commit + " " + key;
+  auto const name = project().root()[STR_NAME].Scalar();
+
+  if (!in_place(out, marker, stamp)) {
+    if (AppVars::INSTANCE().dryRun()) {
+      KOUT(NON) << name << ": prebuilt " << url << " (" << key << ")";
+      return;
+    }
+    std::filesystem::create_directories(out);
+    auto const files = manifest_files(out, url, tag, commit, key);
+    auto const stem = AppVars::INSTANCE().envVar("MKN_LIB_PRE") + baseLibFilename();
+    put_in_place(download_checked(files, url, out, stem), marker, stamp);
   }
   KOUT(NON) << name << ": prebuilt " << tag << " (" << key << ")";
 }
