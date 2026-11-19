@@ -298,9 +298,24 @@ class MKN_KUL_PUBLISH Application : public Constants {
 
   std::string const& compileArg() const { return arg; }
   mkn::kul::hash::map::S2S const& compilerArgs() const { return cArg; }
-  // pub_arg: compile arguments also given to every project depending on this one
-  std::string const& publicArg() const { return pubArg; }
-  mkn::kul::hash::map::S2S const& publicCompilerArgs() const { return cPubArg; }
+  // pub_arg: compile arguments also given to every project depending on this one, as written: a
+  //  line, or an if_arg style value, with its option operands
+  std::vector<std::string> const& publicArgs() const { return pubArgs; }
+  mkn::kul::hash::map::S2T<std::vector<std::string>> const& publicCompilerArgs() const {
+    return cPubArgs;
+  }
+  // a public argument unit, for this project and its dependents, once
+  void addPublicArg(std::string const& unit) {
+    if (std::find(pubArgs.begin(), pubArgs.end(), unit) != pubArgs.end()) return;
+    pubArgs.emplace_back(unit);
+    arg += unit;
+  }
+  void addPublicArg(std::string const& compiler, std::string const& unit) {
+    auto& units = cPubArgs[compiler];
+    if (std::find(units.begin(), units.end(), unit) != units.end()) return;
+    units.emplace_back(unit);
+    cArg[compiler] += unit;
+  }
 
   void addInclude(std::string const& s, bool const is_public = 1) {
     auto it = std::find_if(
@@ -363,14 +378,16 @@ class MKN_KUL_PUBLISH Application : public Constants {
   Application const* par = nullptr;
   Application* sup = nullptr;
   compiler::Mode m{compiler::Mode::SHAR};
-  std::string arg, bin, lang, lnk, out, pubArg, scr, scv;
+  std::string arg, bin, lang, lnk, out, scr, scv;
   std::optional<Source> main_;
   std::string const p;
   mkn::kul::Dir bd, inst;
   std::unordered_map<This const*, YAML::Node> modIArgs, modCArgs, modLArgs, modTArgs, modPArgs;
   maiken::Project const& proj;
   mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2S> fs;
-  mkn::kul::hash::map::S2S cArg, cLnk, cPubArg, includeStamps, itss, ps, tests;
+  mkn::kul::hash::map::S2S cArg, cLnk, includeStamps, itss, ps, tests;
+  std::vector<std::string> pubArgs;
+  mkn::kul::hash::map::S2T<std::vector<std::string>> cPubArgs;
   mkn::kul::hash::map::S2T<mkn::kul::hash::set::String> args;
   mkn::kul::hash::map::S2T<uint64_t> stss;
   std::vector<Application*> deps, modDeps, rdeps;

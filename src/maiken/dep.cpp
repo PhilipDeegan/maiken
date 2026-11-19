@@ -183,14 +183,10 @@ void maiken::Application::populateMapsFromDependencies() KTHROW(mkn::kul::Except
       if (s.second && std::find(includes().begin(), includes().end(), s) == includes().end())
         incs.emplace_back(s.first, true);
 
-    // public arguments, passed on again like public includes
-    auto const add_public = [](std::string& to, std::string& pub, std::string const& from) {
-      if (from.empty() || pub.find(from) != std::string::npos) return;
-      to += from;
-      pub += from;
-    };
-    add_public(arg, pubArg, dep.publicArg());
-    for (auto const& [k, v] : dep.publicCompilerArgs()) add_public(cArg[k], cPubArg[k], v);
+    // public arguments, passed on again like public includes, each unit once
+    for (auto const& unit : dep.publicArgs()) addPublicArg(unit);
+    for (auto const& [compiler, units] : dep.publicCompilerArgs())
+      for (auto const& unit : units) addPublicArg(compiler, unit);
 
     for (std::string const& s : dep.libraryPaths())
       if (std::find(libraryPaths().begin(), libraryPaths().end(), s) == libraryPaths().end())

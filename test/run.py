@@ -29,16 +29,17 @@ def source(profile, settings, ok, has=(), lacks=()):
     )
 
 
-def pub(project, args=(), ok=True, has=(), lacks=()):
+def pub(project, args=(), ok=True, has=(), lacks=(), once=()):
     """test/pub_arg: pub_arg compile arguments of a project and its dependents"""
     return dict(
         name=f"pub_arg {project} {' '.join(args)}".rstrip(),
         cwd=os.path.join(TEST, "pub_arg", project),
         args=["build", "-R", *args, "-x", os.path.join(TEST, "pub_arg", "settings.yaml")],
         ok=ok,
-        # defines end with a space on the command line: -DBASE_STATIC is not -DBASE_STATIC_X
-        has=[f"-D{d} " for d in has] if ok else has,
-        lacks=[f"-D{d} " for d in lacks],
+        # whole arguments: -DBASE_PUB is neither -DBASE_PUB_X nor in -DWRAPPED=-DBASE_PUB
+        has=[f" -D{d} " for d in has] if ok else has,
+        lacks=[f" -D{d} " for d in lacks],
+        once=[f" -D{d} " for d in once],
     )
 
 
@@ -71,6 +72,8 @@ CASES = [
     pub("mid", has=BASE_STATIC + ["MID_PRIVATE", "MID_PUB"]),
     # passed on again: app depends on mid only
     pub("app", ["-p", "mid"], has=BASE_STATIC + ["MID_PUB"], lacks=["MID_PRIVATE"]),
+    # two paths to base: its arguments once, a different argument containing one kept
+    pub("app", ["-p", "diamond"], has=["MID_PUB", "WRAPPED=-DBASE_PUB"], once=BASE_STATIC),
     # an explicit mode: is not changed by -K
     pub("app", ["-p", "shared"], has=["BASE_PUB", "BASE_SHARED"], lacks=["BASE_NOT_STATIC"]),
     pub("app", ["-p", "shared", "-K"], has=["BASE_PUB", "BASE_SHARED"], lacks=["BASE_NOT_STATIC"]),
@@ -96,6 +99,7 @@ def run(mkn, case):
         errors.append(f"exit {result.returncode}, expected {'0' if case['ok'] else 'failure'}")
     errors += [f"missing '{s}'" for s in case["has"] if s not in out]
     errors += [f"unexpected '{s}'" for s in case["lacks"] if s in out]
+    errors += [f"'{s}' {out.count(s)} times" for s in case.get("once", ()) if out.count(s) != 1]
     return errors, out
 
 
