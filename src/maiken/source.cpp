@@ -111,10 +111,11 @@ namespace {
 // extensions a compiler builds, a src: directory's file of one without a compiler is an error.
 //  Objective-C only on Apple, elsewhere its files are another platform's, as in glfw's src
 constexpr std::string_view KNOWN_SOURCE_TYPES[]{
-    "c", "C",   "cc",  "cp",  "cpp", "cxx", "c++", "s", "S",   "sx",  "asm",  "cu", "hip",
-    "f", "for", "f77", "f90", "f95", "f03", "f08", "F", "F90", "F95", "ispc", "cs",
+    "c",   "C",    "cc", "cp",  "cpp", "cxx", "c++", "s",   "S",   "sx",  "asm",
+    "cu",  "hip",  "f",  "for", "f77", "f90", "f95", "f03", "f08", "F",   "F90",
+    "F95", "ispc", "cs", "F03", "F08", "FOR", "FTN", "FPP", "fpp", "ftn",
 #if defined(__APPLE__)
-    "m", "mm",
+    "m",   "mm",
 #endif
 };
 
@@ -152,6 +153,7 @@ maiken::Application::sourceMap() const {
       std::vector<std::string> unbuilt;
       for (auto& file : mkn::kul::fsys::files(in, {.recursive = sourceDir.second})) {
         if (file.filename().string()[0] == '.') continue;
+        if (iMs.count(mkn::kul::fsys::real(file))) continue;  // another profile's main
         auto const ft = extension(file);
         if (fs.count(ft)) {
           files.emplace_back(std::move(file));
