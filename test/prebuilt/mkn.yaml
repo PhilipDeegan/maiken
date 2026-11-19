@@ -1,0 +1,7 @@
+# a prebuilt dependency, see res/ci/build.py prebuilt() and res/mkn/bin*.yml
+name: prebuilt
+main: main.cpp
+dep:
+- name: parse.yaml
+  version: 0.8.0-beta.1
+  profile: static

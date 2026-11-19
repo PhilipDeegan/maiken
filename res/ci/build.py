@@ -65,6 +65,28 @@ def behaviour(mkn_bin):
         sys.exit(1)
 
 
+def prebuilt(mkn_bin, settings, args):
+    """test/prebuilt: parse.yaml from its 0.8.0-beta.1 release binaries, res/mkn/<settings>.yml"""
+    cwd = os.path.join(ROOT, "test", "prebuilt")
+    xs = os.path.join(ROOT, "res", "mkn", settings).replace("\\", "/")
+    cmd = [mkn_bin, "build", "run", "-d", "-x", xs, "-a", args]
+    print(f"+ [{cwd}] {' '.join(cmd)}", flush=True)
+    result = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    print(result.stdout, flush=True)
+    errors = []
+    if result.returncode != 0:
+        errors.append(f"exit {result.returncode}")
+    for expected in ("parse.yaml: prebuilt 0.8.0-beta.1", "parsed 3"):
+        if expected not in result.stdout:
+            errors.append(f"missing '{expected}'")
+    if "p/src/" in result.stdout.replace("\\", "/"):
+        errors.append("yaml-cpp sources were compiled")
+    if errors:
+        print(f"FAILED prebuilt: {', '.join(errors)}", file=sys.stderr)
+        sys.exit(1)
+    print("PASS prebuilt", flush=True)
+
+
 def nix_test(std_args, env, full):
     """ubuntu_gcc / ubuntu_clang / manylinux_gcc."""
     a = f'-a "{std_args}"'
@@ -72,6 +94,7 @@ def nix_test(std_args, env, full):
     run(BOOTSTRAP, f"build -dtp test_mod {a} -O 2 -g 0 -W 9", env=env)
     run(built("build"), f"build test pack -tp test {a} -O 2 -g 0 -W 9", env=env)
     behaviour(built("build"))
+    prebuilt(built("build"), "bin_nix", "-std=c++20")
 
     if not full:
         return
@@ -92,6 +115,7 @@ def job_macos_clang():
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
     run(built("build"), f"build test pack -Op test -x {tc}")
     behaviour(built("build"))
+    prebuilt(built("build"), "bin_osx", "-std=c++20")
 
 
 def job_win_cl():
@@ -101,6 +125,7 @@ def job_win_cl():
     run(BOOTSTRAP, f'build -dtOp test_mod -a "{std}"', env=env)
     run(built("build"), f'build test pack -Op test -a "{std}"', env=env)
     behaviour(built("build"))
+    prebuilt(built("build"), "bin_win", std)
 
 
 def job_win_clang():

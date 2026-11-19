@@ -1,0 +1,6 @@
+super: bin
+
+# the binaries use the DLL C runtime (crt=md in their key), cl's own default is -MT
+file:
+  - type: cpp:cxx:cc:c
+    compiler: cl -MD

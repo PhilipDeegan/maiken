@@ -170,14 +170,18 @@ void maiken::Application::fetchPrebuilt(std::string const& tag) {
   std::filesystem::path const out = buildDir().path();
   auto const marker = out / ".mkn.prebuilt";
   auto const stamp = tag + " " + commit + " " + key;
+  auto const name = project().root()[STR_NAME].Scalar();
   if (std::ifstream m(marker); m) {  // already in place for this tag, commit and key
     std::string s;
     std::getline(m, s);
-    if (s == stamp) return;
+    if (s == stamp) {
+      KOUT(NON) << name << ": prebuilt " << tag << " (" << key << ")";
+      return;
+    }
   }
 
   if (AppVars::INSTANCE().dryRun()) {
-    KOUT(NON) << project().root()[STR_NAME].Scalar() << ": prebuilt " << url << " (" << key << ")";
+    KOUT(NON) << name << ": prebuilt " << url << " (" << key << ")";
     return;
   }
 
@@ -203,7 +207,7 @@ void maiken::Application::fetchPrebuilt(std::string const& tag) {
     }
   }
   std::ofstream(marker) << stamp << "\n";
-  KOUT(NON) << project().root()[STR_NAME].Scalar() << ": prebuilt " << tag << " (" << key << ")";
+  KOUT(NON) << name << ": prebuilt " << tag << " (" << key << ")";
 }
 
 bool maiken::Application::usePrebuilt() {
