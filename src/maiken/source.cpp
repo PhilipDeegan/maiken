@@ -45,8 +45,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstddef>
 #include <algorithm>
+#include <filesystem>
+#include <iterator>
 #include <optional>
 #include <string>
+#include <string_view>
+#include <system_error>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -103,6 +107,25 @@ void maiken::Application::addSourceLine(std::string const& s) KTHROW(mkn::kul::E
   }
 }
 
+namespace {
+// extensions a compiler builds, a src: directory's file of one without a compiler is an error.
+//  Objective-C only on Apple, elsewhere its files are another platform's, as in glfw's src
+constexpr std::string_view KNOWN_SOURCE_TYPES[]{
+    "c",   "C",  "cc",  "cp",  "cpp", "cxx", "c++", "s",   "S", "sx",  "asm", "cu",
+    "hip", "f",  "for", "f77", "f90", "f95", "f03", "f08", "F", "F90", "F95", "ispc",
+#if defined(__APPLE__)
+    "m",   "mm",
+#endif
+};
+
+// the part of the file name after its last ".", empty for none or a hidden file's leading one
+std::string extension(std::filesystem::path const& p) {
+  auto const name = p.filename().string();
+  auto const dot = name.rfind('.');
+  return dot == std::string::npos || dot == 0 ? "" : name.substr(dot + 1);
+}
+}  // namespace
+
 mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2T<std::vector<maiken::Source>>>
 maiken::Application::sourceMap() const {
   mkn::kul::hash::set::String const iMs = inactiveMains();
@@ -120,26 +143,42 @@ maiken::Application::sourceMap() const {
   };
 
   for (auto const& sourceDir : sources()) {
-    std::vector<mkn::kul::File> files;
-    std::string in(sourceDir.first.in);
-    mkn::kul::Dir d(in);
-    if (d)
-      for (auto const& f : d.files(sourceDir.second)) files.push_back(f);
-    else
-      files.push_back(in);
-    for (mkn::kul::File const& file : files) {
-      if (file.name().find(".") == std::string::npos || file.name().substr(0, 1).compare(".") == 0)
-        continue;
-      std::string const ft = file.name().substr(file.name().rfind(".") + 1);
-      if (fs.count(ft) > 0) {
-        std::string const& rl(file.real());
-        bool a = false;
-        for (std::string const& s : iMs) {
-          a = rl.compare(s) == 0;
-          if (a) break;
+    std::string const& in = sourceDir.first.in;
+    std::vector<std::filesystem::path> files;
+    std::error_code ec;
+    if (std::filesystem::is_directory(in, ec)) {
+      // files without a compiler are skipped, an error if one is a known source type
+      std::size_t skipped = 0;
+      std::vector<std::string> unbuilt;
+      for (auto& file : mkn::kul::fsys::files(in, {.recursive = sourceDir.second})) {
+        if (file.filename().string()[0] == '.') continue;
+        auto const ft = extension(file);
+        if (fs.count(ft)) {
+          files.emplace_back(std::move(file));
+          continue;
         }
-        if (!a) check_replace(rl, sourceDir.first.args, sm[ft][file.dir().real()]);
+        ++skipped;
+        if (std::ranges::find(KNOWN_SOURCE_TYPES, ft) != std::end(KNOWN_SOURCE_TYPES))
+          unbuilt.emplace_back(mkn::kul::fsys::mini(file));
       }
+      if (!unbuilt.empty()) {
+        std::string list;
+        for (auto const& f : unbuilt) list += "\n  " + f;
+        KEXIT(1, "Unable to handle sources in: \"", in, "\" - ", unbuilt.size(),
+              " with types not in file list, of ", skipped, " files skipped:", list, "\n",
+              project().file());
+      }
+    } else {  // a file named in src: is compiled
+      if (!fs.count(extension(in)))
+        KEXIT(1, "Unable to handle source: \"" + in + "\" - type is not in file list\n",
+              project().file());
+      files.emplace_back(in);
+    }
+    for (auto const& file : files) {
+      auto const rl = mkn::kul::fsys::real(file);
+      if (iMs.count(rl)) continue;
+      auto const dir = mkn::kul::fsys::real(std::filesystem::absolute(file).parent_path());
+      check_replace(rl, sourceDir.first.args, sm[extension(file)][dir]);
     }
   }
   return sm;
