@@ -223,4 +223,5 @@ void maiken::Settings::POST_CONSTRUCT(Settings* settings_ptr) {
 
   settings.resolveProperties();
   if (!settings_ptr) settings.resolveFindables();
+  if (!settings_ptr) settings.resolveBinaries();
 }

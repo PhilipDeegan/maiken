@@ -237,6 +237,9 @@ class MKN_KUL_PUBLISH Application : public Constants {
 
   bool is_build_required();
   bool is_build_stale();
+  // a dependency named in the settings' bin: map: its prebuilt binaries in place, see prebuilt.cpp
+  bool usePrebuilt();
+  void fetchPrebuilt(std::string const& tag);
 
   void withArgs(std::string const with, std::vector<YAML::Node>& with_nodes,
                 std::function<void(YAML::Node const& n, bool const mod)> getIfMissing,
