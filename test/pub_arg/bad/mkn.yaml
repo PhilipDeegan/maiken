@@ -1,0 +1,5 @@
+# a key if_arg does not have
+name: bad
+main: main.cpp
+pub_arg:
+  bogus: -DBAD

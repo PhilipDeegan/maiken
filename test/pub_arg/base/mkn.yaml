@@ -1,0 +1,34 @@
+# pub_arg as a string and keyed as if_arg, see test/run.py
+name: base
+
+profile:
+- name: headers
+  inc: .
+  pub_arg: -DBASE_PUB
+
+- name: static
+  parent: headers
+  src: b.cpp
+  mode: static
+  pub_arg:
+    nix: -DBASE_OS
+    bsd: -DBASE_OS
+    win: -DBASE_OS
+    static: -DBASE_STATIC
+    shared: -DBASE_NOT_SHARED
+    g++: -DBASE_GXX
+
+- name: shared
+  parent: headers
+  src: b.cpp
+  mode: shared
+  pub_arg:
+    shared: -DBASE_SHARED
+    static: -DBASE_NOT_STATIC
+
+- name: lib
+  parent: headers
+  src: b.cpp
+  pub_arg:
+    static: -DLIB_STATIC
+    shared: -DLIB_SHARED

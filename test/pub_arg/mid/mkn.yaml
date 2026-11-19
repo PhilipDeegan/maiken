@@ -1,0 +1,10 @@
+# public arguments of its dependency, its own private and public ones
+name: mid
+src: m.cpp
+mode: static
+arg: -DMID_PRIVATE
+pub_arg: -DMID_PUB
+dep:
+- name: base
+  local: ../base
+  profile: static
