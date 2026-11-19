@@ -38,8 +38,7 @@ int main(int argc, char* argv[]) {
   int exit_code = 0;
   try {
     using namespace mkn::kul::cli;
-    mkn::kul::Dir d =
-        mkn::kul::user::home(mkn::kul::Dir::JOIN(maiken::Constants::STR_MAIKEN, "server"));
+    mkn::kul::Dir d((mkn::kul::user::home(maiken::Constants::STR_MAIKEN) / "server").string());
     Args args({}, {Arg('d', maiken::Constants::STR_DIR, ArgType::STRING)});
     try {
       args.process(argc, argv);
