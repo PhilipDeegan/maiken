@@ -54,17 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace {
 
-// what a binary must match, the manifest's key without mode=
-#if MKN_KUL_IS_WIN
-constexpr char const* BIN_KEY = "os=win;arch=x86_64;cxxrt=msvc;crt=md";
-#elif defined(__APPLE__)
-constexpr char const* BIN_KEY = "os=bsd;arch=arm64;cxxrt=libc++;macos=13.0";
-#elif defined(__aarch64__)
-constexpr char const* BIN_KEY = "os=nix;arch=arm64;cxxrt=libstdc++;libc=manylinux_2_28";
-#else
-constexpr char const* BIN_KEY = "os=nix;arch=x86_64;cxxrt=libstdc++;libc=manylinux_2_28";
-#endif
-
 class Unusable : public std::runtime_error {  // why a prebuilt binary is not used
  public:
   using std::runtime_error::runtime_error;
@@ -158,7 +147,7 @@ void maiken::Application::fetchPrebuilt(std::string const& tag) {
                            : m == compiler::Mode::SHAR ? "shared"
                                                        : "";
   if (mode.empty()) throw Unusable("no prebuilt binaries without a static or shared mode");
-  auto const key = std::string(BIN_KEY) + ";mode=" + mode;
+  auto const key = AppVars::INSTANCE().properkeys().at("mkn.bin.key") + ";mode=" + mode;
 
   auto const dir = mkn::kul::fsys::escaped_real(project().dir().path());
   if (!capture("git", {"-C", dir, "status", "--porcelain", "--untracked-files=no"}).empty())

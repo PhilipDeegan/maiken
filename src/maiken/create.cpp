@@ -250,6 +250,7 @@ std::string maiken::Application::BUILD_CONFIG() {
   kv("MKN_REP_VERS_DOT", MKN_REP_VERS_DOT);
   kv("MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION", MKN_GIT_WITH_RAM_DEFAULT_CO_ACTION);
   kv("MKN_KUL_PROC_LOOP_NSLEEP", MKN_KUL_PROC_LOOP_NSLEEP);
+  kv("mkn.bin.key", defaultBinKey());
   auto str = ss.str();
   while (!str.empty() && (str.back() == '\n' || str.back() == '\r')) str.pop_back();
   return str;
@@ -279,7 +280,21 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
 
   if (args.has(STR_VERSION)) {
     KOUT(NON) << VERSION();
-    if (args.count(STR_VERSION) > 1) KOUT(NON) << BUILD_CONFIG();
+    if (args.count(STR_VERSION) > 1) {
+      KOUT(NON) << BUILD_CONFIG();
+      try {  // a settings property: mkn.bin.key, settings that fail to load are not -vv's problem
+        Settings::writeDefault();
+        if (args.has(STR_SETTINGS)) Settings::SET(args.get(STR_SETTINGS));
+        AppVars::POST_CONSTRUCT();
+        if (auto const& key = AppVars::INSTANCE().properkeys().at("mkn.bin.key");
+            key != defaultBinKey()) {
+          std::string k = "mkn.bin.key (settings)";
+          mkn::kul::String::PAD(k, 34);
+          KOUT(NON) << "  " << k << ": " << key;
+        }
+      } catch (...) {
+      }
+    }
     KEXIT(0, "");
   }
 

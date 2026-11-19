@@ -85,4 +85,13 @@ void maiken::AppVars::POST_CONSTRUCT() {
     pks["MKN_MOD_REPO"] = *local_repo;
   else
     pks["MKN_MOD_REPO"] = (mkn::kul::user::home(STR_MAIKEN) / STR_MOD_REPO).string();
+
+  // prebuilt binaries are matched against this, see prebuilt.cpp; settings' property: can set it
+  pks["mkn.bin.key"] = defaultBinKey();
+  for (auto const* s = &settings; s != nullptr; s = s->super())
+    if (auto const ps = s->root()[STR_PROPERTY];
+        ps && ps["mkn.bin.key"] && ps["mkn.bin.key"].IsScalar()) {
+      pks["mkn.bin.key"] = ps["mkn.bin.key"].Scalar();
+      break;
+    }
 }

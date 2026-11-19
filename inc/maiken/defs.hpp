@@ -88,6 +88,19 @@ namespace maiken {
 
 auto inline defaultSCMBranchName() { return mkn::kul::env::GET("MKN_DEFAULT_BRANCH", "master"); }
 
+// what a prebuilt binary must match on this platform, the mkn.bin.key property's default
+constexpr char const* defaultBinKey() {
+#if MKN_KUL_IS_WIN
+  return "os=win;arch=x86_64;cxxrt=msvc;crt=md";
+#elif defined(__APPLE__)
+  return "os=bsd;arch=arm64;cxxrt=libc++;macos=13.0";
+#elif defined(__aarch64__)
+  return "os=nix;arch=arm64;cxxrt=libstdc++;libc=manylinux_2_28";
+#else
+  return "os=nix;arch=x86_64;cxxrt=libstdc++;libc=manylinux_2_28";
+#endif
+}
+
 class Exception : public mkn::kul::Exception {
  public:
   Exception(char const* f, uint16_t const& l, std::string const& s)
