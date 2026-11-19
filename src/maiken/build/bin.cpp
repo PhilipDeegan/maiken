@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <mutex>
 #include <exception>
+#include <filesystem>
 #include <functional>
 #include <optional>
 #include <string>
@@ -117,7 +118,7 @@ class Executioner : public Constants {
   }
 
   static CompilerProcessCapture build_exe(mkn::kul::hash::set::String const& objects,
-                                          std::vector<mkn::kul::Dir> const& starDirs,
+                                          std::vector<std::filesystem::path> const& starDirs,
                                           std::string const& main, std::string const& out,
                                           mkn::kul::Dir const outD, Application& app) {
     MKN_KUL_DBG_FUNC_ENTER;
@@ -209,8 +210,8 @@ void Application::buildExecutable(mkn::kul::hash::set::String const& objects_)
   }
   auto install = mkn::kul::Dir(inst ? inst.real() : buildDir());
 
-  std::vector<mkn::kul::Dir> starDirs;
-  if (objects_.size()) starDirs.emplace_back(objD);
+  std::vector<std::filesystem::path> starDirs;
+  if (objects_.size()) starDirs.emplace_back(objD.path());
 
   Executioner::show_link_settings(*this);
   auto cpc = Executioner::build_exe(objects, starDirs, file, name, install, *this);
@@ -230,8 +231,8 @@ void Application::buildTest(mkn::kul::hash::set::String const& objects)
   mkn::kul::Dir tmpD(buildDir().join("tmp"), 1);
   mkn::kul::Dir testsD(buildDir().join("test"), 1);
 
-  std::vector<mkn::kul::Dir> starDirs;
-  if (objects.size()) starDirs.emplace_back(objD);
+  std::vector<std::filesystem::path> starDirs;
+  if (objects.size()) starDirs.emplace_back(objD.path());
 
   std::mutex mute;
   std::vector<CompilerProcessCapture> cpcs;
@@ -297,8 +298,8 @@ CompilerProcessCapture Application::buildLibrary(mkn::kul::hash::set::String con
       if (!linkFlags.empty()) linker += " " + linkFlags;
     }
 
-    std::vector<mkn::kul::Dir> starDirs;
-    if (objects.size()) starDirs.emplace_back(objD);
+    std::vector<std::filesystem::path> starDirs;
+    if (objects.size()) starDirs.emplace_back(objD.path());
     std::vector<std::string> obV;
     auto const libs = Executioner::link_libraries(*this, comp);
     LinkDAO dao{this->context(), linker, linkEnd, lib, starDirs, obV, libs,

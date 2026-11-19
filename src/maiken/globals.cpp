@@ -46,9 +46,9 @@ std::shared_ptr<AppVars> AppVars::instance;
 
 maiken::AppVars::AppVars() {
   pks["OS"] = MKN_KUL_STR(MKN_KUL_OS);
-  pks["HOME"] = mkn::kul::user::home().path();
+  pks["HOME"] = mkn::kul::user::home().string();
   pks["ARCH"] = mkn::kul::env::GET("MKN_ARCH", "x86_64");
-  pks["MKN_HOME"] = mkn::kul::user::home(STR_MAIKEN).path();
+  pks["MKN_HOME"] = mkn::kul::user::home(STR_MAIKEN).string();
 
   pks["DATETIME"] = mkn::kul::DateTime::NOW();
   pks["TIMESTAMP"] = std::time(NULL);
@@ -79,11 +79,11 @@ void maiken::AppVars::POST_CONSTRUCT() {
   if (auto const& local_repo = settings.local_dep_repo())
     pks["MKN_REPO"] = *local_repo;
   else
-    pks["MKN_REPO"] = mkn::kul::user::home(mkn::kul::Dir::JOIN(STR_MAIKEN, STR_REPO)).path();
+    pks["MKN_REPO"] = (mkn::kul::user::home(STR_MAIKEN) / STR_REPO).string();
 
   if (auto const& local_repo = settings.local_mod_repo())
     pks["MKN_MOD_REPO"] = *local_repo;
   else
     pks["MKN_MOD_REPO"] =
-        mkn::kul::user::home(mkn::kul::Dir::JOIN(STR_MAIKEN, STR_MOD_REPO)).path();
+        (mkn::kul::user::home(STR_MAIKEN) / STR_MOD_REPO).string();
 }

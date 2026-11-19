@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "yaml-cpp/yaml.h"
 
 #include <cstdint>
+#include <filesystem>
 #include <vector>
 #include <string>
 #include <optional>
@@ -71,7 +72,7 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   using Findables = mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2T<std::vector<std::string>>>;
 
  public:
-  Settings(std::string const& s);
+  Settings(std::filesystem::path const& s);
 
   Settings const* super() const { return sup.get(); }
 
@@ -116,7 +117,7 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   static void POST_CONSTRUCT(Settings* settings = nullptr);
   static mkn::kul::env::Var PARSE_ENV_NODE(YAML::Node const&, Settings const&);
   static mkn::kul::File userDefault() {
-    return mkn::kul::File("settings.yaml", mkn::kul::user::home("maiken"));
+    return mkn::kul::File("settings.yaml", mkn::kul::Dir(mkn::kul::user::home("maiken").string()));
   }
   static void writeDefault() {
     auto const f = userDefault();
