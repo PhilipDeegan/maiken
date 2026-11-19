@@ -160,10 +160,16 @@ void maiken::Application::fetchPrebuilt(std::string const& tag) {
   auto const marker = out / ".mkn.prebuilt";
   auto const stamp = tag + " " + commit + " " + key;
   auto const name = project().root()[STR_NAME].Scalar();
-  if (std::ifstream m(marker); m) {  // already in place for this tag, commit and key
-    std::string s;
+  // the marker: the stamp, then each installed file, all present for it to count
+  if (std::ifstream m(marker); m) {
+    std::string s, f;
     std::getline(m, s);
-    if (s == stamp) {
+    bool in_place = s == stamp, any = false;
+    while (in_place && std::getline(m, f)) {
+      any = true;
+      in_place = std::filesystem::exists(out / f);
+    }
+    if (in_place && any) {
       KOUT(NON) << name << ": prebuilt " << tag << " (" << key << ")";
       return;
     }
@@ -183,19 +189,44 @@ void maiken::Application::fetchPrebuilt(std::string const& tag) {
                    mf["commit"].as<std::string>().substr(0, 7));
   auto const entry = mf["bins"][key];
   if (!entry) throw Unusable(tag + " has no binary for " + key);
+  auto const files = entry["files"];
+  if (!files || !files.IsSequence() || files.size() == 0) throw Unusable(tag + " lists no files");
 
+  // each file downloaded and checked beside its final name, only then put in place: a failure
+  //  never touches what is there, e.g. a library built from source
   auto const pre = AppVars::INSTANCE().envVar("MKN_LIB_PRE");
-  for (auto const& f : entry["files"]) {
+  std::vector<std::pair<std::filesystem::path, std::filesystem::path>> checked;  // .part, final
+  auto const discard = [&]() {
+    for (auto const& [part, to] : checked) std::filesystem::remove(part);
+  };
+  for (auto const& f : files) {
     auto const file = f["file"].as<std::string>();
     auto const ext = std::filesystem::path(file).extension().string();
+    if (ext != ".a" && ext != ".so" && ext != ".dylib" && ext != ".lib" && ext != ".dll") {
+      discard();
+      throw Unusable(file + " is not a library mkn names");
+    }
     auto const to = out / (pre + baseLibFilename() + ext);  // where building would put it
-    download(url + file, to);
-    if (sha256(to) != f["sha256"].as<std::string>()) {
-      std::filesystem::remove(to);
+    auto const part = std::filesystem::path(to.string() + ".part");
+    checked.emplace_back(part, to);
+    try {
+      download(url + file, part);
+    } catch (...) {
+      discard();
+      throw;
+    }
+    if (sha256(part) != f["sha256"].as<std::string>()) {
+      discard();
       throw Unusable(file + " does not match its sha256");
     }
   }
-  std::ofstream(marker) << stamp << "\n";
+  std::filesystem::remove(marker);  // no marker while files are replaced
+  std::ofstream m(marker);
+  m << stamp << "\n";
+  for (auto const& [part, to] : checked) {
+    std::filesystem::rename(part, to);
+    m << to.filename().string() << "\n";
+  }
   KOUT(NON) << name << ": prebuilt " << tag << " (" << key << ")";
 }
 
@@ -211,11 +242,16 @@ bool maiken::Application::usePrebuilt() {
     ss << name << ": prebuilt binary not used - " << e.what();
     if (AppVars::INSTANCE().quiet()) {
       KOUT(NON) << ss.str() << ", building it";
-      return false;
+    } else {
+      ss << std::endl
+         << "\tWould you like to build it from source (Y/n) - -q builds without asking";
+      if (!mkn::kul::String::BOOL(mkn::kul::cli::receive(ss.str())))
+        KEXIT(1, name, ": prebuilt binary not used, not building it");
     }
-    ss << std::endl << "\tWould you like to build it from source (Y/n) - -q builds without asking";
-    if (!mkn::kul::String::BOOL(mkn::kul::cli::receive(ss.str())))
-      KEXIT(1, name, ": prebuilt binary not used, not building it");
+    // built from source like any -d dependency, its build directory no longer prebuilt
+    std::error_code ec;
+    std::filesystem::remove(std::filesystem::path(buildDir().path()) / ".mkn.prebuilt", ec);
+    this->ig = 0;
     return false;
   }
 }

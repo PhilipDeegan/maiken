@@ -87,6 +87,25 @@ def prebuilt(mkn_bin, settings, args):
     print("PASS prebuilt", flush=True)
 
 
+def prebuilt_fallback(mkn_bin, args):
+    """test/prebuilt/missing.yml names a release that doesn't exist: with -q, and without -d,
+    parse.yaml is built from source instead"""
+    cwd = os.path.join(ROOT, "test", "prebuilt")
+    cmd = [mkn_bin, "build", "run", "-q", "-t", "-x", os.path.join(cwd, "missing").replace("\\", "/"),
+           "-a", args]
+    print(f"+ [{cwd}] {' '.join(cmd)}", flush=True)
+    result = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    print(result.stdout, flush=True)
+    errors = [] if result.returncode == 0 else [f"exit {result.returncode}"]
+    for expected in ("parse.yaml: prebuilt binary not used", "building it", "parsed 3"):
+        if expected not in result.stdout:
+            errors.append(f"missing '{expected}'")
+    if errors:
+        print(f"FAILED prebuilt fallback: {', '.join(errors)}", file=sys.stderr)
+        sys.exit(1)
+    print("PASS prebuilt fallback", flush=True)
+
+
 def nix_test(std_args, env, full):
     """ubuntu_gcc / ubuntu_clang / manylinux_gcc."""
     a = f'-a "{std_args}"'
@@ -98,6 +117,8 @@ def nix_test(std_args, env, full):
 
     if not full:
         return
+
+    prebuilt_fallback(built("build"), "-std=c++20")
 
     # format still runs on the mod-less bootstrap - m/clang/format's mod.cpp
     # is currently out of sync with mkn.mod's Context API (pending changes to
