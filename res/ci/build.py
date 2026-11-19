@@ -57,12 +57,21 @@ def rm_test_lib():
         os.remove(test_lib)
 
 
+def behaviour(mkn_bin):
+    """test/run.py, dry runs of mkn_bin against the projects under test/"""
+    cmd = [sys.executable, os.path.join(ROOT, "test", "run.py"), mkn_bin]
+    print(f"+ {' '.join(cmd)}", flush=True)
+    if subprocess.run(cmd).returncode != 0:
+        sys.exit(1)
+
+
 def nix_test(std_args, env, full):
     """ubuntu_gcc / ubuntu_clang / manylinux_gcc."""
     a = f'-a "{std_args}"'
     run(BOOTSTRAP, f"build {a} -dtO 2 -g 0 -W 9", cwd=DEP_DIR, env=env)
     run(BOOTSTRAP, f"build -dtp test_mod {a} -O 2 -g 0 -W 9", env=env)
     run(built("build"), f"build test pack -tp test {a} -O 2 -g 0 -W 9", env=env)
+    behaviour(built("build"))
 
     if not full:
         return
@@ -82,6 +91,7 @@ def job_macos_clang():
     run(BOOTSTRAP, f"build -dtx {tc}", cwd=DEP_DIR)
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
     run(built("build"), f"build test pack -Op test -x {tc}")
+    behaviour(built("build"))
 
 
 def job_win_cl():
@@ -90,6 +100,7 @@ def job_win_cl():
     run(BOOTSTRAP, f'build -dta "{std}"', cwd=DEP_DIR, env=env)
     run(BOOTSTRAP, f'build -dtOp test_mod -a "{std}"', env=env)
     run(built("build"), f'build test pack -Op test -a "{std}"', env=env)
+    behaviour(built("build"))
 
 
 def job_win_clang():
@@ -99,6 +110,7 @@ def job_win_clang():
     run(BOOTSTRAP, f"build -dtx {tc}", cwd=DEP_DIR)
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
     run(built("build"), f"build test pack -Op test -x {tc}")
+    behaviour(built("build"))
 
 
 JOBS = {
