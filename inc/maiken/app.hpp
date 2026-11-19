@@ -296,8 +296,27 @@ class MKN_KUL_PUBLISH Application : public Constants {
   void add_compile_arg(std::string const& arg) { compile_args.emplace_back(arg); }
   std::vector<std::string> const& compileArgs() const { return compile_args; }
 
-  std::string const& compileArg() const { return arg; }
-  mkn::kul::hash::map::S2S const& compilerArgs() const { return cArg; }
+  // this project's compile arguments, then its dependencies' public ones (pub_arg)
+  std::string compileArg() const;
+  mkn::kul::hash::map::S2S compilerArgs() const;
+  // this project's own pub_arg units, as written: a line, or an if_arg style value with its option
+  //  operands. Its dependents read them through dependencies(), which DepGrapher makes every
+  //  application they depend on, directly or not, once
+  std::vector<std::string> const& publicArgs() const { return pubArgs; }
+  mkn::kul::hash::map::S2T<std::vector<std::string>> const& publicCompilerArgs() const {
+    return cPubArgs;
+  }
+  void addPublicArg(std::string const& unit) {
+    if (std::find(pubArgs.begin(), pubArgs.end(), unit) != pubArgs.end()) return;
+    pubArgs.emplace_back(unit);
+    arg += unit;
+  }
+  void addPublicArg(std::string const& compiler, std::string const& unit) {
+    auto& units = cPubArgs[compiler];
+    if (std::find(units.begin(), units.end(), unit) != units.end()) return;
+    units.emplace_back(unit);
+    cArg[compiler] += unit;
+  }
 
   void addInclude(std::string const& s, bool const is_public = 1) {
     auto it = std::find_if(
@@ -368,6 +387,8 @@ class MKN_KUL_PUBLISH Application : public Constants {
   maiken::Project const& proj;
   mkn::kul::hash::map::S2T<mkn::kul::hash::map::S2S> fs;
   mkn::kul::hash::map::S2S cArg, cLnk, includeStamps, itss, ps, tests;
+  std::vector<std::string> pubArgs;
+  mkn::kul::hash::map::S2T<std::vector<std::string>> cPubArgs;
   mkn::kul::hash::map::S2T<mkn::kul::hash::set::String> args;
   mkn::kul::hash::map::S2T<uint64_t> stss;
   std::vector<Application*> deps, modDeps, rdeps;

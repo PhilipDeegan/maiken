@@ -200,6 +200,7 @@ class Constants {
   static constexpr auto STR_IF_DEP = "if_dep";
   static constexpr auto STR_IF_MOD = "if_mod";
   static constexpr auto STR_IF_ARG = "if_arg";
+  static constexpr auto STR_PUB_ARG = "pub_arg";
   static constexpr auto STR_IF_INC = "if_inc";
   static constexpr auto STR_IF_SRC = "if_src";
   static constexpr auto STR_IF_LIB = "if_lib";

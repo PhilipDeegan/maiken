@@ -188,3 +188,28 @@ void maiken::Application::populateMapsFromDependencies() KTHROW(mkn::kul::Except
         paths.push_back(s);
   }
 }
+
+std::string maiken::Application::compileArg() const {
+  std::string out = arg;
+  std::vector<std::string> units = pubArgs;
+  for (auto const* dep : dependencies())
+    for (auto const& unit : dep->publicArgs())
+      if (std::find(units.begin(), units.end(), unit) == units.end()) {
+        units.emplace_back(unit);
+        out += unit;
+      }
+  return out;
+}
+
+mkn::kul::hash::map::S2S maiken::Application::compilerArgs() const {
+  auto out = cArg;
+  auto units = cPubArgs;
+  for (auto const* dep : dependencies())
+    for (auto const& [compiler, dep_units] : dep->publicCompilerArgs())
+      for (auto const& unit : dep_units)
+        if (auto& seen = units[compiler]; std::find(seen.begin(), seen.end(), unit) == seen.end()) {
+          seen.emplace_back(unit);
+          out[compiler] += unit;
+        }
+  return out;
+}

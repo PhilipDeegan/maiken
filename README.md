@@ -132,7 +132,8 @@ profile:
 
 Select one with `mkn build -p test`. Platform-specific settings go under
 `if_arg`, `if_src`, `if_inc`, `if_lib` keyed by `nix`, `bsd`, `win`
-(and `nix_shared`, `win_static`, …).
+(and `nix_shared`, `win_static`, …). `pub_arg` gives arguments to the project and
+every project depending on it, as a string or keyed as `if_arg`.
 
 Properties can be defined and referenced with `${...}`, and built-ins such as
 `${OS}`, `${ARCH}`, `${MKN_ROOT}` are always available.

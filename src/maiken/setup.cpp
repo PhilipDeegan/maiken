@@ -342,8 +342,9 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
         inst = mkn::kul::Dir(inst.real());
       }
 
+      // pub: each matching value is a public argument unit, see addPublicArg
       auto ifArgOrLnk = [&](auto const& n, auto const& nName, std::string& var,
-                            mkn::kul::hash::map::S2S& cVal) {
+                            mkn::kul::hash::map::S2S& cVal, bool const pub = false) {
         if (n[nName])
           for (YAML::const_iterator it = n[nName].begin(); it != n[nName].end(); ++it) {
             std::string left(it->first.Scalar());
@@ -365,7 +366,10 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
               if (isCVal) break;
             }
             if (isCVal) {
-              cVal[left] = cVal[left] + ifArg;
+              if (pub)
+                addPublicArg(left, ifArg);
+              else
+                cVal[left] = cVal[left] + ifArg;
               continue;
             }
             auto trues = {lang.empty() && left == STR_BIN, !main_ && left == STR_LIB,
@@ -373,11 +377,17 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
                           m == compiler::Mode::STAT && left == STR_STATIC,
                           left == MKN_KUL_STR(MKN_KUL_OS)};
 
-            if (std::any_of(trues.begin(), trues.end(), [](bool b) { return b; })) var += ifArg;
+            if (!std::any_of(trues.begin(), trues.end(), [](bool b) { return b; })) continue;
+            if (pub)
+              addPublicArg(ifArg);
+            else
+              var += ifArg;
           }
       };
 
       ifArgOrLnk(n, STR_IF_ARG, arg, cArg);
+      if (n[STR_PUB_ARG] && n[STR_PUB_ARG].IsMap())  // keyed as if_arg
+        ifArgOrLnk(n, STR_PUB_ARG, arg, cArg, true);
       ifArgOrLnk(n, STR_IF_LNK, lnk, cLnk);
 
       auto if_inc_src = [&](auto const& node, auto str, auto fn) {

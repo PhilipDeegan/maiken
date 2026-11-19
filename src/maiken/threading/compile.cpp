@@ -83,8 +83,8 @@ CompilationUnit build_compilation_unit(Application const& app, std::vector<std::
     for (std::string const& o : (*app.arguments().find(fileType)).second)
       for (auto const& s : mkn::kul::cli::asArgs(o)) args.push_back(s);
   for (auto const& s : mkn::kul::cli::asArgs(app.compileArg())) args.push_back(s);
-  if (app.compilerArgs().count(base))
-    for (auto const& s : mkn::kul::cli::asArgs(app.compilerArgs().at(base))) args.push_back(s);
+  if (auto const cArgs = app.compilerArgs(); cArgs.count(base))
+    for (auto const& s : mkn::kul::cli::asArgs(cArgs.at(base))) args.push_back(s);
   // WE CHECK BEFORE USING THIS THAT A COMPILER EXISTS FOR EVERY FILE
   auto compilerFlags = [&args](std::string const& as) {
     for (auto const& s : mkn::kul::cli::asArgs(as)) args.push_back(s);

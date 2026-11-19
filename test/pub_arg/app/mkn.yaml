@@ -1,0 +1,31 @@
+# a dependent of each variant
+name: app
+
+profile:
+- name: mid
+  main: main.cpp
+  dep:
+  - name: mid
+    local: ../mid
+
+- name: diamond
+  main: main.cpp
+  dep:
+  - name: mid
+    local: ../mid
+  - name: mid2
+    local: ../mid2
+
+- name: shared
+  main: main.cpp
+  dep:
+  - name: base
+    local: ../base
+    profile: shared
+
+- name: lib
+  main: main.cpp
+  dep:
+  - name: base
+    local: ../base
+    profile: lib

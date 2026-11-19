@@ -1,0 +1,9 @@
+# a second path to base, exporting an argument that contains one of base's
+name: mid2
+src: m2.cpp
+mode: static
+pub_arg: -DWRAPPED=-DBASE_PUB
+dep:
+- name: base
+  local: ../base
+  profile: static

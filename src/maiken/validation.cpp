@@ -89,6 +89,8 @@ class Validator : public maiken::Constants {
     }
     for (auto const& str_if : {STR_IF_ARG, STR_IF_LNK})
       if (n[str_if]) IF_VALUEDATER(a, n[str_if], str_if, INSTANCE().ifArgsLefts);
+    if (n[STR_PUB_ARG] && n[STR_PUB_ARG].IsMap())
+      IF_VALUEDATER(a, n[STR_PUB_ARG], STR_PUB_ARG, INSTANCE().ifArgsLefts);
     for (auto const& str_if : {STR_IF_INC, STR_IF_SRC, STR_IF_LIB, STR_IF_DEP, STR_IF_MOD})
       if (n[str_if]) IF_VALUEDATER(a, n[str_if], str_if, INSTANCE().ifOSLefts);
     if (n[STR_DEP])
