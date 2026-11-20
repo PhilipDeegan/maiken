@@ -156,6 +156,8 @@ std::pair<std::string, std::string> clone_release(std::string const& dir, std::s
     throw Unusable("local changes in " + dir);
   auto const commit = capture("git", {"-C", dir, "rev-parse", "HEAD"});
   auto const url = github(capture("git", {"-C", dir, "remote", "get-url", "origin"}));
+  // latest: the release GitHub marks Latest, never a pre-release
+  if (tag == "latest") return {commit, url + "/releases/latest/download/"};
   return {commit, url + "/releases/download/" + tag + "/"};
 }
 
@@ -254,7 +256,10 @@ void maiken::Application::fetchPrebuilt(std::string const& tag) {
     put_in_place(download_checked(files, url, out, stem), marker, stamp);
   }
   buildDirectory(out);
-  KOUT(NON) << name << ": prebuilt " << tag << " (" << key << ")";
+  auto version = tag;  // the manifest's, for latest
+  if (auto const mf = out / "mkn.manifest.yml"; std::filesystem::exists(mf))
+    if (auto const v = YAML::LoadFile(mf.string())["version"]) version = v.Scalar();
+  KOUT(NON) << name << ": prebuilt " << version << " (" << key << ")";
 }
 
 // the library is found in dir: this app's build directory, and the library path every app using

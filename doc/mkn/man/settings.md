@@ -77,7 +77,8 @@ compiler:
                                         # gcc-armhf instead of just "gcc"
 
 bin:                                    # Optional, dependencies used as prebuilt binaries instead of being
-  parse.yaml: 0.8.0                     #  built: project name to release tag. Downloaded from the project's
+  parse.yaml: 0.8.0                     #  built: project name to release tag, or latest for the release
+                                        #  GitHub marks Latest. Downloaded from the project's
                                         #  GitHub release (mkn.manifest.yml) into its clone's
                                         #  .mkn/prebuilt/<static|shared>, its build directory, which
                                         #  can be deleted to download again. Never compiled, linked or
