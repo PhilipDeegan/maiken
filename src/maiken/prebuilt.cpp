@@ -273,14 +273,17 @@ bool missed(Path const& file, std::string const& stamp) {
 }  // namespace
 
 bool maiken::Application::fetchPrebuilt(std::string const& tag, bool const remember) {
-  auto const key =
-      AppVars::INSTANCE().properkeys().at("mkn.bin.key") + ";mode=" + mkn::kul::lang::to_string(m);
+  // the profile built, @ for the file's top level, as profiles of one project differ (mkn.ram's
+  //  https2 has sources lib has not)
+  auto const profile = p.empty() ? std::string{"@"} : p;
+  auto const key = AppVars::INSTANCE().properkeys().at("mkn.bin.key") + ";profile=" + profile +
+                   ";mode=" + mkn::kul::lang::to_string(m);
   auto const [commit, url] =
       clone_release(mkn::kul::fsys::escaped_real(project().dir().path()), tag);
-  // a cache in the clone, itself one version, a directory per mode so a static and a shared
-  //  library never meet, removing it downloads them again
+  // a cache in the clone, itself one version, a directory per profile and mode so libraries of
+  //  one name never meet, removing it downloads them again
   Path const out =
-      Path(project().dir().real()) / ".mkn" / "prebuilt" / mkn::kul::lang::to_string(m);
+      Path(project().dir().real()) / ".mkn" / "prebuilt" / profile / mkn::kul::lang::to_string(m);
   // a marker per library name: profiles with another out: share the directory, not the marker
   auto const stem = AppVars::INSTANCE().envVar("MKN_LIB_PRE") + baseLibFilename();
   auto const marker = out / ("." + stem + ".prebuilt");

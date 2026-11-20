@@ -46,7 +46,9 @@ property:
                                        #  default's machine parts (os, arch, libc) are detected, its
                                        #  toolchain parts (cxxrt, crt) are what releases use: a settings
                                        #  file for another toolchain (clang -stdlib=libc++, cl -MT)
-                                       #  sets this, see inc/maiken/bin_key.hpp
+                                       #  sets this, see inc/maiken/bin_key.hpp. A release's binary
+                                       #  is found by this key, ";profile=" the dependency's profile
+                                       #  (@ for its top level) and ";mode=" static or shared
 
     mkn.with.bin: 1                    # Optional, default 0. Every dependency not in bin: uses its
                                        #  version's prebuilt release when there is one: latest for
@@ -92,7 +94,7 @@ bin:                                    # Optional, dependencies used as prebuil
   parse.yaml: 0.8.0                     #  built: project name to release tag, or latest for the release
                                         #  GitHub marks Latest. Downloaded from the project's
                                         #  GitHub release (mkn.manifest.yml) into its clone's
-                                        #  .mkn/prebuilt/<static|shared>, its build directory, which
+                                        #  .mkn/prebuilt/<profile|@>/<static|shared>, its build directory, which
                                         #  can be deleted to download again. Never compiled, linked or
                                         #  cleaned; a binary that can't be used is built from source with
                                         #  -q, otherwise mkn asks

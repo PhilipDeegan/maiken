@@ -97,6 +97,9 @@ CASES = [
     # a built-in hides a project property of the same name: reported, -P is on purpose
     prop(has=["property OS is a built-in"], lacks=["lib.version"]),
     prop(["-P", "OS=cli"], lacks=["is a built-in"]),
+    # "@" is the top level (-p @, dep[@], prebuilt keys' profile=@), never a profile's name
+    dict(name="profile named @", cwd=os.path.join(TEST, "profile_at"), args=["build", "-R"], ok=False,
+         has=['Profile may not be named "@"'], lacks=[]),
 ]
 
 

@@ -4,19 +4,17 @@ name: prebuilt
 parent: static
 
 profile:
-- name: static
+- name: static  # parse.yaml's top level, profile=@ in the key; static as no mode is stated
   main: main.cpp
   dep:
   - name: parse.yaml
     version: 0.8.0
-    profile: static
 
-- name: shared  # on Windows a .dll and its import .lib
+- name: shared  # the same with -S, see res/ci/build.py; on Windows a .dll and its import .lib
   main: main.cpp
   dep:
   - name: parse.yaml
     version: 0.8.0
-    profile: shared
 
 - name: latest  # the release GitHub marks Latest, static as no mode is stated
   main: main.cpp
