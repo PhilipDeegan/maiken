@@ -64,6 +64,11 @@ class Unusable : public std::runtime_error {  // why a prebuilt binary is not us
   using std::runtime_error::runtime_error;
 };
 
+class NoCurl : public Unusable {  // no curl to download with: said once a run with mkn.with.bin
+ public:
+  using Unusable::Unusable;
+};
+
 class Missing : public Unusable {  // no binary for this clone and key, remembered for mkn.with.bin
  public:
   using Unusable::Unusable;
@@ -83,9 +88,14 @@ std::string capture(std::string const& cmd, std::vector<std::string> const& args
   return out;
 }
 
+// curl looked for once a run; binaries already downloaded need none, see in_place()
+bool curl() {
+  static bool const found = mkn::kul::env::WHICH("curl");
+  return found;
+}
+
 void download(std::string const& url, std::filesystem::path const& to) {
-  if (!mkn::kul::env::WHICH("curl"))  // downloaded binaries in place need no curl, see in_place()
-    throw Unusable("curl not found on PATH, it downloads prebuilt binaries");
+  if (!curl()) throw NoCurl("curl not found on PATH, it downloads prebuilt binaries");
   try {
     capture("curl", {"-fsSL", "--retry", "3", "-A", "mkn", "-o", mkn::kul::fsys::esc(to), url});
   } catch (Unusable const& e) {
@@ -344,7 +354,11 @@ bool maiken::Application::usePrebuilt() {
     std::stringstream ss;
     ss << name << ": prebuilt binary not used - " << e.what();
     if (!named) {
-      KOUT(NON) << ss.str();
+      static bool told_no_curl = false;  // once a run, not for every dependency to download
+      if (dynamic_cast<NoCurl const*>(&e) == nullptr)
+        KOUT(NON) << ss.str();
+      else if (!std::exchange(told_no_curl, true))
+        KOUT(NON) << e.what() << ": dependencies without downloaded binaries are built";
       return false;
     }
     if (AppVars::INSTANCE().quiet()) {
