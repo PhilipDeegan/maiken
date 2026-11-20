@@ -72,6 +72,7 @@ class Var;
 #endif  // MKN_WITH_MKN_MOD
 
 #include <cstdint>
+#include <filesystem>
 #include <queue>
 #include <optional>
 #include <algorithm>
@@ -240,6 +241,7 @@ class MKN_KUL_PUBLISH Application : public Constants {
   // a dependency named in the settings' bin: map: its prebuilt binaries in place, see prebuilt.cpp
   bool usePrebuilt();
   void fetchPrebuilt(std::string const& tag);
+  void buildDirectory(std::filesystem::path const& dir);
 
   void withArgs(std::string const with, std::vector<YAML::Node>& with_nodes,
                 std::function<void(YAML::Node const& n, bool const mod)> getIfMissing,

@@ -43,7 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/string.hpp"
 #include "yaml-cpp/yaml.h"
 
+#include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -232,7 +234,10 @@ void maiken::Application::fetchPrebuilt(std::string const& tag) {
       AppVars::INSTANCE().properkeys().at("mkn.bin.key") + ";mode=" + mkn::kul::lang::to_string(m);
   auto const [commit, url] =
       clone_release(mkn::kul::fsys::escaped_real(project().dir().path()), tag);
-  Path const out = buildDir().path();
+  // a cache in the clone, a directory per mode so a static and a shared library never meet,
+  //  removing it downloads them again
+  Path const out =
+      Path(project().dir().real()) / ".mkn" / "prebuilt" / tag / mkn::kul::lang::to_string(m);
   auto const marker = out / ".mkn.prebuilt";
   auto const stamp = tag + " " + commit + " " + key;
   auto const name = project().root()[STR_NAME].Scalar();
@@ -240,6 +245,7 @@ void maiken::Application::fetchPrebuilt(std::string const& tag) {
   if (!in_place(out, marker, stamp)) {
     if (AppVars::INSTANCE().dryRun()) {
       KOUT(NON) << name << ": prebuilt " << url << " (" << key << ")";
+      buildDirectory(out);
       return;
     }
     std::filesystem::create_directories(out);
@@ -247,7 +253,22 @@ void maiken::Application::fetchPrebuilt(std::string const& tag) {
     auto const stem = AppVars::INSTANCE().envVar("MKN_LIB_PRE") + baseLibFilename();
     put_in_place(download_checked(files, url, out, stem), marker, stamp);
   }
+  buildDirectory(out);
   KOUT(NON) << name << ": prebuilt " << tag << " (" << key << ")";
+}
+
+// the library is found in dir: this app's build directory, and the library path every app using
+//  it, directly or not, took from it during setup
+void maiken::Application::buildDirectory(std::filesystem::path const& dir) {
+  mkn::kul::Dir const d(dir.string());
+  auto const from = bd.escr(), to = d.escr();
+  bd = d;
+  std::vector<Application*> apps{this};
+  for (std::size_t i = 0; i < apps.size(); ++i) {
+    std::replace(apps[i]->paths.begin(), apps[i]->paths.end(), from, to);
+    for (auto* r : apps[i]->rdeps)
+      if (std::find(apps.begin(), apps.end(), r) == apps.end()) apps.push_back(r);
+  }
 }
 
 bool maiken::Application::usePrebuilt() {
@@ -268,10 +289,7 @@ bool maiken::Application::usePrebuilt() {
       if (!mkn::kul::String::BOOL(mkn::kul::cli::receive(ss.str())))
         KEXIT(1, name, ": prebuilt binary not used, not building it");
     }
-    // built from source like any -d dependency, its build directory no longer prebuilt
-    std::error_code ec;
-    std::filesystem::remove(std::filesystem::path(buildDir().path()) / ".mkn.prebuilt", ec);
-    this->ig = 0;
+    this->ig = 0;  // built from source like any -d dependency
     return false;
   }
 }
