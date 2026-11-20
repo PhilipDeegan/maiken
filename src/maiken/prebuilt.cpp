@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -61,6 +62,11 @@ namespace {
 class Unusable : public std::runtime_error {  // why a prebuilt binary is not used
  public:
   using std::runtime_error::runtime_error;
+};
+
+class Missing : public Unusable {  // no binary for this clone and key, remembered for mkn.with.bin
+ public:
+  using Unusable::Unusable;
 };
 
 std::string capture(std::string const& cmd, std::vector<std::string> const& args) {
@@ -78,7 +84,13 @@ std::string capture(std::string const& cmd, std::vector<std::string> const& args
 }
 
 void download(std::string const& url, std::filesystem::path const& to) {
-  capture("curl", {"-fsSL", "--retry", "3", "-A", "mkn", "-o", mkn::kul::fsys::esc(to), url});
+  try {
+    capture("curl", {"-fsSL", "--retry", "3", "-A", "mkn", "-o", mkn::kul::fsys::esc(to), url});
+  } catch (Unusable const& e) {
+    if (std::string_view(e.what()).find("returned error: 404") != std::string_view::npos)
+      throw Missing("not found: " + url);
+    throw;
+  }
 }
 
 // https://github.com/<owner>/<repo> of a git@github.com:<owner>/<repo>(.git) or
@@ -182,12 +194,12 @@ YAML::Node manifest_files(Path const& out, std::string const& url, std::string c
   YAML::Node const mf = YAML::LoadFile(manifest.string());
   auto const built = mf["commit"].as<std::string>();
   if (built != commit)
-    throw Unusable("clone at " + commit.substr(0, 7) + ", " + tag + " built from " +
-                   built.substr(0, 7));
+    throw Missing("clone at " + commit.substr(0, 7) + ", " + tag + " built from " +
+                  built.substr(0, 7));
   auto const bins = mf["bins"];
-  if (!bins || !bins[key]) throw Unusable(tag + " has no binary for " + key);
+  if (!bins || !bins[key]) throw Missing(tag + " has no binary for " + key);
   auto const files = bins[key]["files"];
-  if (!files || !files.IsSequence() || files.size() == 0) throw Unusable(tag + " lists no files");
+  if (!files || !files.IsSequence() || files.size() == 0) throw Missing(tag + " lists no files");
   return files;
 }
 
@@ -227,9 +239,28 @@ void put_in_place(std::vector<std::pair<Path, Path>> const& checked, Path const&
   }
 }
 
+// mkn.with.bin's release for a clone at version: latest for the latest branch, the version for a
+//  tag at the clone's commit, else none (master and other branches build from source)
+std::string release_tag(std::string const& dir, std::string const& version) {
+  if (version == "latest") return version;
+  try {
+    for (auto const& t :
+         mkn::kul::String::LINES(capture("git", {"-C", dir, "tag", "--points-at", "HEAD"})))
+      if (t == version) return version;
+  } catch (Unusable const&) {  // not a git clone
+  }
+  return {};
+}
+
+bool missed(Path const& file, std::string const& stamp) {
+  std::ifstream f(file);
+  std::string s;
+  return f && std::getline(f, s) && s == stamp;
+}
+
 }  // namespace
 
-void maiken::Application::fetchPrebuilt(std::string const& tag) {
+bool maiken::Application::fetchPrebuilt(std::string const& tag, bool const remember) {
   // static unless a mode is stated, as it then links like a library built from source
   if (!ms || m == compiler::Mode::NONE) m = compiler::Mode::STAT;
   auto const key =
@@ -241,25 +272,33 @@ void maiken::Application::fetchPrebuilt(std::string const& tag) {
   Path const out =
       Path(project().dir().real()) / ".mkn" / "prebuilt" / mkn::kul::lang::to_string(m);
   auto const marker = out / ".mkn.prebuilt";
+  auto const miss = out / ".mkn.prebuilt.missing";  // remembered, not asked for again
   auto const stamp = tag + " " + commit + " " + key;
   auto const name = project().root()[STR_NAME].Scalar();
 
   if (!in_place(out, marker, stamp)) {
+    if (remember && missed(miss, stamp)) return false;
     if (AppVars::INSTANCE().dryRun()) {
       KOUT(NON) << name << ": prebuilt " << url << " (" << key << ")";
       buildDirectory(out);
-      return;
+      return true;
     }
     std::filesystem::create_directories(out);
-    auto const files = manifest_files(out, url, tag, commit, key);
-    auto const stem = AppVars::INSTANCE().envVar("MKN_LIB_PRE") + baseLibFilename();
-    put_in_place(download_checked(files, url, out, stem), marker, stamp);
+    try {
+      auto const files = manifest_files(out, url, tag, commit, key);
+      auto const stem = AppVars::INSTANCE().envVar("MKN_LIB_PRE") + baseLibFilename();
+      put_in_place(download_checked(files, url, out, stem), marker, stamp);
+    } catch (Missing const&) {
+      if (remember) std::ofstream(miss) << stamp << "\n";
+      throw;
+    }
   }
   buildDirectory(out);
   auto version = tag;  // the manifest's, for latest
   if (auto const mf = out / "mkn.manifest.yml"; std::filesystem::exists(mf))
     if (auto const v = YAML::LoadFile(mf.string())["version"]) version = v.Scalar();
   KOUT(NON) << name << ": prebuilt " << version << " (" << key << ")";
+  return true;
 }
 
 // the library is found in dir: this app's build directory, and the library path every app using
@@ -276,16 +315,30 @@ void maiken::Application::buildDirectory(std::filesystem::path const& dir) {
   }
 }
 
+// a dependency named in settings bin: uses that release, asking (or -q building) when it can't be
+//  used; with mkn.with.bin every other dependency uses its own version's release when there is one,
+//  else it's built as usual
 bool maiken::Application::usePrebuilt() {
   auto const name = project().root()[STR_NAME].Scalar();
   auto const& bins = Settings::INSTANCE().binaries();
-  if (!bins.count(name)) return false;
+  auto const named = bins.count(name) > 0;
+  auto const with = AppVars::INSTANCE().properkeys().at("mkn.with.bin");
+  std::string tag;
+  if (named)
+    tag = bins.at(name);
+  else if (with == "1" || with == "true")
+    tag = release_tag(mkn::kul::fsys::escaped_real(project().dir().path()),
+                      Path(project().dir().real()).filename().string());
+  if (tag.empty()) return false;
   try {
-    fetchPrebuilt(bins.at(name));
-    return true;
+    return fetchPrebuilt(tag, !named);
   } catch (std::exception const& e) {
     std::stringstream ss;
     ss << name << ": prebuilt binary not used - " << e.what();
+    if (!named) {
+      KOUT(NON) << ss.str();
+      return false;
+    }
     if (AppVars::INSTANCE().quiet()) {
       KOUT(NON) << ss.str() << ", building it";
     } else {

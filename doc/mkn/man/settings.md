@@ -44,6 +44,14 @@ property:
                                        #  this mkn's platform, "mkn -G mkn.bin.key" prints it and
                                        #  "mkn -vv" shows the default and a settings override
 
+    mkn.with.bin: 1                    # Optional, default 0. Every dependency not in bin: uses its
+                                       #  version's prebuilt release when there is one: latest for
+                                       #  the latest branch, the tag for a clone at that tag; other
+                                       #  branches (master) build from source. A missing release is
+                                       #  reported once, remembered in the clone's .mkn/prebuilt
+                                       #  until its commit or mkn.bin.key changes. -P mkn.with.bin=1
+                                       #  for one command
+
     mkn.env.automatic: true           # Optional, default true. Automatically prepend
                                        # dependency library directories onto PATH
                                        # (Windows) / LD_LIBRARY_PATH (nix) / also
