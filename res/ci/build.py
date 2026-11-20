@@ -25,6 +25,7 @@ import os
 import shlex
 import subprocess
 import sys
+import tempfile
 
 IS_WIN = sys.platform.startswith("win")
 EXE = ".exe" if IS_WIN else ""
@@ -66,16 +67,16 @@ def behaviour(mkn_bin):
 
 
 def prebuilt(mkn_bin, settings, args):
-    """test/prebuilt with -P mkn.with.bin=1, res/mkn/<settings>.yml: parse.yaml from its 0.8.0
-    release as a static and a shared library, and from the release marked Latest for version latest,
-    each clone keeping its binaries in .mkn/prebuilt/<mode>"""
+    """test/prebuilt, res/mkn/<settings>.yml: parse.yaml from its 0.8.0 release as a static and a
+    shared library and from the release marked Latest for version latest, each clone keeping its
+    binaries in .mkn/prebuilt/<mode>; with -P mkn.with.bin=1, a settings bin: entry and a settings
+    property: mkn.with.bin"""
     cwd = os.path.join(ROOT, "test", "prebuilt")
     xs = os.path.join(ROOT, "res", "mkn", settings).replace("\\", "/")
-    for profile, version, mode, release in (("static", "0.8.0", "static", "0.8.0"),
-                                            ("shared", "0.8.0", "shared", "0.8.0"),
-                                            ("latest", "latest", "static", "")):
-        cmd = [mkn_bin, "build", "run", "-d", "-p", profile, "-x", xs, "-P", "mkn.with.bin=1",
-               "-a", args]
+    repo = subprocess.run([mkn_bin, "-G", "MKN_REPO"], stdout=subprocess.PIPE, text=True)
+
+    def check(name, profile, x, extra, version, mode, release):
+        cmd = [mkn_bin, "build", "run", "-d", "-p", profile, "-x", x] + extra + ["-a", args]
         print(f"+ [{cwd}] {' '.join(cmd)}", flush=True)
         result = subprocess.run(
             cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -88,14 +89,27 @@ def prebuilt(mkn_bin, settings, args):
                 errors.append(f"missing '{expected}'")
         if "p/src/" in result.stdout.replace("\\", "/"):
             errors.append("yaml-cpp sources were compiled")
-        repo = subprocess.run([mkn_bin, "-G", "MKN_REPO"], stdout=subprocess.PIPE, text=True)
         cache = os.path.join(repo.stdout.strip(), "parse", "yaml", version, ".mkn", "prebuilt", mode)
         if not os.path.isfile(os.path.join(cache, ".mkn.prebuilt")):
             errors.append(f"no {cache}")
         if errors:
-            print(f"FAILED prebuilt {profile}: {', '.join(errors)}", file=sys.stderr)
+            print(f"FAILED prebuilt {name}: {', '.join(errors)}", file=sys.stderr)
             sys.exit(1)
-        print(f"PASS prebuilt {profile}", flush=True)
+        print(f"PASS prebuilt {name}", flush=True)
+
+    with_bin = ["-P", "mkn.with.bin=1"]
+    check("static", "static", xs, with_bin, "0.8.0", "static", "0.8.0")
+    check("shared", "shared", xs, with_bin, "0.8.0", "shared", "0.8.0")
+    check("latest", "latest", xs, with_bin, "latest", "static", "")
+
+    with tempfile.TemporaryDirectory() as tmp:  # settings extending res/mkn/<settings>.yml
+        for name, body in (("named", "bin:\n  parse.yaml: 0.8.0\n"),
+                           ("property", "property:\n  mkn.with.bin: 1\n")):
+            with open(os.path.join(tmp, name + ".yml"), "w") as f:
+                f.write(f"super: {xs}\n{body}")
+        x = lambda name: os.path.join(tmp, name).replace("\\", "/")
+        check("bin: entry", "static", x("named"), [], "0.8.0", "static", "0.8.0")
+        check("property: mkn.with.bin", "latest", x("property"), [], "latest", "static", "")
 
 
 def prebuilt_fallback(mkn_bin, args):
