@@ -240,6 +240,7 @@ class MKN_KUL_PUBLISH Application : public Constants {
   bool is_build_stale();
   // a dependency named in the settings' bin: map: its prebuilt binaries in place, see prebuilt.cpp
   bool usePrebuilt();
+  bool wantsPrebuilt() const;
   bool fetchPrebuilt(std::string const& tag, bool remember);
   void buildDirectory(std::filesystem::path const& dir);
 

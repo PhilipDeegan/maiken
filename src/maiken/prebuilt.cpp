@@ -261,8 +261,6 @@ bool missed(Path const& file, std::string const& stamp) {
 }  // namespace
 
 bool maiken::Application::fetchPrebuilt(std::string const& tag, bool const remember) {
-  // static unless a mode is stated, as it then links like a library built from source
-  if (!ms || m == compiler::Mode::NONE) m = compiler::Mode::STAT;
   auto const key =
       AppVars::INSTANCE().properkeys().at("mkn.bin.key") + ";mode=" + mkn::kul::lang::to_string(m);
   auto const [commit, url] =
@@ -315,18 +313,25 @@ void maiken::Application::buildDirectory(std::filesystem::path const& dir) {
   }
 }
 
+// named in settings bin:, or mkn.with.bin for every dependency
+bool maiken::Application::wantsPrebuilt() const {
+  auto const with = AppVars::INSTANCE().properkeys().at("mkn.with.bin");
+  return Settings::INSTANCE().binaries().count(project().root()[STR_NAME].Scalar()) > 0 ||
+         with == "1" || with == "true";
+}
+
 // a dependency named in settings bin: uses that release, asking (or -q building) when it can't be
 //  used; with mkn.with.bin every other dependency uses its own version's release when there is one,
 //  else it's built as usual
 bool maiken::Application::usePrebuilt() {
   auto const name = project().root()[STR_NAME].Scalar();
   auto const& bins = Settings::INSTANCE().binaries();
+  if (!wantsPrebuilt()) return false;
   auto const named = bins.count(name) > 0;
-  auto const with = AppVars::INSTANCE().properkeys().at("mkn.with.bin");
   std::string tag;
   if (named)
     tag = bins.at(name);
-  else if (with == "1" || with == "true")
+  else
     tag = release_tag(mkn::kul::fsys::escaped_real(project().dir().path()),
                       Path(project().dir().real()).filename().string());
   if (tag.empty()) return false;

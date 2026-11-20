@@ -324,6 +324,9 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
       m = compiler::Mode::STAT;
   }
   ms = !nm || AppVars::INSTANCE().shar() || AppVars::INSTANCE().stat();
+  // a dependency that may be prebuilt is static unless a mode is stated, before if_arg / pub_arg
+  //  keyed static: or shared: are read so its headers match the binary, e.g. no dllimport
+  if (!ro && (!ms || m == compiler::Mode::NONE) && wantsPrebuilt()) m = compiler::Mode::STAT;
 
   profile = p.size() ? p : project().root()[STR_NAME].Scalar();
   if (ro && AppVars::INSTANCE().installOverride().size()) {  // -i, supercedes the install tag
