@@ -65,43 +65,57 @@ def behaviour(mkn_bin):
         sys.exit(1)
 
 
+RPATH_DIR = os.path.join(ROOT, "test", "rpath")
+
+
+def rpath_mkn(mkn_bin, env, *cmd):
+    """mkn_bin with cmd in test/rpath, its output printed and returned with its exit code"""
+    cmd = [mkn_bin, *cmd]
+    print(f"+ [{RPATH_DIR}] {' '.join(cmd)}", flush=True)
+    result = subprocess.run(cmd, cwd=RPATH_DIR, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            text=True, env=env)
+    print(result.stdout, flush=True)
+    return result
+
+
+def rpath_run_errors(ran, runs):
+    """app's run: it prints its library's value, or fails with the library named (not on Windows)"""
+    if runs:
+        if ran.returncode == 0 and "rpath value 42" in ran.stdout:
+            return []
+        return [f"app did not run, exit {ran.returncode}"]
+    if ran.returncode == 0 or "rpath value 42" in ran.stdout:
+        return ["app ran without its library being found"]
+    if sys.platform != "win32" and "librpath" not in ran.stdout:
+        return ["its library is not named as missing"]
+    return []
+
+
+def rpath_link_errors(dry, rpathing):
+    """a dry run's link line: -Wl,-rpath only with mkn.link.rpathing"""
+    if dry.returncode != 0:
+        return [f"dry run exit {dry.returncode}"]
+    if ("-Wl,-rpath" in dry.stdout) != rpathing:
+        return ["-rpath " + ("missing from" if rpathing else "in") + " the link line"]
+    return []
+
+
 def rpath(mkn_bin, args, env=None):
     """test/rpath: app and its shared library built, then run, with the default settings (rpath),
     no_rpath_only.yml (mkn.link.rpathing false: found by the library path mkn sets) and no_rpath.yml
     (mkn.env.automatic false as well: not found); dry runs check -rpath on the link line, not on
     Windows which has none"""
-    cwd = os.path.join(ROOT, "test", "rpath")
     env = dict(os.environ, **(env or {}))
-
-    def mkn(*cmd):
-        cmd = [mkn_bin, *cmd]
-        print(f"+ [{cwd}] {' '.join(cmd)}", flush=True)
-        result = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                text=True, env=env)
-        print(result.stdout, flush=True)
-        return result
-
     for name, runs in (("default", True), ("no_rpath_only", True), ("no_rpath", False)):
-        x = [] if name == "default" else ["-x", os.path.join(cwd, name).replace("\\", "/")]
-        errors = []
-        built = mkn("clean", "build", "-d", *x, "-a", args)
+        x = [] if name == "default" else ["-x", os.path.join(RPATH_DIR, name).replace("\\", "/")]
+        built = rpath_mkn(mkn_bin, env, "clean", "build", "-d", *x, "-a", args)
         if built.returncode != 0:
-            errors.append(f"build exit {built.returncode}")
+            errors = [f"build exit {built.returncode}"]
         else:
-            ran = mkn("run", *x)
-            if runs and (ran.returncode != 0 or "rpath value 42" not in ran.stdout):
-                errors.append(f"app did not run, exit {ran.returncode}")
-            if not runs and (ran.returncode == 0 or "rpath value 42" in ran.stdout):
-                errors.append("app ran without its library being found")
-            if not runs and sys.platform != "win32" and "librpath" not in ran.stdout:
-                errors.append("its library is not named as missing")
-        if sys.platform != "win32" and name != "no_rpath":
-            dry = mkn("build", "-R", "-d", *x, "-a", args)
-            if dry.returncode != 0:
-                errors.append(f"dry run exit {dry.returncode}")
-            elif ("-Wl,-rpath" in dry.stdout) != (name == "default"):
-                errors.append("-rpath " + ("missing from" if name == "default" else "in") +
-                              " the link line")
+            errors = rpath_run_errors(rpath_mkn(mkn_bin, env, "run", *x), runs)
+        if sys.platform != "win32" and runs:
+            dry = rpath_mkn(mkn_bin, env, "build", "-R", "-d", *x, "-a", args)
+            errors += rpath_link_errors(dry, name == "default")
         if errors:
             print(f"FAILED rpath {name}: {', '.join(errors)}", file=sys.stderr)
             sys.exit(1)
