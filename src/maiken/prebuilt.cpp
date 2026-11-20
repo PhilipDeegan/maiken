@@ -84,6 +84,8 @@ std::string capture(std::string const& cmd, std::vector<std::string> const& args
 }
 
 void download(std::string const& url, std::filesystem::path const& to) {
+  if (!mkn::kul::env::WHICH("curl"))  // downloaded binaries in place need no curl, see in_place()
+    throw Unusable("curl not found on PATH, it downloads prebuilt binaries");
   try {
     capture("curl", {"-fsSL", "--retry", "3", "-A", "mkn", "-o", mkn::kul::fsys::esc(to), url});
   } catch (Unusable const& e) {
