@@ -134,6 +134,63 @@ def prebuilt_fallback(mkn_bin, args):
     print("PASS prebuilt fallback", flush=True)
 
 
+RPATH_DIR = os.path.join(ROOT, "test", "rpath")
+
+
+def rpath_mkn(mkn_bin, env, *cmd):
+    """mkn_bin with cmd in test/rpath, its output printed and returned with its exit code"""
+    cmd = [mkn_bin, *cmd]
+    print(f"+ [{RPATH_DIR}] {' '.join(cmd)}", flush=True)
+    result = subprocess.run(cmd, cwd=RPATH_DIR, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            text=True, env=env)
+    print(result.stdout, flush=True)
+    return result
+
+
+def rpath_run_errors(ran, runs):
+    """app's run: it prints its library's value, or fails with the library named (not on Windows)"""
+    if runs:
+        if ran.returncode == 0 and "rpath value 42" in ran.stdout:
+            return []
+        return [f"app did not run, exit {ran.returncode}"]
+    if ran.returncode == 0 or "rpath value 42" in ran.stdout:
+        return ["app ran without its library being found"]
+    if sys.platform != "win32" and "librpath" not in ran.stdout:
+        return ["its library is not named as missing"]
+    return []
+
+
+def rpath_link_errors(dry, rpathing):
+    """a dry run's link line: -Wl,-rpath only with mkn.link.rpathing"""
+    if dry.returncode != 0:
+        return [f"dry run exit {dry.returncode}"]
+    if ("-Wl,-rpath" in dry.stdout) != rpathing:
+        return ["-rpath " + ("missing from" if rpathing else "in") + " the link line"]
+    return []
+
+
+def rpath(mkn_bin, args, env=None):
+    """test/rpath: app and its shared library built, then run, with the default settings (rpath),
+    no_rpath_only.yml (mkn.link.rpathing false: found by the library path mkn sets) and no_rpath.yml
+    (mkn.env.automatic false as well: not found); dry runs check -rpath on the link line, not on
+    Windows which has none"""
+    env = dict(os.environ, **(env or {}))
+    for name, runs in (("default", True), ("no_rpath_only", True), ("no_rpath", False)):
+        x = [] if name == "default" else ["-x", os.path.join(RPATH_DIR, name).replace("\\", "/")]
+        built = rpath_mkn(mkn_bin, env, "clean", "build", "-d", *x, "-a", args)
+        if built.returncode != 0:
+            errors = [f"build exit {built.returncode}"]
+        else:
+            errors = rpath_run_errors(rpath_mkn(mkn_bin, env, "run", *x), runs)
+        if sys.platform != "win32" and runs:
+            dry = rpath_mkn(mkn_bin, env, "build", "-R", "-d", *x, "-a", args)
+            errors += rpath_link_errors(dry, name == "default")
+        if errors:
+            print(f"FAILED rpath {name}: {', '.join(errors)}", file=sys.stderr)
+            sys.exit(1)
+        print(f"PASS rpath {name}", flush=True)
+
+
 def nix_test(std_args, env, full):
     """ubuntu_gcc / ubuntu_clang / manylinux_gcc."""
     a = f'-a "{std_args}"'
@@ -142,6 +199,7 @@ def nix_test(std_args, env, full):
     run(built("build"), f"build test pack -tp test {a} -O 2 -g 0 -W 9", env=env)
     behaviour(built("build"))
     prebuilt(built("build"), "bin_nix", "-std=c++20")
+    rpath(built("build"), std_args, env)
 
     if not full:
         return
@@ -165,6 +223,7 @@ def job_macos_clang():
     run(built("build"), f"build test pack -Op test -x {tc}")
     behaviour(built("build"))
     prebuilt(built("build"), "bin_osx", "-std=c++20")
+    rpath(built("build"), "-std=c++20")
 
 
 def job_win_cl():
@@ -175,6 +234,7 @@ def job_win_cl():
     run(built("build"), f'build test pack -Op test -a "{std}"', env=env)
     behaviour(built("build"))
     prebuilt(built("build"), "bin_win", std)
+    rpath(built("build"), std, env)
 
 
 def job_win_clang():

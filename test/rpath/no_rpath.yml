@@ -1,0 +1,6 @@
+super: settings
+
+# no rpath in what is linked and no library path set by mkn: the shared library is not found
+property:
+  mkn.link.rpathing: false
+  mkn.env.automatic: false
