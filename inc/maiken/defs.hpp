@@ -39,8 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <string_view>
 
-#ifndef MKN_LANG
 #include "maiken/bin_key.hpp"
+
+#ifndef MKN_LANG
 #include "maiken/lang/defs.en.hpp"  // IWYU pragma: export
 #else
 #define MAIKEN_INCLUDE_MACRO(str) <maiken/lang/defs.str.hpp>

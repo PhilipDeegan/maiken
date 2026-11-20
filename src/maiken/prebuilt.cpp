@@ -269,7 +269,9 @@ bool maiken::Application::fetchPrebuilt(std::string const& tag, bool const remem
   //  library never meet, removing it downloads them again
   Path const out =
       Path(project().dir().real()) / ".mkn" / "prebuilt" / mkn::kul::lang::to_string(m);
-  auto const marker = out / ".mkn.prebuilt";
+  // a marker per library name: profiles with another out: share the directory, not the marker
+  auto const stem = AppVars::INSTANCE().envVar("MKN_LIB_PRE") + baseLibFilename();
+  auto const marker = out / ("." + stem + ".prebuilt");
   auto const miss = out / ".mkn.prebuilt.missing";  // remembered, not asked for again
   auto const stamp = tag + " " + commit + " " + key;
   auto const name = project().root()[STR_NAME].Scalar();
@@ -284,7 +286,6 @@ bool maiken::Application::fetchPrebuilt(std::string const& tag, bool const remem
     std::filesystem::create_directories(out);
     try {
       auto const files = manifest_files(out, url, tag, commit, key);
-      auto const stem = AppVars::INSTANCE().envVar("MKN_LIB_PRE") + baseLibFilename();
       put_in_place(download_checked(files, url, out, stem), marker, stamp);
     } catch (Missing const&) {
       if (remember) std::ofstream(miss) << stamp << "\n";

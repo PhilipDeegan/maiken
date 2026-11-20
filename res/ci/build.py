@@ -90,8 +90,9 @@ def prebuilt(mkn_bin, settings, args):
         if "p/src/" in result.stdout.replace("\\", "/"):
             errors.append("yaml-cpp sources were compiled")
         cache = os.path.join(repo.stdout.strip(), "parse", "yaml", version, ".mkn", "prebuilt", mode)
-        if not os.path.isfile(os.path.join(cache, ".mkn.prebuilt")):
-            errors.append(f"no {cache}")
+        marked = os.path.isdir(cache) and any(f.endswith(".prebuilt") for f in os.listdir(cache))
+        if not marked:  # .<library>.prebuilt, the library's marker
+            errors.append(f"no marker in {cache}")
         if errors:
             print(f"FAILED prebuilt {name}: {', '.join(errors)}", file=sys.stderr)
             sys.exit(1)
