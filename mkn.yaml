@@ -48,8 +48,8 @@ profile:
     nix_shared: -rdynamic
     win_cl: -nodefaultlib:libucrt.lib ucrt.lib
 
-# mkn as GitHub Actions builds it, dependencies at the versions above: modules, plus the http/2
-#  client in full (POSIX only, Windows builds mod); the shebang's -w is for local master builds
+# mkn with dependencies at the versions above: mod as GitHub Actions builds and releases it, full
+#  adds the http/2 client (POSIX only, needs OpenSSL); the shebang's -w is for local master builds
 - name: mod
   parent: bin
   mode: none  # as the default build: -K/-S decide, not bin's mode: static (a fully static mkn)

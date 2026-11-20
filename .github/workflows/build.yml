@@ -29,10 +29,10 @@ jobs:
         cp -r $PWD ~/.maiken/app/mkn/master
         [ "${{ matrix.cc }}" = "clang" ] && export CC=clang CXX=clang++
         ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ./mkn build -dtKp full -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ./mkn build -dtp bin_shared -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ./mkn build -dtKp server -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ldd bin/full/mkn
+        ldd bin/mod/mkn
         ldd bin/bin_shared/mkn
     - run: python3 res/ci/build.py ubuntu_${{ matrix.cc }}
 
@@ -47,8 +47,8 @@ jobs:
       run: |
         ldd mkn
         ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ./mkn build -dtKp full -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ldd bin/full/mkn
+        ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ldd bin/mod/mkn
     - run: python3 res/ci/build.py manylinux_gcc
 
   manylinux_arm:
@@ -62,8 +62,8 @@ jobs:
       run: |
         ldd mkn
         ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ./mkn build -dtKp full -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ldd bin/full/mkn
+        ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ldd bin/mod/mkn
     - run: python3 res/ci/build.py manylinux_arm_gcc
 
   macos:
@@ -78,7 +78,7 @@ jobs:
         mkdir -p ~/.maiken/app/mkn
         cp -r $PWD ~/.maiken/app/mkn/master
         ./mkn build -dtKO 2 -W 9 -g 0 -x res/mkn/clang
-        ./mkn build -dtKOp full -x res/mkn/clang
+        ./mkn build -dtKOp mod -x res/mkn/clang
     - run: python3 res/ci/build.py macos_clang
 
   windows:

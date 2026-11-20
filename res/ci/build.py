@@ -8,8 +8,8 @@ win_clang).
 via plain shell/make commands, before invoking it:
   - ./mkn (mkn.exe on Windows): the bootstrap binary from `make nix`/
     `make bsd`/win_build.sh, with no mkn.mod support
-  - bin/full/mkn (bin/mod/mkn on Windows): rebuilt with `-p full` (`-p mod`),
-    so it actually has module-loading support compiled in
+  - bin/mod/mkn: rebuilt with `-p mod`, so it actually has
+    module-loading support compiled in
   - (ubuntu only) bin/bin_shared/mkn: same as bin/mod/mkn but linked
     against a *shared* libparse.yaml instead of static + -rdynamic
 
@@ -198,15 +198,15 @@ def nix_test(std_args, env, full):
     a = f'-a "{std_args}"'
     run(BOOTSTRAP, f"build {a} -dtO 2 -g 0 -W 9", cwd=DEP_DIR, env=env)
     run(BOOTSTRAP, f"build -dtp test_mod {a} -O 2 -g 0 -W 9", env=env)
-    run(built("full"), f"build test pack -tp test {a} -O 2 -g 0 -W 9", env=env)
-    behaviour(built("full"))
-    prebuilt(built("full"), "bin_nix", "-std=c++20")
-    rpath(built("full"), std_args, env)
+    run(built("mod"), f"build test pack -tp test {a} -O 2 -g 0 -W 9", env=env)
+    behaviour(built("mod"))
+    prebuilt(built("mod"), "bin_nix", "-std=c++20")
+    rpath(built("mod"), std_args, env)
 
     if not full:
         return
 
-    prebuilt_fallback(built("full"), "-std=c++20")
+    prebuilt_fallback(built("mod"), "-std=c++20")
 
     # format still runs on the mod-less bootstrap - m/clang/format's mod.cpp
     # is currently out of sync with mkn.mod's Context API (pending changes to
@@ -222,10 +222,10 @@ def job_macos_clang():
     tc = os.path.join(ROOT, "res", "mkn", "clang")
     run(BOOTSTRAP, f"build -dtx {tc}", cwd=DEP_DIR)
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
-    run(built("full"), f"build test pack -Op test -x {tc}")
-    behaviour(built("full"))
-    prebuilt(built("full"), "bin_osx", "-std=c++20")
-    rpath(built("full"), "-std=c++20")
+    run(built("mod"), f"build test pack -Op test -x {tc}")
+    behaviour(built("mod"))
+    prebuilt(built("mod"), "bin_osx", "-std=c++20")
+    rpath(built("mod"), "-std=c++20")
 
 
 def job_win_cl():
