@@ -1,0 +1,6 @@
+# project properties hidden by a built-in of the same name, see test/run.py
+name: property
+property:
+  OS: mine  # a built-in: OS is used, with a warning
+  lib.version: 1  # never a built-in name
+main: main.cpp

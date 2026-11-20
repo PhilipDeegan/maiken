@@ -29,6 +29,18 @@ def source(profile, settings, ok, has=(), lacks=()):
     )
 
 
+def prop(args=(), has=(), lacks=()):
+    """test/property: a project property hidden by a built-in is reported, unless -P set it"""
+    return dict(
+        name=f"property {' '.join(args)}".rstrip(),
+        cwd=os.path.join(TEST, "property"),
+        args=["build", "-R", *args],
+        ok=True,
+        has=has,
+        lacks=lacks,
+    )
+
+
 def pub(project, args=(), ok=True, has=(), lacks=(), once=()):
     """test/pub_arg: pub_arg compile arguments of a project and its dependents"""
     return dict(
@@ -82,6 +94,9 @@ CASES = [
     pub("app", ["-p", "lib", "-K"], has=["LIB_STATIC"], lacks=["LIB_SHARED"]),
     # keys are checked as if_arg's
     pub("bad", ok=False, has=["malformed pub_arg key"]),
+    # a built-in hides a project property of the same name: reported, -P is on purpose
+    prop(has=["property OS is a built-in"], lacks=["lib.version"]),
+    prop(["-P", "OS=cli"], lacks=["is a built-in"]),
 ]
 
 

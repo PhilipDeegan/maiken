@@ -42,13 +42,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <string>
 #include <tuple>
+#include <unordered_set>
 #include <variant>
 
 maiken::Application& maiken::Application::resolveProperties() KTHROW(maiken::Exception) {
   ps.setDeletedKey("--DELETED--");
+  static std::unordered_set<std::string> warned;  // once per project file and property
   for (YAML::const_iterator it = project().root()[STR_PROPERTY].begin();
-       it != project().root()[STR_PROPERTY].end(); ++it)
-    ps[it->first.as<std::string>()] = it->second.as<std::string>();
+       it != project().root()[STR_PROPERTY].end(); ++it) {
+    auto const k = it->first.as<std::string>();
+    ps[k] = it->second.as<std::string>();
+    // a built-in of the same name is used instead, silently but for this; -P is on purpose
+    if (AppVars::INSTANCE().properkeys().count(k) && !AppVars::INSTANCE().cliProperkey(k) &&
+        warned.insert(project().file() + ":" + k).second)
+      KOUT(NON) << "WARNING: " << project().file() << ": property " << k
+                << " is a built-in, its value here is not used";
+  }
   for (YAML::const_iterator it = project().root()[STR_PROPERTY].begin();
        it != project().root()[STR_PROPERTY].end(); ++it) {
     std::string s = Properties::RESOLVE(*this, it->second.as<std::string>());

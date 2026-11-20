@@ -433,10 +433,8 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     };
 
     if (args.has(STR_PROPERTY))
-      splitArgs(
-          args.get(STR_PROPERTY), "property",
-          std::bind((void (AppVars::*)(std::string const&, std::string const&))&AppVars::properkeys,
-                    std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
+      splitArgs(args.get(STR_PROPERTY), "property",
+                [](auto const& k, auto const& v) { AppVars::INSTANCE().cliProperkey(k, v); });
     if (args.has(STR_ENV))
       splitArgs(
           args.get(STR_ENV), "environment",
