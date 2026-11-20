@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/os.hpp"
 #include "mkn/kul/proc.hpp"
 #include "mkn/kul/string.hpp"
+#include "mkn/kul/time.hpp"
 #include "yaml-cpp/yaml.h"
 
 #include <algorithm>
@@ -264,10 +265,21 @@ std::string release_tag(std::string const& dir, std::string const& version) {
   return {};
 }
 
-bool missed(Path const& file, std::string const& stamp) {
+// the stamp found missing before: skipped, unless it is old (STALE_MILLIS, or no time noted) and
+//  asked to check again, never with -q
+bool missed(Path const& file, std::string const& stamp, std::string const& name) {
   std::ifstream f(file);
-  std::string s;
-  return f && std::getline(f, s) && s == stamp;
+  std::string s, t;
+  if (!f || !std::getline(f, s) || s != stamp) return false;
+  auto const now = mkn::kul::Now::MILLIS();
+  bool const fresh = std::getline(f, t) && !t.empty() &&
+                     t.find_first_not_of("0123456789") == std::string::npos &&
+                     now - std::stoull(t) < maiken::STALE_MILLIS;
+  if (fresh || maiken::AppVars::INSTANCE().quiet()) return true;
+  std::stringstream ss;
+  ss << name << ": no prebuilt binary when last checked, see " << file.string() << std::endl
+     << "\tWould you like to check again (Y/n) - this message can be removed with -q";
+  return !mkn::kul::String::BOOL(mkn::kul::cli::receive(ss.str()));
 }
 
 }  // namespace
@@ -292,7 +304,7 @@ bool maiken::Application::fetchPrebuilt(std::string const& tag, bool const remem
   auto const name = project().root()[STR_NAME].Scalar();
 
   if (!in_place(out, marker, stamp)) {
-    if (remember && missed(miss, stamp)) return false;
+    if (remember && missed(miss, stamp, name)) return false;
     if (AppVars::INSTANCE().dryRun()) {
       KOUT(NON) << name << ": prebuilt " << url << " (" << key << ")";
       buildDirectory(out);
@@ -303,7 +315,7 @@ bool maiken::Application::fetchPrebuilt(std::string const& tag, bool const remem
       auto const files = manifest_files(out, url, tag, commit, key);
       put_in_place(download_checked(files, url, out, stem), marker, stamp);
     } catch (Missing const&) {
-      if (remember) std::ofstream(miss) << stamp << "\n";
+      if (remember) std::ofstream(miss) << stamp << "\n" << mkn::kul::Now::MILLIS() << "\n";
       throw;
     }
   }

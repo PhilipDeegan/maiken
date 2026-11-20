@@ -109,7 +109,7 @@ bool Application::is_build_stale() {
   mkn::kul::Dir d(".mkn/build");
   mkn::kul::File f("timestamp", d);
   if (!d || !f) return true;
-  size_t then = size_t{43200} * size_t{60} * size_t{1000};
+  size_t then = STALE_MILLIS;
   size_t now = mkn::kul::Now::MILLIS();
   size_t timestamp =
       mkn::kul::String::UINT64(std::string(mkn::kul::io::Reader(f.full()).readLine()));

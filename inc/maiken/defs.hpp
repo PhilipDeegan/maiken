@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/defs.hpp"
 #include "mkn/kul/except.hpp"
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -93,6 +94,10 @@ auto inline defaultSCMBranchName() { return mkn::kul::env::GET("MKN_DEFAULT_BRAN
 
 // what a prebuilt binary must match on this machine, the mkn.bin.key property's default
 constexpr std::string_view defaultBinKey() { return MKN_BIN_KEY; }
+
+// how old something remembered is before it is offered again (Y/n, -q never asks): a build, or a
+//  prebuilt binary found missing
+constexpr std::size_t STALE_MILLIS = std::size_t{43200} * 60 * 1000;  // 30 days
 
 class Exception : public mkn::kul::Exception {
  public:
