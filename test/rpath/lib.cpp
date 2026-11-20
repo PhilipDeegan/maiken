@@ -1,4 +1,7 @@
+extern "C"
 #if defined(_WIN32)
-__declspec(dllexport)
+    __declspec(dllexport)
 #endif
-extern "C" int rpath_value() { return 42; }
+    int rpath_value() {
+  return 42;
+}

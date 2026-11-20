@@ -66,29 +66,40 @@ def behaviour(mkn_bin):
 
 
 def rpath(mkn_bin, args, env=None):
-    """test/rpath: app and its shared library built and run with the default settings (rpath),
+    """test/rpath: app and its shared library built, then run, with the default settings (rpath),
     no_rpath_only.yml (mkn.link.rpathing false: found by the library path mkn sets) and no_rpath.yml
     (mkn.env.automatic false as well: not found); dry runs check -rpath on the link line, not on
     Windows which has none"""
     cwd = os.path.join(ROOT, "test", "rpath")
     env = dict(os.environ, **(env or {}))
-    for name, runs in (("default", True), ("no_rpath_only", True), ("no_rpath", False)):
-        x = [] if name == "default" else ["-x", os.path.join(cwd, name).replace("\\", "/")]
-        errors = []
-        cmd = [mkn_bin, "clean", "build", "run", "-d", *x, "-a", args]
+
+    def mkn(*cmd):
+        cmd = [mkn_bin, *cmd]
         print(f"+ [{cwd}] {' '.join(cmd)}", flush=True)
         result = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                 text=True, env=env)
         print(result.stdout, flush=True)
-        if runs and (result.returncode != 0 or "rpath value 42" not in result.stdout):
-            errors.append(f"app did not run, exit {result.returncode}")
-        if not runs and (result.returncode == 0 or "rpath value 42" in result.stdout):
-            errors.append("app ran without its library being found")
+        return result
+
+    for name, runs in (("default", True), ("no_rpath_only", True), ("no_rpath", False)):
+        x = [] if name == "default" else ["-x", os.path.join(cwd, name).replace("\\", "/")]
+        errors = []
+        built = mkn("clean", "build", "-d", *x, "-a", args)
+        if built.returncode != 0:
+            errors.append(f"build exit {built.returncode}")
+        else:
+            ran = mkn("run", *x)
+            if runs and (ran.returncode != 0 or "rpath value 42" not in ran.stdout):
+                errors.append(f"app did not run, exit {ran.returncode}")
+            if not runs and (ran.returncode == 0 or "rpath value 42" in ran.stdout):
+                errors.append("app ran without its library being found")
+            if not runs and sys.platform != "win32" and "librpath" not in ran.stdout:
+                errors.append("its library is not named as missing")
         if sys.platform != "win32" and name != "no_rpath":
-            dry = subprocess.run([mkn_bin, "build", "-R", "-d", *x, "-a", args], cwd=cwd,
-                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
-                                 env=env).stdout
-            if ("-Wl,-rpath" in dry) != (name == "default"):
+            dry = mkn("build", "-R", "-d", *x, "-a", args)
+            if dry.returncode != 0:
+                errors.append(f"dry run exit {dry.returncode}")
+            elif ("-Wl,-rpath" in dry.stdout) != (name == "default"):
                 errors.append("-rpath " + ("missing from" if name == "default" else "in") +
                               " the link line")
         if errors:
