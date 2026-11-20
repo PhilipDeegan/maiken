@@ -66,25 +66,28 @@ def behaviour(mkn_bin):
 
 
 def prebuilt(mkn_bin, settings, args):
-    """test/prebuilt: parse.yaml from its 0.8.0-beta.1 release binaries, res/mkn/<settings>.yml"""
+    """test/prebuilt: parse.yaml from its 0.8.0-beta.1 release binaries, res/mkn/<settings>.yml,
+    as a static and a shared library"""
     cwd = os.path.join(ROOT, "test", "prebuilt")
     xs = os.path.join(ROOT, "res", "mkn", settings).replace("\\", "/")
-    cmd = [mkn_bin, "build", "run", "-d", "-x", xs, "-a", args]
-    print(f"+ [{cwd}] {' '.join(cmd)}", flush=True)
-    result = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-    print(result.stdout, flush=True)
-    errors = []
-    if result.returncode != 0:
-        errors.append(f"exit {result.returncode}")
-    for expected in ("parse.yaml: prebuilt 0.8.0-beta.1", "parsed 3"):
-        if expected not in result.stdout:
-            errors.append(f"missing '{expected}'")
-    if "p/src/" in result.stdout.replace("\\", "/"):
-        errors.append("yaml-cpp sources were compiled")
-    if errors:
-        print(f"FAILED prebuilt: {', '.join(errors)}", file=sys.stderr)
-        sys.exit(1)
-    print("PASS prebuilt", flush=True)
+    for profile in ("static", "shared"):
+        cmd = [mkn_bin, "build", "run", "-d", "-p", profile, "-x", xs, "-a", args]
+        print(f"+ [{cwd}] {' '.join(cmd)}", flush=True)
+        result = subprocess.run(
+            cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        print(result.stdout, flush=True)
+        errors = []
+        if result.returncode != 0:
+            errors.append(f"exit {result.returncode}")
+        for expected in ("parse.yaml: prebuilt 0.8.0-beta.1", f"mode={profile})", "parsed 3"):
+            if expected not in result.stdout:
+                errors.append(f"missing '{expected}'")
+        if "p/src/" in result.stdout.replace("\\", "/"):
+            errors.append("yaml-cpp sources were compiled")
+        if errors:
+            print(f"FAILED prebuilt {profile}: {', '.join(errors)}", file=sys.stderr)
+            sys.exit(1)
+        print(f"PASS prebuilt {profile}", flush=True)
 
 
 def prebuilt_fallback(mkn_bin, args):

@@ -1,7 +1,18 @@
-# a prebuilt dependency, see res/ci/build.py prebuilt() and res/mkn/bin*.yml
+# prebuilt dependencies, see res/ci/build.py prebuilt() and res/mkn/bin*.yml
 name: prebuilt
-main: main.cpp
-dep:
-- name: parse.yaml
-  version: 0.8.0-beta.1
-  profile: static
+parent: static
+
+profile:
+- name: static
+  main: main.cpp
+  dep:
+  - name: parse.yaml
+    version: 0.8.0-beta.1
+    profile: static
+
+- name: shared  # on Windows a .dll and its import .lib
+  main: main.cpp
+  dep:
+  - name: parse.yaml
+    version: 0.8.0-beta.1
+    profile: shared
