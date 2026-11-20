@@ -69,17 +69,17 @@ def behaviour(mkn_bin):
 def prebuilt(mkn_bin, settings, args):
     """test/prebuilt, res/mkn/<settings>.yml: parse.yaml from its 0.8.0 release as a static and a
     shared library and from the release marked Latest for version latest, each clone keeping its
-    binaries in .mkn/prebuilt/<mode>; with -P mkn.with.bin=1, a settings bin: entry and a settings
-    property: mkn.with.bin"""
+    binaries in .mkn/prebuilt/<mode>; with -P mkn.with.bin=1, MKN_WITH_BIN=1, a settings bin: entry
+    and a settings property: mkn.with.bin"""
     cwd = os.path.join(ROOT, "test", "prebuilt")
     xs = os.path.join(ROOT, "res", "mkn", settings).replace("\\", "/")
     repo = subprocess.run([mkn_bin, "-G", "MKN_REPO"], stdout=subprocess.PIPE, text=True)
 
-    def check(name, profile, x, extra, version, mode, release):
+    def check(name, profile, x, extra, version, mode, release, env=None):
         cmd = [mkn_bin, "build", "run", "-d", "-p", profile, "-x", x] + extra + ["-a", args]
         print(f"+ [{cwd}] {' '.join(cmd)}", flush=True)
-        result = subprocess.run(
-            cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        result = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                text=True, env=env)
         print(result.stdout, flush=True)
         errors = []
         if result.returncode != 0:
@@ -101,6 +101,8 @@ def prebuilt(mkn_bin, settings, args):
     check("static", "static", xs, with_bin, "0.8.0", "static", "0.8.0")
     check("shared", "shared", xs, with_bin, "0.8.0", "shared", "0.8.0")
     check("latest", "latest", xs, with_bin, "latest", "static", "")
+    check("MKN_WITH_BIN", "latest", xs, [], "latest", "static", "",
+          dict(os.environ, MKN_WITH_BIN="1"))
 
     with tempfile.TemporaryDirectory() as tmp:  # settings extending res/mkn/<settings>.yml
         for name, body in (("named", "bin:\n  parse.yaml: 0.8.0\n"),

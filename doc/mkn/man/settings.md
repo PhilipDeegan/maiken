@@ -53,8 +53,8 @@ property:
                                        #  the latest branch, the tag for a clone at that tag; other
                                        #  branches (master) build from source. A missing release is
                                        #  reported once, remembered in the clone's .mkn/prebuilt
-                                       #  until its commit or mkn.bin.key changes. -P mkn.with.bin=1
-                                       #  for one command
+                                       #  until its commit or mkn.bin.key changes. The environment
+                                       #  variable MKN_WITH_BIN overrides it, -P mkn.with.bin=1 both
 
     mkn.env.automatic: true           # Optional, default true. Automatically prepend
                                        # dependency library directories onto PATH

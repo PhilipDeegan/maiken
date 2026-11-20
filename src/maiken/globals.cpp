@@ -87,7 +87,8 @@ void maiken::AppVars::POST_CONSTRUCT() {
     pks["MKN_MOD_REPO"] = (mkn::kul::user::home(STR_MAIKEN) / STR_MOD_REPO).string();
 
   // prebuilt binaries are matched against mkn.bin.key and used for every dependency with
-  //  mkn.with.bin, see prebuilt.cpp; settings' property: can set them, -P overrides that
+  //  mkn.with.bin, see prebuilt.cpp; settings' property: can set them, MKN_WITH_BIN overrides
+  //  mkn.with.bin (e.g. one env: line in a CI workflow), -P overrides both
   pks["mkn.bin.key"] = defaultBinKey();
   pks["mkn.with.bin"] = "0";
   for (auto const* const k : {"mkn.bin.key", "mkn.with.bin"})
@@ -96,4 +97,6 @@ void maiken::AppVars::POST_CONSTRUCT() {
         pks[k] = ps[k].Scalar();
         break;
       }
+  if (mkn::kul::env::EXISTS("MKN_WITH_BIN"))
+    pks["mkn.with.bin"] = mkn::kul::env::GET("MKN_WITH_BIN");
 }
