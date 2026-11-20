@@ -79,7 +79,7 @@ compiler:
 bin:                                    # Optional, dependencies used as prebuilt binaries instead of being
   parse.yaml: 0.8.0                     #  built: project name to release tag. Downloaded from the project's
                                         #  GitHub release (mkn.manifest.yml) into its clone's
-                                        #  .mkn/prebuilt/<tag>/<static|shared>, its build directory, which
+                                        #  .mkn/prebuilt/<static|shared>, its build directory, which
                                         #  can be deleted to download again. Never compiled, linked or
                                         #  cleaned; a binary that can't be used is built from source with
                                         #  -q, otherwise mkn asks

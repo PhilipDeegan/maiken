@@ -234,10 +234,10 @@ void maiken::Application::fetchPrebuilt(std::string const& tag) {
       AppVars::INSTANCE().properkeys().at("mkn.bin.key") + ";mode=" + mkn::kul::lang::to_string(m);
   auto const [commit, url] =
       clone_release(mkn::kul::fsys::escaped_real(project().dir().path()), tag);
-  // a cache in the clone, a directory per mode so a static and a shared library never meet,
-  //  removing it downloads them again
+  // a cache in the clone, itself one version, a directory per mode so a static and a shared
+  //  library never meet, removing it downloads them again
   Path const out =
-      Path(project().dir().real()) / ".mkn" / "prebuilt" / tag / mkn::kul::lang::to_string(m);
+      Path(project().dir().real()) / ".mkn" / "prebuilt" / mkn::kul::lang::to_string(m);
   auto const marker = out / ".mkn.prebuilt";
   auto const stamp = tag + " " + commit + " " + key;
   auto const name = project().root()[STR_NAME].Scalar();
