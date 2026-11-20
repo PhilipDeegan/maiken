@@ -42,7 +42,11 @@ property:
 
     mkn.bin.key: os=nix;...           # Optional, what prebuilt binaries (bin:) must match, defaults to
                                        #  this mkn's platform, "mkn -G mkn.bin.key" prints it and
-                                       #  "mkn -vv" shows the default and a settings override
+                                       #  "mkn -vv" shows the default and a settings override. The
+                                       #  default's machine parts (os, arch, libc) are detected, its
+                                       #  toolchain parts (cxxrt, crt) are what releases use: a settings
+                                       #  file for another toolchain (clang -stdlib=libc++, cl -MT)
+                                       #  sets this, see inc/maiken/bin_key.hpp
 
     mkn.with.bin: 1                    # Optional, default 0. Every dependency not in bin: uses its
                                        #  version's prebuilt release when there is one: latest for
