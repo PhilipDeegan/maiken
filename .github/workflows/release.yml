@@ -1,0 +1,231 @@
+name: release
+
+# mkn's release binaries, built in the newest images (:latest) on purpose: every PR into master or
+#  latest builds them, a PR merged into latest publishes them as mkn.yaml's version: that tag and a
+#  GitHub release marked latest, so https://github.com/mkn/mkn/releases/latest/download/<file> is the
+#  newest mkn. Dependency versions left as `latest` (property <dep>.version: latest) are pinned to the
+#  dependency's newest release tag: -P for the builds, a commit on top of the merge commit for the tag,
+#  the latest branch keeps `latest`. A pre-release version (e.g. 0.1.0-beta.1) publishes a GitHub
+#  pre-release, never marked latest. Run by hand it only builds.
+
+on:
+  pull_request:
+    branches: [ master, latest ]
+    types: [ opened, synchronize, reopened, closed ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event.action == 'closed' }}
+  cancel-in-progress: true
+
+env:
+  MKN_WITH_BIN: 0  # dependencies built from source
+  # a merged PR builds its merge commit, an open one GitHub's merge of it
+  REF: ${{ github.event.action == 'closed' && github.event.pull_request.merge_commit_sha || '' }}
+  PUBLISH: ${{ github.event.action == 'closed' && github.event.pull_request.merged && github.base_ref == 'latest' }}
+
+jobs:
+  pins:
+    if: github.event.action != 'closed' || (github.event.pull_request.merged && github.base_ref == 'latest')
+    runs-on: ubuntu-latest
+    outputs:
+      pins: ${{ steps.pins.outputs.pins }}  # <key>=<tag>,... for -P, empty when nothing is `latest`
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ env.REF }}
+    - id: pins
+      run: |
+        set -euo pipefail
+        if [ "$PUBLISH" = true ]; then
+          version=$(yq '.version' mkn.yaml)
+          if [ -z "$version" ] || [ "$version" = null ] || [ "$version" = master ]; then
+            echo "mkn.yaml version must be a release on latest, not '$version'"; exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$version" > /dev/null; then
+            echo "tag $version exists, bump mkn.yaml version"; exit 1
+          fi
+        fi
+        pins=
+        for key in $(yq '.property // {} | to_entries | .[] | select(.key == "*.version" and .value == "latest") | .key' mkn.yaml); do
+          dep=${key%.version}
+          pin=$(git ls-remote --tags --refs --sort=-v:refname "https://github.com/mkn/$dep" \
+            | sed -n 's#.*refs/tags/\([0-9]*\.[0-9]*\.[0-9]*\)$#\1#p' | head -1)
+          if [ -z "$pin" ]; then echo "no release tag found for $dep"; exit 1; fi
+          pins="${pins:+$pins,}$key=$pin"
+        done
+        echo "pins=$pins" | tee -a "$GITHUB_OUTPUT"
+
+  build:
+    needs: pins
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      PINS: ${{ needs.pins.outputs.pins }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ env.REF }}
+    - if: matrix.os == 'windows-latest'
+      run: bash -c "rm /bin/link" # interferes with cl/link.exe
+    - if: matrix.os == 'windows-latest'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+    - if: matrix.os == 'windows-latest'
+      shell: bash
+      env:
+        MKN_CL_PREFERRED: 1
+      run: |
+        set -ex
+        ./res/ci/win_build.sh
+        ./mkn.exe build -dtKp mod -O 3 -g 0 -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE" ${PINS:+-P $PINS}
+
+    - if: matrix.os == 'ubuntu-latest'
+      env:
+        MKN_GCC_PREFERRED: 1
+      run: |
+        ./res/ci/nixish_setup.sh && make nix
+        KLOG=3 ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_nix ${PINS:+-P $PINS}
+
+    - if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v4.4.0
+      with:
+        name: maiken-${{ matrix.os }}
+        path: bin/mod/mkn_nix
+        retention-days: 1
+
+    - if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v4.4.0
+      with:
+        name: maiken-${{ matrix.os }}
+        path: bin/mod/mkn.exe
+        retention-days: 1
+
+
+  build_many_linux:
+    needs: pins
+    runs-on: ubuntu-22.04
+    container: quay.io/pypa/manylinux_2_28_x86_64:latest
+    env:
+      PINS: ${{ needs.pins.outputs.pins }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ env.REF }}
+    - run: ./res/ci/nixish_setup.sh && make nix
+    - env:
+        MKN_GCC_PREFERRED: 1
+      run: KLOG=3 ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_manylinux ${PINS:+-P $PINS}
+    - uses: actions/upload-artifact@v4.4.0
+      with:
+        name: maiken-manylinux-latest
+        path: bin/mod/mkn_manylinux
+        retention-days: 1
+
+
+  build_many_linux_arm:
+    needs: pins
+    runs-on: ubuntu-26.04-arm
+    container: quay.io/pypa/manylinux_2_28_aarch64:latest
+    env:
+      PINS: ${{ needs.pins.outputs.pins }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ env.REF }}
+    - run: ./res/ci/nixish_setup.sh && make nix
+    - env:
+        MKN_GCC_PREFERRED: 1
+      run: KLOG=3 ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_manylinux_arm ${PINS:+-P $PINS}
+    - uses: actions/upload-artifact@v4.4.0
+      with:
+        name: maiken-manylinux-arm-latest
+        path: bin/mod/mkn_manylinux_arm
+        retention-days: 1
+
+  build_arm_macos:
+    needs: pins
+    runs-on: macos-latest
+    env:
+      PINS: ${{ needs.pins.outputs.pins }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ env.REF }}
+    - run: ./res/ci/nixish_setup.sh && make bsd
+    - env:
+        MKN_GCC_PREFERRED: 1
+      run: KLOG=3 ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_arm_osx ${PINS:+-P $PINS}
+    - uses: actions/upload-artifact@v4.4.0
+      with:
+        name: maiken-macos-latest
+        path: bin/mod/mkn_arm_osx
+        retention-days: 1
+
+  build_arm_linux:
+    needs: pins
+    runs-on: ubuntu-26.04-arm
+    env:
+      PINS: ${{ needs.pins.outputs.pins }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ env.REF }}
+    - run: ./res/ci/nixish_setup.sh && make nix
+    - env:
+        MKN_GCC_PREFERRED: 1
+      run: KLOG=3 ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_arm_linux ${PINS:+-P $PINS}
+    - uses: actions/upload-artifact@v4.4.0
+      with:
+        name: maiken-ubuntu-arm-latest
+        path: bin/mod/mkn_arm_linux
+        retention-days: 1
+
+  publish:
+    needs: [ pins, build, build_many_linux, build_many_linux_arm, build_arm_macos, build_arm_linux ]
+    if: github.event.action == 'closed' && github.event.pull_request.merged && github.base_ref == 'latest'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      PINS: ${{ needs.pins.outputs.pins }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ env.REF }}
+    - uses: actions/download-artifact@v5
+      with:
+        path: dist
+    - id: version
+      run: |
+        set -euo pipefail
+        version=$(yq '.version' mkn.yaml)
+        # the pins in mkn.yaml for the tag: only those lines, yq -i would reformat the file
+        for pin in ${PINS//,/ }; do
+          key=${pin%%=*}; tag=${pin#*=}; k=${key//./\\.}
+          sed -i "s/^\( *$k: *\)latest/\1$tag/" mkn.yaml
+          grep -q "^ *$k: *$tag\( \|$\)" mkn.yaml || { echo "could not pin $key"; exit 1; }
+        done
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git commit -qam "$version: dependency versions pinned" || true
+        git tag -a "$version" -m "$version"
+        git push origin "refs/tags/$version"
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+        case "$version" in *-*) echo "prerelease=true";; *) echo "prerelease=false";; esac >> "$GITHUB_OUTPUT"
+    - uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.version.outputs.version }}
+        name: ${{ steps.version.outputs.version }}
+        prerelease: ${{ steps.version.outputs.prerelease }}
+        make_latest: ${{ steps.version.outputs.prerelease == 'false' }}
+        files: |
+          dist/maiken-windows-latest/mkn.exe
+          dist/maiken-ubuntu-latest/mkn_nix
+          dist/maiken-manylinux-latest/mkn_manylinux
+          dist/maiken-manylinux-arm-latest/mkn_manylinux_arm
+          dist/maiken-macos-latest/mkn_arm_osx
+          dist/maiken-ubuntu-arm-latest/mkn_arm_linux

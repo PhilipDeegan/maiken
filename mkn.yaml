@@ -1,10 +1,10 @@
 #! clean build test -qdtKw mkn.mod,mkn.ram[https] -W 9
 
 name: mkn
-version: master
+version: master  # on the latest branch a release, e.g. 0.1.0: merged there it is tagged and published
 property:
   DATE: 20_NOV_2026
-  # dependency versions, only here: master on master, released versions on latest
+  # dependency versions, only here: master on master, latest on the latest branch, releases pinned in tags
   mkn.kul.version: master
   parse.yaml.version: master
   mkn.mod.version: master
@@ -48,6 +48,17 @@ profile:
     nix_shared: -rdynamic
     win_cl: -nodefaultlib:libucrt.lib ucrt.lib
 
+# mkn with dependencies at the versions above: mod as GitHub Actions builds and releases it, full
+#  adds the http/2 client (POSIX only, needs OpenSSL); the shebang's -w is for local master builds
+- name: mod
+  parent: bin
+  mode: none  # as the default build: -K/-S decide, not bin's mode: static (a fully static mkn)
+  with: mkn.mod#${mkn.mod.version}
+
+- name: full
+  parent: mod
+  with: mkn.ram#${mkn.ram.version}[https2]
+
 - name: static
   parent: bin
   mode: static
@@ -57,7 +68,7 @@ profile:
 # still dlopen() cleanly when their yaml-cpp dependency is a separate .so
 # rather than baked into this binary. See test_mod's mkn.yaml/mod.cpp.
 - name: bin_shared
-  parent: bin
+  parent: mod
   mode: none
   dep: parse.yaml#${parse.yaml.version}[shared]
 

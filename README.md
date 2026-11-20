@@ -39,7 +39,7 @@ mkn build run
 ## Install
 
 Prebuilt binaries are published on the
-[latest release](https://github.com/mkn/mkn/releases/tag/latest):
+[latest release](https://github.com/mkn/mkn/releases/latest):
 
 | Platform              | Asset                |
 |-----------------------|----------------------|
@@ -51,7 +51,7 @@ Prebuilt binaries are published on the
 | Windows x86_64        | `mkn.exe`            |
 
 ```sh
-curl -Lo mkn https://github.com/mkn/mkn/releases/download/latest/mkn_manylinux
+curl -Lo mkn https://github.com/mkn/mkn/releases/latest/download/mkn_manylinux
 chmod +x mkn && mv mkn ~/.local/bin/   # or anywhere on PATH
 mkn -v
 ```
