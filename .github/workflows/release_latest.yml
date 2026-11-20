@@ -1,4 +1,8 @@
 name: Production Builds
+
+# the rolling "latest" release from master: tag latest, maiken-*-latest binaries, built in the
+#  newest images (:latest) on purpose
+
 on:
   push:
     branches: [ master ]
