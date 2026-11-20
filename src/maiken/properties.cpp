@@ -55,8 +55,8 @@ maiken::Application& maiken::Application::resolveProperties() KTHROW(maiken::Exc
     // a built-in of the same name is used instead, silently but for this; -P is on purpose
     if (AppVars::INSTANCE().properkeys().count(k) && !AppVars::INSTANCE().cliProperkey(k) &&
         warned.insert(project().file() + ":" + k).second)
-      KOUT(NON) << "WARNING: " << project().file() << ": property " << k
-                << " is a built-in, its value here is not used";
+      KERR << "WARNING: " << project().file() << ": property " << k
+           << " is a built-in, its value here is not used";  // stderr: not on -G's stdout
   }
   for (YAML::const_iterator it = project().root()[STR_PROPERTY].begin();
        it != project().root()[STR_PROPERTY].end(); ++it) {

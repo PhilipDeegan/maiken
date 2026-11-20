@@ -364,8 +364,11 @@ bool maiken::Application::usePrebuilt() {
     tag = release_tag(mkn::kul::fsys::escaped_real(project().dir().path()),
                       Path(project().dir().real()).filename().string());
   if (tag.empty()) return false;
+  // a release was meant to be used: without it the dependency is built from source, -d or not
   try {
-    return fetchPrebuilt(tag, !named);
+    if (fetchPrebuilt(tag, !named)) return true;
+    this->ig = 0;  // remembered missing
+    return false;
   } catch (std::exception const& e) {
     std::stringstream ss;
     ss << name << ": prebuilt binary not used - " << e.what();
@@ -375,6 +378,7 @@ bool maiken::Application::usePrebuilt() {
         KOUT(NON) << ss.str();
       else if (!std::exchange(told_no_curl, true))
         KOUT(NON) << e.what() << ": dependencies without downloaded binaries are built";
+      this->ig = 0;
       return false;
     }
     if (AppVars::INSTANCE().quiet()) {
@@ -385,7 +389,7 @@ bool maiken::Application::usePrebuilt() {
       if (!mkn::kul::String::BOOL(mkn::kul::cli::receive(ss.str())))
         KEXIT(1, name, ": prebuilt binary not used, not building it");
     }
-    this->ig = 0;  // built from source like any -d dependency
+    this->ig = 0;
     return false;
   }
 }

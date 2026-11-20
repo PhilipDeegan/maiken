@@ -486,13 +486,12 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
     if (args.has(STR_INFO)) apps[0]->showConfig(1);
     if (args.has(STR_TREE)) apps[0]->showTree();
     if (args.has(STR_GET)) {
+      // the value ${get} resolves to: a built-in or -P before the project's, as Properties::RESOLVE
       auto const& get(args.get(STR_GET));
-      if (apps[0]->properties().count(get)) {
-        KOUT(NON) << (*apps[0]->properties().find(get)).second;
-      }
-      if (AppVars::INSTANCE().properkeys().count(get)) {
+      if (AppVars::INSTANCE().properkeys().count(get))
         KOUT(NON) << (*AppVars::INSTANCE().properkeys().find(get)).second;
-      }
+      else if (apps[0]->properties().count(get))
+        KOUT(NON) << (*apps[0]->properties().find(get)).second;
       KEXIT(0, "");
     }
   }

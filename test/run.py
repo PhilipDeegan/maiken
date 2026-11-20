@@ -97,6 +97,12 @@ CASES = [
     # a built-in hides a project property of the same name: reported, -P is on purpose
     prop(has=["property OS is a built-in"], lacks=["lib.version"]),
     prop(["-P", "OS=cli"], lacks=["is a built-in"]),
+    # -G prints the value alone on stdout, the warning goes to stderr
+    dict(name="property -G OS", cwd=os.path.join(TEST, "property"), args=["-G", "OS"], ok=True,
+         has=["property OS is a built-in"], lacks=[], stdout="nix" if sys.platform.startswith("linux")
+         else "bsd" if APPLE else "win"),
+    dict(name="property -G unknown", cwd=os.path.join(TEST, "property"), args=["-G", "mkn.nope"],
+         ok=True, has=[], lacks=[], stdout=""),
     # "@" is the top level (-p @, dep[@], prebuilt keys' profile=@), never a profile's name
     dict(name="profile named @", cwd=os.path.join(TEST, "profile_at"), args=["build", "-R"], ok=False,
          has=['Profile may not be named "@"'], lacks=[]),
@@ -104,15 +110,19 @@ CASES = [
 
 
 def run(mkn, case):
+    """has/lacks/once look at stdout and stderr together; "stdout", when given, is all of stdout"""
+    separate = "stdout" in case
     result = subprocess.run(
         [mkn] + case["args"],
         cwd=case["cwd"],
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        stderr=subprocess.PIPE if separate else subprocess.STDOUT,
         text=True,
     )
-    out = result.stdout
+    out = result.stdout + (result.stderr if separate else "")
     errors = []
+    if separate and result.stdout.strip() != case["stdout"]:
+        errors.append(f"stdout {result.stdout.strip()!r}, expected {case['stdout']!r}")
     if (result.returncode == 0) != case["ok"]:
         errors.append(f"exit {result.returncode}, expected {'0' if case['ok'] else 'failure'}")
     errors += [f"missing '{s}'" for s in case["has"] if s not in out]
