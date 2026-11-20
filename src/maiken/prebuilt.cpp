@@ -29,7 +29,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 // Prebuilt dependency binaries: a project named in the settings' bin: map is downloaded from its
-//  GitHub release's mkn.manifest.yml into its build directory instead of being built
+//  GitHub release's mkn.manifest.yml into its build directory instead of being built; the manifest
+//  command writes that mkn.manifest.yml
 #include "maiken/app.hpp"
 #include "maiken/defs.hpp"
 #include "maiken/global.hpp"
@@ -51,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <map>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -392,4 +394,86 @@ bool maiken::Application::usePrebuilt() {
     this->ig = 0;
     return false;
   }
+}
+
+// the manifest command, after this run's build: the top level's libraries for its profile and mode
+//  copied into .mkn/manifest/ as <name>-<os>-<arch>-<profile, default for @>-<mode><ext>, with
+//  their entry "<mkn.bin.key>;profile=<profile|@>;mode=<mode>" in .mkn/manifest/mkn.manifest.yml;
+//  other entries are kept, each build of a release adds its own. What a GitHub release publishes
+//  for fetchPrebuilt(), every platform's entries merged into one file
+void maiken::Application::manifest() KTHROW(mkn::kul::Exception) {
+  auto const name = project().root()[STR_NAME].Scalar();
+  auto const mode = mkn::kul::lang::to_string(m);
+  if (mode != "static" && mode != "shared")
+    KEXIT(1, name, ": manifest needs a static or shared build, not ", mode);
+  auto const profile = p.empty() ? std::string{"@"} : p;
+  auto const& bin_key = AppVars::INSTANCE().properkeys().at("mkn.bin.key");
+  auto const key = bin_key + ";profile=" + profile + ";mode=" + mode;
+  Path const out = Path(project().dir().real()) / ".mkn" / "manifest";
+  Path const mf = out / "mkn.manifest.yml";
+  if (AppVars::INSTANCE().dryRun()) {
+    KOUT(NON) << name << ": manifest " << key << " -> " << mf.string();
+    return;
+  }
+
+  auto const field = [&](std::string const& f) {
+    for (auto const& part : mkn::kul::String::SPLIT(bin_key, ';'))
+      if (part.rfind(f + "=", 0) == 0) return part.substr(f.size() + 1);
+    return std::string{"unknown"};
+  };
+  auto const short_name = name + "-" + field("os") + "-" + field("arch") + "-" +
+                          (p.empty() ? std::string{"default"} : p) + "-" + mode;
+
+  struct Bin {
+    std::string mkn;
+    std::vector<std::pair<std::string, std::string>> files;  // file, sha256
+  };
+  std::map<std::string, Bin> bins;
+  if (std::filesystem::exists(mf)) {
+    auto const old = YAML::LoadFile(mf.string());
+    if (old["name"] && old["name"].Scalar() != name)
+      KEXIT(1, mf.string(), " is for ", old["name"].Scalar(), ", not ", name);
+    for (auto const& b : old["bins"]) {
+      auto& bin = bins[b.first.Scalar()];
+      bin.mkn = b.second["mkn"].Scalar();
+      for (auto const& f : b.second["files"])
+        bin.files.emplace_back(f["file"].Scalar(), f["sha256"].Scalar());
+    }
+  }
+
+  // only this mode's kinds of library: a stale one of the other mode is not this build's
+  std::filesystem::create_directories(out);
+  Path const built = inst ? inst.real() : buildDir().real();
+  auto const stem = AppVars::INSTANCE().envVar("MKN_LIB_PRE") + baseLibFilename();
+  auto const exts = mode == "static" ? std::vector<std::string>{".a", ".lib"}
+                                     : std::vector<std::string>{".so", ".dylib", ".dll", ".lib"};
+  Bin bin{Application::VERSION().substr(0, Application::VERSION().find(' ')), {}};
+  for (auto const& ext : exts) {
+    Path const lib = built / (stem + ext);
+    if (!std::filesystem::is_regular_file(lib)) continue;
+    auto const file = short_name + ext;
+    std::filesystem::copy_file(lib, out / file, std::filesystem::copy_options::overwrite_existing);
+    bin.files.emplace_back(file, sha256(out / file));
+  }
+  if (bin.files.empty())
+    KEXIT(1, name, ": no ", mode, " library ", stem, " in ", built.string(), " for the manifest");
+  bins[key] = bin;
+
+  std::string commit;
+  try {
+    commit = capture(
+        "git", {"-C", mkn::kul::fsys::escaped_real(project().dir().path()), "rev-parse", "HEAD"});
+  } catch (Unusable const&) {  // not a git clone: no commit, a release sets it
+  }
+  std::ofstream o(mf);
+  o << "format: 1\nname: " << name << "\n";
+  if (auto const v = project().root()[STR_VERSION]) o << "version: " << v.Scalar() << "\n";
+  if (!commit.empty()) o << "commit: " << commit << "\n";
+  o << "bins:\n";
+  for (auto const& [k, b] : bins) {
+    o << "  \"" << k << "\":\n    mkn: " << b.mkn << "\n    files:\n";
+    for (auto const& [file, sha] : b.files)
+      o << "    - file: " << file << "\n      sha256: " << sha << "\n";
+  }
+  KOUT(NON) << name << ": manifest " << key << " -> " << mf.string();
 }

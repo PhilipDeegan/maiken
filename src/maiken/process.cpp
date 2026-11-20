@@ -163,6 +163,7 @@ void maiken::Application::process() KTHROW(mkn::kul::Exception) {
 
   proc_b();
 
+  if (cmds.count(STR_MANIFEST)) manifest();
   if (cmds.count(STR_TEST)) {
 #if MKN_WITH_MKN_MOD
     for (auto& modLoader : mods)

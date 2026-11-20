@@ -13,6 +13,7 @@
 | `inc`       | Print include directories to std out |
 | `src`       | Print found source files to std out [allows `-d`]. |
 | `pack`      | Copy binary files & library files into `bin/$profile/pack` |
+| `manifest`  | After the build: the profile's library (`-K`/`-S` mode) into `.mkn/manifest/`, with its entry in `.mkn/manifest/mkn.manifest.yml` for prebuilt binaries, see [settings](settings.md) |
 | `run`       | Starts the application automatically linking libraries for dependencies on dynamic libraries, supports `-a` and `-p`/`-D` |
 | `dbg`       | Same as run but uses debugger - see [debugging](debugging.md) |
 | `tree [$p]` | Prints dependency tree for base profile (or profile `$p`) |

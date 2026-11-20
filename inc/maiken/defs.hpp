@@ -119,6 +119,7 @@ class Constants {
   static constexpr auto STR_COMPILE = "compile";
   static constexpr auto STR_HELP = "help", STR_INIT = "init", STR_INFO = "info";
   static constexpr auto STR_LINK = "link";
+  static constexpr auto STR_MANIFEST = "manifest";
   static constexpr auto STR_PACK = "pack";
   static constexpr auto STR_THREADS = "threads";
   static constexpr auto STR_TREE = "tree";
