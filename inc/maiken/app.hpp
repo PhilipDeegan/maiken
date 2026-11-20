@@ -379,6 +379,7 @@ class MKN_KUL_PUBLISH Application : public Constants {
   ApplicationContext ctx_{*this};
 
   bool ig = 1, isMod = 0, ro = 0, su = 0;  // su: setup() ran
+  bool ms = 0;  // ms: mode stated, by a profile's mode: or -K/-S
   Application const* par = nullptr;
   Application* sup = nullptr;
   compiler::Mode m{compiler::Mode::SHAR};

@@ -323,6 +323,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
     else if (AppVars::INSTANCE().stat())
       m = compiler::Mode::STAT;
   }
+  ms = !nm || AppVars::INSTANCE().shar() || AppVars::INSTANCE().stat();
 
   profile = p.size() ? p : project().root()[STR_NAME].Scalar();
   if (ro && AppVars::INSTANCE().installOverride().size()) {  // -i, supercedes the install tag

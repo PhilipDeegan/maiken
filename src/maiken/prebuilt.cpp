@@ -36,6 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/settings.hpp"
 #include "mkn/kul/cli.hpp"
 #include "mkn/kul/except.hpp"
+#include "mkn/kul/lang/def.hpp"
 #include "mkn/kul/log.hpp"
 #include "mkn/kul/os.hpp"
 #include "mkn/kul/proc.hpp"
@@ -147,12 +148,6 @@ namespace {
 
 using Path = std::filesystem::path;
 
-std::string mode_name(maiken::compiler::Mode const m) {
-  if (m == maiken::compiler::Mode::STAT) return "static";
-  if (m == maiken::compiler::Mode::SHAR) return "shared";
-  throw Unusable("no prebuilt binaries without a static or shared mode");
-}
-
 // the clone's commit and its GitHub release URL for tag, a clone with local changes can't be used
 std::pair<std::string, std::string> clone_release(std::string const& dir, std::string const& tag) {
   if (!capture("git", {"-C", dir, "status", "--porcelain", "--untracked-files=no"}).empty())
@@ -231,7 +226,10 @@ void put_in_place(std::vector<std::pair<Path, Path>> const& checked, Path const&
 }  // namespace
 
 void maiken::Application::fetchPrebuilt(std::string const& tag) {
-  auto const key = AppVars::INSTANCE().properkeys().at("mkn.bin.key") + ";mode=" + mode_name(m);
+  // static unless a mode is stated, as it then links like a library built from source
+  if (!ms || m == compiler::Mode::NONE) m = compiler::Mode::STAT;
+  auto const key =
+      AppVars::INSTANCE().properkeys().at("mkn.bin.key") + ";mode=" + mkn::kul::lang::to_string(m);
   auto const [commit, url] =
       clone_release(mkn::kul::fsys::escaped_real(project().dir().path()), tag);
   Path const out = buildDir().path();
