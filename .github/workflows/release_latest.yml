@@ -31,27 +31,27 @@ jobs:
             MKN_CL_PREFERRED: 1
           run: |
             bash -c ./res/ci/win_build.sh
-            mkn build -dtKw mkn.mod -O 3 -g 0 -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE"
+            mkn build -dtKp mod -O 3 -g 0 -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE"
 
         - if: matrix.os == 'ubuntu-latest'
           env:
             MKN_GCC_PREFERRED: 1
           run: |
             ./res/ci/nixish_setup.sh && make nix
-            KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_nix
+            KLOG=3 ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_nix
 
         - if: matrix.os == 'ubuntu-latest'
           uses: actions/upload-artifact@v4.4.0
           with:
             name: maiken-${{ matrix.os }}
-            path: bin/build/mkn_nix
+            path: bin/mod/mkn_nix
             retention-days: 1
 
         - if: matrix.os == 'windows-latest'
           uses: actions/upload-artifact@v4.4.0
           with:
             name: maiken-${{ matrix.os }}
-            path: bin/build/mkn.exe
+            path: bin/mod/mkn.exe
             retention-days: 1
 
 
@@ -63,11 +63,11 @@ jobs:
     - run: ./res/ci/nixish_setup.sh && make nix
     - env:
         MKN_GCC_PREFERRED: 1
-      run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_manylinux
+      run: KLOG=3 ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_manylinux
     - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-manylinux-latest
-        path: bin/build/mkn_manylinux
+        path: bin/mod/mkn_manylinux
         retention-days: 1
 
 
@@ -79,11 +79,11 @@ jobs:
     - run: ./res/ci/nixish_setup.sh && make nix
     - env:
         MKN_GCC_PREFERRED: 1
-      run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_manylinux_arm
+      run: KLOG=3 ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_manylinux_arm
     - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-manylinux-arm-latest
-        path: bin/build/mkn_manylinux_arm
+        path: bin/mod/mkn_manylinux_arm
         retention-days: 1
 
   build_arm_macos:
@@ -93,11 +93,11 @@ jobs:
     - run: ./res/ci/nixish_setup.sh && make bsd
     - env:
         MKN_GCC_PREFERRED: 1
-      run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_arm_osx
+      run: KLOG=3 ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_arm_osx
     - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-macos-latest
-        path: bin/build/mkn_arm_osx
+        path: bin/mod/mkn_arm_osx
         retention-days: 1
 
   build_arm_linux:
@@ -107,11 +107,11 @@ jobs:
     - run: ./res/ci/nixish_setup.sh && make nix
     - env:
         MKN_GCC_PREFERRED: 1
-      run: KLOG=3 ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_arm_linux
+      run: KLOG=3 ./mkn build -dtKp mod -a "-std=c++20 -fPIC" -O 3 -g 0 -W 9 -o mkn_arm_linux
     - uses: actions/upload-artifact@v4.4.0
       with:
         name: maiken-ubuntu-arm-latest
-        path: bin/build/mkn_arm_linux
+        path: bin/mod/mkn_arm_linux
         retention-days: 1
 
   finally:

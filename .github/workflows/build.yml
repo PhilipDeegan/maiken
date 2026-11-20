@@ -29,10 +29,10 @@ jobs:
         cp -r $PWD ~/.maiken/app/mkn/master
         [ "${{ matrix.cc }}" = "clang" ] && export CC=clang CXX=clang++
         ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ./mkn build -dtw mkn.mod -p bin_shared -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtKp full -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ./mkn build -dtp bin_shared -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
         ./mkn build -dtKp server -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ldd bin/build/mkn
+        ldd bin/full/mkn
         ldd bin/bin_shared/mkn
     - run: python3 res/ci/build.py ubuntu_${{ matrix.cc }}
 
@@ -47,8 +47,8 @@ jobs:
       run: |
         ldd mkn
         ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ldd bin/build/mkn
+        ./mkn build -dtKp full -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ldd bin/full/mkn
     - run: python3 res/ci/build.py manylinux_gcc
 
   manylinux_arm:
@@ -62,8 +62,8 @@ jobs:
       run: |
         ldd mkn
         ./mkn build -dtKa "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ./mkn build -dtKw mkn.mod -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
-        ldd bin/build/mkn
+        ./mkn build -dtKp full -a "-std=c++20 -fPIC" -O 2 -g 0 -W 9
+        ldd bin/full/mkn
     - run: python3 res/ci/build.py manylinux_arm_gcc
 
   macos:
@@ -78,7 +78,7 @@ jobs:
         mkdir -p ~/.maiken/app/mkn
         cp -r $PWD ~/.maiken/app/mkn/master
         ./mkn build -dtKO 2 -W 9 -g 0 -x res/mkn/clang
-        ./mkn build -dtKO -w mkn.mod -x res/mkn/clang
+        ./mkn build -dtKOp full -x res/mkn/clang
     - run: python3 res/ci/build.py macos_clang
 
   windows:
@@ -99,7 +99,7 @@ jobs:
         MKN_CL_PREFERRED: 1
       run: |
         mkn build -dtKO 2 -g 0 -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE" || exit /b 1
-        mkn build -dtKO -w mkn.mod -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE" || exit /b 1
+        mkn build -dtKOp mod -a "-std:c++20 -EHsc -DYAML_CPP_STATIC_DEFINE" || exit /b 1
     - shell: cmd
       run: python res/ci/build.py win_cl
 
@@ -119,7 +119,7 @@ jobs:
       run: |
         clang++ --version
         mkn build -dtKO 2 -g 0 -x res/mkn/clang_win -a "-DYAML_CPP_STATIC_DEFINE" || exit /b 1
-        mkn build -dtKO -w mkn.mod -x res/mkn/clang_win -a "-DYAML_CPP_STATIC_DEFINE" || exit /b 1
+        mkn build -dtKOp mod -x res/mkn/clang_win -a "-DYAML_CPP_STATIC_DEFINE" || exit /b 1
     - shell: cmd
       run: python res/ci/build.py win_clang
 
