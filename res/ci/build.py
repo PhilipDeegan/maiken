@@ -111,7 +111,8 @@ def prebuilt(mkn_bin, settings, args):
                 f.write(f"super: {xs}\n{body}")
         x = lambda name: os.path.join(tmp, name).replace("\\", "/")
         check("bin: entry", "static", x("named"), [], "0.8.0", "static", "0.8.0")
-        check("property: mkn.with.bin", "latest", x("property"), [], "latest", "static", "")
+        env = {k: v for k, v in os.environ.items() if k != "MKN_WITH_BIN"}  # it would override
+        check("property: mkn.with.bin", "latest", x("property"), [], "latest", "static", "", env)
 
 
 def prebuilt_fallback(mkn_bin, args):
