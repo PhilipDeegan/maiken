@@ -37,6 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 
 #ifndef MKN_LANG
 #include "maiken/bin_key.hpp"
@@ -90,7 +91,7 @@ namespace maiken {
 auto inline defaultSCMBranchName() { return mkn::kul::env::GET("MKN_DEFAULT_BRANCH", "master"); }
 
 // what a prebuilt binary must match on this machine, the mkn.bin.key property's default
-constexpr char const* defaultBinKey() { return MKN_BIN_KEY; }
+constexpr std::string_view defaultBinKey() { return MKN_BIN_KEY; }
 
 class Exception : public mkn::kul::Exception {
  public:
