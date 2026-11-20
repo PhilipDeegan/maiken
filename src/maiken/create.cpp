@@ -108,14 +108,14 @@ class CLIHandler : public Constants {
                                        Arg('w', STR_WITH, ArgType::STRING),
                                        Arg('W', STR_WARN, ArgType::MAYBE),
                                        Arg('x', STR_SETTINGS, ArgType::STRING)};
-  std::vector<mkn::kul::cli::Cmd> cmdV{Cmd(STR_INIT),     Cmd(STR_INC),     Cmd(STR_SRC),
+  std::vector<mkn::kul::cli::Cmd> cmdV{
+      Cmd(STR_INIT),  Cmd(STR_INC),      Cmd(STR_SRC),
 #if MKN_WITH_MKN_MOD
-                                       Cmd(STR_MODS),
+      Cmd(STR_MODS),
 #endif  // MKN_WITH_MKN_MOD
-                                       Cmd(STR_CLEAN),    Cmd(STR_DEPS),    Cmd(STR_BUILD),
-                                       Cmd(STR_RUN),      Cmd(STR_COMPILE), Cmd(STR_LINK),
-                                       Cmd(STR_PROFILES), Cmd(STR_DBG),     Cmd(STR_PACK),
-                                       Cmd(STR_INFO),     Cmd(STR_TREE),    Cmd(STR_TEST)};
+      Cmd(STR_CLEAN), Cmd(STR_DEPS),     Cmd(STR_BUILD),   Cmd(STR_RUN),  Cmd(STR_COMPILE),
+      Cmd(STR_LINK),  Cmd(STR_PROFILES), Cmd(STR_DBG),     Cmd(STR_PACK), Cmd(STR_INFO),
+      Cmd(STR_TREE),  Cmd(STR_TEST),     Cmd(STR_MANIFEST)};
 
  public:
   std::vector<mkn::kul::cli::Arg> args() { return argV; }
@@ -442,8 +442,8 @@ std::vector<maiken::Application*> maiken::Application::CREATE(mkn::kul::cli::Arg
                     std::ref(AppVars::INSTANCE()), std::placeholders::_1, std::placeholders::_2));
   }
 
-  std::vector<std::string> cmds = {
-      {STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK, STR_RUN, STR_TEST, STR_DBG, STR_PACK}};
+  std::vector<std::string> cmds = {{STR_CLEAN, STR_BUILD, STR_COMPILE, STR_LINK, STR_RUN, STR_TEST,
+                                    STR_DBG, STR_PACK, STR_MANIFEST}};
   for (auto const& cmd : cmds)
     if (args.has(cmd)) AppVars::INSTANCE().command(cmd);
 

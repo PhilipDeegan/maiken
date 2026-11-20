@@ -53,6 +53,7 @@ constexpr char const* maiken::Constants::STR_PARENT;
 constexpr char const* maiken::Constants::STR_SUPER;
 constexpr char const* maiken::Constants::STR_PATH;
 constexpr char const* maiken::Constants::STR_PACK;
+constexpr char const* maiken::Constants::STR_MANIFEST;
 constexpr char const* maiken::Constants::STR_BUILD;
 constexpr char const* maiken::Constants::STR_FILE;
 constexpr char const* maiken::Constants::STR_ARG;

@@ -1,0 +1,4 @@
+# the manifest command, see res/ci/build.py manifest(): a library built static and shared, both in
+#  .mkn/manifest/mkn.manifest.yml
+name: manifest
+src: lib.cpp
