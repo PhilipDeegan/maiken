@@ -6,11 +6,11 @@ concurrency:
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ master, latest ]
 
 env:
   KLOG: 3
-  MKN_WITH_BIN: 0  # dependencies built from source on master, the latest branch sets 1
+  MKN_WITH_BIN: 0  # dependencies built from source
 
 jobs:
   ubuntu:
