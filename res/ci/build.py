@@ -25,6 +25,7 @@ import os
 import shlex
 import subprocess
 import sys
+import tempfile
 
 IS_WIN = sys.platform.startswith("win")
 EXE = ".exe" if IS_WIN else ""
@@ -63,6 +64,76 @@ def behaviour(mkn_bin):
     print(f"+ {' '.join(cmd)}", flush=True)
     if subprocess.run(cmd).returncode != 0:
         sys.exit(1)
+
+
+def prebuilt(mkn_bin, settings, args):
+    """test/prebuilt, res/mkn/<settings>.yml: parse.yaml from its 0.8.0 release as a static and a
+    shared library and from the release marked Latest for version latest, each clone keeping its
+    binaries in .mkn/prebuilt/@/<mode>; with -P mkn.with.bin=1, MKN_WITH_BIN=1, a settings bin: entry
+    and a settings property: mkn.with.bin"""
+    cwd = os.path.join(ROOT, "test", "prebuilt")
+    xs = os.path.join(ROOT, "res", "mkn", settings).replace("\\", "/")
+    repo = subprocess.run([mkn_bin, "-G", "MKN_REPO"], stdout=subprocess.PIPE, text=True)
+
+    def check(name, profile, x, extra, version, mode, release, env=None):
+        cmd = [mkn_bin, "build", "run", "-d", "-p", profile, "-x", x] + extra + ["-a", args]
+        print(f"+ [{cwd}] {' '.join(cmd)}", flush=True)
+        result = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                text=True, env=env)
+        print(result.stdout, flush=True)
+        errors = []
+        if result.returncode != 0:
+            errors.append(f"exit {result.returncode}")
+        for expected in (f"parse.yaml: prebuilt {release}", f"mode={mode})", "parsed 3"):
+            if expected not in result.stdout:
+                errors.append(f"missing '{expected}'")
+        if "p/src/" in result.stdout.replace("\\", "/"):
+            errors.append("yaml-cpp sources were compiled")
+        cache = os.path.join(repo.stdout.strip(), "parse", "yaml", version, ".mkn", "prebuilt", "@",
+                             mode)
+        marked = os.path.isdir(cache) and any(f.endswith(".prebuilt") for f in os.listdir(cache))
+        if not marked:  # .<library>.prebuilt, the library's marker
+            errors.append(f"no marker in {cache}")
+        if errors:
+            print(f"FAILED prebuilt {name}: {', '.join(errors)}", file=sys.stderr)
+            sys.exit(1)
+        print(f"PASS prebuilt {name}", flush=True)
+
+    with_bin = ["-P", "mkn.with.bin=1"]
+    check("static", "static", xs, with_bin, "0.8.0", "static", "0.8.0")
+    check("shared", "shared", xs, with_bin + ["-S"], "0.8.0", "shared", "0.8.0")
+    check("latest", "latest", xs, with_bin, "latest", "static", "")
+    check("MKN_WITH_BIN", "latest", xs, [], "latest", "static", "",
+          dict(os.environ, MKN_WITH_BIN="1"))
+
+    with tempfile.TemporaryDirectory() as tmp:  # settings extending res/mkn/<settings>.yml
+        for name, body in (("named", "bin:\n  parse.yaml: 0.8.0\n"),
+                           ("property", "property:\n  mkn.with.bin: 1\n")):
+            with open(os.path.join(tmp, name + ".yml"), "w") as f:
+                f.write(f"super: {xs}\n{body}")
+        x = lambda name: os.path.join(tmp, name).replace("\\", "/")
+        check("bin: entry", "static", x("named"), [], "0.8.0", "static", "0.8.0")
+        env = {k: v for k, v in os.environ.items() if k != "MKN_WITH_BIN"}  # it would override
+        check("property: mkn.with.bin", "latest", x("property"), [], "latest", "static", "", env)
+
+
+def prebuilt_fallback(mkn_bin, args):
+    """test/prebuilt/missing.yml names a release that doesn't exist: with -q, and without -d,
+    parse.yaml is built from source instead"""
+    cwd = os.path.join(ROOT, "test", "prebuilt")
+    cmd = [mkn_bin, "build", "run", "-q", "-t", "-x", os.path.join(cwd, "missing").replace("\\", "/"),
+           "-a", args]
+    print(f"+ [{cwd}] {' '.join(cmd)}", flush=True)
+    result = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    print(result.stdout, flush=True)
+    errors = [] if result.returncode == 0 else [f"exit {result.returncode}"]
+    for expected in ("parse.yaml: prebuilt binary not used", "building it", "parsed 3"):
+        if expected not in result.stdout:
+            errors.append(f"missing '{expected}'")
+    if errors:
+        print(f"FAILED prebuilt fallback: {', '.join(errors)}", file=sys.stderr)
+        sys.exit(1)
+    print("PASS prebuilt fallback", flush=True)
 
 
 RPATH_DIR = os.path.join(ROOT, "test", "rpath")
@@ -129,10 +200,13 @@ def nix_test(std_args, env, full):
     run(BOOTSTRAP, f"build -dtp test_mod {a} -O 2 -g 0 -W 9", env=env)
     run(built("build"), f"build test pack -tp test {a} -O 2 -g 0 -W 9", env=env)
     behaviour(built("build"))
+    prebuilt(built("build"), "bin_nix", "-std=c++20")
     rpath(built("build"), std_args, env)
 
     if not full:
         return
+
+    prebuilt_fallback(built("build"), "-std=c++20")
 
     # format still runs on the mod-less bootstrap - m/clang/format's mod.cpp
     # is currently out of sync with mkn.mod's Context API (pending changes to
@@ -150,6 +224,7 @@ def job_macos_clang():
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
     run(built("build"), f"build test pack -Op test -x {tc}")
     behaviour(built("build"))
+    prebuilt(built("build"), "bin_osx", "-std=c++20")
     rpath(built("build"), "-std=c++20")
 
 
@@ -160,6 +235,7 @@ def job_win_cl():
     run(BOOTSTRAP, f'build -dtOp test_mod -a "{std}"', env=env)
     run(built("build"), f'build test pack -Op test -a "{std}"', env=env)
     behaviour(built("build"))
+    prebuilt(built("build"), "bin_win", std)
     rpath(built("build"), std, env)
 
 

@@ -4,7 +4,12 @@ name: mkn
 version: master
 property:
   DATE: 20_NOV_2026
-  self.deps: mkn.kul
+  # dependency versions, only here: master on master, released versions on latest
+  mkn.kul.version: master
+  parse.yaml.version: master
+  mkn.mod.version: master
+  mkn.ram.version: master
+  self.deps: mkn.kul#${mkn.kul.version}
 
 parent: bin
 mode: none
@@ -36,7 +41,7 @@ profile:
 
 - name: lib
   parent: compiled
-  dep: parse.yaml
+  dep: parse.yaml#${parse.yaml.version}
   src: src
   if_link:
     nix: -ldl -pthread
@@ -54,11 +59,11 @@ profile:
 - name: bin_shared
   parent: bin
   mode: none
-  dep: parse.yaml[shared]
+  dep: parse.yaml#${parse.yaml.version}[shared]
 
 - name: test_mod
   parent: headers
-  with: mkn.mod
+  with: mkn.mod#${mkn.mod.version}
   dep:
     - local: test/mod/dep
   src: test/mod/mod.cpp
@@ -74,7 +79,7 @@ profile:
 
 - name: server
   parent: lib
-  with: io.cereal mkn.ram[https]
+  with: io.cereal mkn.ram#${mkn.ram.version}[https]
   main: server.cpp
   mode: none
 
@@ -106,6 +111,6 @@ profile:
 
 - name: github
   parent: headers
-  dep: parse.yaml
+  dep: parse.yaml#${parse.yaml.version}
   main: test/github/test.cpp
-  with: mkn.ram
+  with: mkn.ram#${mkn.ram.version}

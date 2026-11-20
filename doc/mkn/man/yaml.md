@@ -187,6 +187,16 @@ System properties:
 | `TIMESTAMP` | Unix timestamp when app launched in seconds |
 | `MKN_ROOT`  | Directory of current mkn.yaml file |
 | `MKN_REPO`  | if settings.yaml has `[local][repo]`, it is that, otherwise<br>bsd/nix/win(with msys/cygwin/etc) = `~/.maiken/repo`<br>win cmd prompt = `%HOMEDRIVE%/%HOMEPATH%/maiken/repo` |
+| `MKN_MOD_REPO`, `MKN_HOME` | module repository and maiken's home directory |
+| `mkn.bin.key`, `mkn.with.bin` | prebuilt binaries, see [settings](settings.md) |
+
+System properties, and any given with `-P name=value`, are used before a project's `property:`
+of the same name. `-P` is how one build overrides a project's value. A project property that a
+system property hides is reported once (`WARNING: ... is a built-in, its value here is not used`).
+
+System properties never end in `.version`: a project names its dependencies' versions
+`<dependency>.version` (e.g. `parse.yaml.version: 0.8.0`, used as `parse.yaml#${parse.yaml.version}`)
+without meeting one, and `-P parse.yaml.version=0.8.1` tries another for one build.
 
 ## Profile dependencies
 

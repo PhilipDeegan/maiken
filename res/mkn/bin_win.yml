@@ -1,0 +1,8 @@
+super: settings
+
+# what a consumer of prebuilt binaries needs, see res/ci/build.py prebuilt()
+
+# the binaries use the DLL C runtime (crt=md in their key), cl's own default is -MT
+file:
+  - type: cpp:cxx:cc:c
+    compiler: cl -MD

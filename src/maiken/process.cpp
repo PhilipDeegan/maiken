@@ -153,6 +153,7 @@ void maiken::Application::process() KTHROW(mkn::kul::Exception) {
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) loadModules(**app);
   loadModules(*this);
   for (auto app = this->deps.rbegin(); app != this->deps.rend(); ++app) {
+    if ((*app)->usePrebuilt()) continue;  // neither built nor cleaned, -d or not
     if ((*app)->ig) continue;
     if ((*app)->lang.empty()) (*app)->resolveLang();
     (*app)->main_ = {};

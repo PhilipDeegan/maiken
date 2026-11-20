@@ -1,0 +1,23 @@
+# prebuilt dependencies with -P mkn.with.bin=1, see res/ci/build.py prebuilt() and res/mkn/bin_*.yml:
+#  each dependency's own version picks the release, both clones end up with .mkn/prebuilt
+name: prebuilt
+parent: static
+
+profile:
+- name: static  # parse.yaml's top level, profile=@ in the key; static as no mode is stated
+  main: main.cpp
+  dep:
+  - name: parse.yaml
+    version: 0.8.0
+
+- name: shared  # the same with -S, see res/ci/build.py; on Windows a .dll and its import .lib
+  main: main.cpp
+  dep:
+  - name: parse.yaml
+    version: 0.8.0
+
+- name: latest  # the release GitHub marks Latest, static as no mode is stated
+  main: main.cpp
+  dep:
+  - name: parse.yaml
+    version: latest

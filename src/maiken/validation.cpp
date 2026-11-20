@@ -155,6 +155,8 @@ void maiken::Application::preSetupValidation() KTHROW(maiken::Exception) {
       KEXIT(1, "Profile may not contain character \"[\" or \"]\"");
     if (p == project().root()[STR_NAME].Scalar())
       KEXIT(1, "Profile may not have same name as project");
+    if (p == "@")  // -p @, dep[@] and prebuilt keys' profile=@ mean the file's top level
+      KEXIT(1, "Profile may not be named \"@\", it is the top level of " + project().file());
     if (std::find(profiles.begin(), profiles.end(), p) != profiles.end())
       KEXIT(1, "Duplicate profile name found");
     profiles.push_back(p);

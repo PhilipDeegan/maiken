@@ -4,6 +4,7 @@
 |-----|------|---------|-------------|
 | `KLOG` | Number | `0` | See [logging](logging.md) |
 | `MKN_COMPILE_THREADS` | uint | none | Global override, if set forces all compile calls to use value. Example, low RAM systems |
+| `MKN_WITH_BIN` | bool | `0` | Sets the `mkn.with.bin` property: every dependency uses its version's prebuilt release when there is one, see [settings](settings.md). Overrides settings, `-P mkn.with.bin=` overrides it |
 | `MKN_DEFAULT_BRANCH` | String | `"master"` | Default branch for SCM if not given or set |
 | `MKN_DBG` | String | `""` | Sets the preceding command line string when using "dbg". See [debugging](debugging.md) |
 | `MKN_OBJ` | String | Linux/BSD=`o`, Windows=`obj` | Sets the file type to compile object files to |

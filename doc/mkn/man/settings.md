@@ -5,7 +5,8 @@ The settings file is the default global configuration for projects.
 ## Schema
 
 ```yaml
-super: $directory                   # Inherit properties of project at directory, super (..) or sub directory advisable
+super: $file                        # Optional, a settings file this one extends, e.g. "settings" for the default
+                                    #  one, see "How settings files combine"
 
 property:
     aaa: AAA
@@ -39,6 +40,25 @@ property:
                                        #  library's archiver gets none of these, its
                                        #  file: archiver entry is used as given.
 
+    mkn.bin.key: os=nix;...           # Optional, what prebuilt binaries (bin:) must match, defaults to
+                                       #  this mkn's platform, "mkn -G mkn.bin.key" prints it and
+                                       #  "mkn -vv" shows the default and a settings override. The
+                                       #  default's machine parts (os, arch, libc) are detected, its
+                                       #  toolchain parts (cxxrt, crt) are what releases use: a settings
+                                       #  file for another toolchain (clang -stdlib=libc++, cl -MT)
+                                       #  sets this, see inc/maiken/bin_key.hpp. A release's binary
+                                       #  is found by this key, ";profile=" the dependency's profile
+                                       #  (@ for its top level) and ";mode=" static or shared
+
+    mkn.with.bin: 1                    # Optional, default 0. Every dependency not in bin: uses its
+                                       #  version's prebuilt release when there is one: latest for
+                                       #  the latest branch, the tag for a clone at that tag; other
+                                       #  branches (master) build from source. A missing release is
+                                       #  reported once, remembered in the clone's .mkn/prebuilt
+                                       #  until its commit or mkn.bin.key changes; after 30 days
+                                       #  mkn asks to check again (Y/n), -q never asks. The environment
+                                       #  variable MKN_WITH_BIN overrides it, -P mkn.with.bin=1 both
+
     mkn.env.automatic: true           # Optional, default true. Automatically prepend
                                        # dependency library directories onto PATH
                                        # (Windows) / LD_LIBRARY_PATH (nix) / also
@@ -71,6 +91,15 @@ compiler:
                                         # e.g. gcc: gcc-armhf would allow the compiler tag to contain
                                         # gcc-armhf instead of just "gcc"
 
+bin:                                    # Optional, dependencies used as prebuilt binaries instead of being
+  parse.yaml: 0.8.0                     #  built: project name to release tag, or latest for the release
+                                        #  GitHub marks Latest. Downloaded from the project's
+                                        #  GitHub release (mkn.manifest.yml) into its clone's
+                                        #  .mkn/prebuilt/<profile|@>/<static|shared>, its build directory, which
+                                        #  can be deleted to download again. Never compiled, linked or
+                                        #  cleaned; a binary that can't be used is built from source with
+                                        #  -q, otherwise mkn asks
+
 file:                                   # Must include at least one item in list
   - type: c:cpp:cxx                     # Sources won't be compiled if the filetype is missing
     archiver: ${aaa}                    # Archiver is not used for C#
@@ -91,3 +120,43 @@ The default file is created if missing.
 A different file can be used with `-x $f`. Absolute paths are used as is, otherwise `$f` is looked
 up in the current directory then the default settings directory above. `.yml`/`.yaml` suffixes are
 tried if `$f` is not found.
+
+## How settings files combine
+
+A settings file can extend another with `super:`, and that one can extend another in turn. With
+`-x`, the file given is the first of such a chain, which usually ends at the default settings
+file (`super: settings`). Without `-x` the chain starts at the default file.
+
+### Finding a file
+
+`-x <name>` and `super: <name>` use an absolute path as is. Otherwise `<name>` is looked up in these
+directories in order, trying `<name>`, `<name>.yml` then `<name>.yaml` in each:
+
+| | `-x` | `super:` |
+|---|---|---|
+| 1 | the current directory | the current directory |
+| 2 | | the directory of the file with the `super:` |
+| 3 | the default settings directory, see Location | the default settings directory |
+
+So `super: settings` is normally the default settings file, unless the current directory has a
+`settings.yaml`. A file can't extend itself, and a cycle of `super:` files is an error.
+
+### Combining entries
+
+From the first file of the chain to the last:
+
+| Entry | Across the chain |
+|---|---|
+| `file:` | per file type and key (`compiler`, `linker`, `archiver`) the first file setting it wins, so a file can set just one key for a type and take the rest from the files it extends |
+| `property:` | a file's own properties win over those of the files it extends |
+| `local:` `repo` / `mod-repo` | the first file that sets it |
+| `remote:` | only the first file's, with the built-in defaults (`MKN_REMOTE_REPO` / `MKN_REMOTE_MOD`); a `remote:` further down the chain is not used |
+| `inc:`, `path:` | every file's, the first file's first |
+| `env:` | every file's, applied from the last file up, so the first file's `replace` is the one left and its `prepend` ends up in front |
+| `compiler:` `mask:` | every file's |
+| `find:` | every file's, per name the first file's directories first |
+| `bin:` | per project, the first file naming it |
+
+For example `res/mkn/bin_win.yml` in maiken's repository extends the default settings and sets only
+`compiler: cl -MD` for C and C++, what the prebuilt binaries need; linker, archiver, includes and
+library paths come from the default settings at the end of the chain.

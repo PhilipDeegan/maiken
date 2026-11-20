@@ -72,6 +72,7 @@ class Var;
 #endif  // MKN_WITH_MKN_MOD
 
 #include <cstdint>
+#include <filesystem>
 #include <queue>
 #include <optional>
 #include <algorithm>
@@ -237,6 +238,11 @@ class MKN_KUL_PUBLISH Application : public Constants {
 
   bool is_build_required();
   bool is_build_stale();
+  // a dependency named in the settings' bin: map: its prebuilt binaries in place, see prebuilt.cpp
+  bool usePrebuilt();
+  bool wantsPrebuilt() const;
+  bool fetchPrebuilt(std::string const& tag, bool remember);
+  void buildDirectory(std::filesystem::path const& dir);
 
   void withArgs(std::string const with, std::vector<YAML::Node>& with_nodes,
                 std::function<void(YAML::Node const& n, bool const mod)> getIfMissing,
@@ -376,6 +382,7 @@ class MKN_KUL_PUBLISH Application : public Constants {
   ApplicationContext ctx_{*this};
 
   bool ig = 1, isMod = 0, ro = 0, su = 0;  // su: setup() ran
+  bool ms = 0;                             // ms: mode stated, by a profile's mode: or -K/-S
   Application const* par = nullptr;
   Application* sup = nullptr;
   compiler::Mode m{compiler::Mode::SHAR};

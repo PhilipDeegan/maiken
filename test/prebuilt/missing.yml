@@ -1,0 +1,5 @@
+super: settings
+
+# a release that does not exist, see res/ci/build.py prebuilt_fallback()
+bin:
+  parse.yaml: 0.0.0-missing

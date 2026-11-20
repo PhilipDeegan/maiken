@@ -1,0 +1,6 @@
+# a profile named "@" is refused: -p @, dep[@] and prebuilt keys use @ for the top level
+name: profile_at
+main: main.cpp
+
+profile:
+- name: "@"

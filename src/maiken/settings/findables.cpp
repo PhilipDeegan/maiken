@@ -55,3 +55,13 @@ void maiken::Settings::resolveFindables() KTHROW(SettingsException) {
             add(k, it->first.template as<std::string>(), it->second);
   });
 }
+
+void maiken::Settings::resolveBinaries() KTHROW(SettingsException) {
+  // the first settings file naming a project wins: -x over its super chain
+  traverse([&](auto const& s) {
+    if (auto bin = s.root()["bin"])
+      for (auto const& c : bin)
+        if (auto const k = c.first.template as<std::string>(); k.size() && !binaries_.count(k))
+          binaries_.insert(k, c.second.template as<std::string>());
+  });
+}

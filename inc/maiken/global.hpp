@@ -73,6 +73,7 @@ class AppVars : public Constants {
   std::string aa, al, dep, io, la, mo, no_, ra, wi, wo;
   mkn::kul::hash::set::String cmds, wop;
   mkn::kul::hash::map::S2S evs, jas, pks;
+  std::unordered_set<std::string> cpks;  // pks given with -P
 
   static std::shared_ptr<AppVars> instance;
 
@@ -144,6 +145,9 @@ class AppVars : public Constants {
 
   mkn::kul::hash::map::S2S const& properkeys() const { return pks; }
   void properkeys(std::string const& k, std::string const& v) { pks[k] = v; }
+  // -P: overrides a project's property of the same name on purpose, without a warning
+  void cliProperkey(std::string const& k, std::string const& v) { pks[k] = v, cpks.insert(k); }
+  bool cliProperkey(std::string const& k) const { return cpks.count(k) > 0; }
 
   mkn::kul::hash::map::S2S const& envVars() const { return evs; }
   std::string envVar(std::string const&& k) const { return (*evs.find(k)).second; }

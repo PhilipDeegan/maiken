@@ -107,6 +107,8 @@ class Settings : public mkn::kul::yaml::File, public Constants {
     return joined;
   }
   Findables const& findables() const { return findables_; }
+  // bin: dependencies used as prebuilt binaries, project name to release tag
+  mkn::kul::hash::map::S2S const& binaries() const { return binaries_; }
   std::optional<std::string> local_dep_repo() const;
   std::optional<std::string> local_mod_repo() const;
 
@@ -136,9 +138,11 @@ class Settings : public mkn::kul::yaml::File, public Constants {
   std::unique_ptr<Settings> sup;
   mkn::kul::hash::map::S2S ps;
   Findables findables_;
+  mkn::kul::hash::map::S2S binaries_;
 
   void resolveProperties() KTHROW(SettingsException);
   void resolveFindables() KTHROW(SettingsException);
+  void resolveBinaries() KTHROW(SettingsException);
   static std::unique_ptr<Settings> instance;
   static void write(mkn::kul::File const& f) KTHROW(mkn::kul::Exit);
 };

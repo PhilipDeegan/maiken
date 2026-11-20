@@ -1,0 +1,8 @@
+super: settings
+
+# what a consumer of prebuilt binaries needs, see res/ci/build.py prebuilt()
+
+# the binaries target macOS 13.0 (macos=13.0 in their key)
+env:
+  - name: MACOSX_DEPLOYMENT_TARGET
+    value: "13.0"

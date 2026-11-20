@@ -70,5 +70,6 @@ mkn::kul::yaml::Validator maiken::Settings::validator() const {
 #endif  // MKN_WITH_MKN_RAM && MKN_WITH_IO_CEREAL
        NodeValidator("compiler", {NodeValidator("mask", masks, 0, NodeType::MAP)}, 0,
                      NodeType::MAP),
-       NodeValidator("find", {NodeValidator("*")}, 0, NodeType::MAP)});
+       NodeValidator("find", {NodeValidator("*")}, 0, NodeType::MAP),
+       NodeValidator("bin", {NodeValidator("*")}, 0, NodeType::MAP)});
 }

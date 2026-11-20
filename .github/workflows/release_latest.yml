@@ -1,10 +1,16 @@
 name: Production Builds
+
+# the rolling "latest" release from master: tag latest, maiken-*-latest binaries, built in the
+#  newest images (:latest) on purpose
+
 on:
   push:
     branches: [ master ]
   release:
     types: [published]
   workflow_dispatch:
+env:
+  MKN_WITH_BIN: 0  # dependencies built from source on master, the latest branch sets 1
 jobs:
   build:
       strategy:

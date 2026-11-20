@@ -1,0 +1,5 @@
+super: settings
+
+# what a consumer of prebuilt binaries needs, see res/ci/build.py prebuilt()
+
+# the manylinux_2_28 binaries need nothing from the consumer
