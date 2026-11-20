@@ -1,0 +1,5 @@
+super: settings
+
+# no rpath in what is linked, mkn still sets the library path when it runs it
+property:
+  mkn.link.rpathing: false

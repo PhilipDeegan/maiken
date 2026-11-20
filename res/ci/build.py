@@ -65,6 +65,38 @@ def behaviour(mkn_bin):
         sys.exit(1)
 
 
+def rpath(mkn_bin, args, env=None):
+    """test/rpath: app and its shared library built and run with the default settings (rpath),
+    no_rpath_only.yml (mkn.link.rpathing false: found by the library path mkn sets) and no_rpath.yml
+    (mkn.env.automatic false as well: not found); dry runs check -rpath on the link line, not on
+    Windows which has none"""
+    cwd = os.path.join(ROOT, "test", "rpath")
+    env = dict(os.environ, **(env or {}))
+    for name, runs in (("default", True), ("no_rpath_only", True), ("no_rpath", False)):
+        x = [] if name == "default" else ["-x", os.path.join(cwd, name).replace("\\", "/")]
+        errors = []
+        cmd = [mkn_bin, "clean", "build", "run", "-d", *x, "-a", args]
+        print(f"+ [{cwd}] {' '.join(cmd)}", flush=True)
+        result = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                text=True, env=env)
+        print(result.stdout, flush=True)
+        if runs and (result.returncode != 0 or "rpath value 42" not in result.stdout):
+            errors.append(f"app did not run, exit {result.returncode}")
+        if not runs and (result.returncode == 0 or "rpath value 42" in result.stdout):
+            errors.append("app ran without its library being found")
+        if sys.platform != "win32" and name != "no_rpath":
+            dry = subprocess.run([mkn_bin, "build", "-R", "-d", *x, "-a", args], cwd=cwd,
+                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                                 env=env).stdout
+            if ("-Wl,-rpath" in dry) != (name == "default"):
+                errors.append("-rpath " + ("missing from" if name == "default" else "in") +
+                              " the link line")
+        if errors:
+            print(f"FAILED rpath {name}: {', '.join(errors)}", file=sys.stderr)
+            sys.exit(1)
+        print(f"PASS rpath {name}", flush=True)
+
+
 def nix_test(std_args, env, full):
     """ubuntu_gcc / ubuntu_clang / manylinux_gcc."""
     a = f'-a "{std_args}"'
@@ -72,6 +104,7 @@ def nix_test(std_args, env, full):
     run(BOOTSTRAP, f"build -dtp test_mod {a} -O 2 -g 0 -W 9", env=env)
     run(built("build"), f"build test pack -tp test {a} -O 2 -g 0 -W 9", env=env)
     behaviour(built("build"))
+    rpath(built("build"), std_args, env)
 
     if not full:
         return
@@ -92,6 +125,7 @@ def job_macos_clang():
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
     run(built("build"), f"build test pack -Op test -x {tc}")
     behaviour(built("build"))
+    rpath(built("build"), "-std=c++20")
 
 
 def job_win_cl():
@@ -101,6 +135,7 @@ def job_win_cl():
     run(BOOTSTRAP, f'build -dtOp test_mod -a "{std}"', env=env)
     run(built("build"), f'build test pack -Op test -a "{std}"', env=env)
     behaviour(built("build"))
+    rpath(built("build"), std, env)
 
 
 def job_win_clang():
