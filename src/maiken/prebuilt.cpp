@@ -91,7 +91,8 @@ std::string capture(std::string const& cmd, std::vector<std::string> const& args
 
 // curl looked for once a run; binaries already downloaded need none, see in_place()
 bool curl() {
-  static bool const found = mkn::kul::env::WHICH("curl");
+  // env::WHERE matches file names exactly: curl.exe on Windows, not PATHEXT's
+  static bool const found = mkn::kul::env::WHICH(MKN_KUL_IS_WIN ? "curl.exe" : "curl");
   return found;
 }
 
