@@ -1,14 +1,14 @@
 #! clean build test -qdtKw mkn.mod,mkn.ram[https] -W 9
 
 name: mkn
-version: master  # on the latest branch a release, e.g. 0.1.0: merged there it is tagged and published
+version: 0.1.0  # merged into latest: tagged and published, a pre-release (-beta.1) never marked latest
 property:
   DATE: 20_NOV_2026
   # dependency versions, only here: master on master, latest on the latest branch, releases pinned in tags
-  mkn.kul.version: master
-  parse.yaml.version: master
-  mkn.mod.version: master
-  mkn.ram.version: master
+  mkn.kul.version: latest
+  parse.yaml.version: latest
+  mkn.mod.version: latest
+  mkn.ram.version: latest
   self.deps: mkn.kul#${mkn.kul.version}
 
 parent: bin
