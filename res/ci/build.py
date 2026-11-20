@@ -66,12 +66,16 @@ def behaviour(mkn_bin):
 
 
 def prebuilt(mkn_bin, settings, args):
-    """test/prebuilt: parse.yaml from its 0.8.0-beta.1 release binaries, res/mkn/<settings>.yml,
-    as a static and a shared library"""
+    """test/prebuilt with -P mkn.with.bin=1, res/mkn/<settings>.yml: parse.yaml from its 0.8.0
+    release as a static and a shared library, and from the release marked Latest for version latest,
+    each clone keeping its binaries in .mkn/prebuilt/<mode>"""
     cwd = os.path.join(ROOT, "test", "prebuilt")
     xs = os.path.join(ROOT, "res", "mkn", settings).replace("\\", "/")
-    for profile in ("static", "shared"):
-        cmd = [mkn_bin, "build", "run", "-d", "-p", profile, "-x", xs, "-a", args]
+    for profile, version, mode, release in (("static", "0.8.0", "static", "0.8.0"),
+                                            ("shared", "0.8.0", "shared", "0.8.0"),
+                                            ("latest", "latest", "static", "")):
+        cmd = [mkn_bin, "build", "run", "-d", "-p", profile, "-x", xs, "-P", "mkn.with.bin=1",
+               "-a", args]
         print(f"+ [{cwd}] {' '.join(cmd)}", flush=True)
         result = subprocess.run(
             cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -79,11 +83,15 @@ def prebuilt(mkn_bin, settings, args):
         errors = []
         if result.returncode != 0:
             errors.append(f"exit {result.returncode}")
-        for expected in ("parse.yaml: prebuilt 0.8.0-beta.1", f"mode={profile})", "parsed 3"):
+        for expected in (f"parse.yaml: prebuilt {release}", f"mode={mode})", "parsed 3"):
             if expected not in result.stdout:
                 errors.append(f"missing '{expected}'")
         if "p/src/" in result.stdout.replace("\\", "/"):
             errors.append("yaml-cpp sources were compiled")
+        repo = subprocess.run([mkn_bin, "-G", "MKN_REPO"], stdout=subprocess.PIPE, text=True)
+        cache = os.path.join(repo.stdout.strip(), "parse", "yaml", version, ".mkn", "prebuilt", mode)
+        if not os.path.isfile(os.path.join(cache, ".mkn.prebuilt")):
+            errors.append(f"no {cache}")
         if errors:
             print(f"FAILED prebuilt {profile}: {', '.join(errors)}", file=sys.stderr)
             sys.exit(1)

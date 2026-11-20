@@ -1,5 +1,0 @@
-super: settings
-
-# dependencies used as prebuilt binaries instead of being built: project name to release tag
-bin:
-  parse.yaml: 0.8.0-beta.1

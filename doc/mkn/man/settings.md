@@ -150,6 +150,6 @@ From the first file of the chain to the last:
 | `find:` | every file's, per name the first file's directories first |
 | `bin:` | per project, the first file naming it |
 
-For example `res/mkn/bin_win.yml` in maiken's repository extends `bin.yml` (which names the prebuilt
-binaries) and sets only `compiler: cl -MD` for C and C++; linker, archiver, includes and library
-paths come from the default settings at the end of the chain.
+For example `res/mkn/bin_win.yml` in maiken's repository extends the default settings and sets only
+`compiler: cl -MD` for C and C++, what the prebuilt binaries need; linker, archiver, includes and
+library paths come from the default settings at the end of the chain.
