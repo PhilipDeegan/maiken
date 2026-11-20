@@ -21,8 +21,11 @@ subprocess's exit code explicitly.
 
 Run from the repository root, e.g.: python3 res/ci/build.py ubuntu_gcc
 """
+import hashlib
 import os
+import re
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -117,6 +120,30 @@ def prebuilt(mkn_bin, settings, args):
         check("property: mkn.with.bin", "latest", x("property"), [], "latest", "static", "", env)
 
 
+def manifest(mkn_bin, args, env=None):
+    """test/manifest: "clean build manifest" static then shared, .mkn/manifest/mkn.manifest.yml lists
+    both, its files there with their sha256"""
+    cwd = os.path.join(ROOT, "test", "manifest")
+    out = os.path.join(cwd, ".mkn", "manifest")
+    shutil.rmtree(out, ignore_errors=True)
+    for mode in ("-K", "-S"):
+        run(mkn_bin, f'clean build manifest {mode} -a "{args}"', cwd=cwd, env=env)
+    with open(os.path.join(out, "mkn.manifest.yml")) as f:
+        text = f.read()
+    print(text, flush=True)
+    errors = [f"no {m} entry" for m in ("static", "shared") if f';profile=@;mode={m}":' not in text]
+    files = re.findall(r"- file: (\S+)\n\s+sha256: (\S+)", text)
+    if len(files) < 2:
+        errors.append(f"{len(files)} files listed")
+    for file, sha in files:
+        with open(os.path.join(out, file), "rb") as f:
+            if hashlib.sha256(f.read()).hexdigest() != sha:
+                errors.append(f"{file} does not match its sha256")
+    if errors:
+        print("FAILED manifest: " + ", ".join(errors), file=sys.stderr)
+        sys.exit(1)
+
+
 def prebuilt_fallback(mkn_bin, args):
     """test/prebuilt/missing.yml names a release that doesn't exist: with -q, and without -d,
     parse.yaml is built from source instead"""
@@ -200,6 +227,7 @@ def nix_test(std_args, env, full):
     run(BOOTSTRAP, f"build -dtp test_mod {a} -O 2 -g 0 -W 9", env=env)
     run(built("mod"), f"build test pack -tp test {a} -O 2 -g 0 -W 9", env=env)
     behaviour(built("mod"))
+    manifest(built("mod"), std_args, env)
     prebuilt(built("mod"), "bin_nix", "-std=c++20")
     rpath(built("mod"), std_args, env)
 
@@ -224,6 +252,7 @@ def job_macos_clang():
     run(BOOTSTRAP, f"build -dtOp test_mod -x {tc}")
     run(built("mod"), f"build test pack -Op test -x {tc}")
     behaviour(built("mod"))
+    manifest(built("mod"), "-std=c++20")
     prebuilt(built("mod"), "bin_osx", "-std=c++20")
     rpath(built("mod"), "-std=c++20")
 
@@ -235,6 +264,7 @@ def job_win_cl():
     run(BOOTSTRAP, f'build -dtOp test_mod -a "{std}"', env=env)
     run(built("mod"), f'build test pack -Op test -a "{std}"', env=env)
     behaviour(built("mod"))
+    manifest(built("mod"), std, env)
     prebuilt(built("mod"), "bin_win", std)
     rpath(built("mod"), std, env)
 

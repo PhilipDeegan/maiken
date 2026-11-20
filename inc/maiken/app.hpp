@@ -242,6 +242,8 @@ class MKN_KUL_PUBLISH Application : public Constants {
   bool usePrebuilt();
   bool wantsPrebuilt() const;
   bool fetchPrebuilt(std::string const& tag, bool remember);
+  // the manifest command: this build's libraries into .mkn/manifest/ and its mkn.manifest.yml
+  void manifest() KTHROW(mkn::kul::Exception);
   void buildDirectory(std::filesystem::path const& dir);
 
   void withArgs(std::string const with, std::vector<YAML::Node>& with_nodes,
