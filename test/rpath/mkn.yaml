@@ -1,0 +1,13 @@
+# mkn.link.rpathing and mkn.env.automatic, see res/ci/build.py rpath(): app runs with its shared
+#  library found by its rpath, else by the library path mkn sets, else not at all
+name: rpath
+parent: app
+
+profile:
+- name: lib
+  mode: shared
+  src: lib.cpp
+
+- name: app
+  main: main.cpp
+  self: lib
