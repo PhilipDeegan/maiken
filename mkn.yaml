@@ -3,7 +3,7 @@
 name: mkn
 version: master  # on the latest branch a release, e.g. 0.1.0: merged there it is tagged and published
 property:
-  DATE: 20_NOV_2026
+  DATE: 21_NOV_2026
   # dependency versions, only here: master on master, latest on the latest branch, releases pinned in tags
   mkn.kul.version: master
   parse.yaml.version: master

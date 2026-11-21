@@ -5,8 +5,8 @@ The settings file is the default global configuration for projects.
 ## Schema
 
 ```yaml
-super: $file                        # Optional, a settings file this one extends, e.g. "settings" for the default
-                                    #  one, see "How settings files combine"
+super: $file                        # Optional, settings files this one extends, e.g. "settings" for the default
+                                    #  one, whitespace separated or a list, see "How settings files combine"
 
 property:
     aaa: AAA
@@ -123,9 +123,14 @@ tried if `$f` is not found.
 
 ## How settings files combine
 
-A settings file can extend another with `super:`, and that one can extend another in turn. With
-`-x`, the file given is the first of such a chain, which usually ends at the default settings
-file (`super: settings`). Without `-x` the chain starts at the default file.
+A settings file can extend others with `super:`, and those can extend others in turn. With `-x`,
+the file given is the first of such a chain, which usually ends at the default settings file
+(`super: settings`). Without `-x` the chain starts at the default file.
+
+`super:` takes one file or several, whitespace separated (`super: a b`) or as a list. The chain is
+searched depth first: `super: a b` is this file, then `a` and every file `a` extends, then `b`
+and every file `b` extends. A file already in the chain is not searched again where it comes up a
+second time, so `a` and `b` can both extend `settings`, and it is searched once, under `a`.
 
 ### Finding a file
 
@@ -139,20 +144,21 @@ directories in order, trying `<name>`, `<name>.yml` then `<name>.yaml` in each:
 | 3 | the default settings directory, see Location | the default settings directory |
 
 So `super: settings` is normally the default settings file, unless the current directory has a
-`settings.yaml`. A file can't extend itself, and a cycle of `super:` files is an error.
+`settings.yaml`. A file can't extend itself; one extending a file already in the chain, as in a
+cycle, has that `super:` left out.
 
 ### Combining entries
 
-From the first file of the chain to the last:
+From the first file of the chain to the last, in the depth first order above:
 
 | Entry | Across the chain |
 |---|---|
 | `file:` | per file type and key (`compiler`, `linker`, `archiver`) the first file setting it wins, so a file can set just one key for a type and take the rest from the files it extends |
-| `property:` | a file's own properties win over those of the files it extends |
+| `property:` | a file's own properties win over those of the files it extends, and those of its first `super:` file over the next |
 | `local:` `repo` / `mod-repo` | the first file that sets it |
-| `remote:` | only the first file's, with the built-in defaults (`MKN_REMOTE_REPO` / `MKN_REMOTE_MOD`); a `remote:` further down the chain is not used |
+| `remote:` `repo` / `mod-repo` | the first file that sets it, then the built-in defaults (`MKN_REMOTE_REPO` / `MKN_REMOTE_MOD`) |
 | `inc:`, `path:` | every file's, the first file's first |
-| `env:` | every file's, applied from the last file up, so the first file's `replace` is the one left and its `prepend` ends up in front |
+| `env:` | the first file that has one, the `env:` of the files after it is left out: a file with an `env:` repeats what it wants of theirs, e.g. the default Windows settings' `PATH` entry for `cl` |
 | `compiler:` `mask:` | every file's |
 | `find:` | every file's, per name the first file's directories first |
 | `bin:` | per project, the first file naming it |

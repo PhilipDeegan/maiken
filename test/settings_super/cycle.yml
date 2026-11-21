@@ -1,0 +1,9 @@
+# cycle_back extends this file again, which is left out
+super: cycle_back
+property:
+  who: cycle
+  only_b: cycle
+env:
+  - name: SS_WHO
+    mode: replace
+    value: cycle

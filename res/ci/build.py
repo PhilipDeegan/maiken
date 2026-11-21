@@ -220,6 +220,46 @@ def rpath(mkn_bin, args, env=None):
         print(f"PASS rpath {name}", flush=True)
 
 
+SETTINGS_SUPER_DIR = os.path.join(ROOT, "test", "settings_super")
+
+
+def settings_super(mkn_bin, env=None):
+    """test/settings_super: dry runs with super: lists, the properties on the compile line show
+    which file each came from: top.yml (super: a b, a searched with the files it extends before b,
+    shared.yml under both searched once), cycle.yml (a file extending it again is left out) and
+    self.yml (a file extending itself is an error); top and cycle are then built and run, the app
+    prints the env: of the first file of the chain to have one, b.yml's is left out"""
+    env = dict(os.environ, **(env or {}))
+    expected = {
+        "top": ("-DWHO=a -DDEEP=shared -DONLY_B=b -DONLY_SHARED=shared", "SS_WHO=a SS_B="),
+        "cycle": ("-DWHO=cycle -DDEEP=shared -DONLY_B=cycle -DONLY_SHARED=shared",
+                  "SS_WHO=cycle SS_B="),
+    }
+
+    def mkn(*cmd):
+        cmd = [mkn_bin, *cmd]
+        print(f"+ [{SETTINGS_SUPER_DIR}] {' '.join(cmd)}", flush=True)
+        result = subprocess.run(cmd, cwd=SETTINGS_SUPER_DIR, stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT, text=True, env=env)
+        print(result.stdout, flush=True)
+        return result
+
+    for name in ("top", "cycle", "self"):
+        x = os.path.join(SETTINGS_SUPER_DIR, name).replace("\\", "/")
+        result = mkn("build", "-R", "-x", x)
+        if name == "self":
+            ok = result.returncode != 0 and "super cannot reference itself" in result.stdout
+        else:
+            ok = result.returncode == 0 and expected[name][0] in result.stdout
+            if ok:
+                ran = mkn("clean", "build", "run", "-x", x)
+                ok = ran.returncode == 0 and expected[name][1] in ran.stdout
+        if not ok:
+            print(f"FAILED settings_super {name}: exit {result.returncode}", file=sys.stderr)
+            sys.exit(1)
+        print(f"PASS settings_super {name}", flush=True)
+
+
 def nix_test(std_args, env, full):
     """ubuntu_gcc / ubuntu_clang / manylinux_gcc."""
     a = f'-a "{std_args}"'
@@ -230,6 +270,7 @@ def nix_test(std_args, env, full):
     manifest(built("mod"), std_args, env)
     prebuilt(built("mod"), "bin_nix", "-std=c++20")
     rpath(built("mod"), std_args, env)
+    settings_super(built("mod"), env)
 
     if not full:
         return
@@ -255,6 +296,7 @@ def job_macos_clang():
     manifest(built("mod"), "-std=c++20")
     prebuilt(built("mod"), "bin_osx", "-std=c++20")
     rpath(built("mod"), "-std=c++20")
+    settings_super(built("mod"))
 
 
 def job_win_cl():
@@ -267,6 +309,7 @@ def job_win_cl():
     manifest(built("mod"), std, env)
     prebuilt(built("mod"), "bin_win", std)
     rpath(built("mod"), std, env)
+    settings_super(built("mod"), env)
 
 
 def job_win_clang():

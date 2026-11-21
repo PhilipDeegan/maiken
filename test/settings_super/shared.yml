@@ -1,0 +1,6 @@
+# extended by a and b, searched once, under a: before b
+super: settings
+property:
+  who: shared
+  deep: shared
+  only_shared: shared

@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maiken/settings.hpp"
 #include "maiken/defs.hpp"
 #include "maiken/property.hpp"
+#include "mkn/kul/cli.hpp"
 #include "mkn/kul/env.hpp"
 #include "mkn/kul/except.hpp"
 #include "mkn/kul/lang/cpp/compilers.hpp"
@@ -44,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/yaml.hpp"
 #include "yaml-cpp/yaml.h"
 
+#include <cstddef>
 #include <optional>
 #include <initializer_list>
 #include <memory>
@@ -55,21 +57,54 @@ namespace maiken {
 
 std::unique_ptr<Settings> Settings::instance;
 
+// the files of the settings being loaded, from the first of its chain: a super: file seen before,
+//  above it in the chain or under an earlier super: file, is searched there already and left out
 class SuperSettings {
   friend class maiken::Settings;
 
  private:
   mkn::kul::hash::set::String files;
+  std::size_t depth = 0;  // settings files being constructed, 0 when none
+
   static SuperSettings& INSTANCE() {
     static SuperSettings instance;
     return instance;
   }
-  void cycleCheck(std::string const& file) KTHROW(maiken::SettingsException) {
-    if (files.count(file))
-      KEXCEPT(maiken::SettingsException, "Super cycle detected in file: " + file);
+  // true the first time file is seen while loading one chain
+  bool first(std::string const& file) {
+    if (files.count(file)) return false;
     files.insert(file);
+    return true;
   }
+
+  class Loading {  // one settings file being constructed
+   public:
+    Loading(std::string const& file) : outermost{INSTANCE().depth == 0} {
+      auto& ss = INSTANCE();
+      if (ss.depth++ == 0) ss.files.clear();  // a new chain
+      ss.first(file);
+    }
+    bool const outermost;  // the first file of the chain
+    ~Loading() { --INSTANCE().depth; }
+    Loading(Loading const&) = delete;
+    Loading& operator=(Loading const&) = delete;
+  };
 };
+
+// super: names, a list or whitespace separated
+static std::vector<std::string> super_names(YAML::Node const& node) {
+  std::vector<std::string> names;
+  auto const add = [&](std::string const& s) {
+    for (auto const& line : mkn::kul::String::LINES(s))
+      for (auto const& name : mkn::kul::cli::asArgs(line))
+        if (!name.empty()) names.push_back(name);
+  };
+  if (node.IsSequence())
+    for (auto const& n : node) add(n.Scalar());
+  else
+    add(node.Scalar());
+  return names;
+}
 }  // namespace maiken
 
 //
@@ -94,6 +129,7 @@ std::optional<std::string> maiken::Settings::local_mod_repo() const {
 
 maiken::Settings::Settings(std::filesystem::path const& file_) : mkn::kul::yaml::File(file_) {
   KLOG(TRC) << file_.string();
+  SuperSettings::Loading const loading{mkn::kul::File(file()).real()};
 
   if (root()[STR_LOCAL] && root()[STR_LOCAL][STR_REPO]) {
     mkn::kul::Dir d(root()[STR_LOCAL][STR_REPO].Scalar());
@@ -105,40 +141,64 @@ maiken::Settings::Settings(std::filesystem::path const& file_) : mkn::kul::yaml:
     if (!d.is() && !d.mk())
       KEXCEPT(SettingsException, file_.string(), " error: local/mod-repo is not a valid directory");
   }
-  if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_REPO])
-    for (auto const& s : mkn::kul::String::SPLIT(root()[STR_REMOTE][STR_REPO].Scalar(), ' '))
-      rrs.push_back(s);
-  {
-    std::string const& rr = MKN_REMOTE_REPO;
-    for (auto const& s : mkn::kul::String::SPLIT(rr, ' ')) rrs.push_back(s);
+  if (root()[STR_SUPER])
+    for (auto const& name : super_names(root()[STR_SUPER])) {
+      auto const f = RESOLVE(name, this);
+      if (f.real() == mkn::kul::File(file()).real())
+        KEXCEPT(SettingsException, "super cannot reference itself: " + file());
+      if (!SuperSettings::INSTANCE().first(f.real())) continue;
+      sups.emplace_back(std::make_unique<Settings>(
+          mkn::kul::yaml::File::CREATE<Settings>(f.full())));  // -> getOrCreate
+    }
+
+  if (loading.outermost) {
+    std::vector<Settings*> files;
+    preorder(files);
+    // env: is the first file's to have one, the files after it leave theirs out
+    bool found = false;
+    for (auto* f : files) {
+      f->envSkipped = found;
+      found = found || static_cast<bool>(f->root()[STR_ENV]);
+    }
+    // from the end of the chain up, each file after the files it extends: their properties, then
+    //  its env: and properties; this file's own env: and properties follow in POST_CONSTRUCT
+    for (auto it = files.rbegin(); it != files.rend(); ++it) {
+      (*it)->mergeSuperProperties();
+      if (*it != this) POST_CONSTRUCT(*it);
+    }
   }
 
-  if (root()[STR_REMOTE] && root()[STR_REMOTE][STR_MOD_REPO])
-    for (auto const& s : mkn::kul::String::SPLIT(root()[STR_REMOTE][STR_MOD_REPO].Scalar(), ' '))
-      rms.push_back(s);
-  {
-    std::string const& rr = MKN_REMOTE_MOD;
-    for (auto const& s : mkn::kul::String::SPLIT(rr, ' ')) rms.push_back(s);
-  }
-
-  if (root()[STR_SUPER]) {
-    auto const f = RESOLVE(root()[STR_SUPER].Scalar(), this);
-    if (!f) KEXCEPT(SettingsException, "super file not found: " + file());
-    if (f.real() == mkn::kul::File(file()).real())
-      KEXCEPT(SettingsException, "super cannot reference itself: " + file());
-    SuperSettings::INSTANCE().cycleCheck(f.real());
-    sup = std::make_unique<Settings>(
-        mkn::kul::yaml::File::CREATE<Settings>(f.full()));  // -> getOrCreate
-    POST_CONSTRUCT(sup.get());
-    for (auto const& [a, b] : sup->properties())
-      if (!ps.count(a)) ps.insert(a, b);
-  }
+  // remote: repos from the first file of the chain setting them, then the built-in ones
+  auto const remotes = [&](std::string const& key, std::string const& builtin) {
+    std::vector<std::string> v;
+    auto const found = getFirstFound([&](Settings const& s) -> std::optional<std::string> {
+      if (s[STR_REMOTE] && s[STR_REMOTE][key]) return s[STR_REMOTE][key].Scalar();
+      return std::nullopt;
+    });
+    if (found)
+      for (auto const& r : mkn::kul::String::SPLIT(*found, ' ')) v.push_back(r);
+    for (auto const& r : mkn::kul::String::SPLIT(builtin, ' ')) v.push_back(r);
+    return v;
+  };
+  rrs = remotes(STR_REPO, MKN_REMOTE_REPO);
+  rms = remotes(STR_MOD_REPO, MKN_REMOTE_MOD);
   if (root()[STR_COMPILER] && root()[STR_COMPILER][STR_MASK])
     for (auto const& k : Compilers::INSTANCE().keys())
       if (root()[STR_COMPILER][STR_MASK][k])
         for (auto const& s :
              mkn::kul::String::SPLIT(root()[STR_COMPILER][STR_MASK][k].Scalar(), ' '))
           Compilers::INSTANCE().addMask(s, k);
+}
+
+void maiken::Settings::preorder(std::vector<Settings*>& files) {
+  files.push_back(this);
+  for (auto& sup : sups) sup->preorder(files);
+}
+
+void maiken::Settings::mergeSuperProperties() {  // the first super: file's first
+  for (auto const& sup : sups)
+    for (auto const& [a, b] : sup->properties())
+      if (!ps.count(a)) ps.insert(a, b);
 }
 
 maiken::Settings& maiken::Settings::INSTANCE() KTHROW(mkn::kul::Exit) {
@@ -201,25 +261,23 @@ mkn::kul::env::Var maiken::Settings::PARSE_ENV_NODE(YAML::Node const& n, Setting
   return maiken::PARSE_ENV_NODE(n, settings, "settings file");
 }
 
+std::vector<mkn::kul::env::Var> maiken::Settings::envVars() const {
+  std::vector<mkn::kul::env::Var> evs;
+  auto const node = root()[STR_ENV];
+  if (!node) return evs;
+  if (node.IsScalar())
+    for (auto const& line : mkn::kul::String::LINES(node.Scalar()))
+      evs.emplace_back(PARSE_ENV_NODE(decltype(node){line}, *this));
+  else
+    for (auto const& c : node) evs.emplace_back(PARSE_ENV_NODE(c, *this));
+  return evs;
+}
+
 void maiken::Settings::POST_CONSTRUCT(Settings* settings_ptr) {
   auto& settings = settings_ptr != nullptr ? *settings_ptr : Settings::INSTANCE();
-  auto& root = settings.root();
 
-  if (root[STR_ENV]) {
-    if (root[STR_ENV].IsScalar()) {
-      auto lines = mkn::kul::String::LINES(root[STR_ENV].Scalar());
-      for (auto const& line : lines) {
-        auto copy = decltype(root[STR_ENV]){line};
-        auto ev = maiken::Settings::PARSE_ENV_NODE(copy, settings);
-        mkn::kul::env::SET(ev.name(), ev.toString().c_str());
-      }
-    } else {
-      for (auto const& c : root[STR_ENV]) {
-        auto ev = maiken::Settings::PARSE_ENV_NODE(c, settings);
-        mkn::kul::env::SET(ev.name(), ev.toString().c_str());
-      }
-    }
-  }
+  if (!settings.envSkipped)
+    for (auto const& ev : settings.envVars()) mkn::kul::env::SET(ev.name(), ev.toString().c_str());
 
   settings.resolveProperties();
   if (!settings_ptr) settings.resolveFindables();
