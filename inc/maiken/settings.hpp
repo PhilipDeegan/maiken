@@ -74,7 +74,8 @@ class Settings : public mkn::kul::yaml::File, public Constants {
  public:
   Settings(std::filesystem::path const& s);
 
-  Settings const* super() const { return sup.get(); }
+  // this file, then each super: file with the files it extends before the next one
+  std::vector<Settings const*> chain() const;
 
   mkn::kul::yaml::Validator validator() const;
   auto remotes(bool const module) const {
@@ -135,12 +136,17 @@ class Settings : public mkn::kul::yaml::File, public Constants {
 
  private:
   std::vector<std::string> rrs, rms;
-  std::unique_ptr<Settings> sup;
+  std::vector<std::unique_ptr<Settings>>
+      sups;  // super: files, in order, those seen before left out
   mkn::kul::hash::map::S2S ps;
   Findables findables_;
   mkn::kul::hash::map::S2S binaries_;
+  bool envSkipped = false;  // an earlier file of the chain has an env:
 
   void resolveProperties() KTHROW(SettingsException);
+  void preorder(std::vector<Settings*>& files);  // this file, then each super: file's chain
+  void mergeSuperProperties();
+  std::vector<mkn::kul::env::Var> envVars() const;  // this file's env:
   void resolveFindables() KTHROW(SettingsException);
   void resolveBinaries() KTHROW(SettingsException);
   static std::unique_ptr<Settings> instance;
@@ -152,10 +158,16 @@ void Settings::traverse(auto const fn) const {
 
   FuncType const loop = [&](auto const& settings) {
     fn(settings);
-    if (settings.sup) loop(*settings.sup);
+    for (auto const& sup : settings.sups) loop(*sup);
   };
 
   loop(*this);
+}
+
+inline std::vector<Settings const*> Settings::chain() const {
+  std::vector<Settings const*> v;
+  traverse([&](Settings const& s) { v.push_back(&s); });
+  return v;
 }
 
 auto Settings::getFirstFound(auto const fn) const {
@@ -164,7 +176,8 @@ auto Settings::getFirstFound(auto const fn) const {
 
   FuncType const loop = [&](auto const& settings) -> Ret {
     if (auto const node = fn(settings)) return node;
-    if (settings.sup) return loop(*settings.sup);
+    for (auto const& sup : settings.sups)
+      if (auto const node = loop(*sup)) return node;
     return std::nullopt;
   };
 

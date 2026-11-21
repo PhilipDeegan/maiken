@@ -92,7 +92,7 @@ void maiken::AppVars::POST_CONSTRUCT() {
   pks["mkn.bin.key"] = defaultBinKey();
   pks["mkn.with.bin"] = "0";
   for (auto const* const k : {"mkn.bin.key", "mkn.with.bin"})
-    for (auto const* s = &settings; s != nullptr; s = s->super())
+    for (auto const* s : settings.chain())
       if (auto const ps = s->root()[STR_PROPERTY]; ps && ps[k] && ps[k].IsScalar()) {
         pks[k] = ps[k].Scalar();
         break;

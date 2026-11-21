@@ -1,0 +1,13 @@
+# env: left out, a has one
+super: shared
+property:
+  who: b
+  deep: b
+  only_b: b
+env:
+  - name: SS_WHO
+    mode: replace
+    value: b
+  - name: SS_B
+    mode: replace
+    value: b

@@ -45,8 +45,9 @@ mkn::kul::yaml::Validator maiken::Settings::validator() const {
     masks.push_back(NodeValidator(s, {}, 0, NodeType::STRING));
 
   return Validator(
-      {NodeValidator("super"), NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP),
-       NodeValidator("inc"), NodeValidator("path"),
+      {NodeValidator("super", {}, 0, NodeType::NON),
+       NodeValidator("property", {NodeValidator("*")}, 0, NodeType::MAP), NodeValidator("inc"),
+       NodeValidator("path"),
        NodeValidator("local",
                      {NodeValidator("repo"), NodeValidator("mod-repo"), NodeValidator("debugger")},
                      0, NodeType::MAP),

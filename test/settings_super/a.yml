@@ -1,0 +1,7 @@
+super: shared
+property:
+  who: a
+env:
+  - name: SS_WHO
+    mode: replace
+    value: a

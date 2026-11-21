@@ -248,7 +248,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   with_node[STR_DEP] = with_nodes;
   popDepOrMod(with_node, deps, STR_DEP, 0, 1);
 
-  for (auto const* ptr = &Settings::INSTANCE(); ptr != nullptr; ptr = ptr->super())
+  for (auto const* ptr : Settings::INSTANCE().chain())
     if (auto const node = ptr->root()[STR_INC])
       for (auto const& l : mkn::kul::String::LINES(node.Scalar()))
         for (auto const& s : mkn::kul::cli::asArgs(l))
@@ -259,7 +259,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
             else
               KEXIT(1, "include does not exist\n", d.path(), "\n", ptr->file());
           }
-  for (auto const* ptr = &Settings::INSTANCE(); ptr != nullptr; ptr = ptr->super())
+  for (auto const* ptr : Settings::INSTANCE().chain())
     if (auto const node = ptr->root()[STR_PATH])
       for (auto const& l : mkn::kul::String::LINES(node.Scalar()))
         for (auto const& s : mkn::kul::cli::asArgs(l))
@@ -274,7 +274,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
   this->populateMapsFromDependencies();
   std::vector<std::string> fileStrings{STR_ARCHIVER, STR_COMPILER, STR_LINKER};
 
-  for (auto const* ptr = &Settings::INSTANCE(); ptr != nullptr; ptr = ptr->super())
+  for (auto const* ptr : Settings::INSTANCE().chain())
     if (ptr->root()[STR_FILE])
       for (auto const& c : ptr->root()[STR_FILE])
         for (auto const& s : fileStrings)
@@ -283,7 +283,7 @@ void maiken::Application::setup() KTHROW(mkn::kul::Exception) {
               fs[t].insert(s, Properties::RESOLVE(*this, c[s].Scalar()));
 
   if (fs.empty()) {
-    for (auto const* ptr = &Settings::INSTANCE(); ptr != nullptr; ptr = ptr->super())
+    for (auto const* ptr : Settings::INSTANCE().chain())
       KOUT(NON) << "No file tag in Settings file: " << ptr->file();
     KEXIT(1, "No file types found, review settings.yaml files shown above");
   }
