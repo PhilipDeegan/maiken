@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mkn/kul/map.hpp"
 #include "mkn/kul/os.hpp"
 
+#include <cctype>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -66,13 +67,44 @@ void maiken::Application::findables() {
       this->addLibpath(file->dir().real());
   };
 
+  // as CMake's find_package hints, for key "hdf5": the directories in HDF5_INCLUDE_DIR and
+  //  HDF5_LIBDIR (or HDF5_LIBRARY_DIR), then under HDF5_ROOT (include, lib, lib64), are tried
+  //  before the settings' lines; each only where it holds the file
+  // a variable from mkn's three sources, the first set: -E, this project's env, then the
+  //  process' (the shell's, and the settings' env, set into it)
+  auto const env = [&](std::string const& name) -> std::string {
+    if (auto const& cli = AppVars::INSTANCE().envVars(); cli.count(name)) return cli.at(name);
+    for (auto const& ev : this->envVars())
+      if (ev.name() == name) return ev.toString();
+    return mkn::kul::env::GET(name.c_str());
+  };
+  auto const env_dirs = [&](std::string const& k, std::vector<std::string> const& dirs_vars,
+                            std::vector<std::string> const& under_root) {
+    std::string K;
+    for (auto const c : k) K += std::isalnum(static_cast<unsigned char>(c)) ? std::toupper(c) : '_';
+    std::vector<std::string> dirs;
+    for (auto const& var : dirs_vars)
+      if (auto const dir = env(K + var); dir.size()) dirs.push_back(dir);
+    if (auto const root = env(K + "_ROOT"); root.size())
+      for (auto const& sub : under_root) dirs.push_back(mkn::kul::Dir::JOIN(root, sub));
+    return dirs;
+  };
+  auto const with_env = [](std::vector<std::string> first, std::vector<std::string> const& rest) {
+    first.insert(first.end(), rest.begin(), rest.end());
+    return first;
+  };
+
   auto const& findables = Settings::INSTANCE().findables();
 
   for (auto const& [k, v] : findables)
     for (auto const& l : libraries()) {
       if (l.starts_with(k)) {
-        if (v.count("inc")) incs(k, l, v["inc"]);
-        if (v.count("lib")) libs(k, l, v["lib"]);
+        auto const settings = [&](auto const& key) {
+          return v.count(key) ? v.at(key) : std::vector<std::string>{};
+        };
+        incs(k, l, with_env(env_dirs(k, {"_INCLUDE_DIR"}, {"include"}), settings("inc")));
+        libs(k, l,
+             with_env(env_dirs(k, {"_LIBDIR", "_LIBRARY_DIR"}, {"lib", "lib64"}), settings("lib")));
       }
     }
 }
